@@ -4,11 +4,11 @@ steps:
     entrypoint: "chmod"
     args: ["-v","-R", "a+rw","."]
   - id: Build Jekyll Site
-    name: 'jekyll/jekyll'
+    name: 'bretfisher/jekyll'
     args: ['jekyll','build']
     env:
     - 'JEKYLL_ENV=production'
-    - 'JEKYLL_VERSION=4.2'
+    - 'JEKYLL_VERSION=4.2.0'
   - id: Deploy to App Engine
     name: "gcr.io/cloud-builders/gcloud"
     args: ["app", "deploy"]

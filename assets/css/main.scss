@@ -1,9 +1,1004 @@
 ---
 sitemap: false
 ---
-@import "variables";
-@import "reset";
-@import "main";
-@import "syntax";
-@import "grid";
-@import "utilities";
+
+/*--- PAGE ------------------------------------------------------------------*/
+
+$feature-image-height            : 400px; // min 150px recommended
+$front-page-feature-image-height : 300px; // min 150px recommended
+$column-width                    : 950px;
+
+/*--- TYPOGRAPHY ------------------------------------------------------------*/
+
+$base-font                       : 'Lato', Calibri, Arial, sans-serif;
+$heading-font                    : $base-font;
+$caption-font                    : $base-font;
+$code-font                       : monospace;
+$alt-font                        : serif;
+
+$doc-font-size                   : 16;
+$doc-line-height                 : 26;
+
+/*--- COLORS ----------------------------------------------------------------*/
+
+$base-color                      : rgba(#222,0.8);
+$body-color                      : #EAEAEA; //#202020;
+$text-color                      : #808080;
+$border-color                    : lighten($base-color,60);
+$link-color                      : #202020;
+$link-color-hover                : lighten($link-color,20);
+$highlight-color	             : #00a693; //#F2992E;
+
+/*--- SCREEN SIZES ----------------------------------------------------------*/
+
+$toosmall						 : "only screen and (max-width: 30em)";
+$small                           : "only screen and (min-width: 30em)";
+$medium                          : "only screen and (min-width: 48em)";
+$large                           : "only screen and (min-width: 62.5em)";
+
+/* ==========================================================================
+   Reset CSS
+   Adapted from http://github.com/necolas/normalize.css
+   ========================================================================== */
+
+*, *:after, *:before {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+// Display in IE6-9 and FF3
+// -------------------------
+article,
+aside,
+details,
+figcaption,
+figure,
+footer,
+header,
+hgroup,
+nav,
+section {
+  display: block;
+}
+
+// Display block in IE6-9 and FF3
+// -------------------------
+audio,
+canvas,
+video {
+  display: inline-block;
+  *display: inline;
+  *zoom: 1;
+}
+
+// Prevents modern browsers from displaying 'audio' without controls
+// -------------------------
+audio:not([controls]) {
+    display: none;
+}
+
+// Base settings
+// -------------------------
+html {
+  font-size: 100%;
+  -webkit-text-size-adjust: 100%;
+      -ms-text-size-adjust: 100%;
+}
+
+// Hover & Active
+a:hover,
+a:active {
+  outline: 0;
+}
+
+// Prevents sub and sup affecting line-height in all browsers
+// -------------------------
+sub,
+sup {
+  position: relative;
+  font-size: 75%;
+  line-height: 0;
+  vertical-align: baseline;
+}
+sup {
+  top: -0.5em;
+}
+sub {
+  bottom: -0.25em;
+}
+
+// Blockquote
+// -------------------------
+blockquote {
+  margin: 0;
+}
+
+// Img border in a's and image quality
+// -------------------------
+img {
+  /* Responsive images (ensure images don't scale beyond their parents) */
+  max-width: 100%; /* Part 1: Set a maxium relative to the parent */
+  width: auto; /* IE7-8 need help adjusting responsive images */
+  height: auto; /* Part 2: Scale the height according to the width, otherwise you get stretching */
+
+  vertical-align: middle;
+  border: 0;
+  -ms-interpolation-mode: bicubic;
+}
+
+// Full width tables
+// -------------------------
+table {
+  width: 100%;
+}
+
+// Prevent max-width from affecting Google Maps
+#map_canvas img,
+.google-maps img {
+  max-width: none;
+}
+
+// Forms
+// -------------------------
+// Font size in all browsers, margin changes, misc consistency
+
+label,
+select,
+button,
+input[type="button"],
+input[type="reset"],
+input[type="submit"],
+input[type="radio"],
+input[type="checkbox"] {
+    cursor: pointer; // Improves usability and consistency of cursor style between image-type `input` and others.
+}
+input[type="search"] { // Appearance in Safari/Chrome
+  box-sizing: content-box;
+  -webkit-appearance: textfield;
+}
+input[type="search"]::-webkit-search-decoration,
+input[type="search"]::-webkit-search-cancel-button {
+  -webkit-appearance: none; // Inner-padding issues in Chrome OSX, Safari 5
+}
+textarea {
+  overflow: auto; // Remove vertical scrollbar in IE6-9
+  vertical-align: top; // Readability and alignment cross-browser
+}
+
+
+/*--- LINKS -----------------------------------------------------------------*/
+
+a {  
+	text-decoration: none;
+	color: $highlight-color; 
+
+	&:visited { 
+		color: lighten($highlight-color, 0); 
+	}
+
+	&:hover { 
+		color: lighten($highlight-color, 0); 
+	}
+
+	&:focus { 
+		outline: thin dotted; 
+		color: darken($highlight-color, 0);
+	}
+
+	&:hover, 
+	&:active { 
+		outline: 0; 
+	}
+}
+
+/*--- BLOCKQUOTE ------------------------------------------------------------*/
+
+blockquote {
+    border-left: 4px solid $border-color;
+    font-size: 14px;
+    font-family: $alt-font;
+    margin-left: 1em;
+    margin-right: 5em;
+    padding-left: 15px;
+    line-height: 22px;
+}
+
+/*--- BREADCRUMBS -----------------------------------------------------------*/
+
+#breadcrumbs {
+    display: block;
+    margin-block-start: 1em;
+    margin-block-end: 1em;
+    margin-inline-start: 0px;
+    margin-inline-end: 0px;
+}
+
+/*--- CODE FORMAT -----------------------------------------------------------*/
+
+tt, code, kbd, samp, pre {
+	font-family: $code-font;
+}
+
+p > code,
+a > code,
+li > code,
+figcaption > code,
+td > code {
+    margin: 0 2px;
+	padding: 0 5px;
+    font-size: 12px;
+	line-height: 1.5;
+    border: 1px solid lighten(#000, 90);
+	background-color: lighten(#000, 95);
+	border-radius: 3px;
+}
+
+pre {
+    font-size: 12px;
+	line-height: 1.5;
+	overflow-x: auto;
+
+	&::-webkit-scrollbar {
+		height: 12px;
+		background-color: #34362e;
+		border-radius: 0 0 4px 4px;
+	}
+
+	&::-webkit-scrollbar-thumb:horizontal {
+		background-color: #6a6d5d;
+		border-radius: 4px;
+	}
+}
+
+/*--- ABOUT SECTION (SOCIAL MEDIA) ------------------------------------------*/
+
+.personal-social-media {
+    word-spacing: 10px;
+    
+    img:hover {
+        opacity: 0.5;
+    }
+}
+
+/*--- DIVIDING LINE ---------------------------------------------------------*/
+
+hr { 
+    display: block; 
+    margin: 1em 0 1.5em; 
+    padding: 0;
+    height: 1px; 
+    border: 0; 
+    border-top: 1px solid #ccc;
+    border-bottom: 1px solid #fff; 
+}
+
+/*--- FIGURES & IMAGES ------------------------------------------------------*/
+
+figure {
+  margin: 0 auto;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  display: block;
+
+  img {
+  	margin: 0 auto;
+    margin-bottom: 0px;
+    display: block;
+  }
+}
+
+figcaption {
+	text-align: center;
+	font-size: .75em;
+}
+
+svg:not(:root) {
+  overflow: hidden; 
+}
+
+/*--- PAGINATION ------------------------------------------------------------*/
+
+.pagination {
+    a{
+        color: lighten($base-color,30);
+    }
+    
+    a:hover {
+        color: lighten($base-color,60);
+    }
+    
+    //word-spacing: 10px;
+}
+
+/*--- EQUATIONS -------------------------------------------------------------*/
+
+.has-jax {
+    font: inherit; 
+    font-size: 100; 
+    background: inherit; 
+    border: inherit;
+    color: #006699;
+}
+
+/*--- NAVIGATION BAR --------------------------------------------------------*/
+
+.navigation-bar {
+    //word-spacing: 20px;
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+
+    li {
+	    padding-left: 10px;
+	    padding-right: 10px;
+	    display: inline-block;
+    }
+
+    a{
+    	text-transform: uppercase;
+        //color: $highlight-color;
+        //color: $base-color;
+        color: lighten($base-color,30);
+        font-weight: 300;
+    }
+    
+    a:hover {
+    	text-transform: uppercase;
+        color: $highlight-color;
+        //color: lighten($base-color,60);
+        font-weight: 300;
+    }
+}
+
+/*--- TAGS ------------------------------------------------------------------*/
+
+.inline-tags {
+    font-size: 14px;
+
+    a {
+        color: $highlight-color;
+    }
+    
+    &:hover {
+        color: lighten($highlight-color,0);
+    }
+}
+
+/*--- GLOBAL TRANSITION -----------------------------------------------------*/
+
+b, i, strong, em, blockquote, p, q, span, figure, img, h1, h2, header, input, a {
+	transition: all 0.2s ease;
+}
+
+/*--- MAIN CONTENT ----------------------------------------------------------*/
+
+.entry-content {
+    font-size: 16px;
+    line-height: 26px;
+    a{
+    	color: $highlight-color;
+    }
+}
+
+.entry-title {
+    font-weight: 300;
+    text-align: left;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+}
+
+.entry-subtitle {
+	font-weight: 300;
+	text-align: left;
+}
+
+li.entry-title{
+    padding-bottom:10px;
+}
+
+.main-header-image {
+    img {
+        @media #{$medium} {
+            margin-left: 0px;
+			margin-right: 0px;
+			max-width: $column-width;
+		}
+
+		@media #{$large} {
+			max-width: $column-width;
+		}
+    }
+
+    h1, a:link, a:visited, a:hover, a:active, div {
+    	text-transform: uppercase;
+        color: $highlight-color;
+		//color: lighten($base-color, 60);
+		letter-spacing: 5px;
+	}
+}
+
+.post-date {
+    font-size: 14px;
+	text-transform: none;
+    color: lighten($base-color,0);
+
+	a {
+		color: lighten($base-color,0);
+	}
+    
+    a:hover{
+        color: lighten($base-color,0);
+    }
+}
+
+.post-byline {
+    font-size: 14px;
+	text-transform: none;
+    color: lighten($base-color,0);
+
+	a {
+		color: lighten($highlight-color,0);
+	}
+    
+    a:hover{
+        color: lighten($highlight-color,0);
+    }
+}
+
+header .entry-meta {
+	display: none; // hide header meta on small screens
+
+	@media #{$medium} {
+		display: block;
+	}
+}
+
+/*--- POST INDEX ------------------------------------------------------------*/
+
+#post-index {
+	#main {
+		margin: 40px 2px 20px 2px;
+
+    @media #{$small} {
+      max-width: $column-width;
+      margin-top: 50px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+		@media #{$medium} {
+			max-width: $column-width;
+			margin-top: 50px;
+			margin-left: auto;
+			margin-right: auto;
+		}
+
+		@media #{$large} {
+			max-width: $column-width;
+			margin-top: 50px;
+			margin-left: auto;
+			margin-right: auto;
+		}
+	}
+
+	article {
+		background-color: #fff;
+		box-shadow: 0 0 0 0, 0 6px 12px rgba($base-color,0.2);
+		border-radius: 3px;
+		margin-bottom: 20px;
+		padding: 0px 0px 50px 0px;
+		overflow: hidden;
+
+	@media #{$toosmall} {
+      margin-bottom: 25px;
+      padding: 25px 10px;
+
+      .featured-image {
+            display:block;
+            margin:-50px -80px;
+            padding: 0px 0px 50px 0px;
+          }
+    }
+
+		@media #{$small} {
+      margin-bottom: 25px;
+      padding: 25px 50px;
+
+      .featured-image {
+            display:block;
+            margin:-50px -80px;
+            padding: 0px 0px 50px 0px;
+          }
+    }
+
+		@media #{$medium} {
+      margin-bottom: 25px;
+      padding: 25px 50px;
+
+      .featured-image {
+            display:block;
+            margin:-50px -80px;
+            padding: 0px 0px 50px 0px;
+          }
+    }
+
+		@media #{$large} {
+			margin-bottom: 25px;
+			padding: 25px 50px;
+
+			.featured-image {
+				    display:block;
+	        	margin:-50px -80px;
+	        	padding: 0px 0px 50px 0px;
+	        }
+		}
+       
+        a { 
+
+            img:hover {
+                filter: brightness(110%);
+            }
+        }
+
+        
+	}
+}
+
+/*--- FOOTER ----------------------------------------------------------------*/
+
+.footer-wrapper {
+	margin: 2em auto;
+	text-align: center;
+	color: lighten($text-color,20);
+    font-size: 14px;
+
+    a:link{
+        color: lighten($text-color,20);
+    }
+    
+	a:hover {
+		color: lighten($text-color,60);
+	}
+}
+
+/*--- BROWSER UPGRADE -------------------------------------------------------*/
+
+.upgrade {
+	padding: 10px;
+	text-align: center;
+}
+
+/*--- BODY ------------------------------------------------------------------*/
+
+body {
+    font-family: $base-font;
+    color: $text-color;
+    font-weight: 300;
+	margin: 0;
+	padding: 0;
+	width: 100%;
+	background-color: $body-color;
+    margin-top: 0px + $doc-line-height;
+    font-size: 0px + $doc-font-size;
+    text-align: justify;
+}
+
+/*--- HEADINGS --------------------------------------------------------------*/
+
+h1, h2, h3, h4, h5, h6 {
+	font-family: $heading-font;
+
+    a {  
+        text-decoration: none;
+        color: lighten($link-color, 0); 
+
+        &:visited { 
+            color: lighten($link-color, 0); 
+        }
+
+        &:hover { 
+            color: $highlight-color; 
+        }
+
+        &:focus { 
+            outline: thin dotted; 
+            color: darken($link-color, 20);
+        }
+
+        &:hover, 
+        &:active { 
+            outline: 0; 
+        }
+    }
+}
+
+
+h1 {
+	@media #{$medium} {
+        font-size: 32px;
+	}
+}
+
+/*--- CARD GRID ----------------------------------------------------------------*/
+.card-grid{
+  display: flex;
+  align-content: space-between;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.card {
+  /*background: #F1F1F2;*/
+  display: flex;
+  align-items: center;
+
+  border: 1px solid lighten($base-color, 30);
+  // box-shadow: 0 0 0 0, 0 6px 12px rgba($base-color,0.2);
+  // box-shadow: 0px 0px 15px 0px rgba(255,255,255,1);
+  border-radius: 3px;
+  margin-bottom: 10px;
+  margin-left: 10px;
+  padding: 0px;
+  overflow: hidden;
+  color: lighten($base-color, 30);
+}
+
+.card:hover {
+  color: $highlight-color;
+}
+
+.card-img {
+  display: flex;
+  margin: 0px;
+  height: 100%;
+  align-items: center;
+  // background-color: lighten($base-color, 30);
+  a:link,a:hover,a:visited,a:active{
+    color: lighten($base-color, 30);
+  }
+}
+
+.card-img i {
+  padding: 10px;
+  color: lighten($base-color, 30);
+}
+
+.card-body {
+  height: 100%;
+  flex: 0 1 auto;
+  display: flex;
+  /*flex-direction: column;*/
+  margin: 5px;
+  padding: 5px;
+  align-items: center;
+}
+
+
+/*---- TWO COLUMN LAYOUT -------------------------------------------------------*/
+ .grid {
+  display: block;
+  align-items: center;
+  flex-wrap: wrap;
+ }
+
+.col-1-2 {
+  align-content: space-between;
+  flex: 1;
+  padding-left: 0px;
+  padding-right: 0px;
+
+}
+.col-1-2:last-child {
+  margin-left: 0px;
+  padding-left: 50px;
+  padding-right: 50px;
+  padding-top: 15px;
+  padding-bottom: 15px;
+  flex-grow: 2;
+}
+
+@media #{$toosmall} {
+  .col-1-2:first-child {
+    display: none;
+  }
+}
+
+@media #{$toosmall} {
+  .col-1-2:last-child {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+}
+
+/*--- SYNTAX HIGHLIGHTING ---------------------------------------------------*/
+
+div.highlighter-rouge, figure.highlight {
+    position: relative;
+    margin-bottom: 1.5em;
+    color: #d0d0d0;
+    //@include font-rem(12);
+    font-size: 12px;
+    line-height: 1.5;
+    border: 1px solid darken($body-color, 5);
+    border-radius: 3px;
+    background-color: #202020; //$body-color;
+
+    .highlight {
+        margin: 0;
+        padding: 1em;
+    }
+}
+
+figure.highlight {
+    padding-left: 1em;
+    padding-right: 1em;
+}
+
+.highlight table {
+    font-size: 1em;
+    border: 0;
+
+    td {
+        padding: 5px;
+        border: 0;
+
+        // line numbers
+        &.gutter {
+        padding-right: 1em;
+        color: #ccc;
+        }
+    }
+
+    pre {
+        margin: 0;
+    }
+}
+
+.highlight pre { 
+    width: 100%; 
+}
+
+.highlight {	
+	.lineno { 
+        padding-right: 24px; 
+        color: #8f908a;
+    }
+    
+	.hll { background-color: #49483e }
+    
+    /* Error */
+	.err {                     
+        color: #960050; 
+        background-color: #1e0010 
+    }
+    
+    .c { color: #75715e }           /* Comment */
+	.k { color: #66d9ef }          /* Keyword */
+	.l { color: #ae81ff }          /* Literal */
+	.n { color: #f8f8f2 }          /* Name */
+	.o { color: #f92672 }          /* Operator */
+	.p { color: #f8f8f2 }          /* Punctuation */
+	.cm { color: #75715e }         /* Comment.Multiline */
+	.cp { color: #75715e }         /* Comment.Preproc */
+	.c1 { color: #75715e }         /* Comment.Single */
+	.cs { color: #75715e }         /* Comment.Special */
+	.ge { font-style: italic }     /* Generic.Emph */
+	.gs { font-weight: bold }      /* Generic.Strong */
+	.kc { color: #66d9ef }         /* Keyword.Constant */
+	.kd { color: #66d9ef }         /* Keyword.Declaration */
+	.kn { color: #f92672 }         /* Keyword.Namespace */
+	.kp { color: #66d9ef }         /* Keyword.Pseudo */
+	.kr { color: #66d9ef }         /* Keyword.Reserved */
+	.kt { color: #66d9ef }         /* Keyword.Type */
+	.ld { color: #e6db74 }         /* Literal.Date */
+	.m { color: #ae81ff }          /* Literal.Number */
+	.s { color: #e6db74 }          /* Literal.String */
+	.na { color: #a6e22e }         /* Name.Attribute */
+	.nb { color: #f8f8f2 }         /* Name.Builtin */
+	.nc { color: #a6e22e }         /* Name.Class */
+	.no { color: #66d9ef }         /* Name.Constant */
+	.nd { color: #a6e22e }         /* Name.Decorator */
+	.ni { color: #f8f8f2 }         /* Name.Entity */
+	.ne { color: #a6e22e }         /* Name.Exception */
+	.nf { color: #a6e22e }         /* Name.Function */
+	.nl { color: #f8f8f2 }         /* Name.Label */
+	.nn { color: #f8f8f2 }         /* Name.Namespace */
+	.nx { color: #a6e22e }         /* Name.Other */
+	.py { color: #f8f8f2 }         /* Name.Property */
+	.nt { color: #f92672 }         /* Name.Tag */
+	.nv { color: #f8f8f2 }         /* Name.Variable */
+	.ow { color: #f92672 }         /* Operator.Word */
+	.w { color: #f8f8f2 }          /* Text.Whitespace */
+	.mf { color: #ae81ff }         /* Literal.Number.Float */
+	.mh { color: #ae81ff }         /* Literal.Number.Hex */
+	.mi { color: #ae81ff }         /* Literal.Number.Integer */
+	.mo { color: #ae81ff }         /* Literal.Number.Oct */
+	.sb { color: #e6db74 }         /* Literal.String.Backtick */
+	.sc { color: #e6db74 }         /* Literal.String.Char */
+	.sd { color: #e6db74 }         /* Literal.String.Doc */
+	.s2 { color: #e6db74 }         /* Literal.String.Double */
+	.se { color: #ae81ff }         /* Literal.String.Escape */
+	.sh { color: #e6db74 }         /* Literal.String.Heredoc */
+	.si { color: #e6db74 }         /* Literal.String.Interpol */
+	.sx { color: #e6db74 }         /* Literal.String.Other */
+	.sr { color: #e6db74 }         /* Literal.String.Regex */
+	.s1 { color: #e6db74 }         /* Literal.String.Single */
+	.ss { color: #e6db74 }         /* Literal.String.Symbol */
+	.bp { color: #f8f8f2 }         /* Name.Builtin.Pseudo */
+	.vc { color: #f8f8f2 }         /* Name.Variable.Class */
+	.vg { color: #f8f8f2 }         /* Name.Variable.Global */
+	.vi { color: #f8f8f2 }         /* Name.Variable.Instance */
+	.il { color: #ae81ff }         /* Literal.Number.Integer.Long */
+}
+
+/*--- GRID ------------------------------------------------------------------*/
+// Adapted from mmistakes -> https://github.com/mmistakes/hpstr-jekyll-theme
+
+// Defining number of columns in the grid.
+// Common Values would be 12, 16 or 24
+$width: 100%;
+$def_grid: 12;
+$margin: 0;
+
+@mixin container(){
+  margin:0 auto;
+  width:$width;
+}
+                                      
+// Works out the width of elements based
+// on total number of columns and width
+// number of columns being displayed.
+// Removes 20px for margins
+@mixin grid($grid:$def_grid,$cols:'',$float:left,$display:inline){
+  display:$display;
+  float:$float;
+  width:(100%/$grid * $cols) - ($margin * 2);
+}  
+
+// Allows for padding before element
+@mixin prefix($grid:$def_grid,$cols:''){
+  margin-left:(100%/$grid * $cols);
+}
+
+// Allows for padding after element
+@mixin suffix($grid:$def_grid,$cols:''){  
+  margin-right:(100%/$grid * $cols);    
+}
+
+// Removes left margin
+@mixin first(){
+  margin-left:0;
+}
+
+// Removes right margin
+@mixin last(){
+  margin-right:0;
+}
+
+@mixin push($grid:$def_grid,$move:'') {
+  position:relative;
+  left:(100%/$grid * $move);
+} 
+
+@mixin pull($grid:$def_grid,$move:''){
+  position:relative;
+  left:(100%/$grid * $move) * -1;
+}
+
+/* ==========================================================================
+   UTILITY CLASSES
+   ========================================================================== */
+
+/*
+   Visibility
+   ========================================================================== */
+
+/* http://www.456bereastreet.com/archive/200711/screen_readers_sometimes_ignore_displaynone/ */
+
+.hidden,
+.is--hidden {
+  display: none;
+  visibility: hidden;
+}
+
+/* for preloading images */
+
+.load {
+  display: none;
+}
+
+.transparent {
+  opacity: 0;
+}
+
+/* https://developer.yahoo.com/blogs/ydn/clip-hidden-content-better-accessibility-53456.html */
+
+.visually-hidden,
+.screen-reader-text,
+.screen-reader-text span,
+.screen-reader-shortcut {
+  position: absolute !important;
+  clip: rect(1px, 1px, 1px, 1px);
+  height: 1px !important;
+  width: 1px !important;
+  border: 0 !important;
+  overflow: hidden;
+}
+
+body:hover .visually-hidden a,
+body:hover .visually-hidden input,
+body:hover .visually-hidden button {
+  display: none !important;
+}
+
+/* screen readers */
+
+.screen-reader-text:focus,
+.screen-reader-shortcut:focus {
+  clip: auto !important;
+  height: auto !important;
+  width: auto !important;
+  display: block;
+  font-size: 1em;
+  font-weight: bold;
+  padding: 15px 23px 14px;
+  background: #fff;
+  z-index: 100000;
+  text-decoration: none;
+  box-shadow: 0 0 2px 2px rgba(0, 0, 0, 0.6);
+}
+
+/*
+   Skip links
+   ========================================================================== */
+
+.skip-link {
+  position: fixed;
+  z-index: 20;
+  margin: 0;
+  white-space: nowrap;
+}
+
+.skip-link li {
+  height: 0;
+  width: 0;
+  list-style: none;
+}
+
+/*
+   Type
+   ========================================================================== */
+
+.text-left {
+  text-align: left;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.text-justify {
+  text-align: justify;
+}
+
+.text-nowrap {
+  white-space: nowrap;
+}
+
+/*
+   Google Custom Search Engine
+   ========================================================================== */
+
+.gsc-control-cse {
+  table,
+  tr,
+  td {
+    border: 0; /* remove table borders widget */
+  }
+}

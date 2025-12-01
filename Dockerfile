@@ -1,18 +1,17 @@
-FROM jekyll/jekyll:4.0
+FROM bretfisher/jekyll-serve:latest
 
 WORKDIR /srv/jekyll
-COPY Gemfile Gemfile.lock ./
+COPY Gemfile ./
+# COPY Gemfile.lock ./
 
-RUN apk update && apk --update add ruby ruby-irb nodejs ruby-json ruby-rake \
-   ruby-bigdecimal ruby-io-console libstdc++ tzdata  \
-   libffi-dev libxml2-dev libxslt-dev
+RUN apt-get update && apt-get install -y ruby ruby-irb nodejs ruby-json rake \
+   ruby-bigdecimal ruby-io-console tzdata pkg-config libz-dev  \
+   libffi-dev libxml2-dev libxslt-dev \
+   ruby-dev libc-dev zlib1g-dev liblzma-dev patch
 
 COPY Gemfile* /app/
 
-RUN apk add --virtual build-deps git build-base ruby-dev \
-   libc-dev linux-headers \
-   && gem install bundler \
-   && bundle config build.nokogiri --use-system-libraries \
+RUN gem install bundler \
    && bundle update
 
 RUN bundle install --jobs 20 --retry 5

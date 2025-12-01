@@ -1,4 +1,4 @@
-runtime: ruby25
+runtime: ruby34
 entrypoint: bundle exec jekyll serve -P $PORT --safe --skip-initial-build --no-watch --trace
 instance_class: B1
 basic_scaling:

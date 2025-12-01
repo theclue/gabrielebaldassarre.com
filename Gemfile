@@ -1,13 +1,12 @@
 source "https://rubygems.org"
 group :jekyll_plugins do
-  gem 'jekyll', "4.2"
+  gem 'jekyll', "4.4.1"
   gem 'activesupport'
   gem 'jekyll-default-layout'
   gem 'jekyll-feed'
   gem 'jekyll-optional-front-matter'
   gem 'jekyll-relative-links'
   gem 'jekyll-include-cache'
-  gem 'jekyll-redirect-from'
   gem 'kramdown'
   gem 'liquid'
   gem 'listen'
@@ -24,4 +23,6 @@ group :jekyll_plugins do
   gem 'jekyll-gist'
   gem 'jekyll-figure'
   gem 'kramdown-parser-gfm'
+  gem 'pkg-config'
+  gem 'zlib'
 end
