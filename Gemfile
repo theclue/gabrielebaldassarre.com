@@ -1,28 +1,39 @@
 source "https://rubygems.org"
+
+jekyll_version = ENV["JEKYLL_VERSION"] || "4.4.1"
+gem "jekyll", jekyll_version
+
+group :other_plugins do
+  gem 'liquid'
+  gem 'liquid_pluralize'
+  gem 'liquid_reading_time'
+  gem 'nokogiri'
+  gem 'kramdown'
+  gem 'listen'
+  gem 'rouge'
+  gem 'rb-inotify'
+  gem 'kramdown-parser-gfm'
+  gem 'pkg-config'
+  gem 'zlib'
+end
+
 group :jekyll_plugins do
-  gem 'jekyll', "4.4.1"
   gem 'activesupport'
   gem 'jekyll-default-layout'
   gem 'jekyll-feed'
   gem 'jekyll-optional-front-matter'
   gem 'jekyll-relative-links'
   gem 'jekyll-include-cache'
-  gem 'kramdown'
-  gem 'liquid'
-  gem 'listen'
-  gem 'nokogiri'
-  gem 'rouge'
-  gem 'rb-inotify'
+  gem 'jekyll-get-json'
+  gem 'jekyll-imagemagick'
+  gem 'jekyll-link-attributes'
+  gem 'jekyll-regex-replace'
+  gem 'jekyll-scholar'
   gem 'jekyll-redirect-from'
   gem 'jemoji'
   gem 'jekyll-mentions'
-  gem 'liquid_pluralize'
-  gem 'liquid_reading_time'
   gem 'jekyll-sitemap'
   gem 'jekyll-paginate'
   gem 'jekyll-gist'
   gem 'jekyll-figure'
-  gem 'kramdown-parser-gfm'
-  gem 'pkg-config'
-  gem 'zlib'
 end

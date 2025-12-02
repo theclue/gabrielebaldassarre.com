@@ -8,6 +8,7 @@ Thumbs.db
 
 .rbenv-version
 .rvmrc
+.ruby-version
 
 *.lock
 
@@ -19,7 +20,6 @@ cache/
 
 .sass-cache
 
-
 .sass-cache/
 .jekyll-cache/
 .jekyll-metadata
@@ -27,3 +27,14 @@ cache/
 .Rproj.user
 .Rhistory
 .RData
+
+.bundle
+.tweet-cache
+
+assets/libs/
+
+node_modules/
+
+vendor
+.idea
+.venv
