@@ -7,7 +7,12 @@ LABEL authors="Gabriele Baldassarre" \
 ENV DEBIAN_FRONTEND=noninteractive
 
 ARG JEKYLL_VERSION
+ARG LOCALE=it_IT
+ARG LOCALE_LANG=it-IT
+
 ENV JEKYLL_VERSION=$JEKYLL_VERSION
+ENV LOCALE=$LOCALE
+ENV LOCALE_LANG=$LOCALE_LANG
 
 # create a directory for the jekyll site
 RUN mkdir -p /srv/jekyll
@@ -35,15 +40,15 @@ RUN npm config set registry https://registry.npmjs.org/ && \
     npm install -g purgecss
 
 # set the locale
-RUN sed -i '/it_IT.UTF-8/s/^# //g' /etc/locale.gen && \
+RUN sed -i "/${LOCALE}.UTF-8/s/^# //g" /etc/locale.gen && \
     locale-gen
 
 # set environment variables
 ENV EXECJS_RUNTIME=Node \
     JEKYLL_ENV=production \
-    LANG=it_IT.UTF-8 \
-    LANGUAGE=it_IT:it \
-    LC_ALL=it_IT.UTF-8
+    LANG=${LOCALE}.UTF-8 \
+    LANGUAGE=${LOCALE}:it \
+    LC_ALL=${LOCALE}.UTF-8
 
 COPY Gemfile* /app/
 
