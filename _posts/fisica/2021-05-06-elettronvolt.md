@@ -12,8 +12,7 @@ L'elettronvolt (simbolo eV) è un'unità di misura dell'energia particolarmente 
 
 Poiché il lavoro del campo elettromagnetico è dato dal prodotto del potenziale per la carica e la carica dell'elettrone è pari a $$ e = 1,602\times10^{-19}C $$:
 
-$$ 1V = \frac{1J}{1C} \Rightarrow 1eV = \frac{1J}{1C}(1,602\times10^{-19}C) = \bbox[5px, border:1px solid black]
-{1,602\times10^{-19}J} $$
+$$ 1V = \frac{1J}{1C} \Rightarrow 1eV = \frac{1J}{1C}(1,602\times10^{-19}C) = \boxed{1{,}602\times10^{-19}\,\text{J}} $$
 
 Ricordando come 1 J sia il lavoro compiuto da una forza per spostare una massa di 1kg per un metro (o in alternativa di sollevare a 1m di altezza una massa di poco più di 100gr soggetta alla gravità terrestre), ne consegue che un elettronvolt sia una quantità di energia molto piccola. Per questo motivo, spesso si utilizza uno dei suoi multipli come il megaelettronvolt (MeV) o il gigaelettronvolt (GeV), soprattutto quando si utilizzà l'elettronvolt come unità di misura per la massa.
 
@@ -38,8 +37,7 @@ Per rispondere a questa domanda, basti ricordare l'equazione dell'equivalenza di
 
 Facciamo un esempio. L'equivalente in massa di 1eV è:
 
-$$ 1eV/c^2 = \frac{1eV}{c^2} = \frac{1,602 \times 10^{-19}}{(2,99 \times 10^8)^2} = \bbox[5px, border:1px solid black]
-{1,78 \times 10^{-36} kg} $$
+$$ 1eV/c^2 = \frac{1eV}{c^2} = \frac{1{,}602 \times 10^{-19}}{(2{,}99 \times 10^8)^2} = \boxed{1{,}78 \times 10^{-36}\,\text{kg}} $$
 
 Ad esempio, la massa dell'elettrone:
 

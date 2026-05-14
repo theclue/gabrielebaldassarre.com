@@ -78,14 +78,17 @@ author:
   email            :
   links:
     - label: "GitHub"
-      icon: "fab fa-github fa-1x"
+      icon: "mdi mdi-github"
       url: "https://github.com/theclue"
     - label: "LinkedIn"
-      icon: "fab fa-linkedin fa-1x"
+      icon: "mdi mdi-linkedin"
       url: "https://www.linkedin.com/in/gabrielebaldassarre"
     - label: "Goodreads"
-      icon: "fab fa-goodreads fa-1x"
+      icon: "mdi mdi-book-open-variant"
       url: "https://goodreads.com/theclue"
+    - label: "Printables"
+      icon: "mdi mdi-printer-3d"
+      url: "https://www.printables.com/@GabrioB_1701666"
 
 # Reading Files
 include:
@@ -158,6 +161,9 @@ kramdown:
   toc_levels: 1..6
   smart_quotes: lsquo,rsquo,ldquo,rdquo
   enable_coderay: false
+  math_engine: katex
+  math_engine_opts:
+    throw_on_error: false
 
 
 # Sass/SCSS
@@ -170,7 +176,7 @@ sass:
 permalink: /:slugified_categories/:title/
 paginate: 10 # amount of posts to show
 paginate_path: /page:num/
-timezone: # Europe/Rome
+timezone: Europe/Rome
 
 
 # Plugins (previously gems:)
@@ -185,7 +191,13 @@ plugins:
   - liquid_reading_time
   - jekyll-feed
   - jekyll-include-cache
-  - kramdown-parser-gfm 
+  - jekyll-toc
+  - kramdown-parser-gfm
+
+# Table of Contents (jekyll-toc)
+toc:
+  min_level: 2
+  max_level: 4
 
 # mimic GitHub Pages with --safe
 whitelist:
@@ -197,6 +209,7 @@ whitelist:
   - liquid_reading_time
   - jekyll-feed
   - jekyll-include-cache
+  - jekyll-toc
 
 
 # HTML Compression
@@ -205,15 +218,6 @@ compress_html:
   clippings: all
   ignore:
     envs: development
-
-# scripts
-head_scripts:
-  - https://polyfill.io/v3/polyfill.min.js?features=es6
-  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
-  - https://code.jquery.com/jquery-3.7.1.min.js
-
-after_footer_scripts:
-  - //s7.addthis.com/js/300/addthis_widget.js#pubid=ra-5d790b1b248d9eaf
 
 # Defaults
 defaults:

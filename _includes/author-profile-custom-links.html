@@ -1,6 +1,6 @@
 <li>
-  <a href="https://goodreads.com/theclue"><i class="fab fa-fw fa-goodreads" aria-hidden="true"></i> Goodreads</a>
+  <a href="https://goodreads.com/theclue"><i class="mdi mdi-book-open-variant" aria-hidden="true"></i> Goodreads</a>
 </li>
 <li>
-  <a href="{% if site.atom_feed.path %}{{ site.atom_feed.path }}{% else %}{{ '/feed.xml' | relative_url }}{% endif %}"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> {{ site.data.ui-text[site.locale].feed_label | default: "Feed" }}</a>
+  <a href="{% if site.atom_feed.path %}{{ site.atom_feed.path }}{% else %}{{ '/feed.xml' | relative_url }}{% endif %}"><i class="mdi mdi-rss" aria-hidden="true"></i> {{ site.data.ui-text[site.locale].feed_label | default: "Feed" }}</a>
 </li>

@@ -3,18 +3,21 @@ source "https://rubygems.org"
 jekyll_version = ENV["JEKYLL_VERSION"] || "4.4.1"
 gem "jekyll", jekyll_version
 
+group :development do
+  gem 'listen'
+  gem 'rb-inotify'
+end
+
 group :other_plugins do
   gem 'liquid'
   gem 'liquid_pluralize'
   gem 'liquid_reading_time'
   gem 'nokogiri'
   gem 'kramdown'
-  gem 'listen'
   gem 'rouge'
-  gem 'rb-inotify'
   gem 'kramdown-parser-gfm'
-  gem 'pkg-config'
-  gem 'zlib'
+  gem 'kramdown-math-katex'
+  gem 'execjs'
 end
 
 group :jekyll_plugins do
@@ -36,4 +39,5 @@ group :jekyll_plugins do
   gem 'jekyll-paginate'
   gem 'jekyll-gist'
   gem 'jekyll-figure'
+  gem 'jekyll-toc'
 end

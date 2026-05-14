@@ -50,7 +50,7 @@ ENV EXECJS_RUNTIME=Node \
     LANGUAGE=${LOCALE}:it \
     LC_ALL=${LOCALE}.UTF-8
 
-COPY Gemfile* /app/
+COPY Gemfile* /srv/jekyll/
 
 RUN gem install --no-document bundler \
     && bundle update

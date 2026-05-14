@@ -1,51 +1,47 @@
 ---
 layout: default
 ---
-        <article class="hentry">
-            <div class="featured-image">
-                {% if page.header.overlay_image == "" or page.header.overlay_image == nil %}
-                    <img src="{{ '/images/default-header.png' | relative_url }}" style="width:100%">
-                {% else %}
-                    <img src="{{ page.header.overlay_image | relative_url }}" style="width:100%">
-                {% endif %}
-            </div>
-            {% include breadcrumbs.html %}
-            {% if page.title %}<meta itemprop="headline" content="{{ page.title | markdownify | strip_html | strip_newlines | escape_once }}">{% endif %}
-            {% if page.excerpt %}<meta itemprop="description" content="{{ page.excerpt | markdownify | strip_html | strip_newlines | escape_once }}">{% endif %}
-            {% if page.date %}<meta itemprop="datePublished" content="{{ page.date | date_to_xmlschema }}">{% endif %}
-            {% if page.last_modified_at %}<meta itemprop="dateModified" content="{{ page.last_modified_at | date_to_xmlschema }}">{% endif %}
-            
-            <!-- MAIN -->
-            <h1 class="entry-title">
-                {{ page.title | markdownify | remove: "<p>" | remove: "</p>" }}
-            </h1>
-            {% if page.subtitle %}
-            <h3 class="entry-subtitle">
-                {{ page.subtitle }}
-            </h3>
-            {% endif %}
-            
-            {% include page_meta.html %}
-            
-            <hr>
-                
-            <!-- POST CONTENT -->
-            <div class="entry-content">
-                {{ page.content }}
-            </div>  
+<article class="hentry" itemscope itemtype="https://schema.org/BlogPosting">
+  {% if page.header.overlay_image %}
+  <div class="featured-image main-header-image">
+    <img src="{{ page.header.overlay_image | relative_url }}"
+         alt="{{ page.header.overlay_alt | default: page.title | strip_html }}"
+         loading="eager"
+         decoding="async"
+         fetchpriority="high">
+  </div>
+  {% endif %}
 
-            <!--- DIVIDING LINE -->
-            <hr>
-    
-            <!-- POST TAGS -->
-            <div class="inline-tags">
-                <span>
-                    {% for tag in page.tags %}
-                        <a href="/tags/#{{tag}}">#{{ tag }}&nbsp;&nbsp;&nbsp;</a>
-                    {% endfor %}
-                </span>
-            </div>
-          
-            <br>           
-        </article>
+  {% include breadcrumbs.html %}
 
+  {% if page.title %}<meta itemprop="headline" content="{{ page.title | markdownify | strip_html | strip_newlines | escape_once }}">{% endif %}
+  {% if page.excerpt %}<meta itemprop="description" content="{{ page.excerpt | markdownify | strip_html | strip_newlines | escape_once }}">{% endif %}
+  {% if page.date %}<meta itemprop="datePublished" content="{{ page.date | date_to_xmlschema }}">{% endif %}
+  {% if page.last_modified_at %}<meta itemprop="dateModified" content="{{ page.last_modified_at | date_to_xmlschema }}">{% endif %}
+
+  <header>
+    <h1 class="entry-title" itemprop="name">
+      {{ page.title | markdownify | remove: "<p>" | remove: "</p>" }}
+    </h1>
+    {% if page.subtitle %}
+    <p class="entry-subtitle">{{ page.subtitle }}</p>
+    {% endif %}
+
+    {% include page_meta.html %}
+  </header>
+
+  <hr>
+
+  <div class="entry-content" itemprop="articleBody">
+    {{ content }}
+  </div>
+
+  {% if page.tags and page.tags.size > 0 %}
+  <hr>
+  <nav class="inline-tags" aria-label="Tags">
+    {% for tag in page.tags %}
+      <a href="{{ '/tags/#' | append: tag | relative_url }}">#{{ tag }}</a>
+    {% endfor %}
+  </nav>
+  {% endif %}
+</article>

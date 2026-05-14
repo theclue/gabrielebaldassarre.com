@@ -1,33 +1,26 @@
----
----
 <!doctype html>
-<!--[if lt IE 7]><html class="no-js lt-ie9 lt-ie8 lt-ie7" lang="{{ site.locale | slice: 0,2 | default: "it" }}"> <![endif]-->
-<!--[if (IE 7)&!(IEMobile)]><html class="no-js lt-ie9 lt-ie8" lang="{{ site.locale | slice: 0,2 | default: "it" }}"><![endif]-->
-<!--[if (IE 8)&!(IEMobile)]><html class="no-js lt-ie9" lang="{{ site.locale | slice: 0,2 | default: "it" }}"><![endif]-->
-<!--[if gt IE 8]><!--><html lang="{{ site.locale | slice: 0,2 | default: "it" }}" class="no-js"><!--<![endif]-->
+<html lang="{{ site.locale | slice: 0,2 | default: 'it' }}" class="no-js">
 <head>
-    {% include analytics-head.html %}
-    {% include head.html %}
+  {% include analytics-head.html %}
+  {% include head.html %}
 </head>
-<!-- BODY -->
 <body id="post-index">
-    {% include analytics-body.html %}
-        {% include navigation.html %}
-    {% include_cached skip-links.html %}
-    {% include browser-upgrade.html %}
+  {% include analytics-body.html %}
+  {% include_cached skip-links.html %}
+  {% include browser-upgrade.html %}
+  {% include navigation.html %}
 
-    <!-- MAIN -->
-    <div id="main" role="main">
-      {{ content }}
-    </div>       
-    <!-- FOOTER -->  
-    <footer id="footer">  
-        <div class="footer-wrapper">
-            <footer role="contentinfo">
-            {% include footer.html %}
-            </footer>
-        </div>   
-    </footer>
-    {% include scripts.html %}
+  <main id="main" role="main" class="container">
+    {{ content }}
+  </main>
+
+  <footer id="footer" class="footer-wrapper" role="contentinfo">
+    <div class="container">
+      {% include footer.html %}
+    </div>
+  </footer>
+
+  {% include scripts.html %}
+  <script src="{{ '/assets/js/theme-toggle.js' | relative_url }}" defer></script>
 </body>
 </html>

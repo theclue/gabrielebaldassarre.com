@@ -37,7 +37,7 @@ Il pendolo ideale
 
 Innanzitutto una precisazione. Il concetto di ritratto di fase è del tutto generale e non è legato necessariamente a un sistema meccanico (descritto dalle equazioni del moto di Newton), ma può essere utilizzato su sistemi dinamici di qualsiasi natura e con un numero qualsiasi di dimensioni.
 
-Nulla vieta, per capirci, di descrivere un sistema attraverso l'uso di _N_ variabili, anche infinite, e relative condizioni iniziali in modo da individuare uno spazio di fase in $$ \mathbb{R}^N \times \mathbb{R}^N $$. Né siamo costretti a utilizzare vettori reali (in meccanica quantistica, ad esempio, [quei vettori sono complessi]({% post_url Fisica/2019-10-04-spazio-stati-quantistici %})).
+Nulla vieta, per capirci, di descrivere un sistema attraverso l'uso di _N_ variabili, anche infinite, e relative condizioni iniziali in modo da individuare uno spazio di fase in $$ \mathbb{R}^N \times \mathbb{R}^N $$. Né siamo costretti a utilizzare vettori reali (in meccanica quantistica, ad esempio, [quei vettori sono complessi]({% post_url fisica/2019-10-04-spazio-stati-quantistici %})).
 
 Il problema, più che altro, sta nell'efficacia della _rappresentazione_ di uno spazio degli stati quando la dimensionalità del sistema dinamico cresce.
 

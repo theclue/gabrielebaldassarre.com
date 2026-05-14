@@ -38,7 +38,8 @@ $$ \ln p(x) = -\alpha \ln x + c $$
 
 con \\( \alpha \\) e \\( c \\) costanti. Elevando su \\( e \\) otteniamo la cosiddetta __legge di potenza__ (o power law).
 
-$$ p(x) = Cx^{-\alpha} \tag{*}$$
+$$ p(x) = Cx^{-\alpha} \tag{\ast} $$
+
 con \\( C = e^c \\).
 
 Una volta definito \\( \alpha \\), che è il parametro caratterizzante e che in genere (e soprattutto in ambito SNA) è compreso tra 2 e 3, e comunque non è mai minore di 1,  abbiamo tutto ciò che ci serve per descrivere la distribuzione. Il coefficiente \\( C \\), infatti, non è per nulla interessante ai fini pratici, dato che è semplicemente il termine che garantisce che la somma dell'area sottesa dalla curva sia 1, come obbligatorio che sia trovandoci di fronte a una funzione di probabilità.
@@ -83,7 +84,7 @@ $$ p(x) = Cx^{-\alpha} $$
 
 possiamo scrivere
 
-$$ P(x) = C\int_x^\infty x^{\prime-\alpha}dx^\prime = \bbox[5px,border:1px solid red]{ \frac{C}{\alpha - 1}x^{-(\alpha - 1 )}} \tag{CDF} $$
+$$ P(x) = C\int_x^\infty x^{\prime-\alpha}dx^\prime = \boxed{ \frac{C}{\alpha - 1}x^{-(\alpha - 1 )}} \tag{CDF} $$
 
 La CDF \\( P(x) \\) di una power law (nel box rosso) è a sua volta, come si può vedere, una power law ma con esponente \\( \alpha - 1 \\); questo significa che una volta rappresentata su scala log-log presenterà ancora un andamento rettilineo, ma con una pendenza diversa.
 Soprattutto,  essa è stata ottenuta _senza_ un binning, quindi senza perdita di informazioni e senza aver dovuto formulare alcuna ipotesi sull'ampiezza degli intervalli (ovvero, fare una scelta empirica). Ancora una volta, usiamo il dataset di Moby Dick per visualizzare la CDF:

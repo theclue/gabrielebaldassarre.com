@@ -15,7 +15,7 @@ Ebbene, non c'è nulla in algebra che restringa tale concetto al fatto che i suo
 Basi ortonormali di un sistema complesso
 ----------------------------------------
 
-In maniera del tutto analoga a quanto si fa in un sistema reale, si cominciano a prendere dei vettori con modulo unitario che siano tutti tra di loro mutuamente ortogonali (che, nel campo complesso, significa prendere due vettori il cui [prodotto interno sia uguale a zero]({% post_url Fisica/2019-10-04-spazio-stati-quantistici %}). Essendo tutti questi vettori di modulo unitario, l'informazione interessante che portano in dote è la _direzione_ che individuano.
+In maniera del tutto analoga a quanto si fa in un sistema reale, si cominciano a prendere dei vettori con modulo unitario che siano tutti tra di loro mutuamente ortogonali (che, nel campo complesso, significa prendere due vettori il cui [prodotto interno sia uguale a zero]({% post_url fisica/2019-10-04-spazio-stati-quantistici %}). Essendo tutti questi vettori di modulo unitario, l'informazione interessante che portano in dote è la _direzione_ che individuano.
 
 Ebbene, continuando a prendere vettori (direzioni) ortogonali, si arriverà ad un punto in cui non è più possibile prendere altri preservando la condizione di mutua ortogonalità e saremo costretti a fermarci: i vettori presi fino a questo momento individueranno una __base ortonormale__ e il loro numero la dimensionalità dello spazio.
 

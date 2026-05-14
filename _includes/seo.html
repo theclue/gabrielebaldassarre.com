@@ -122,19 +122,91 @@
 {% endif %}
 
 <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    {% if site.social.type == "Organization" %}
-      "@type": "Organization",
-      "url": {{ '/' | absolute_url | jsonify }}{% if site.og_image %},
-      "logo": {{ site_og_image | jsonify }}{% endif %}
-    {% else %}
-      "@type": "Person",
-      "name": {{ site.social.name | default: site.name | jsonify }},
-      "url": {{ '/' | absolute_url |jsonify }}{% if site.social.links %},
-      "sameAs": {{ site.social.links | jsonify }}{% endif %}
-    {% endif %}
+{%- if og_type == "article" -%}
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": {{ page.title | markdownify | strip_html | strip_newlines | escape_once | jsonify }},
+  "description": {{ seo_description | jsonify }},
+  "url": {{ canonical_url | jsonify }},
+  "datePublished": "{{ page.date | date_to_xmlschema }}",
+  "dateModified": "{{ page.last_modified_at | default: page.date | date_to_xmlschema }}"
+  {%- if page_large_image %},
+  "image": {{ page_large_image | jsonify }}
+  {%- elsif page_teaser_image %},
+  "image": {{ page_teaser_image | jsonify }}
+  {%- endif %},
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": {{ canonical_url | jsonify }}
+  },
+  "author": {
+    "@type": "Person",
+    "name": {{ author.name | default: site.name | jsonify }},
+    "url": {{ seo_url | jsonify }}
+  },
+  "publisher": {
+    "@type": "Person",
+    "name": {{ site.name | default: site.title | jsonify }},
+    "url": {{ seo_url | jsonify }}
   }
+}
+{%- else -%}
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": {{ site.title | jsonify }},
+  "description": {{ site.description | jsonify }},
+  "url": {{ seo_url | jsonify }}
+}
+{%- endif -%}
+</script>
+
+{%- if og_type == "article" and page.categories.size > 0 -%}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": {{ site.title | jsonify }},
+      "item": {{ seo_url | jsonify }}
+    }
+    {%- for cat in page.categories %},
+    {
+      "@type": "ListItem",
+      "position": {{ forloop.index | plus: 1 }},
+      "name": {{ cat | jsonify }},
+      "item": {{ cat | slugify | append: "/" | prepend: seo_url | jsonify }}
+    }
+    {%- endfor %},
+    {
+      "@type": "ListItem",
+      "position": {{ page.categories.size | plus: 2 }},
+      "name": {{ page.title | markdownify | strip_html | strip_newlines | jsonify }},
+      "item": {{ canonical_url | jsonify }}
+    }
+  ]
+}
+</script>
+{%- endif -%}
+
+{%- assign author_links = author.links | map: "url" | compact -%}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "name": {{ site.name | default: site.author | jsonify }},
+  "url": {{ seo_url | jsonify }}
+  {%- if author.avatar %},
+  "image": {{ author.avatar | absolute_url | jsonify }}
+  {%- endif %}
+  {%- if author_links.size > 0 %},
+  "sameAs": {{ author_links | jsonify }}
+  {%- endif %}
+}
 </script>
 
 {% if site.google_site_verification %}

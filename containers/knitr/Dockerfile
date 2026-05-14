@@ -61,6 +61,7 @@ RUN install2.r --error -n 4 \
     -r 'http://cran.rstudio.com' \
     futile.logger \
     rprojroot \
+    xfun \
     Hmisc \
     knitr \
     blogdown \

@@ -46,7 +46,7 @@ $$ \vec{v}(A - \lambda I) = 0 \tag{2} $$
 
 La relazione (2) produce un sistema di equazioni lineari _omogeneo_ ovvero privo del termine noto. Il che significa che è possibile trovare soluzioni non nulle del vettore \\( \vec{v} \\) solo se il determinante della matrice che moltiplica \\( \vec{v} \\) è zero. In simboli:
 
-$$ \bbox[5px,border:1px solid red]{ det(A - \lambda I) = 0 } $$
+$$ \boxed{ det(A - \lambda I) = 0 } $$
 
 che, una volta risolto, ci consente di individuare gli autovalori \\( \lambda_{1 \cdots N} \\) e i corrispettivi autovettori.
 
@@ -60,11 +60,11 @@ Innanzitutto verifichiamo una proprietà molto interessante delle matrici diagon
 
 Supponendo di voler calcolare \\( \vec{b} = A\vec{a} \\) dati:
 
-$$ \vec{a} = \begin{pmatrix} 1 \\\\ 3 \end{pmatrix}  A = \begin{bmatrix} 3 & 0 \\\\ 0 & -2 \end{bmatrix} $$
+$$ \vec{a} = \begin{pmatrix} 1 \\ 3 \end{pmatrix}  A = \begin{bmatrix} 3 & 0 \\ 0 & -2 \end{bmatrix} $$
 
 Avremo:
 
-$$ \vec{b} = \begin{pmatrix} 1 \\\\ 3 \end{pmatrix} \begin{bmatrix} 3 & 0 \\\\ 0 & -2 \end{bmatrix} = \begin{pmatrix} 3 \\\\ -6 \end{pmatrix}  $$
+$$ \vec{b} = \begin{pmatrix} 1 \\ 3 \end{pmatrix} \begin{bmatrix} 3 & 0 \\ 0 & -2 \end{bmatrix} = \begin{pmatrix} 3 \\ -6 \end{pmatrix}  $$
 
 ovvero le componenti \\(b_x = 3 \\) e \\(b_y = -6 \\) sono le proiezioni sugli assi \\( (x, y) \\) del vettore \\( \vec{b} \\) con un modulo pari alle proiezioni del vettore di partenza \\( \vec{a} \\) moltiplicati, come abbiamo già detto, per i coefficienti sulla diagonale \\( A \\).
 
@@ -86,21 +86,21 @@ $$ a = \alpha v_1 + \beta v_2 $$
 
 che individua un sistema di equazioni lineari che può essere risolto in \\( (\alpha, \beta) \\) così:
 
-$$ \begin{pmatrix} a_x \\\\ a_y \end{pmatrix} = \alpha\begin{pmatrix} v_1x \\\\ v_1y \end{pmatrix} + \beta\begin{pmatrix} v_2x \\\\ v_2y \end{pmatrix} \Rightarrow $$
+$$ \begin{pmatrix} a_x \\ a_y \end{pmatrix} = \alpha\begin{pmatrix} v_1x \\ v_1y \end{pmatrix} + \beta\begin{pmatrix} v_2x \\ v_2y \end{pmatrix} \Rightarrow $$
 
-$$ \begin{pmatrix} a_x \\\\ a_y \end{pmatrix} = \begin{pmatrix} \alpha v_1x + \beta v_2x \\\\ \alpha v_1y + \beta v_2y \end{pmatrix} \Rightarrow $$
+$$ \begin{pmatrix} a_x \\ a_y \end{pmatrix} = \begin{pmatrix} \alpha v_1x + \beta v_2x \\ \alpha v_1y + \beta v_2y \end{pmatrix} \Rightarrow $$
 
-$$ \begin{pmatrix} a_x \\\\ a_y \end{pmatrix} = \bbox[5px,border:1px solid red]{\begin{pmatrix} v_1x && v_2x \\\\ v_1y && v_2y \end{pmatrix}}\begin{pmatrix} \alpha \\\\ \beta \end{pmatrix}  $$
+$$ \begin{pmatrix} a_x \\ a_y \end{pmatrix} = \boxed{\begin{pmatrix} v_1x & v_2x \\ v_1y & v_2y \end{pmatrix}}\begin{pmatrix} \alpha \\ \beta \end{pmatrix}  $$
 
 Dove la matrice nel riquadro rosso non è altro che la __matrice che ha come colonne le componenti normalizzate degli autovettori della matrice di partenza__ mentre \\( (\alpha, \beta)^T \\) è niente altro che __la rappresentazione del vettore di partenza \\(\vec{a} \\) nel nuovo sistema di riferimento dato dagli autovettori__.
 
 Se indichiamo la matrice degli autovettori con \\( V \\) possiamo in definitiva scrivere:
 
-$$ \vec{a} = V\begin{pmatrix} \alpha \\\\ \beta \end{pmatrix} $$
+$$ \vec{a} = V\begin{pmatrix} \alpha \\ \beta \end{pmatrix} $$
 
 ovvero
 
-$$  \begin{pmatrix} \alpha \\\\ \beta \end{pmatrix} = V^{-1}A $$
+$$  \begin{pmatrix} \alpha \\ \beta \end{pmatrix} = V^{-1}A $$
 
 Il nuovo sistema di assi così individuato non sarà necessariamente rappresentato da autovettori ortogonali. Tuttavia, questi potranno essere _ortogonalizzati_ facendoli ruotare relativamente uno agli altri in modo da ottenere variazioni di angoli di, giustappunto, 90°.
 
@@ -112,19 +112,19 @@ $$ A\vec{v_k} = \lambda_k\vec{v_k} \text{  con   } k = 1,\ldots,N $$
 
 Ovvero
 
-$$ \begin{matrix} A\vec{v_1} = \lambda_1\vec{v_1} \\\\ A\vec{v_2} = \lambda_2\vec{v_2} \\\\ \vdots \\\\ A\vec{v_k} = \lambda_k\vec{v_k} \end{matrix} \Rightarrow $$
+$$ \begin{matrix} A\vec{v_1} = \lambda_1\vec{v_1} \\ A\vec{v_2} = \lambda_2\vec{v_2} \\ \vdots \\ A\vec{v_k} = \lambda_k\vec{v_k} \end{matrix} \Rightarrow $$
 
 $$ A(v_1 v_2 \ldots v_N) = (v_1 v_2 \ldots v_N)\Lambda $$
 
 con i vettori \\( v_k \\) gli autovettori e \\( \Lambda \\) la __matrice degli autovalori__ che, infatti, vale:
 
-$$ \Lambda = \begin{pmatrix} \lambda_1 & 0 & \ldots & 0 \\\\ 0 & \lambda_2 & \ldots & 0 \\\\ \vdots & \vdots & \ddots & \vdots \\\\ 0 & 0 & \ldots & \lambda_k \end{pmatrix} $$
+$$ \Lambda = \begin{pmatrix} \lambda_1 & 0 & \ldots & 0 \\ 0 & \lambda_2 & \ldots & 0 \\ \vdots & \vdots & \ddots & \vdots \\ 0 & 0 & \ldots & \lambda_k \end{pmatrix} $$
 
 che, come si può vedere, è una matrice che presenta sulla diagonale principale i coefficienti degli autovalori della matrice \\( A \\).
 
 Per finire, andando a indicare con \\( V \\) la matrice degli autovettori utilizzati precedentemente, otterremo l'equazione fondamentale per la diagonalizzazione di una matrice:
 
-$$ \bbox[5px,border:1px solid red]{ VA = V\Lambda } $$
+$$ \boxed{ VA = V\Lambda } $$
 
 In altri termini, __la matrice degli autovalori \\( \Lambda \\) sarà la rappresentazione diagonale della matrice \\( A \\) in un sistema di riferimento individuato dagli autovettori di \\( A \\)__, o come si dice più propriamente _nell'autospazio di \\( A \\)_.
 
@@ -134,27 +134,27 @@ Ma a cosa serve tutto ciò?
 Sia data una certa matrice quadrata \\( A \\). La __matrice degli autovettori__ esprime la __varianza__ di \\(A \\), ovvero _le informazioni che contiene_. Il quantitativo di varianza espressa da ogni singolo autovettore è espresso dal valore dell'autovettore corrispondente. Vediamolo con un esempio con la seguente matrice \\( A \\):
 
 
-$$ A = \begin{pmatrix} 2 & -1 & 3 \\\\ 3 & -2 & 2  \\\\ 15 & -9 & 16 \end{pmatrix}   $$
+$$ A = \begin{pmatrix} 2 & -1 & 3 \\ 3 & -2 & 2  \\ 15 & -9 & 16 \end{pmatrix}   $$
 
 (si noti che la matrice A è di ordine 3 con il terzo componente volutamente molto _vicino_ ma non coincidente alla combinazione lineare \\( 3a_1 + 3a_2\\)).
 
 Ora calcoliamo gli autovalori e gli autovettori corrispondenti:
 
-$$ \begin{matrix} \lambda_1 = 17.59 \\\\ \lambda_2 = -1.62 \\\\ \lambda_3 = 0.035 \end{matrix} $$
+$$ \begin{matrix} \lambda_1 = 17.59 \\ \lambda_2 = -1.62 \\ \lambda_3 = 0.035 \end{matrix} $$
 
-$$ V = \begin{pmatrix} -0.18 & 0.26 & -0.64 \\\\ -0.12 & -0.68 & -0.19 \\\\ -0.97 & -0.68 & 0.74 \end{pmatrix} $$
+$$ V = \begin{pmatrix} -0.18 & 0.26 & -0.64 \\ -0.12 & -0.68 & -0.19 \\ -0.97 & -0.68 & 0.74 \end{pmatrix} $$
 
-$$ V^-1 = \begin{pmatrix} -0.81 & 0.47 & -0.93 \\\\ 1.04 & -0.86 & -0.08 \\\\ -0.80 & -0.60 & 0.22 \end{pmatrix} $$
+$$ V^-1 = \begin{pmatrix} -0.81 & 0.47 & -0.93 \\ 1.04 & -0.86 & -0.08 \\ -0.80 & -0.60 & 0.22 \end{pmatrix} $$
 
 Notiamo subito che \\( \lambda_3 \\) è molto più piccolo in modulo degli altri due autovalori. Questo significa che il suo contributo all'informazione contenuta in \\( A \\) è molto ridotto, rispetto agli altri due.
 
 Decidiamo allora di _scartarlo_ e di scartare anche l'autovettore corrispondente.
 
-$$ \Lambda = \begin{pmatrix} 17.5 & 0 \\\\ 0 & -1.6 \end{pmatrix} $$
+$$ \Lambda = \begin{pmatrix} 17.5 & 0 \\ 0 & -1.6 \end{pmatrix} $$
 
-$$ V = \begin{pmatrix} -0.18 & 0.26 4 \\\\ -0.12 & -0.68  \\\\ -0.97 & -0.68  \end{pmatrix} $$
+$$ V = \begin{pmatrix} -0.18 & 0.26 4 \\ -0.12 & -0.68  \\ -0.97 & -0.68  \end{pmatrix} $$
 
-$$ V^-1 = \begin{pmatrix} -0.81 & 0.47 & -0.93 \\\\ 1.04 & -0.86 & -0.08  \end{pmatrix} $$
+$$ V^-1 = \begin{pmatrix} -0.81 & 0.47 & -0.93 \\ 1.04 & -0.86 & -0.08  \end{pmatrix} $$
 
 
 Ora, dalla formula della diagonalizzazione abbiamo che
@@ -163,7 +163,7 @@ $$ A = V\Lambda V^{-1} $$
 
 e facendo i calcoli abbiamo questa rappresentazione di \\( A \\) che per distinguerla dall'originaria decoro con un pedice \\( R \\):
 
-$$ A_R = \begin{pmatrix} 1.98 & -1.01 & 3 \\\\ 2.97 & -2.01 & 2  \\\\ 15 & -8.99 & 15.99 \end{pmatrix}  $$
+$$ A_R = \begin{pmatrix} 1.98 & -1.01 & 3 \\ 2.97 & -2.01 & 2  \\ 15 & -8.99 & 15.99 \end{pmatrix}  $$
 
 che non è _identica_ alla matrice \\( A \\), ma è senza dubbio _estremamente_ simile ad essa. Ma ottenuta lavorando con matrici di dimensione 2 invece di 3, ovvero con _meno calcoli_.
 

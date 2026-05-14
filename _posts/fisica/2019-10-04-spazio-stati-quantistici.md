@@ -56,17 +56,17 @@ Anche le altre regole che definiscono gli spazi di Hilbert sono rispettate (esis
 
 Possiamo lavorare anche con una rappresentazione più concreta dei ket, ovvero nella forma di _vettori colonna_, che ne esplicitano le componenti. Ad esempio, possiamo scrivere:
 
-$$ \vert A \rangle = \begin{pmatrix} \alpha_1 \\\\ \alpha_2 \end{pmatrix} $$
+$$ \vert A \rangle = \begin{pmatrix} \alpha_1 \\ \alpha_2 \end{pmatrix} $$
 
 dove i coefficienti complessi $$ \alpha $$ rappresentano le componenti del vettore.
 
 Come abbiamo detto per la linearità vale per la somma:
 
-$$ \vert A \rangle  + \vert B \rangle = \begin{pmatrix} \alpha_1 \\\\ \alpha_2 \end{pmatrix} + \begin{pmatrix} \beta_1 \\\\ \beta_2 \end{pmatrix} = \begin{pmatrix} \alpha_1 + \beta_1 \\\\ \alpha_2 + \beta_2 \end{pmatrix}  $$
+$$ \vert A \rangle  + \vert B \rangle = \begin{pmatrix} \alpha_1 \\ \alpha_2 \end{pmatrix} + \begin{pmatrix} \beta_1 \\ \beta_2 \end{pmatrix} = \begin{pmatrix} \alpha_1 + \beta_1 \\ \alpha_2 + \beta_2 \end{pmatrix}  $$
 
 e per la moltiplicazione per uno scalare complesso:
 
-$$ z \vert A \rangle  = z\begin{pmatrix} \alpha_1 \\\\ \alpha_2 \end{pmatrix}  = \begin{pmatrix} z\alpha_1 \\\\ z\alpha_2  \end{pmatrix}  $$
+$$ z \vert A \rangle  = z\begin{pmatrix} \alpha_1 \\ \alpha_2 \end{pmatrix}  = \begin{pmatrix} z\alpha_1 \\ z\alpha_2  \end{pmatrix}  $$
 
 Bra e Ket
 ---------
@@ -98,7 +98,7 @@ dove $$ z^* $$ è il complesso coniugato di $$ z $$.
 
 Nella rappresentazione delle componenti in colonna, per rendere ben evidente che i due spazi vettoriali individuati dai vettori bra e ket, i primi si rappresentano come vettori riga. In altre parole, al ket di A
 
-$$ \vert A \rangle  = \begin{pmatrix} \alpha_1 \\\\ \alpha_2 \end{pmatrix}  $$
+$$ \vert A \rangle  = \begin{pmatrix} \alpha_1 \\ \alpha_2 \end{pmatrix}  $$
 
 corrisponde il bra:
 
@@ -138,7 +138,7 @@ che è un numero reale perché solo nei numeri reali il complesso coincide con i
 
 Inoltre,
 
-$$ \begin{pmatrix} \alpha^*_1 & \alpha^*_2 \end{pmatrix} \begin{pmatrix} \alpha_1 \\\\ \alpha_2 \end{pmatrix} = \alpha^*_1\alpha_1 + \alpha^*_2\alpha_2 $$
+$$ \begin{pmatrix} \alpha^*_1 & \alpha^*_2 \end{pmatrix} \begin{pmatrix} \alpha_1 \\ \alpha_2 \end{pmatrix} = \alpha^*_1\alpha_1 + \alpha^*_2\alpha_2 $$
 
 non solo è reale, ma è anche positivo ed è il quadrato della lunghezza del vettore. Possiamo generalizzare e dire che vettori complessi hanno lunghezza reale.
 

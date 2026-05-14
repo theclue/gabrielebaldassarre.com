@@ -41,7 +41,7 @@ $$ x(0) = x_0, \dot{x} = v_0 $$
 
 ovvero la posizione e la velocità iniziale a $$ t_0 $$.
 
-Il motivo per cui Newton ritenne che il moto fosse determinato dalla posizione e dalla velocità iniziali è dovuto al fatto che l'equazione fosse descrivibile mediante sviluppo in serie e, pertanto, come soluzione di certe equazioni differenziali con particolari scelte dei dati iniziali (per i quali è anche possibile estrarre il relativo [ritratto]({% post_url 2019-10-31-spazio-degli-stati %})). È il teorema di Cauchy-Kowalewska, ma avrò pietà e non lo approfondiremo in questa sede. Piuttosto,c ominciamo a parlare di energia.
+Il motivo per cui Newton ritenne che il moto fosse determinato dalla posizione e dalla velocità iniziali è dovuto al fatto che l'equazione fosse descrivibile mediante sviluppo in serie e, pertanto, come soluzione di certe equazioni differenziali con particolari scelte dei dati iniziali (per i quali è anche possibile estrarre il relativo [ritratto]({% post_url meccanica/2019-10-31-spazio-degli-stati %})). È il teorema di Cauchy-Kowalewska, ma avrò pietà e non lo approfondiremo in questa sede. Piuttosto,c ominciamo a parlare di energia.
 
 Il teorema dell'energia
 -----------------------
@@ -108,7 +108,7 @@ Per come è formulato, il Teorema dell'Energia vale per forze che variano nello 
 Le costanti di moto
 -------------------
 
-L'energia, essendo una quantità dinamica, è una funzione definita nello [spazio degli stati]({% post_url  2019-10-31-spazio-degli-stati %}) $$ E = E(x, v) $$ e, poiché, in ogni punto dello spazio degli stati passa un unico vettore (originato dalle condizioni iniziali $$ x_0, v_0) che è soluzione dell'equazione di Newton, allora si può esplicitare la dipendenza
+L'energia, essendo una quantità dinamica, è una funzione definita nello [spazio degli stati]({% post_url fisica/2019-10-31-spazio-degli-stati %}) $$ E = E(x, v) $$ e, poiché, in ogni punto dello spazio degli stati passa un unico vettore (originato dalle condizioni iniziali $$ x_0, v_0) che è soluzione dell'equazione di Newton, allora si può esplicitare la dipendenza
 
 $$ E(t) = E(x(t), v(t)) $$
 
