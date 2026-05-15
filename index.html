@@ -24,7 +24,7 @@ header:
         {% for link in site.author.links %}
           {% if link.label and link.url %}
             <a href="{{ link.url }}" rel="nofollow noopener noreferrer" aria-label="{{ link.label }}" title="{{ link.label }}">
-              <i class="{{ link.icon | default: 'mdi mdi-link' }}" aria-hidden="true"></i> {{ link.label }}
+              {% include icon.html name=link.icon default="link" %} {{ link.label }}
             </a>
           {% endif %}
         {% endfor %}

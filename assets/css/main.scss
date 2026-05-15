@@ -215,6 +215,14 @@ img, picture, video, canvas, svg {
   height: auto;
 }
 
+svg.icon {
+  display: inline-block;
+  vertical-align: -0.125em;
+  flex-shrink: 0;
+  max-width: none;
+  height: auto;
+}
+
 input, button, textarea, select { font: inherit; color: inherit; }
 
 p, h1, h2, h3, h4, h5, h6 { overflow-wrap: break-word; }
@@ -426,6 +434,97 @@ main {
 .navigation-bar a:focus-visible {
   color: var(--color-accent);
   background-color: var(--color-bg-subtle);
+}
+
+/* --- Hamburger menu toggle (mobile) --- */
+
+.nav-toggle {
+  display: none;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-2xs);
+  cursor: pointer;
+  width: 2.5rem;
+  height: 2.5rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  transition: border-color var(--dur-fast) var(--ease-out);
+}
+
+.nav-toggle:hover {
+  border-color: var(--color-accent);
+}
+
+.nav-toggle__icon,
+.nav-toggle__icon::before,
+.nav-toggle__icon::after {
+  display: block;
+  width: 18px;
+  height: 2px;
+  background-color: var(--color-text);
+  border-radius: 2px;
+  transition: transform var(--dur-base) var(--ease-out),
+              background-color var(--dur-fast) var(--ease-out);
+}
+
+.nav-toggle__icon {
+  position: relative;
+}
+
+.nav-toggle__icon::before,
+.nav-toggle__icon::after {
+  content: "";
+  position: absolute;
+  left: 0;
+}
+
+.nav-toggle__icon::before { top: -6px; }
+.nav-toggle__icon::after  { top:  6px; }
+
+.nav-toggle[aria-expanded="true"] .nav-toggle__icon {
+  background-color: transparent;
+}
+
+.nav-toggle[aria-expanded="true"] .nav-toggle__icon::before {
+  transform: translateY(6px) rotate(45deg);
+}
+
+.nav-toggle[aria-expanded="true"] .nav-toggle__icon::after {
+  transform: translateY(-6px) rotate(-45deg);
+}
+
+@media (max-width: 48em) {
+  .nav-toggle {
+    display: flex;
+  }
+
+  .site-header__inner {
+    flex-wrap: wrap;
+  }
+
+  #nav-menu {
+    flex-basis: 100%;
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height 0.35s var(--ease-out);
+  }
+
+  #nav-menu.is-open {
+    max-height: 30rem;
+  }
+
+  .navigation-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-2xs);
+    padding-block: var(--space-sm);
+  }
+
+  .navigation-bar .theme-toggle {
+    align-self: flex-start;
+  }
 }
 
 /* Theme toggle button */

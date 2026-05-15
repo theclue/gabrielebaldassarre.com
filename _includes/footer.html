@@ -1,4 +1,4 @@
 <span>
-    &copy; {{ site.time | date: '%Y' }} {{ site.copyright }}{% unless site.atom_feed.hide %} <a href="{% if site.atom_feed.path %}{{ site.atom_feed.path }}{% else %}{{ '/feed.xml' | relative_url }}{% endif %}"><i class="mdi mdi-rss" aria-hidden="true"></i></a>
+    &copy; {{ site.time | date: '%Y' }} {{ site.copyright }}{% unless site.atom_feed.hide %} <a href="{% if site.atom_feed.path %}{{ site.atom_feed.path }}{% else %}{{ '/feed.xml' | relative_url }}{% endif %}">{% include icon.html name="rss" %}</a>
     {% endunless %}
 </span>

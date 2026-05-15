@@ -2,7 +2,15 @@
   <div class="container site-header__inner">
     <a class="site-brand" href="{{ '/' | relative_url }}">{{ site.title }}</a>
 
-    <nav aria-label="{{ site.data.ui-text[site.locale].menu_label | default: 'Main navigation' }}">
+    <button type="button"
+            class="nav-toggle"
+            aria-label="{{ site.data.ui-text[site.locale].menu_label | default: 'Menu' }}"
+            aria-expanded="false"
+            aria-controls="nav-menu">
+      <span class="nav-toggle__icon" aria-hidden="true"></span>
+    </button>
+
+    <nav id="nav-menu" aria-label="{{ site.data.ui-text[site.locale].menu_label | default: 'Main navigation' }}">
       <ul class="navigation-bar">
         <li><a href="{{ '/' | relative_url }}">{{ site.data.ui-text[site.locale].home | default: 'Home' }}</a></li>
         {% for navpage in site.pages %}
@@ -18,8 +26,8 @@
                   class="theme-toggle"
                   aria-label="{{ site.data.ui-text[site.locale].toggle_theme | default: 'Toggle dark mode' }}"
                   data-theme-toggle>
-            <i class="mdi mdi-weather-night icon-moon" aria-hidden="true"></i>
-            <i class="mdi mdi-weather-sunny icon-sun" aria-hidden="true"></i>
+            {% include icon.html name="weather-night" class="icon-moon" %}
+            {% include icon.html name="weather-sunny" class="icon-sun" %}
           </button>
         </li>
       </ul>

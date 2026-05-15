@@ -78,16 +78,16 @@ author:
   email            :
   links:
     - label: "GitHub"
-      icon: "mdi mdi-github"
+      icon: "github"
       url: "https://github.com/theclue"
     - label: "LinkedIn"
-      icon: "mdi mdi-linkedin"
+      icon: "linkedin"
       url: "https://www.linkedin.com/in/gabrielebaldassarre"
     - label: "Goodreads"
-      icon: "mdi mdi-book-open-variant"
+      icon: "book-open-variant"
       url: "https://goodreads.com/theclue"
     - label: "Printables"
-      icon: "mdi mdi-printer-3d"
+      icon: "printer-3d"
       url: "https://www.printables.com/@GabrioB_1701666"
 
 # Reading Files

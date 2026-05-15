@@ -8,20 +8,20 @@
   {% assign _mi = _ts | date: "%-m" | plus: 0 | minus: 1 %}
   {% assign _anno = _ts | date: "%Y" %}
   {% assign _data_it = _ts | date: "%-d" | append: " " | append: _mesi[_mi] | append: " " | append: _anno %}
-  <strong><i class="mdi mdi-calendar" aria-hidden="true"></i> {{ site.data.ui-text[site.locale].date_label | default: "Aggiornato:" }}</strong> <time datetime="{{ _ts | date: "%Y-%m-%d" }}">{{ _data_it }}</time>
+  <strong>{% include icon.html name="calendar" %} {{ site.data.ui-text[site.locale].date_label | default: "Aggiornato:" }}</strong> <time datetime="{{ _ts | date: "%Y-%m-%d" }}">{{ _data_it }}</time>
 {% elsif document.date %}
   {% assign _ts = document.date %}
   {% assign _mi = _ts | date: "%-m" | plus: 0 | minus: 1 %}
   {% assign _anno = _ts | date: "%Y" %}
   {% assign _data_it = _ts | date: "%-d" | append: " " | append: _mesi[_mi] | append: " " | append: _anno %}
-  <strong><i class="mdi mdi-calendar" aria-hidden="true"></i> {{ site.data.ui-text[site.locale].original_date_label | default: "Pubblicato:" }}</strong> <time datetime="{{ _ts | date_to_xmlschema }}">{{ _data_it }}</time>
+  <strong>{% include icon.html name="calendar" %} {{ site.data.ui-text[site.locale].original_date_label | default: "Pubblicato:" }}</strong> <time datetime="{{ _ts | date_to_xmlschema }}">{{ _data_it }}</time>
 {% endif %}
 
       {% if document.read_time %}
       {% assign words_per_minute = document.words_per_minute | default: site.words_per_minute | default: 200 %}
       {% assign words = document.content | strip_html | number_of_words %}
 
-        <i class="mdi mdi-clock-outline" aria-hidden="true"></i>
+        {% include icon.html name="clock-outline" %}
         {% if words < words_per_minute %}
           {{ site.data.ui-text[site.locale].less_than | default: "less than" }} 1 {{ site.data.ui-text[site.locale].minute_read | default: "minute read" }}
         {% elsif words == words_per_minute %}

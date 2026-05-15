@@ -35,6 +35,6 @@ assets/libs/
 
 node_modules/
 
-vendor
+/vendor
 .idea
 .venv

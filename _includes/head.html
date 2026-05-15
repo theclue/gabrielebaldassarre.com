@@ -9,9 +9,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
 
-<!-- Resource hints for third-party CDN (MDI, KaTeX) -->
-<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-
 <!-- Self-hosted font preload (improves CLS / LCP for code blocks) -->
 <link rel="preload" href="{{ '/assets/fonts/JetBrainsMono-Regular.woff2' | relative_url }}" as="font" type="font/woff2" crossorigin>
 
@@ -19,13 +16,10 @@
 <link rel="stylesheet" href="{{ '/assets/css/main.css' | relative_url }}">
 
 <!-- KaTeX: CSS + JS for math rendering ($$...$$ server-side via kramdown-math-katex; $...$ client-side via auto-render) -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" integrity="sha384-nB0miv6/jRmo5UMMR1wu3Gz6NLsoTkbqJghGIsx//Rlm+ZU03BU6SQNC66uf4l5+" crossorigin="anonymous">
-<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg" crossorigin="anonymous"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" integrity="sha384-43gviWU0YVjaDtb/GhzOouOXtZMP/7XUzwPTstBeZFe/+rCMvRwr4yROQP43s0Xk" crossorigin="anonymous"
+<link rel="stylesheet" href="{{ '/assets/vendor/katex/katex.min.css' | relative_url }}">
+<script defer src="{{ '/assets/vendor/katex/katex.min.js' | relative_url }}"></script>
+<script defer src="{{ '/assets/vendor/katex/auto-render.min.js' | relative_url }}"
   onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\[',right:'\\]',display:true},{left:'$',right:'$',display:false},{left:'\\(',right:'\\)',display:false}],ignoredClasses:['katex'],throwOnError:false});"></script>
-
-<!-- Material Design Icons -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7/css/materialdesignicons.min.css">
 
 <!-- Favicons -->
 <link rel="icon" type="image/png" sizes="32x32" href="{{ '/favicon-32x32.png' | relative_url }}">
