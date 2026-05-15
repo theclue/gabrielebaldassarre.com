@@ -52,6 +52,10 @@ permissions:
   contents: read
   deployments: write
 
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
 jobs:
   build_and_deploy:
     runs-on: ubuntu-latest

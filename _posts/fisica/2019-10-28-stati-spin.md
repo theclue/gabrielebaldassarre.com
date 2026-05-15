@@ -3,6 +3,8 @@ category: Fisica
 title: Stati di Spin
 excerpt: "È giunto il momento di verificare se il modello matematico che abbiamo derivato per descrivere gli stati quantistici funziona. Mettiamolo alla prova con il sistema quantistico più semplice di tutti: uno spin"
 master: /assets/images/stati-spin.png
+broadcast:
+  channels: [linkedin, mastodon]
 header:
   overlay_filter: 0.5
 ---
