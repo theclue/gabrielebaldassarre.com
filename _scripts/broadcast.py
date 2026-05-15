@@ -304,9 +304,21 @@ def _call_models_api(model, user_prompt):
     try:
         result = json.loads(raw)
         content = result.get("choices", [{}])[0].get("message", {}).get("content", "")
+
+        # Strip markdown code fences if present
+        content = content.strip()
+        if content.startswith("```json"):
+            content = content[7:]
+        elif content.startswith("```"):
+            content = content[3:]
+        if content.endswith("```"):
+            content = content[:-3]
+        content = content.strip()
+
         return json.loads(content)
     except json.JSONDecodeError:
-        print(f"  ERRORE ({model}): risposta non-JSON (primi 200 char): {raw[:200].decode(errors='replace')}", file=sys.stderr)
+        print(f"  ERRORE ({model}): LLM non ha prodotto JSON valido", file=sys.stderr)
+        print(f"  Contenuto (primi 300 char): {content[:300]}", file=sys.stderr)
         return None
     except Exception as e:
         print(f"  ERRORE parsing risposta ({model}): {e}", file=sys.stderr)
