@@ -1,11 +1,10 @@
 name: Broadcast to Social
 
 on:
-  push:
+  workflow_run:
+    workflows: ["Deploy blog on Cloudflare Pages"]
+    types: [completed]
     branches: [main, master]
-    paths:
-      - '_posts/**.md'
-      - '_posts/**.Rmd'
   workflow_dispatch:
     inputs:
       post_path:
@@ -24,12 +23,11 @@ concurrency:
 
 jobs:
   broadcast:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout 🛎️
         uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
 
       - name: Set up Python 🐍
         uses: actions/setup-python@v5
@@ -50,41 +48,38 @@ jobs:
             # Manual dispatch: process specific post
             echo "_posts/$INPUT_POST_PATH" >> /tmp/posts_to_broadcast.txt
           else
-            # Push trigger: find changed posts
-            BEFORE="${{ github.event.before }}"
-            if [ "$BEFORE" = "0000000000000000000000000000000000000000" ] || ! git cat-file -e "$BEFORE" 2>/dev/null; then
-              BEFORE="HEAD~1"
-            fi
-
-            if git cat-file -e "$BEFORE" 2>/dev/null; then
-              git diff --name-only "$BEFORE" HEAD -- '_posts/**.md' '_posts/**.Rmd' >> /tmp/posts_to_broadcast.txt 2>/dev/null || true
-            fi
+            # workflow_run: scan all posts for broadcast: enabled and not sent
+            find _posts -name '*.md' -o -name '*.Rmd' | sort > /tmp/all_posts.txt
+            while read -r post; do
+              [ -z "$post" ] && continue
+              # Skip if broadcast: false
+              if grep -q 'broadcast:\s*false' "$post" 2>/dev/null; then
+                continue
+              fi
+              # Skip if already sent
+              if grep -q 'sent:\s*true' "$post" 2>/dev/null; then
+                continue
+              fi
+              # Include if broadcast: is present (either true or mapping)
+              if grep -q 'broadcast:' "$post" 2>/dev/null; then
+                echo "$post" >> /tmp/posts_to_broadcast.txt
+              fi
+            done < /tmp/all_posts.txt
           fi
 
-          # Filter: only include posts that exist and are broadcastable
+          # Filter: only include posts that exist
           : > /tmp/to_process.txt
           while read -r post; do
             [ -z "$post" ] && continue
             if [ ! -f "$post" ]; then
-              echo "  SKIP (file not found): $post"
+              echo "  SALTA (file non trovato): $post"
               continue
             fi
-
-            # Quick check without Python: skip if broadcast: false or sent: true
-            if grep -q 'broadcast:\s*false' "$post" 2>/dev/null; then
-              echo "  SKIP (broadcast: false): $post"
-              continue
-            fi
-            if grep -q 'sent:\s*true' "$post" 2>/dev/null; then
-              echo "  SKIP (already sent): $post"
-              continue
-            fi
-
             echo "$post" >> /tmp/to_process.txt
           done < /tmp/posts_to_broadcast.txt
 
           count=$(grep -c . /tmp/to_process.txt 2>/dev/null || echo 0)
-          echo "Posts to process: $count"
+          echo "Post da elaborare: $count"
           cat /tmp/to_process.txt
 
           if [ "$count" -eq 0 ]; then
@@ -121,7 +116,7 @@ jobs:
         run: |
           TIMESTAMP=$(date +'%Y%m%d-%H%M%S')
           BRANCH="broadcast/sent-${TIMESTAMP}"
-          BASE="${{ github.ref_name }}"
+          BASE="${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_branch || github.ref_name }}"
 
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -156,4 +151,4 @@ jobs:
 
       - name: No posts to process
         if: steps.find.outputs.no_posts == 'true'
-        run: echo "No broadcastable posts found. Exiting."
+        run: echo "Nessun post da broadcastare. Fine."

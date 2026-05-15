@@ -10,6 +10,7 @@ import json
 import os
 import re
 import sys
+import time
 import urllib.request
 import urllib.error
 
@@ -483,47 +484,79 @@ def gql_escape(s):
     return s.replace("\\", "\\\\").replace('"', '\\"').replace("\n", "\\n")
 
 
-def create_buffer_draft(channel_id, text, photo_url=None):
-    """Crea un draft post in Buffer per un canale specifico."""
-    escaped_text = gql_escape(text)
+def warmup_cloudinary_url(url):
+    """Chiama un URL Cloudinary per forzare la generazione e il caching dell'immagine."""
+    try:
+        req = urllib.request.Request(url, method="HEAD")
+        urllib.request.urlopen(req, timeout=15)
+        return True
+    except Exception:
+        return False
 
-    parts = [
-        f'text: "{escaped_text}"',
-        f'channelId: "{channel_id}"',
-        'schedulingType: automatic',
-        'mode: addToQueue',
-        'saveToDraft: true'
-    ]
-    if photo_url:
-        parts.append(f'assets: [{{ image: {{ url: "{gql_escape(photo_url)}" }} }}]')
 
-    joined = ",\n        ".join(parts)
+def create_buffer_draft(channel_id, text, photo_url=None, retries=3):
+    """Crea una bozza in Buffer per un canale specifico. Ritenta se fallisce."""
+    for attempt in range(1, retries + 1):
+        if attempt > 1:
+            print(f"  Tentativo {attempt}/{retries}...")
+            time.sleep(2)
 
-    query = f"""
-    mutation {{
-      createPost(input: {{
-        {joined}
-      }}) {{
-        ... on PostActionSuccess {{
-          post {{
-            id
-            text
+        # Warm up the Cloudinary URL before sending to Buffer
+        if photo_url:
+            warmup_cloudinary_url(photo_url)
+
+        escaped_text = gql_escape(text)
+        parts = [
+            f'text: "{escaped_text}"',
+            f'channelId: "{channel_id}"',
+            'schedulingType: automatic',
+            'mode: addToQueue',
+            'saveToDraft: true'
+        ]
+        if photo_url:
+            parts.append(f'assets: [{{ image: {{ url: "{gql_escape(photo_url)}" }} }}]')
+
+        joined = ",\n        ".join(parts)
+
+        query = f"""
+        mutation {{
+          createPost(input: {{
+            {joined}
+          }}) {{
+            ... on PostActionSuccess {{
+              post {{
+                id
+                text
+              }}
+            }}
+            ... on MutationError {{
+              message
+            }}
           }}
         }}
-        ... on MutationError {{
-          message
-        }}
-      }}
-    }}
-    """
+        """
 
-    result = buffer_graphql(query)
-    if not result:
-        # If we included an image and it failed, retry without image
-        if photo_url:
-            print("  Nuovo tentativo senza immagine allegata...", file=sys.stderr)
-            return create_buffer_draft(channel_id, text, photo_url=None)
-        return None
+        result = buffer_graphql(query)
+        if not result:
+            continue
+
+        data = result.get("data", {}).get("createPost", {})
+        if "post" in data:
+            return data["post"].get("id")
+
+        msg = data.get("message", "Errore sconosciuto")
+        if "Not Found" in msg or "image dimensions" in msg:
+            print(f"  Errore Buffer (tentativo {attempt}): {msg} — attendo e ritento...", file=sys.stderr)
+            continue
+        else:
+            print(f"  Errore Buffer: {msg}", file=sys.stderr)
+            break
+
+    # If all retries with image failed, try without image
+    if photo_url:
+        print("  Tentativo finale senza immagine...", file=sys.stderr)
+        return create_buffer_draft(channel_id, text, photo_url=None, retries=1)
+    return None
 
     data = result.get("data", {}).get("createPost", {})
     if "post" in data:
