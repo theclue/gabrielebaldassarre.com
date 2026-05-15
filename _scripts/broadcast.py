@@ -485,11 +485,13 @@ def gql_escape(s):
 
 
 def warmup_cloudinary_url(url):
-    """Chiama un URL Cloudinary per forzare la generazione e il caching dell'immagine."""
+    """Scarica effettivamente l'immagine da Cloudinary per forzare fetch + caching completi."""
     try:
-        req = urllib.request.Request(url, method="HEAD")
-        urllib.request.urlopen(req, timeout=15)
-        return True
+        req = urllib.request.Request(url)
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            # Read up to 1KB just to verify the image is available
+            data = resp.read(1024)
+            return len(data) > 0
     except Exception:
         return False
 
