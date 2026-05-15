@@ -5,7 +5,6 @@ excerpt: Studiando la fisica nei libri in lingua inglese, può capitare di fare 
 master: /assets/images/quantitamoto.png
 broadcast:
   channels: [linkedin, mastodon]
-  sent: true
 header:
   overlay_filter: 0.5
 ---
