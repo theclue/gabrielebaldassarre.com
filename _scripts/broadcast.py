@@ -503,7 +503,7 @@ def warmup_cloudinary_url(url, label=""):
     return False
 
 
-def create_buffer_draft(channel_id, text, photo_url=None, retries=3):
+def create_buffer_draft(channel_id, text, photo_url=None, retries=3, label=""):
     """Crea una bozza in Buffer per un canale specifico. Ritenta se fallisce."""
     for attempt in range(1, retries + 1):
         if attempt > 1:
@@ -564,7 +564,7 @@ def create_buffer_draft(channel_id, text, photo_url=None, retries=3):
     # If all retries with image failed, try without image
     if photo_url:
         print("  Tentativo finale senza immagine...", file=sys.stderr)
-        return create_buffer_draft(channel_id, text, photo_url=None, retries=1)
+        return create_buffer_draft(channel_id, text, photo_url=None, retries=1, label=label)
     return None
 
     data = result.get("data", {}).get("createPost", {})
@@ -682,7 +682,7 @@ def broadcast_post(filepath, dry_run=False):
         if photo_url:
             print(f"    Immagine: {photo_url}")
 
-        draft_id = create_buffer_draft(ch_id, text, photo_url)
+        draft_id = create_buffer_draft(ch_id, text, photo_url, label=ch_type)
         if draft_id:
             print(f"  ✅ Draft creato: {draft_id}")
             created_count += 1
