@@ -355,17 +355,17 @@ def get_buffer_channels():
     print(f"  Organization: {orgs[0].get('name', 'N/A')} ({org_id})")
 
     # Step 2: Get channels for this organization
-    ch_query = """
-    query GetChannels($orgId: ID!) {
-      channels(input: { organizationId: $orgId }) {
+    ch_query = f"""
+    query {{
+      channels(input: {{ organizationId: "{org_id}" }}) {{
         id
         name
         service
-      }
-    }
+      }}
+    }}
     """
 
-    ch_result = buffer_graphql(ch_query, {"orgId": org_id})
+    ch_result = buffer_graphql(ch_query)
     if not ch_result:
         return {}
 
@@ -381,37 +381,47 @@ def get_buffer_channels():
     return channel_map
 
 
+def gql_escape(s):
+    """Escape a string for inline use in a GraphQL query."""
+    return s.replace("\\", "\\\\").replace('"', '\\"').replace("\n", "\\n")
+
+
 def create_buffer_draft(channel_id, text, photo_url=None):
     """Create a draft post in Buffer for a specific channel."""
-    input_vars = {
-        "text": text,
-        "channelId": channel_id,
-        "schedulingType": "automatic",
-        "mode": "addToQueue",
-        "saveToDraft": True
-    }
+    escaped_text = gql_escape(text)
 
+    parts = [
+        f'text: "{escaped_text}"',
+        f'channelId: "{channel_id}"',
+        'schedulingType: automatic',
+        'mode: addToQueue',
+        'saveToDraft: true'
+    ]
     if photo_url:
-        input_vars["assets"] = [{"image": {"url": photo_url}}]
+        parts.append(f'assets: [{{ image: {{ url: "{gql_escape(photo_url)}" }} }}]')
 
-    query = """
-    mutation CreatePost($input: CreatePostInput!) {
-      createPost(input: $input) {
-        ... on PostActionSuccess {
-          post {
+    joined = ",\n        ".join(parts)
+
+    query = f"""
+    mutation {{
+      createPost(input: {{
+        {joined}
+      }}) {{
+        ... on PostActionSuccess {{
+          post {{
             id
             text
-          }
-        }
-        ... on MutationError {
+          }}
+        }}
+        ... on MutationError {{
           message
           code
-        }
-      }
-    }
+        }}
+      }}
+    }}
     """
 
-    result = buffer_graphql(query, {"input": input_vars})
+    result = buffer_graphql(query)
     if not result:
         return None
 
