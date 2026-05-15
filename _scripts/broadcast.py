@@ -512,7 +512,7 @@ def create_buffer_draft(channel_id, text, photo_url=None, retries=3, label=""):
 
         # Warm up the Cloudinary URL before sending to Buffer
         if photo_url:
-            warmup_cloudinary_url(photo_url, ch_type)
+            warmup_cloudinary_url(photo_url, label)
 
         escaped_text = gql_escape(text)
         parts = [
