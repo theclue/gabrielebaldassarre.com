@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Broadcast blog posts to social channels via Buffer, using GitHub Models for copy
-and Cloudinary for image crops.
+"""Trasmette articoli del blog sui canali social tramite Buffer, usando GitHub Models per i copy
+e Cloudinary per i ritagli delle immagini.
 
-Usage:
+Uso:
   python3 _scripts/broadcast.py [--dry-run] [--posts post1.md post2.md ...]
 """
 
@@ -121,13 +121,13 @@ OUTPUT: JSON valido, niente testo prima o dopo.
 
 
 def parse_frontmatter(filepath):
-    """Extract YAML frontmatter as dict and body from a markdown file."""
+    """Estrae il frontmatter YAML come dizionario e corpo da un file markdown."""
     with open(filepath) as f:
         content = f.read()
 
     match = re.match(r'^---\s*\n(.*?)\n---\s*\n(.*)', content, re.DOTALL)
     if not match:
-        raise ValueError(f"No frontmatter found in {filepath}")
+        raise ValueError(f"Nessun frontmatter trovato in {filepath}")
 
     fm_raw = match.group(1)
     body = match.group(2)
@@ -138,7 +138,7 @@ def parse_frontmatter(filepath):
 
 
 def update_file_frontmatter(filepath, fm, new_key, new_value):
-    """Update YAML frontmatter by adding or updating a key, then write file."""
+    """Aggiorna il frontmatter YAML aggiungendo o aggiornando una chiave, poi scrive il file."""
     with open(filepath) as f:
         content = f.read()
 
@@ -186,7 +186,7 @@ def update_file_frontmatter(filepath, fm, new_key, new_value):
 
 
 def get_broadcast_config(fm):
-    """Extract broadcast configuration from frontmatter dict."""
+    """Estrae la configurazione broadcast dal dizionario frontmatter."""
     bc = fm.get("broadcast", None)
 
     if bc is None:
@@ -212,7 +212,7 @@ def get_broadcast_config(fm):
 
 
 def get_master_image(fm):
-    """Get the master image path from frontmatter, falling back to overlay_image."""
+    """Ottiene il percorso dell'immagine master dal frontmatter, con fallback a overlay_image."""
     master = fm.get("master")
     if master:
         return master
@@ -227,7 +227,7 @@ def get_master_image(fm):
 
 
 def get_post_info(fm, filepath):
-    """Extract relevant info from frontmatter for the LLM prompt."""
+    """Estrae le informazioni rilevanti dal frontmatter per il prompt LLM."""
     title = fm.get("title", "")
     excerpt = fm.get("excerpt", "")
     category = fm.get("category", "")
@@ -251,9 +251,9 @@ def get_post_info(fm, filepath):
 
 
 def call_github_models(post_info, active_channels):
-    """Call GitHub Models LLM to generate social copy for given channels."""
+    """Chiama GitHub Models LLM per generare copy social per i canali specificati."""
     if not GITHUB_TOKEN:
-        print("  ERROR: GITHUB_TOKEN not set", file=sys.stderr)
+        print("  ERRORE: GITHUB_TOKEN non impostato", file=sys.stderr)
         return None
 
     channel_list = ", ".join(active_channels)
@@ -290,12 +290,12 @@ Genera il copy per: {channel_list}"""
             content = result.get("choices", [{}])[0].get("message", {}).get("content", "")
             return json.loads(content)
     except Exception as e:
-        print(f"  ERROR calling GitHub Models: {e}", file=sys.stderr)
+        print(f"  ERRORE chiamata GitHub Models: {e}", file=sys.stderr)
         return None
 
 
 def cloudinary_url(master_path, transforms):
-    """Build a Cloudinary fetch URL for a given master image and transforms."""
+    """Costruisce un URL Cloudinary fetch per una data immagine master e trasformazioni."""
     return (
         f"https://res.cloudinary.com/{CLOUDINARY_CLOUD_NAME}/image/fetch/"
         f"{transforms}/{SITE_URL}{master_path}"
@@ -303,9 +303,9 @@ def cloudinary_url(master_path, transforms):
 
 
 def buffer_graphql(query, variables=None):
-    """Execute a GraphQL query against Buffer API."""
+    """Esegue una query GraphQL contro l'API Buffer."""
     if not BUFFER_API_TOKEN:
-        print("  ERROR: BUFFER_API_TOKEN not set", file=sys.stderr)
+        print("  ERRORE: BUFFER_API_TOKEN non impostato", file=sys.stderr)
         return None
 
     payload = {"query": query}
@@ -326,16 +326,16 @@ def buffer_graphql(query, variables=None):
             return json.loads(resp.read())
     except urllib.error.HTTPError as e:
         body = e.read().decode(errors="replace")[:500]
-        print(f"  ERROR calling Buffer API: HTTP {e.code}", file=sys.stderr)
-        print(f"  Response: {body}", file=sys.stderr)
+        print(f"  ERRORE chiamata API Buffer: HTTP {e.code}", file=sys.stderr)
+        print(f"  Risposta: {body}", file=sys.stderr)
         return None
     except Exception as e:
-        print(f"  ERROR calling Buffer API: {e}", file=sys.stderr)
+        print(f"  ERRORE chiamata API Buffer: {e}", file=sys.stderr)
         return None
 
 
 def get_buffer_channels():
-    """Query Buffer for available channels and return a mapping from service name to channel ID."""
+    """Interroga Buffer per i canali disponibili e restituisce una mappatura da nome servizio a ID canale."""
     # Step 1: Get organization ID
     org_query = """
     query {
@@ -354,11 +354,11 @@ def get_buffer_channels():
 
     orgs = result.get("data", {}).get("account", {}).get("organizations", [])
     if not orgs:
-        print("  ERROR: No organizations found in Buffer account", file=sys.stderr)
+        print("  ERRORE: Nessuna organizzazione trovata nell'account Buffer", file=sys.stderr)
         return {}
 
     org_id = orgs[0]["id"]
-    print(f"  Organization: {orgs[0].get('name', 'N/A')} ({org_id})")
+    print(f"  Organizzazione: {orgs[0].get('name', 'N/A')} ({org_id})")
 
     # Step 2: Get channels for this organization
     ch_query = f"""
@@ -382,18 +382,18 @@ def get_buffer_channels():
         ch_id = ch.get("id", "")
         if service and ch_id:
             channel_map[service] = ch_id
-            print(f"  Channel: {ch.get('name', 'N/A')} ({service}) = {ch_id}")
+            print(f"  Canale: {ch.get('name', 'N/A')} ({service}) = {ch_id}")
 
     return channel_map
 
 
 def gql_escape(s):
-    """Escape a string for inline use in a GraphQL query."""
+    """Esegue l'escape di una stringa per uso inline in una query GraphQL."""
     return s.replace("\\", "\\\\").replace('"', '\\"').replace("\n", "\\n")
 
 
 def create_buffer_draft(channel_id, text, photo_url=None):
-    """Create a draft post in Buffer for a specific channel."""
+    """Crea un draft post in Buffer per un canale specifico."""
     escaped_text = gql_escape(text)
 
     parts = [
@@ -421,7 +421,6 @@ def create_buffer_draft(channel_id, text, photo_url=None):
         }}
         ... on MutationError {{
           message
-          code
         }}
       }}
     }}
@@ -431,7 +430,7 @@ def create_buffer_draft(channel_id, text, photo_url=None):
     if not result:
         # If we included an image and it failed, retry without image
         if photo_url:
-            print("  Retrying without image attachment...", file=sys.stderr)
+            print("  Nuovo tentativo senza immagine allegata...", file=sys.stderr)
             return create_buffer_draft(channel_id, text, photo_url=None)
         return None
 
@@ -440,80 +439,79 @@ def create_buffer_draft(channel_id, text, photo_url=None):
         post = data["post"]
         return post.get("id")
     else:
-        msg = data.get("message", "Unknown error")
-        code = data.get("code", "")
-        print(f"  Buffer error: {msg} (code: {code})", file=sys.stderr)
+        msg = data.get("message", "Errore sconosciuto")
+        print(f"  Errore Buffer: {msg}", file=sys.stderr)
         return None
 
 
 def finalize_text(text, post_url):
-    """Append the article URL to the social copy."""
+    """Aggiunge l'URL dell'articolo al copy social."""
     return f"{text}\n\n{post_url}"
 
 
 def broadcast_post(filepath, dry_run=False):
-    """Broadcast a single post to configured social channels."""
+    """Trasmette un singolo articolo ai canali social configurati."""
     print(f"\n{'=' * 60}")
-    print(f"Processing: {filepath}")
+    print(f"Elaborazione: {filepath}")
     print(f"{'=' * 60}")
 
     try:
         fm, fm_raw, body, content = parse_frontmatter(filepath)
     except Exception as e:
-        print(f"  SKIP: {e}")
+        print(f"  SALTA: {e}")
         return False
 
     config = get_broadcast_config(fm)
-    print(f"  Broadcast config: enabled={config['enabled']}, sent={config['sent']}, channels={config['channels']}")
+    print(f"  Configurazione broadcast: abilitato={config['enabled']}, inviato={config['sent']}, canali={config['channels']}")
 
     if not config["enabled"]:
-        print("  SKIP: broadcast not enabled")
+        print("  SALTA: broadcast non abilitato")
         return None
 
     if config["sent"]:
-        print("  SKIP: already sent")
+        print("  SALTA: già inviato")
         return None
 
     # Determine active channels
     active_channels = config["channels"] if config["channels"] else DEFAULT_CHANNELS
 
-    print(f"  Active channels: {active_channels}")
+    print(f"  Canali attivi: {active_channels}")
 
     post_info = get_post_info(fm, filepath)
     master_image = get_master_image(fm)
-    print(f"  Title: {post_info['title']}")
+    print(f"  Titolo: {post_info['title']}")
     print(f"  URL: {post_info['url']}")
-    print(f"  Master image: {master_image or 'NONE'}")
+    print(f"  Immagine master: {master_image or 'NESSUNA'}")
 
     if dry_run:
-        print("  DRY RUN - skipping LLM and Buffer calls")
+        print("  SIMULAZIONE - salto chiamate LLM e Buffer")
         return True
 
     # Step 1: Generate social copy via LLM
-    print("  Generating social copy via GitHub Models...")
+    print("  Generazione copy social via GitHub Models...")
     copy = call_github_models(post_info, active_channels)
     if not copy:
-        print("  FAILED to generate social copy")
+        print("  FALLITA generazione copy social")
         return False
-    print("  Copy generated successfully")
+    print("  Copy generato con successo")
 
     # Step 2: Resolve Buffer channels
-    print("  Resolving Buffer channels...")
+    print("  Risoluzione canali Buffer...")
     channel_map = get_buffer_channels()
     if not channel_map:
-        print("  FAILED to resolve Buffer channels")
+        print("  FALLITA risoluzione canali Buffer")
         return False
-    print(f"  Found channels: {list(channel_map.keys())}")
+    print(f"  Canali trovati: {list(channel_map.keys())}")
 
     # Step 3: Create drafts in Buffer
     created_count = 0
     for ch_type in active_channels:
         if ch_type not in channel_map:
-            print(f"  WARNING: Channel '{ch_type}' not found in Buffer (available: {list(channel_map.keys())})")
+            print(f"  ATTENZIONE: Canale '{ch_type}' non trovato in Buffer (disponibili: {list(channel_map.keys())})")
             continue
 
         if ch_type not in SOCIAL_CROPS:
-            print(f"  WARNING: No crop config for channel '{ch_type}'")
+            print(f"  ATTENZIONE: Nessuna configurazione di crop per il canale '{ch_type}'")
             continue
 
         ch_id = channel_map[ch_type]
@@ -527,7 +525,7 @@ def broadcast_post(filepath, dry_run=False):
             if hashtags:
                 text += "\n\n" + " ".join(hashtags)
         else:
-            print(f"  WARNING: No copy generated for {ch_type}")
+            print(f"  ATTENZIONE: Nessun copy generato per {ch_type}")
             continue
 
         # Build Cloudinary URL for the social crop
@@ -537,28 +535,28 @@ def broadcast_post(filepath, dry_run=False):
         else:
             photo_url = None
 
-        print(f"  Creating draft for {ch_type} (channel: {ch_id})...")
-        print(f"    Text length: {len(text)} chars")
+        print(f"  Creazione draft per {ch_type} (canale: {ch_id})...")
+        print(f"    Lunghezza testo: {len(text)} caratteri")
         if photo_url:
-            print(f"    Image: {photo_url}")
+            print(f"    Immagine: {photo_url}")
 
         draft_id = create_buffer_draft(ch_id, text, photo_url)
         if draft_id:
-            print(f"  ✅ Draft created: {draft_id}")
+            print(f"  ✅ Draft creato: {draft_id}")
             created_count += 1
         else:
-            print(f"  ❌ Failed to create draft for {ch_type}")
+            print(f"  ❌ Fallita creazione draft per {ch_type}")
 
     if created_count == 0:
-        print("  FAILED: No drafts were created")
+        print("  FALLITO: Nessun draft creato")
         return False
 
     # Step 4: Mark as sent in frontmatter
     if not dry_run:
         update_file_frontmatter(filepath, fm, "broadcast.sent", True)
-        print(f"  Updated frontmatter: broadcast.sent = true")
+        print(f"  Frontmatter aggiornato: broadcast.sent = true")
 
-    print(f"  Done: {created_count} draft(s) created")
+    print(f"  Fatto: {created_count} draft creati")
     return True
 
 
@@ -574,14 +572,14 @@ def main():
         post_args = [a for a in sys.argv[1:] if not a.startswith("--")]
 
     if not post_args:
-        print("Usage: python3 _scripts/broadcast.py [--dry-run] [--posts] post1.md [post2.md ...]")
+        print("Uso: python3 _scripts/broadcast.py [--dry-run] [--posts] post1.md [post2.md ...]")
         sys.exit(1)
 
     results = {}
     all_ok = True
     for post_path in post_args:
         if not os.path.exists(post_path):
-            print(f"ERROR: File not found: {post_path}")
+            print(f"ERRORE: File non trovato: {post_path}")
             all_ok = False
             continue
         result = broadcast_post(post_path, dry_run=dry_run)
@@ -589,7 +587,7 @@ def main():
 
     # Summary
     print(f"\n{'=' * 60}")
-    print("SUMMARY")
+    print("RIEPILOGO")
     print(f"{'=' * 60}")
     for path, result in results.items():
         icon = "✅" if result else ("⏭️" if result is None else "❌")
