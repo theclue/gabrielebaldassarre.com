@@ -89,6 +89,9 @@ author:
     - label: "Printables"
       icon: "printer-3d"
       url: "https://www.printables.com/@GabrioB_1701666"
+    - label: "Mastodon"
+      icon: "mastodon"
+      url: "https://mastodon.social/@gabriob"
 
 # Reading Files
 include:

@@ -745,6 +745,12 @@ h2.entry-title {
   font-weight: 400;
   color: var(--color-text-muted);
 }
+.post-date {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 var(--space-sm);
+}
 .post-date a, .post-byline a { color: var(--color-text-muted); }
 .post-date a:hover, .post-byline a:hover { color: var(--color-accent); }
 

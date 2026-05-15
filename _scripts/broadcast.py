@@ -111,48 +111,84 @@ def parse_frontmatter(filepath):
 
 
 def update_file_frontmatter(filepath, fm, new_key, new_value):
-    """Aggiorna il frontmatter YAML aggiungendo o aggiornando una chiave, poi scrive il file."""
+    """Aggiunge una chiave `new_key: new_value` dentro il blocco `broadcast:` del frontmatter,
+    preservando TUTTA la formattazione originale del resto del file."""
     with open(filepath) as f:
         content = f.read()
 
-    # Replace the frontmatter block
     start = content.index("---\n") + 4
-    end = content.index("\n---\n", start)
+    end = content.index("\n---\n", start + 4)
+    before_fm = content[:start]
+    fm_text = content[start:end]
+    after_fm = content[end:]
 
-    fm_lines = content[start:end].split("\n")
-
-    # Add new key-value to the mapping
+    lines = fm_text.split("\n")
     new_lines = []
-    inserted = False
     in_broadcast = False
-    indent = ""
+    broadcast_indent = 0
+    broadcast_inserted = False
 
-    for line in fm_lines:
+    for i, line in enumerate(lines):
         new_lines.append(line)
 
-        if re.match(r'^broadcast:', line):
+        stripped = line.strip()
+
+        if re.match(r'^broadcast:', stripped):
             in_broadcast = True
-            # Check if it's a scalar value (false/true) or mapping
-            val = line.split(":", 1)[1].strip()
-            if val == "true" or val == "false" or line.endswith("true") or line.endswith("false"):
-                # Convert scalar to mapping
-                pass  # handled by YAML lib approach instead
+            broadcast_indent = len(line) - len(line.lstrip())
 
-    # Use YAML to reserialize for correctness
-    import yaml
-    fm_dict = yaml.safe_load(content[start:end]) or {}
+        if in_broadcast:
+            # Check next line: if it's at the same or lower indent level,
+            # we're either at end of broadcast block or it's an empty broadcast
+            next_line = lines[i + 1] if i + 1 < len(lines) else ""
+            next_stripped = next_line.strip()
+            next_indent = len(next_line) - len(next_line.lstrip()) if next_line.strip() else 999
 
-    if "broadcast" not in fm_dict or fm_dict["broadcast"] is False:
-        fm_dict["broadcast"] = {}
-    if fm_dict["broadcast"] is True:
-        fm_dict["broadcast"] = {}
-    if not isinstance(fm_dict["broadcast"], dict):
-        fm_dict["broadcast"] = {"channels": fm_dict["broadcast"]}
+            # End of broadcast block: next line is at same or outer indent level
+            if next_indent <= broadcast_indent and next_stripped and not next_stripped.startswith("#"):
+                # Check if sent: true already exists in this block
+                block_lines = fm_text.split("\n")
+                block_start = 0
+                for j, bl in enumerate(block_lines):
+                    if re.match(r'^broadcast:', bl.strip()):
+                        block_start = j
+                        break
+                # Search forward to end of broadcast block
+                block_end = len(block_lines)
+                for j in range(block_start + 1, len(block_lines)):
+                    bl_stripped = block_lines[j].strip()
+                    bl_indent = len(block_lines[j]) - len(block_lines[j].lstrip()) if bl_stripped else 999
+                    if bl_stripped and bl_indent <= broadcast_indent and not bl_stripped.startswith("#"):
+                        block_end = j
+                        break
+                block_text = "\n".join(block_lines[block_start:block_end])
+                if "sent:" not in block_text:
+                    indent = " " * (broadcast_indent + 2)
+                    new_lines.insert(len(new_lines), f"{indent}sent: true")
+                in_broadcast = False
+                broadcast_inserted = True
 
-    fm_dict["broadcast"]["sent"] = True
+    # If broadcast block wasn't found or is a simple scalar, handle that
+    if not broadcast_inserted:
+        # Find broadcast: line
+        for i, line in enumerate(new_lines):
+            if re.match(r'^broadcast:', line.strip()):
+                val = line.split(":", 1)[1].strip()
+                if val in ("true", "false", ""):
+                    # Replace scalar with mapping
+                    indent = " " * (len(line) - len(line.lstrip()))
+                    new_lines[i] = f"{indent}broadcast:"
+                    new_lines.insert(i + 1, f"{indent}  sent: true")
+                broadcast_inserted = True
+                break
 
-    new_fm = yaml.dump(fm_dict, default_flow_style=False, allow_unicode=True, sort_keys=False).strip()
-    new_content = f"---\n{new_fm}\n---\n" + content[end + 5:]
+    # If broadcast key doesn't exist at all
+    if not broadcast_inserted:
+        new_lines.append("broadcast:")
+        new_lines.append("  sent: true")
+
+    new_fm = "\n".join(new_lines)
+    new_content = f"{before_fm}{new_fm}{after_fm}"
 
     with open(filepath, "w") as f:
         f.write(new_content)

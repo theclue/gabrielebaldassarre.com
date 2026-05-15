@@ -38,3 +38,8 @@ node_modules/
 /vendor
 .idea
 .venv
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
