@@ -484,16 +484,23 @@ def gql_escape(s):
     return s.replace("\\", "\\\\").replace('"', '\\"').replace("\n", "\\n")
 
 
-def warmup_cloudinary_url(url):
-    """Scarica effettivamente l'immagine da Cloudinary per forzare fetch + caching completi."""
-    try:
-        req = urllib.request.Request(url)
-        with urllib.request.urlopen(req, timeout=30) as resp:
-            # Read up to 1KB just to verify the image is available
-            data = resp.read(1024)
-            return len(data) > 0
-    except Exception:
-        return False
+def warmup_cloudinary_url(url, label=""):
+    """Scarica l'immagine da Cloudinary per forzare il caching completo. Ritenta fino a 5 volte."""
+    for attempt in range(1, 6):
+        try:
+            req = urllib.request.Request(url)
+            with urllib.request.urlopen(req, timeout=30) as resp:
+                data = resp.read(1024)
+                if len(data) > 0:
+                    if attempt > 1:
+                        print(f"    Cloudinary warmup OK ({label}, tentativo {attempt})")
+                    return True
+        except Exception as e:
+            if attempt == 5:
+                print(f"    Cloudinary warmup FALLITO ({label}): {e}", file=sys.stderr)
+            else:
+                time.sleep(2)
+    return False
 
 
 def create_buffer_draft(channel_id, text, photo_url=None, retries=3):
@@ -505,7 +512,7 @@ def create_buffer_draft(channel_id, text, photo_url=None, retries=3):
 
         # Warm up the Cloudinary URL before sending to Buffer
         if photo_url:
-            warmup_cloudinary_url(photo_url)
+            warmup_cloudinary_url(photo_url, ch_type)
 
         escaped_text = gql_escape(text)
         parts = [
