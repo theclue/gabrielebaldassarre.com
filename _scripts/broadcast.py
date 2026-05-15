@@ -249,7 +249,8 @@ def get_post_info(fm, filepath):
 
 
 def call_github_models(post_info, active_channels):
-    """Chiama GitHub Models LLM per generare copy social per i canali specificati."""
+    """Call GitHub Models LLM to generate social copy for given channels.
+    Tries gpt-4o first, falls back to gpt-4o-mini."""
     if not GITHUB_TOKEN:
         print("  ERRORE: GITHUB_TOKEN non impostato", file=sys.stderr)
         return None
@@ -262,8 +263,19 @@ Estratto: {post_info['excerpt']}
 
 Genera il copy per: {channel_list}"""
 
+    for model in ["openai/gpt-4o", "openai/gpt-4o-mini"]:
+        if model != "openai/gpt-4o":
+            print(f"  Tentativo con modello fallback: {model}...")
+        result = _call_models_api(model, user_prompt)
+        if result:
+            return result
+    return None
+
+
+def _call_models_api(model, user_prompt):
+    """Single model API call to GitHub Models."""
     payload = {
-        "model": "openai/gpt-4o",
+        "model": model,
         "messages": [
             {"role": "system", "content": SOCIAL_COPY_PROMPT},
             {"role": "user", "content": user_prompt}
@@ -284,11 +296,20 @@ Genera il copy per: {channel_list}"""
 
     try:
         with urllib.request.urlopen(req, timeout=120) as resp:
-            result = json.loads(resp.read())
-            content = result.get("choices", [{}])[0].get("message", {}).get("content", "")
-            return json.loads(content)
+            raw = resp.read()
     except Exception as e:
-        print(f"  ERRORE chiamata GitHub Models: {e}", file=sys.stderr)
+        print(f"  ERRORE chiamata GitHub Models ({model}): {e}", file=sys.stderr)
+        return None
+
+    try:
+        result = json.loads(raw)
+        content = result.get("choices", [{}])[0].get("message", {}).get("content", "")
+        return json.loads(content)
+    except json.JSONDecodeError:
+        print(f"  ERRORE ({model}): risposta non-JSON (primi 200 char): {raw[:200].decode(errors='replace')}", file=sys.stderr)
+        return None
+    except Exception as e:
+        print(f"  ERRORE parsing risposta ({model}): {e}", file=sys.stderr)
         return None
 
 
@@ -320,12 +341,16 @@ def buffer_graphql(query, variables=None):
     )
 
     try:
-        with urllib.request.urlopen(req, timeout=30) as resp:
-            return json.loads(resp.read())
-    except urllib.error.HTTPError as e:
-        body = e.read().decode(errors="replace")[:500]
-        print(f"  ERRORE chiamata API Buffer: HTTP {e.code}", file=sys.stderr)
-        print(f"  Risposta: {body}", file=sys.stderr)
+        with urllib.request.urlopen(req, timeout=120) as resp:
+            raw = resp.read()
+    except Exception as e:
+        print(f"  ERRORE chiamata GitHub Models: {e}", file=sys.stderr)
+        return None
+
+    try:
+        return json.loads(raw)
+    except json.JSONDecodeError:
+        print(f"  ERRORE: risposta non-JSON (primi 300 char): {raw[:300].decode(errors='replace')}", file=sys.stderr)
         return None
     except Exception as e:
         print(f"  ERRORE chiamata API Buffer: {e}", file=sys.stderr)
