@@ -5,6 +5,7 @@ excerpt: Come stimare l'illuminamento di un ambiente senza sensori fisici, usand
 master: /assets/images/homeassistant-illuminanza.png
 broadcast:
   channels: [linkedin, mastodon]
+  sent: true
 header:
   overlay_filter: 0.5
 ---
