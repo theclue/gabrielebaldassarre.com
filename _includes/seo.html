@@ -32,10 +32,14 @@
   {%- assign author_twitter = author.twitter | replace: "@", "" -%}
 {%- endif -%}
 
-{%- assign page_large_image = page.header.og_image | default: page.header.overlay_image | default: page.header.image | absolute_url -%}
+{%- if page.master %}
+  {%- assign page_large_image = page.master | cloudinary_url: "w_1922,h_724,c_fill,g_auto,q_auto,f_auto" %}
+  {%- assign page_teaser_image = page.master | cloudinary_url: "w_600,c_fill,g_auto,q_auto,f_auto" %}
+{%- else %}
+  {%- assign page_large_image = page.header.og_image | default: page.header.overlay_image | default: page.header.image | absolute_url %}
+  {%- assign page_teaser_image = page.header.teaser | default: site.og_image | absolute_url %}
+{%- endif %}
 {%- assign page_large_image = page_large_image | escape -%}
-
-{%- assign page_teaser_image = page.header.teaser | default: site.og_image | absolute_url -%}
 {%- assign page_teaser_image = page_teaser_image | escape -%}
 
 {%- assign site_og_image = site.og_image | absolute_url -%}

@@ -2,9 +2,14 @@
 layout: default
 ---
 <article class="hentry" itemscope itemtype="https://schema.org/BlogPosting">
-  {% if page.header.overlay_image %}
+  {%- if page.master %}
+    {%- assign overlay = page.master | cloudinary_url: "w_1922,h_724,c_fill,g_auto,q_auto,f_auto" %}
+  {%- elsif page.header.overlay_image %}
+    {%- assign overlay = page.header.overlay_image | relative_url %}
+  {%- endif %}
+  {% if overlay %}
   <div class="featured-image main-header-image">
-    <img src="{{ page.header.overlay_image | relative_url }}"
+    <img src="{{ overlay }}"
          alt="{{ page.header.overlay_alt | default: page.title | strip_html }}"
          loading="eager"
          decoding="async"

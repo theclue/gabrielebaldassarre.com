@@ -46,10 +46,15 @@ header:
 
 {% for post in paginator.posts %}
 <article>
-  {% if post.header.overlay_image %}
+  {%- if post.master %}
+    {%- assign card_img = post.master | cloudinary_url: "w_600,c_fill,g_auto,q_auto,f_auto" %}
+  {%- elsif post.header.overlay_image %}
+    {%- assign card_img = post.header.overlay_image | relative_url %}
+  {%- endif %}
+  {% if card_img %}
   <div class="featured-image">
     <a href="{{ post.url | relative_url }}" aria-hidden="true" tabindex="-1">
-      <img src="{{ post.header.overlay_image | relative_url }}"
+      <img src="{{ card_img }}"
            alt=""
            loading="lazy"
            decoding="async">

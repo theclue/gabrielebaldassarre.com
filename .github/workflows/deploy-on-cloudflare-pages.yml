@@ -13,6 +13,7 @@ on:
       - "**/*.md"
       - "**/*.Rmd"
       - "**/*.R"
+      - "**.rb"
       - "**.yml"
       - "Gemfile"
       - "Gemfile.lock"
@@ -36,6 +37,7 @@ on:
       - "**/*.md"
       - "**/*.Rmd"
       - "**/*.R"
+      - "**.rb"
       - "**.yml"
       - "Gemfile"
       - "Gemfile.lock"
@@ -59,6 +61,8 @@ jobs:
       - name: Set up Docker (Buildx) 🐋
         uses: docker/setup-buildx-action@v4
       - name: Build 🔧
+        env:
+          CLOUDINARY_CLOUD_NAME: ${{ secrets.CLOUDINARY_CLOUD_NAME }}
         run: make site
       - name: Verify build 🔍
         run: |
@@ -73,3 +77,52 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: pages deploy ./_site --project-name=gabrielebaldassarre
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+  warmup-cloudinary:
+    if: github.event_name == 'push'
+    needs: build_and_deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Warm Cloudinary URLs 🔥
+        env:
+          CLOUDINARY_CLOUD_NAME: ${{ secrets.CLOUDINARY_CLOUD_NAME }}
+        run: |
+          BEFORE="${{ github.event.before }}"
+          if [ "$BEFORE" = "0000000000000000000000000000000000000000" ] || ! git cat-file -e "$BEFORE" 2>/dev/null; then
+            BEFORE="HEAD~1"
+          fi
+
+          : > /tmp/to_warm.txt
+
+          # 1. Changed posts
+          if git cat-file -e "$BEFORE" 2>/dev/null; then
+            git diff --name-only "$BEFORE" HEAD -- '_posts/**.md' '_posts/**.Rmd' >> /tmp/to_warm.txt 2>/dev/null || true
+          fi
+
+          # 2. Changed images -> find posts referencing them as master
+          if git cat-file -e "$BEFORE" 2>/dev/null; then
+            git diff --name-only "$BEFORE" HEAD -- 'assets/images/*' 2>/dev/null | while read img; do
+              rel="/${img}"
+              grep -rl "master:.*${rel}" _posts/ >> /tmp/to_warm.txt 2>/dev/null || true
+            done
+          fi
+
+          # 3. Deduplicate and warm
+          sort -u /tmp/to_warm.txt | while read -r post; do
+            [ -z "$post" ] && continue
+            master=$(grep -oP 'master:\s*\K\S+' "$post" 2>/dev/null | head -1 | tr -d '"')
+            if [ -n "$master" ]; then
+              echo "Warming ${master}..."
+              base="https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/image/fetch"
+              curl -sf -o /dev/null --max-time 30 "${base}/w_1922,h_724,c_fill,g_auto,q_auto,f_auto/https://gabrielebaldassarre.com${master}" || echo "  (overlay warm timed out, may already be cached)"
+              curl -sf -o /dev/null --max-time 30 "${base}/w_600,c_fill,g_auto,q_auto,f_auto/https://gabrielebaldassarre.com${master}" || echo "  (teaser warm timed out, may already be cached)"
+            fi
+          done
+
+          # Report
+          count=$(sort -u /tmp/to_warm.txt | grep -c . 2>/dev/null || echo 0)
+          echo "Warmed ${count} post(s)."

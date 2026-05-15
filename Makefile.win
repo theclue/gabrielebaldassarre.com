@@ -1,8 +1,10 @@
+SHELL := cmd.exe
+
 include Makefile.common
 
 help:
 	@echo Usage: make [TARGET]
-	@echo
+	@echo.
 	@echo Targets:
 	@echo   build        Build the Jekyll Docker image
 	@echo   build-knitr  Build the R/knitr Docker image
@@ -10,15 +12,15 @@ help:
 	@echo   knitr        Convert .Rmd drafts to .md via R container
 	@echo   dev          Start local Jekyll dev server with live-reload
 	@echo   clean        Remove _site/ output
-	@echo
-	@echo "Environment overrides  (defaults shown):"
-	@echo "  LOCALE=$(LOCALE)"
-	@echo "  LOCALE_LANG=$(LOCALE_LANG)"
-	@echo
+	@echo.
+	@echo Environment overrides  (defaults shown):
+	@echo   LOCALE=$(LOCALE)
+	@echo   LOCALE_LANG=$(LOCALE_LANG)
+	@echo.
 	@echo Examples:
 	@echo   make dev
 	@echo   make site
 	@echo   make LOCALE=en_US LOCALE_LANG=en-US site
 
 clean:
-	@rm -rf _site
+	if exist _site rmdir /s /q _site

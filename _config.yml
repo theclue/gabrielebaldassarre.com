@@ -192,6 +192,7 @@ plugins:
   - jekyll-feed
   - jekyll-include-cache
   - jekyll-toc
+  - jekyll-cloudinary
   - kramdown-parser-gfm
 
 # Table of Contents (jekyll-toc)
@@ -218,6 +219,11 @@ compress_html:
   clippings: all
   ignore:
     envs: development
+
+# Cloudinary
+cloudinary:
+  # cloud_name is injected via CLOUDINARY_CLOUD_NAME environment variable
+  only_prod: true
 
 # Defaults
 defaults:
