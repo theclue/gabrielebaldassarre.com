@@ -11,6 +11,7 @@ import os
 import re
 import sys
 import urllib.request
+import urllib.error
 
 CLOUDINARY_CLOUD_NAME = os.environ.get("CLOUDINARY_CLOUD_NAME", "")
 SITE_URL = "https://gabrielebaldassarre.com"
@@ -323,6 +324,11 @@ def buffer_graphql(query, variables=None):
     try:
         with urllib.request.urlopen(req, timeout=30) as resp:
             return json.loads(resp.read())
+    except urllib.error.HTTPError as e:
+        body = e.read().decode(errors="replace")[:500]
+        print(f"  ERROR calling Buffer API: HTTP {e.code}", file=sys.stderr)
+        print(f"  Response: {body}", file=sys.stderr)
+        return None
     except Exception as e:
         print(f"  ERROR calling Buffer API: {e}", file=sys.stderr)
         return None
@@ -423,6 +429,10 @@ def create_buffer_draft(channel_id, text, photo_url=None):
 
     result = buffer_graphql(query)
     if not result:
+        # If we included an image and it failed, retry without image
+        if photo_url:
+            print("  Retrying without image attachment...", file=sys.stderr)
+            return create_buffer_draft(channel_id, text, photo_url=None)
         return None
 
     data = result.get("data", {}).get("createPost", {})
