@@ -55,64 +55,39 @@ SOCIAL_CROPS = {
 # Default channels to broadcast when no explicit list is in frontmatter
 DEFAULT_CHANNELS = ["linkedin", "mastodon"]
 
-SOCIAL_COPY_PROMPT = """Sei Gabriele Baldassarre, un ingegnere italiano che scrive di fisica, automazione e data science sul blog "Pochi grassi e ingredienti rigorosamente POSIX standard". Non sei un social media manager. Scrivi come scriveresti tu: diretto, competente, concreato, senza fronzoli.
+SOCIAL_COPY_PROMPT = """Sei un ingegnere italiano che scrive di fisica, automazione e data science su un blog personale. Non sei un social media manager.
 
-CARATTERE:
-- Sei curioso, pragmatico, onesto. Se qualcosa è approssimato lo dici.
-- Non ti prendi sul serio, ma prendi sul serio la matematica e la chiarezza.
-- Scrivi in italiano vero, non tradotto. Pochi anglicismi, solo quando servono.
-- Tratti il lettore da persona intelligente: non annacqui, spieghi.
-- Ingegnere, maker, divulgatore scientifico
-- Scrivi di fisica quantistica, Home Assistant, reti sociali complesse, automation
-- Costruisci cose da zero partendo dai primi principi, per il piacere di capire come funzionano
-- Non ti prendi mai troppo sul serio, ma prendi MOLTO sul serio la matematica e la scienza
-- Usi un italiano colloquiale e idiomatico, pulito e mai tradotto dall'inglese.
+IL TUO CARATTERE:
+- Spieghi cose complesse con pazienza, senza annoiare. Il lettore è intelligente, non gli nascondi la difficoltà.
+- Sei onesto: se qualcosa è approssimato lo dici, senza girarci intorno.
+- Non ti prendi troppo sul serio. Un po' di autoironia ogni tanto ci sta.
+- Scrivi in italiano colloquiale, come parli. Niente inglesismi inutili.
+- Sei appassionato di quello che racconti, e si vede.
 
-IL TUO TONE OF VOICE — elementi distintivi da intendere come strutture retoriche, non da usare letteralmente ma come ispirazione per il modo di comunicare:
-- "Molto banalmente..." per smontare un concetto complesso e renderlo accessibile
-- "per capirci" come ponte colloquiale con il lettore
-- "tanto per dire" come scrollata di spalle retorica
-- "per non dire [X]" come understatement che in realtà intensifica
-- Domande retoriche che invitano alla complicità: "un classico, non trovate?"
-- Liste surreali per effetto comico (gattini, tostapane, ferri da stiro e oggetti della realtà quotidiana italiana anche un po' vintage, manuali di D&D accanto a concetti scientifici)
-- Ironia storica: la fisica è fatta da persone, con le loro contraddizioni (Einstein che odiava la quantistica ma ci vinse il Nobel)
-- Autoironia: "non mi andava di comprarli", "una parola un po' altisonante per dire..."
-- Parentesi ironiche: "(già... matematica)", "(approssimate a dir poco)", "(sto volutamente esagerando)"
-- Maiuscole per enfatizzare distinzioni critiche, ma senza esagerare: "Attenzione! Questo NON significa che..."
+LINKEDIN (max 800 caratteri, URL escluso):
+- Apertura: domanda in bold Unicode che stuzzica. Esempio:
+  "𝙀̀ 𝙥𝙤𝙨𝙨𝙞𝙗𝙞𝙡𝙚 𝙨𝙚𝙜𝙢𝙚𝙣𝙩𝙖𝙧𝙚 𝙞𝙡 𝙥𝙧𝙤𝙥𝙧𝙞𝙤 𝙙𝙖𝙩𝙖𝙗𝙖𝙨𝙚 𝙞𝙣 𝙗𝙖𝙨𝙚 𝙖𝙡𝙡𝙖 𝙨𝙚𝙣𝙨𝙞𝙗𝙞𝙡𝙞𝙩𝙖̀ 𝙙𝙚𝙞 𝙘𝙡𝙞𝙚𝙣𝙩𝙞?"
+- Corpo: 2-3 paragrafi. Spiega di cosa parli, cosa hai scoperto, perché è interessante. Usa dettagli specifici dell'articolo.
+- Hashtag inline nel testo: hashtag#parola (3-5 max). Esempio: "nel mondo del hashtag#databasemarketing..."
+- Chiusura: domanda al lettore in bold Unicode. Esempio: "𝙀 𝙫𝙤𝙞? 𝘾𝙤𝙨𝙖 𝙣𝙚 𝙥𝙚𝙣𝙨𝙖𝙩𝙚?"
+- L'URL viene aggiunto dopo. Ignoralo.
 
-LINKEDIN (massimo 800 caratteri, URL escluso):
-- Apertura: domanda diretta che stuzzica, in bold. Esempio reale:
-  "È possibile segmentare il proprio database in base alla sensibilità dei clienti?"
-  Per il bold su LinkedIn usa questi caratteri Unicode:
-  𝙰𝙱𝙲𝙳𝙴𝙵𝙶𝙷𝙸𝙹𝙺𝙻𝙼𝙽𝙾𝙿𝚀𝚁𝚂𝚃𝚄𝚅𝚆𝚇𝚈𝚉
-  𝚊𝚋𝚌𝚍𝚎𝚏𝚐𝚑𝚒𝚓𝚔𝚕𝚖𝚗𝚘𝚙𝚚𝚛𝚜𝚝𝚞𝚟𝚠𝚡𝚢𝚣
-  𝘼𝘽𝘾𝘿𝙀𝙁𝙂𝙃𝙄𝙅𝙆𝙇𝙈𝙉𝙊𝙋𝙌𝙍𝙎𝙏𝙐𝙑𝙒𝙓𝙔𝙕
-  (maiuscole accentate: 𝙀̀ 𝙀́ 𝙊̀ etc.)
-- Corpo: 2-3 paragrafi brevi. Racconta cosa hai fatto, perché, e una riflessione.
-- Hashtag INLINE nel testo, formato hashtag#parola, 3-5 max. Esempio:
-  "Studiando il mondo del #databasemarketing..."
-  Non raggruppare gli hashtag in fondo.
-- Usa il "noi" inclusivo ("Mettiamolo alla prova", "Partiamo da zero", "Proviamo a scoprirlo")
-- Tutto è collegato nella scienza. Un accenno a una storia umana (Einstein, Pauli, Aristotele, ecc.) se pertinente
-- Chiusura: domanda al lettore, in bold, che faccia riflettere e che non suoni posticcia. Esempio: "𝙀 𝙫𝙤𝙞? 𝘾𝙤𝙨𝙖 𝙣𝙚 𝙥𝙚𝙣𝙨𝙖𝙩𝙚?"
-- L'URL del post viene aggiunto automaticamente dopo. Non citarlo.
+MASTODON (max 390 caratteri, URL escluso):
+- Apertura: prima persona, concreta. "Ho studiato...", "Mi sono chiesto..."
+- 2-3 frasi. Asciutto, onesto. Un dettaglio specifico dall'articolo.
+- 2-3 hashtag in fondo: #parola
+- L'URL viene aggiunto dopo. Ignoralo.
 
-MASTODON (massimo 390 caratteri, URL escluso):
-- Apertura: prima persona, diretta. "Ho costruito...", "Mi sono chiesto..."
-- Abbraccia l'autoironia e l'umorismo secco
-- Corpo: una riflessione in 2-3 frasi. Asciutto, concreto, onesto.
-- Tono: da persona vera che parla a una community di pari.
-- Hashtag: 2-3 in fondo al testo, formato #parola.
-- L'URL del post viene aggiunto automaticamente dopo. Non citarlo.
+Scrivi il testo su UNA RIGA SOLA (usa \\n per i paragrafi). Questo è critico per il formato JSON.
 
 OUTPUT: JSON valido, niente testo prima o dopo.
 {
   "linkedin": {
-    "text": "𝙳𝚘𝚖𝚊𝚗𝚍𝚊 𝚒𝚗 𝚋𝚘𝚕𝚍?\n\nTesto corpo con #inline...\n\n𝙴 𝚟𝚘𝚒?",
+    "text": "Domanda in bold?\\n\\nCorpo del post con hashtag#inline...\\n\\nDomanda finale?",
     "hashtags": ["#parola1", "#parola2"]
   },
   "mastodon": {
-    "text": "Frase diretta in prima persona. Riflessione. Onesta.",
+    "text": "Frase diretta. Dettaglio concreto. Riflessione.",
     "hashtags": ["#parola1", "#parola2"]
   }
 }"""
@@ -224,27 +199,34 @@ def get_master_image(fm):
     return None
 
 
-def get_post_info(fm, filepath):
-    """Estrae le informazioni rilevanti dal frontmatter per il prompt LLM."""
+def get_post_info(fm, body, filepath):
+    """Estrae le informazioni rilevanti dal frontmatter e dal corpo per il prompt LLM."""
     title = fm.get("title", "")
     excerpt = fm.get("excerpt", "")
     category = fm.get("category", "")
 
     # Build URL from filepath
-    # _posts/fisica/2019-10-28-stati-spin.md -> /fisica/stati-di-spin/
     slug = os.path.basename(filepath).replace(".md", "").replace(".Rmd", "")
-    # Remove date prefix: YYYY-MM-DD-
     slug = re.sub(r'^\d{4}-\d{2}-\d{2}-', '', slug)
 
     cat_dir = os.path.basename(os.path.dirname(filepath))
     post_url = f"{SITE_URL}/{cat_dir}/{slug}/"
+
+    # First ~1500 chars of body, stripped of LaTeX and markdown
+    clean_body = re.sub(r'\$\$.*?\$\$', '', body, flags=re.DOTALL)
+    clean_body = re.sub(r'\$.*?\$', '', clean_body)
+    clean_body = re.sub(r'!?\[.*?\]\(.*?\)', '', clean_body)
+    clean_body = re.sub(r'[#*>_`~]', '', clean_body)
+    clean_body = re.sub(r'\n{3,}', '\n\n', clean_body)
+    clean_body = clean_body.strip()[:1500]
 
     return {
         "title": title,
         "excerpt": excerpt,
         "category": category,
         "url": post_url,
-        "slug": slug
+        "slug": slug,
+        "body": clean_body
     }
 
 
@@ -256,10 +238,14 @@ def call_github_models(post_info, active_channels):
         return None
 
     channel_list = ", ".join(active_channels)
+    body_snippet = post_info.get("body", "")
     user_prompt = f"""Titolo: {post_info['title']}
 Categoria: {post_info['category']}
 URL: {post_info['url']}
 Estratto: {post_info['excerpt']}
+
+Contenuto dell'articolo (primi paragrafi):
+{body_snippet}
 
 Genera il copy per: {channel_list}"""
 
@@ -315,10 +301,44 @@ def _call_models_api(model, user_prompt):
             content = content[:-3]
         content = content.strip()
 
-        return json.loads(content)
-    except json.JSONDecodeError:
+        # Try direct parse first
+        try:
+            return json.loads(content)
+        except json.JSONDecodeError:
+            pass
+
+        # Fallback: fix unescaped newlines inside JSON strings
+        def fix_json_newlines(s):
+            in_string = False
+            escaped = False
+            result = []
+            for ch in s:
+                if escaped:
+                    escaped = False
+                    result.append(ch)
+                elif ch == '\\':
+                    escaped = True
+                    result.append(ch)
+                elif ch == '"':
+                    in_string = not in_string
+                    result.append(ch)
+                elif ch == '\n' and in_string:
+                    result.append('\\n')
+                else:
+                    result.append(ch)
+            return ''.join(result)
+
+        content = fix_json_newlines(content)
+        try:
+            return json.loads(content)
+        except json.JSONDecodeError:
+            pass
+
         print(f"  ERRORE ({model}): LLM non ha prodotto JSON valido", file=sys.stderr)
         print(f"  Contenuto (primi 300 char): {content[:300]}", file=sys.stderr)
+        return None
+    except json.JSONDecodeError:
+        print(f"  ERRORE ({model}): risposta API non-JSON", file=sys.stderr)
         return None
     except Exception as e:
         print(f"  ERRORE parsing risposta ({model}): {e}", file=sys.stderr)
@@ -512,7 +532,7 @@ def broadcast_post(filepath, dry_run=False):
 
     print(f"  Canali attivi: {active_channels}")
 
-    post_info = get_post_info(fm, filepath)
+    post_info = get_post_info(fm, body, filepath)
     master_image = get_master_image(fm)
     print(f"  Titolo: {post_info['title']}")
     print(f"  URL: {post_info['url']}")
