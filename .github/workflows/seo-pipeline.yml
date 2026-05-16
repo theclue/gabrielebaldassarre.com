@@ -271,8 +271,6 @@ jobs:
 
           : > /tmp/hermes_urls.txt
 
-          echo "/" >> /tmp/hermes_urls.txt
-
           if [ -n "$INPUT_URLS" ]; then
             for u in $INPUT_URLS; do
               url_from_post "$u" >> /tmp/hermes_urls.txt
@@ -300,14 +298,23 @@ jobs:
           echo "🔬 Hermes SEO Audit in corso..."
           echo ""
           HERMES_AUTH=""
+          HERMES_SLEEP=302
           if [ -n "$HERMES_API_KEY" ]; then
             HERMES_AUTH="&api_key=${HERMES_API_KEY}"
+            HERMES_SLEEP=32
+            echo "   Con API key — rate limit: 1 richiesta ogni 30s"
+          else
+            echo "   Senza API key — rate limit: 1 richiesta ogni 300s (ottieni key gratuita su hermesforge.dev/api/docs)"
           fi
+
+          TOTAL=$(wc -l < /tmp/hermes_urls.txt 2>/dev/null || echo 0)
+          CURRENT=0
 
           while read -r path; do
             [ -z "$path" ] && continue
+            CURRENT=$((CURRENT + 1))
             URL="https://gabrielebaldassarre.com${path}"
-            echo "📋 ${URL}"
+            echo "📋 [${CURRENT}/${TOTAL}] ${URL}"
 
             RESULT=$(curl -s -w "\n%{http_code}" "https://hermesforge.dev/api/seo?url=${URL}${HERMES_AUTH}")
             HTTP_CODE=$(echo "$RESULT" | tail -1)
@@ -349,7 +356,11 @@ jobs:
             echo ""
             echo "  📊 Riepilogo: ${SCORE}/100 (${GRADE}) | 🔴 ${ISSUE_COUNT} | 🟡 ${WARN_COUNT} | ✅ ${PASS_COUNT}"
             echo ""
-            sleep 1
+
+            # Rispetta rate limit: attendi tra una richiesta e l'altra (non dopo l'ultima)
+            if [ "$CURRENT" -lt "$TOTAL" ]; then
+              sleep "$HERMES_SLEEP"
+            fi
           done < /tmp/hermes_urls.txt
 
           echo "✅ Hermes SEO Audit completato"
