@@ -1,6 +1,40 @@
 ---
 permalink: /robots.txt
 ---
+# AI crawlers: allow content, disallow binary assets
+User-agent: GPTBot
+Disallow: /assets/
+Allow: /
+
+User-agent: CCBot
+Disallow: /assets/
+Allow: /
+
+User-agent: anthropic-ai
+Disallow: /assets/
+Allow: /
+
+User-agent: PerplexityBot
+Disallow: /assets/
+Allow: /
+
+User-agent: Google-Extended
+Disallow: /assets/
+Allow: /
+
+User-agent: Applebot-Extended
+Disallow: /assets/
+Allow: /
+
+User-agent: cohere-ai
+Disallow: /assets/
+Allow: /
+
+User-agent: Diffbot
+Disallow: /assets/
+Allow: /
+
+# Everyone else: full access
 User-agent: *
 Disallow:
 

@@ -1,0 +1,405 @@
+name: SEO Post-Deploy Pipeline
+
+on:
+  workflow_run:
+    workflows: ["Deploy blog on Cloudflare Pages"]
+    types: [completed]
+    branches: [main, master]
+  workflow_dispatch:
+    inputs:
+      urls:
+        description: 'URL da verificare (separati da spazio). Se vuoto, il workflow cercherà automaticamente i post modificati'
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: seo-pipeline
+  cancel-in-progress: false
+
+jobs:
+  indexnow:
+    name: IndexNow — Notifica motori di ricerca
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Trova URL da notificare 🔍
+        id: find
+        env:
+          INPUT_URLS: ${{ inputs.urls }}
+        run: |
+          : > /tmp/indexnow_urls.txt
+
+          if [ -n "$INPUT_URLS" ]; then
+            # Workflow dispatch manuale: usa gli URL forniti
+            for u in $INPUT_URLS; do
+              echo "https://gabrielebaldassarre.com${u}" >> /tmp/indexnow_urls.txt
+            done
+          else
+            # workflow_run: trova post modificati nell'ultimo deploy
+            BEFORE="${{ github.event.workflow_run.head_commit.id }}"
+            if [ -z "$BEFORE" ] || ! git cat-file -e "$BEFORE" 2>/dev/null; then
+              BEFORE="HEAD~1"
+            fi
+
+            if git cat-file -e "$BEFORE" 2>/dev/null; then
+              git diff --name-only "$BEFORE" HEAD -- '_posts/**.md' '_posts/**.Rmd' 2>/dev/null | while read post; do
+                [ -z "$post" ] && continue
+                # Estrai slug dal nome file: _posts/cat/YYYY-MM-DD-slug.md → /cat/slug/
+                cat_dir=$(basename "$(dirname "$post")")
+                slug=$(basename "$post" .md | sed 's/^[0-9-]*//' | sed 's/^-//')
+                echo "https://gabrielebaldassarre.com/${cat_dir}/${slug}/" >> /tmp/indexnow_urls.txt
+              done
+            fi
+          fi
+
+          count=$(wc -l < /tmp/indexnow_urls.txt 2>/dev/null || echo 0)
+          echo "URL da notificare: ${count}"
+          cat /tmp/indexnow_urls.txt
+
+          if [ "$count" -eq 0 ]; then
+            echo "no_urls=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "no_urls=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Invia notifiche IndexNow 📡
+        if: steps.find.outputs.no_urls != 'true'
+        run: |
+          KEY="b8f09512fca218ea59ed4b754cfecab6"
+          URLS=$(jq -R -s -c 'split("\n") | map(select(length > 0))' /tmp/indexnow_urls.txt)
+
+          echo "🚀 Invio notifica IndexNow per $(echo "$URLS" | jq 'length') URL..."
+
+          RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "https://api.indexnow.org/indexnow" \
+            -H "Content-Type: application/json; charset=utf-8" \
+            -d "{\"host\": \"gabrielebaldassarre.com\", \"key\": \"$KEY\", \"urlList\": $URLS}")
+
+          HTTP_CODE=$(echo "$RESPONSE" | tail -1)
+          BODY=$(echo "$RESPONSE" | sed '$d')
+
+          echo "📥 Risposta IndexNow: HTTP ${HTTP_CODE}"
+          echo "$BODY" | jq . 2>/dev/null || echo "$BODY"
+
+          if [ "$HTTP_CODE" != "200" ] && [ "$HTTP_CODE" != "202" ]; then
+            echo "⚠️  IndexNow: risposta inattesa (HTTP ${HTTP_CODE}) — verifica key file e URL"
+          else
+            echo "✅ URL notificati con successo ai motori di ricerca"
+          fi
+
+  pagespeed:
+    name: PageSpeed Insights
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Trova URL da verificare 🔍
+        id: find
+        env:
+          INPUT_URLS: ${{ inputs.urls }}
+        run: |
+          : > /tmp/psi_urls.txt
+
+          # Includi sempre la homepage
+          echo "/" >> /tmp/psi_urls.txt
+
+          if [ -n "$INPUT_URLS" ]; then
+            for u in $INPUT_URLS; do
+              echo "${u}" >> /tmp/psi_urls.txt
+            done
+          else
+            BEFORE="${{ github.event.workflow_run.head_commit.id }}"
+            if [ -z "$BEFORE" ] || ! git cat-file -e "$BEFORE" 2>/dev/null; then
+              BEFORE="HEAD~1"
+            fi
+
+            if git cat-file -e "$BEFORE" 2>/dev/null; then
+              git diff --name-only "$BEFORE" HEAD -- '_posts/**.md' '_posts/**.Rmd' 2>/dev/null | while read post; do
+                [ -z "$post" ] && continue
+                cat_dir=$(basename "$(dirname "$post")")
+                slug=$(basename "$post" .md | sed 's/^[0-9-]*//' | sed 's/^-//')
+                echo "/${cat_dir}/${slug}/" >> /tmp/psi_urls.txt
+              done
+            fi
+          fi
+
+          cat /tmp/psi_urls.txt | sort -u > /tmp/psi_urls_unique.txt
+          count=$(wc -l < /tmp/psi_urls_unique.txt 2>/dev/null || echo 0)
+          echo "URL da verificare: ${count}"
+
+          if [ "$count" -eq 0 ]; then
+            echo "no_urls=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Analizza PageSpeed Insights 📊
+        if: steps.find.outputs.no_urls != 'true'
+        run: |
+          API_KEY="${{ secrets.PAGESPEED_API_KEY }}"
+          HAS_ERRORS=0
+
+          while read -r path; do
+            [ -z "$path" ] && continue
+            URL="https://gabrielebaldassarre.com${path}"
+            echo ""
+            echo "🔍 Analisi: ${URL}"
+
+            # Mobile
+            MOBILE=$(curl -s "https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${URL}&strategy=mobile&key=${API_KEY}")
+            PERF=$(echo "$MOBILE" | jq -r '.lighthouseResult.categories.performance.score * 100 // 0')
+            A11Y=$(echo "$MOBILE" | jq -r '.lighthouseResult.categories.accessibility.score * 100 // 0')
+            SEO=$(echo "$MOBILE" | jq -r '.lighthouseResult.categories.seo.score * 100 // 0')
+            LCP=$(echo "$MOBILE" | jq -r '.lighthouseResult.audits["largest-contentful-paint"].displayValue // "N/A"')
+            TBT=$(echo "$MOBILE" | jq -r '.lighthouseResult.audits["total-blocking-time"].displayValue // "N/A"')
+            CLS=$(echo "$MOBILE" | jq -r '.lighthouseResult.audits["cumulative-layout-shift"].displayValue // "N/A"')
+
+            echo "  📱 Mobile  | Perf: ${PERF}% | A11y: ${A11Y}% | SEO: ${SEO}% | LCP: ${LCP} | TBT: ${TBT} | CLS: ${CLS}"
+
+            # Desktop
+            DESKTOP=$(curl -s "https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${URL}&strategy=desktop&key=${API_KEY}")
+            D_PERF=$(echo "$DESKTOP" | jq -r '.lighthouseResult.categories.performance.score * 100 // 0')
+            D_A11Y=$(echo "$DESKTOP" | jq -r '.lighthouseResult.categories.accessibility.score * 100 // 0')
+
+            echo "  🖥️  Desktop | Perf: ${D_PERF}% | A11y: ${D_A11Y}%"
+
+            # Alert solo su problemi seri
+            if [ "$(echo "$PERF < 50" | bc -l 2>/dev/null || echo 0)" = "1" ]; then
+              echo "  ⚠️  PERFORMANCE MOBILE SOTTO SOGLIA CRITICA: ${PERF}%"
+              HAS_ERRORS=1
+            fi
+            if [ "$(echo "$A11Y < 80" | bc -l 2>/dev/null || echo 0)" = "1" ]; then
+              echo "  ⚠️  ACCESSIBILITÀ MOBILE SOTTO SOGLIA: ${A11Y}%"
+              HAS_ERRORS=1
+            fi
+
+          done < /tmp/psi_urls_unique.txt
+
+          echo ""
+          if [ "$HAS_ERRORS" -eq 1 ]; then
+            echo "⚠️  PageSpeed Insights: problemi rilevati su alcuni URL. Vedi log sopra."
+          else
+            echo "✅ PageSpeed Insights: tutto nella norma"
+          fi
+
+  hermes-seo:
+    name: Hermes SEO Audit
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Trova URL da verificare 🔍
+        id: find
+        env:
+          INPUT_URLS: ${{ inputs.urls }}
+        run: |
+          : > /tmp/hermes_urls.txt
+
+          echo "/" >> /tmp/hermes_urls.txt
+
+          if [ -n "$INPUT_URLS" ]; then
+            for u in $INPUT_URLS; do
+              echo "${u}" >> /tmp/hermes_urls.txt
+            done
+          else
+            BEFORE="${{ github.event.workflow_run.head_commit.id }}"
+            if [ -z "$BEFORE" ] || ! git cat-file -e "$BEFORE" 2>/dev/null; then
+              BEFORE="HEAD~1"
+            fi
+
+            if git cat-file -e "$BEFORE" 2>/dev/null; then
+              git diff --name-only "$BEFORE" HEAD -- '_posts/**.md' '_posts/**.Rmd' 2>/dev/null | while read post; do
+                [ -z "$post" ] && continue
+                cat_dir=$(basename "$(dirname "$post")")
+                slug=$(basename "$post" .md | sed 's/^[0-9-]*//' | sed 's/^-//')
+                echo "/${cat_dir}/${slug}/" >> /tmp/hermes_urls.txt
+              done
+            fi
+          fi
+
+          wc -l < /tmp/hermes_urls.txt
+
+      - name: Audit SEO via Hermes 🔬
+        run: |
+          echo "🔬 Hermes SEO Audit in corso..."
+          echo ""
+
+          while read -r path; do
+            [ -z "$path" ] && continue
+            URL="https://gabrielebaldassarre.com${path}"
+            echo "📋 ${URL}"
+
+            RESULT=$(curl -s "https://hermesforge.dev/api/seo?url=${URL}")
+
+            # Meta
+            TITLE_LEN=$(echo "$RESULT" | jq -r '.meta.title_length // 0')
+            DESC_LEN=$(echo "$RESULT" | jq -r '.meta.description_length // 0')
+            HAS_CANONICAL=$(echo "$RESULT" | jq -r '.meta.canonical // false')
+            HAS_OG_TITLE=$(echo "$RESULT" | jq -r '.meta.og_title // false')
+
+            echo "  Titolo: ${TITLE_LEN} caratteri | Descrizione: ${DESC_LEN} caratteri | Canonical: ${HAS_CANONICAL} | OG: ${HAS_OG_TITLE}"
+
+            # Immagini
+            IMG_TOTAL=$(echo "$RESULT" | jq -r '.images.total // 0')
+            IMG_NOALT=$(echo "$RESULT" | jq -r '.images.missing_alt // 0')
+            echo "  Immagini: ${IMG_TOTAL} totali, ${IMG_NOALT} senza alt text"
+
+            # Heading
+            H1_COUNT=$(echo "$RESULT" | jq -r '.headings.h1 | length // 0')
+            echo "  H1: ${H1_COUNT}"
+
+            # Alert
+            if [ "${TITLE_LEN}" -lt 20 ] || [ "${TITLE_LEN}" -gt 70 ]; then
+              echo "  ⚠️  Lunghezza titolo fuori range ottimale (50-60)"
+            fi
+            if [ "${IMG_NOALT}" -gt 0 ]; then
+              echo "  ⚠️  ${IMG_NOALT} immagini senza alt text"
+            fi
+            if [ "${H1_COUNT}" -ne 1 ]; then
+              echo "  ⚠️  H1 count anomalo: ${H1_COUNT}"
+            fi
+
+            echo ""
+            sleep 1
+          done < /tmp/hermes_urls.txt
+
+          echo "✅ Hermes SEO Audit completato"
+
+  seo-score:
+    name: SEO Score API (informativo)
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - name: SEO Score check 📊
+        run: |
+          echo "📊 SEO Score API — puramente informativo, non bloccante"
+          echo ""
+
+          URL="https://gabrielebaldassarre.com"
+          echo "🔍 ${URL}"
+
+          RESULT=$(curl -s "https://hermesforge.dev/api/seo?url=${URL}")
+
+          SEARCHABLE=$(echo "$RESULT" | jq -r '.indexability.searchable // "N/A"')
+          TITLE=$(echo "$RESULT" | jq -r '.meta.title // "N/A"')
+          TITLE_LEN=$(echo "$RESULT" | jq -r '.meta.title_length // 0')
+          DESC=$(echo "$RESULT" | jq -r '.meta.description // "N/A"')
+          H1=$(echo "$RESULT" | jq -r '.headings.h1[0] // "N/A"')
+          IMG_TOTAL=$(echo "$RESULT" | jq -r '.images.total // 0')
+          IMG_NOALT=$(echo "$RESULT" | jq -r '.images.missing_alt // 0')
+          LINKS_INT=$(echo "$RESULT" | jq -r '.links.internal // 0')
+          HAS_SCHEMA=$(echo "$RESULT" | jq -r '.structured_data.jsonld // false')
+          PAGE_SIZE=$(echo "$RESULT" | jq -r '.performance.page_size // 0')
+
+          echo "  Indicizzabile: ${SEARCHABLE}"
+          echo "  Titolo: ${TITLE} (${TITLE_LEN} caratteri)"
+          echo "  Descrizione: ${DESC}"
+          echo "  H1: ${H1}"
+          echo "  Immagini: ${IMG_TOTAL} (${IMG_NOALT} senza alt)"
+          echo "  Link interni: ${LINKS_INT}"
+          echo "  JSON-LD schema.org: ${HAS_SCHEMA}"
+          echo "  Dimensione pagina: ${PAGE_SIZE}B"
+
+          echo ""
+          echo "✅ SEO Score check completato"
+
+  lighthouse:
+    name: Lighthouse CI (post-deploy)
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Trova URL da verificare 🔍
+        id: find
+        env:
+          INPUT_URLS: ${{ inputs.urls }}
+        run: |
+          : > /tmp/lh_urls.txt
+
+          # Sempre la homepage
+          echo "https://gabrielebaldassarre.com/" >> /tmp/lh_urls.txt
+
+          if [ -n "$INPUT_URLS" ]; then
+            for u in $INPUT_URLS; do
+              echo "https://gabrielebaldassarre.com${u}" >> /tmp/lh_urls.txt
+            done
+          else
+            BEFORE="${{ github.event.workflow_run.head_commit.id }}"
+            if [ -z "$BEFORE" ] || ! git cat-file -e "$BEFORE" 2>/dev/null; then
+              BEFORE="HEAD~1"
+            fi
+
+            if git cat-file -e "$BEFORE" 2>/dev/null; then
+              git diff --name-only "$BEFORE" HEAD -- '_posts/**.md' '_posts/**.Rmd' 2>/dev/null | while read post; do
+                [ -z "$post" ] && continue
+                cat_dir=$(basename "$(dirname "$post")")
+                slug=$(basename "$post" .md | sed 's/^[0-9-]*//' | sed 's/^-//')
+                echo "https://gabrielebaldassarre.com/${cat_dir}/${slug}/" >> /tmp/lh_urls.txt
+              done
+            fi
+          fi
+
+          count=$(wc -l < /tmp/lh_urls.txt 2>/dev/null || echo 0)
+          echo "URL da verificare: ${count}"
+          cat /tmp/lh_urls.txt
+
+      - name: Lighthouse CI 🟢
+        run: |
+          echo "🏠 Avvio Lighthouse CI su URL live (post-deploy, post-warmup)..."
+          echo "   Asset Cloudinary già cachati → nessun falso positivo"
+          echo ""
+
+          npm install -g @lhci/cli --quiet
+
+          cat /tmp/lh_urls.txt | while read url; do
+            [ -z "$url" ] && continue
+            echo "🔍 Analisi: ${url}"
+            npx lhci collect --url="$url" --settings.chromeFlags="--no-sandbox --headless --disable-gpu" --numberOfRuns=1 || echo "  ⚠️  Collezione fallita per ${url}"
+          done
+
+          echo ""
+          echo "📊 Verifica assertion..."
+          npx lhci assert --config=.github/lighthouse/lighthouserc.json || {
+            echo ""
+            echo "⚠️  Lighthouse CI: alcuni KPI sotto soglia — vedi report sopra"
+            echo "   (Post-deploy, puramente informativo — non bloccante)"
+          }
+
+          # Salva report HTML per consultazione
+          mkdir -p lighthouse-results
+          echo "📄 Report generati in .lighthouseci/"
+          ls -la .lighthouseci/ 2>/dev/null || echo "  (nessun report generato)"
+          cp .lighthouseci/*.html lighthouse-results/ 2>/dev/null || true
+          cp .lighthouseci/*.json lighthouse-results/ 2>/dev/null || true
+
+          echo ""
+          echo "✅ Lighthouse CI completato"
+
+      - name: Salva report Lighthouse 📥
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-reports
+          path: |
+            lighthouse-results/
+            .lighthouseci/
+          retention-days: 30

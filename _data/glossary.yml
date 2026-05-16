@@ -1,0 +1,54 @@
+# Glossario dei termini tecnici per schema.org DefinedTerm
+# Usato da _includes/seo.html per il knowledge graph semantico
+
+- term: "Spin quantistico"
+  description: "Proprietà intrinseca delle particelle elementari che descrive un momento angolare interno. Sistema quantistico a due stati (up/down) che rappresenta il più semplice modello di sistema quantistico."
+  url: "/fisica/stati-spin/"
+
+- term: "Stato quantistico"
+  description: "Rappresentazione matematica completa di un sistema fisico in meccanica quantistica, descritto da un vettore in uno spazio di Hilbert."
+  url: "/fisica/spazio-stati-quantistici/"
+
+- term: "Effetto fotoelettrico"
+  description: "Fenomeno per cui elettroni vengono emessi da un materiale quando esposto a radiazione elettromagnetica. La sua spiegazione valse ad Einstein il Nobel nel 1921."
+  url: "/fisica/effetto-fotoelettrico/"
+
+- term: "Autovettore"
+  description: "Vettore che, quando trasformato da una matrice, cambia solo in modulo e non in direzione. Concetto fondamentale dell'algebra lineare con applicazioni nella Social Network Analysis."
+  url: "/reti-sociali/introduzione-autovettori-autovalori/"
+
+- term: "Legge di potenza (Power Law)"
+  description: "Relazione funzionale tra due quantità dove una varia come potenza dell'altra. Descrive fenomeni come la distribuzione dei gradi nelle reti sociali."
+  url: "/reti-sociali/legge-potenza-powerlaw/"
+
+- term: "Elettronvolt"
+  description: "Unità di misura dell'energia pari all'energia acquisita da un elettrone accelerato da una differenza di potenziale di 1 volt. Usata estensivamente in fisica delle particelle."
+  url: "/fisica/elettronvolt/"
+
+- term: "Energia cinetica"
+  description: "Energia posseduta da un corpo in movimento. Il teorema dell'energia cinetica la mette in relazione con il lavoro compiuto dalle forze agenti sul corpo."
+  url: "/fisica/teorema-energia-cinetica/"
+
+- term: "Quantità di moto"
+  description: "Grandezza vettoriale data dal prodotto della massa per la velocità. Nella fisica classica è legata all'impulso di una forza dal teorema dell'impulso."
+  url: "/fisica/quantita-moto/"
+
+- term: "Illuminamento"
+  description: "Flusso luminoso incidente per unità di superficie, misurato in lux. Parametro chiave per il comfort visivo negli ambienti di lavoro."
+  url: "/home-assistant/illuminanza-smartworking-home-assistant/"
+
+- term: "Home Assistant"
+  description: "Piattaforma open-source per la domotica e l'automazione domestica che integra migliaia di dispositivi e servizi senza dipendere dal cloud."
+  url: "/home-assistant/illuminanza-smartworking-home-assistant/"
+
+- term: "Astrometria"
+  description: "Ramo dell'astronomia che si occupa della misura precisa delle posizioni e dei movimenti dei corpi celesti."
+  url: "/home-assistant/dashboard-astrometria-parte-1/"
+
+- term: "Social Network Analysis"
+  description: "Disciplina che studia le relazioni e le strutture sociali attraverso la teoria dei grafi e l'analisi di rete."
+  url: "/reti-sociali/introduzione-autovettori-autovalori/"
+
+- term: "Meccanica quantistica"
+  description: "Teoria fisica che descrive il comportamento della materia e della radiazione a scala atomica e subatomica, basata sul principio di indeterminazione e sulla funzione d'onda."
+  url: "/fisica/sistemi-classici-quantistici/"

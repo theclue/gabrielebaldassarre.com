@@ -78,11 +78,12 @@ jobs:
             echo "$post" >> /tmp/to_process.txt
           done < /tmp/posts_to_broadcast.txt
 
-          count=$(grep -c . /tmp/to_process.txt 2>/dev/null || echo 0)
-          echo "Post da elaborare: $count"
+          count=$(wc -l < /tmp/to_process.txt 2>/dev/null || echo 0)
+          count=$(echo "$count" | tr -d ' ')
+          echo "Post da elaborare: ${count:-0}"
           cat /tmp/to_process.txt
 
-          if [ "$count" -eq 0 ]; then
+          if [ "${count:-0}" -eq 0 ] 2>/dev/null; then
             echo "no_posts=true" >> "$GITHUB_OUTPUT"
           else
             echo "no_posts=false" >> "$GITHUB_OUTPUT"
@@ -95,12 +96,16 @@ jobs:
           BUFFER_API_TOKEN: ${{ secrets.BUFFER_API_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          POSTS=$(cat /tmp/to_process.txt | tr '\n' ' ')
+          POSTS=$(cat /tmp/to_process.txt 2>/dev/null | tr '\n' ' ' | xargs)
+          if [ -z "$POSTS" ]; then
+            echo "Nessun post da broadcastare."
+            exit 0
+          fi
           echo "Broadcasting: $POSTS"
           python3 _scripts/broadcast.py $POSTS
 
       - name: Check for frontmatter changes ✏️
-        if: steps.find.outputs.no_posts != 'true'
+        if: success() && steps.find.outputs.no_posts != 'true'
         id: changes
         run: |
           if git diff --name-only | grep -q '_posts/'; then

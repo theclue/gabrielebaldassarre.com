@@ -148,12 +148,35 @@
     "@type": "Person",
     "name": {{ author.name | default: site.name | jsonify }},
     "url": {{ seo_url | jsonify }}
+    {%- if site.author.links %},
+    "sameAs": [
+      {%- for link in site.author.links %}
+        {{ link.url | jsonify }}{% unless forloop.last %},{% endunless %}
+      {%- endfor %}
+    ]
+    {%- endif %}
   },
   "publisher": {
     "@type": "Person",
     "name": {{ site.name | default: site.title | jsonify }},
     "url": {{ seo_url | jsonify }}
-  }
+  },
+  "inLanguage": "it-IT",
+  "isAccessibleForFree": true
+  {%- if page.category and site.data.glossary %},
+  "about": [
+    {%- assign glossary_terms = site.data.glossary | where_exp: "item", "item.url contains page.category" %}
+    {%- for term in glossary_terms %}
+    {
+      "@type": "DefinedTerm",
+      "termCode": {{ term.term | jsonify }},
+      "name": {{ term.term | jsonify }},
+      "description": {{ term.description | jsonify }},
+      "url": {{ term.url | absolute_url | jsonify }}
+    }{% unless forloop.last %},{% endunless %}
+    {%- endfor %}
+  ]
+  {%- endif %}
 }
 {%- else -%}
 {
@@ -212,6 +235,28 @@
   {%- endif %}
 }
 </script>
+
+{%- if site.data.glossary and og_type != "article" -%}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "DefinedTermSet",
+  "name": "Glossario di Gabriele Baldassarre",
+  "description": "Termini tecnici di fisica, automazione e data science",
+  "hasDefinedTerm": [
+    {%- for term in site.data.glossary %}
+    {
+      "@type": "DefinedTerm",
+      "termCode": {{ term.term | jsonify }},
+      "name": {{ term.term | jsonify }},
+      "description": {{ term.description | jsonify }},
+      "url": {{ term.url | absolute_url | jsonify }}
+    }{% unless forloop.last %},{% endunless %}
+    {%- endfor %}
+  ]
+}
+</script>
+{%- endif -%}
 
 {% if site.google_site_verification %}
   <meta name="google-site-verification" content="{{ site.google_site_verification }}" />

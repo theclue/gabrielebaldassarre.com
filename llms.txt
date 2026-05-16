@@ -1,0 +1,18 @@
+---
+layout: null
+permalink: /llms.txt
+---
+# Gabriele Baldassarre — Divulgazione scientifica, automazione e data science
+# llms.txt — Guida per AI crawler verso i contenuti canonici del blog
+
+{% for post in site.posts %}
+## [{{ post.title | smartify }}]({{ post.url | absolute_url }})
+{% if post.excerpt %}{{ post.excerpt | strip_html | normalize_whitespace | truncate: 200 }}{% endif %}
+{% endfor %}
+
+## Pagine
+{% for page in site.pages %}
+{% if page.show_nav %}
+- [{{ page.title | smartify }}]({{ page.url | absolute_url }})
+{% endif %}
+{% endfor %}
