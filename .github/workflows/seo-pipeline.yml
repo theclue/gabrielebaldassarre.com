@@ -35,15 +35,29 @@ jobs:
         env:
           INPUT_URLS: ${{ inputs.urls }}
         run: |
+          normalize_url() {
+            local raw="$1"
+            # Se è un path file (_posts/...), estrai cat/slug
+            if echo "$raw" | grep -q '_posts/'; then
+              local d=$(dirname "$raw" | xargs basename)
+              local s=$(basename "$raw" .md | sed 's/^[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}-//')
+              echo "https://gabrielebaldassarre.com/${d}/${s}/"
+            # Se inizia con /, è già un path URL
+            elif echo "$raw" | grep -q '^/'; then
+              echo "https://gabrielebaldassarre.com${raw}"
+            # Altrimenti assumi sia uno slug e prependi
+            else
+              echo "https://gabrielebaldassarre.com/${raw}"
+            fi
+          }
+
           : > /tmp/indexnow_urls.txt
 
           if [ -n "$INPUT_URLS" ]; then
-            # Workflow dispatch manuale: usa gli URL forniti
             for u in $INPUT_URLS; do
-              echo "https://gabrielebaldassarre.com${u}" >> /tmp/indexnow_urls.txt
+              normalize_url "$u" >> /tmp/indexnow_urls.txt
             done
           else
-            # workflow_run: trova post modificati nell'ultimo deploy
             BEFORE="${{ github.event.workflow_run.head_commit.id }}"
             if [ -z "$BEFORE" ] || ! git cat-file -e "$BEFORE" 2>/dev/null; then
               BEFORE="HEAD~1"
@@ -52,10 +66,7 @@ jobs:
             if git cat-file -e "$BEFORE" 2>/dev/null; then
               git diff --name-only "$BEFORE" HEAD -- '_posts/**.md' '_posts/**.Rmd' 2>/dev/null | while read post; do
                 [ -z "$post" ] && continue
-                # Estrai slug dal nome file: _posts/cat/YYYY-MM-DD-slug.md → /cat/slug/
-                cat_dir=$(basename "$(dirname "$post")")
-                slug=$(basename "$post" .md | sed 's/^[0-9-]*//' | sed 's/^-//')
-                echo "https://gabrielebaldassarre.com/${cat_dir}/${slug}/" >> /tmp/indexnow_urls.txt
+                normalize_url "$post" >> /tmp/indexnow_urls.txt
               done
             fi
           fi
@@ -109,14 +120,26 @@ jobs:
         env:
           INPUT_URLS: ${{ inputs.urls }}
         run: |
+          url_from_post() {
+            local raw="$1"
+            if echo "$raw" | grep -q '_posts/'; then
+              local d=$(dirname "$raw" | xargs basename)
+              local s=$(basename "$raw" .md | sed 's/^[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}-//')
+              echo "/${d}/${s}/"
+            elif echo "$raw" | grep -q '^/'; then
+              echo "$raw"
+            else
+              echo "/${raw}"
+            fi
+          }
+
           : > /tmp/psi_urls.txt
 
-          # Includi sempre la homepage
           echo "/" >> /tmp/psi_urls.txt
 
           if [ -n "$INPUT_URLS" ]; then
             for u in $INPUT_URLS; do
-              echo "${u}" >> /tmp/psi_urls.txt
+              url_from_post "$u" >> /tmp/psi_urls.txt
             done
           else
             BEFORE="${{ github.event.workflow_run.head_commit.id }}"
@@ -127,9 +150,7 @@ jobs:
             if git cat-file -e "$BEFORE" 2>/dev/null; then
               git diff --name-only "$BEFORE" HEAD -- '_posts/**.md' '_posts/**.Rmd' 2>/dev/null | while read post; do
                 [ -z "$post" ] && continue
-                cat_dir=$(basename "$(dirname "$post")")
-                slug=$(basename "$post" .md | sed 's/^[0-9-]*//' | sed 's/^-//')
-                echo "/${cat_dir}/${slug}/" >> /tmp/psi_urls.txt
+                url_from_post "$post" >> /tmp/psi_urls.txt
               done
             fi
           fi
@@ -156,9 +177,9 @@ jobs:
 
             # Mobile
             MOBILE=$(curl -s "https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${URL}&strategy=mobile&key=${API_KEY}")
-            PERF=$(echo "$MOBILE" | jq -r '.lighthouseResult.categories.performance.score * 100 // 0')
-            A11Y=$(echo "$MOBILE" | jq -r '.lighthouseResult.categories.accessibility.score * 100 // 0')
-            SEO=$(echo "$MOBILE" | jq -r '.lighthouseResult.categories.seo.score * 100 // 0')
+            PERF=$(echo "$MOBILE" | jq -r '(.lighthouseResult.categories.performance.score // 0) * 100')
+            A11Y=$(echo "$MOBILE" | jq -r '(.lighthouseResult.categories.accessibility.score // 0) * 100')
+            SEO=$(echo "$MOBILE" | jq -r '(.lighthouseResult.categories.seo.score // 0) * 100')
             LCP=$(echo "$MOBILE" | jq -r '.lighthouseResult.audits["largest-contentful-paint"].displayValue // "N/A"')
             TBT=$(echo "$MOBILE" | jq -r '.lighthouseResult.audits["total-blocking-time"].displayValue // "N/A"')
             CLS=$(echo "$MOBILE" | jq -r '.lighthouseResult.audits["cumulative-layout-shift"].displayValue // "N/A"')
@@ -167,17 +188,17 @@ jobs:
 
             # Desktop
             DESKTOP=$(curl -s "https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${URL}&strategy=desktop&key=${API_KEY}")
-            D_PERF=$(echo "$DESKTOP" | jq -r '.lighthouseResult.categories.performance.score * 100 // 0')
-            D_A11Y=$(echo "$DESKTOP" | jq -r '.lighthouseResult.categories.accessibility.score * 100 // 0')
+            D_PERF=$(echo "$DESKTOP" | jq -r '(.lighthouseResult.categories.performance.score // 0) * 100')
+            D_A11Y=$(echo "$DESKTOP" | jq -r '(.lighthouseResult.categories.accessibility.score // 0) * 100')
 
             echo "  🖥️  Desktop | Perf: ${D_PERF}% | A11y: ${D_A11Y}%"
 
             # Alert solo su problemi seri
-            if [ "$(echo "$PERF < 50" | bc -l 2>/dev/null || echo 0)" = "1" ]; then
+            if [ -n "$PERF" ] && [ "$(echo "$PERF < 50" | bc -l 2>/dev/null)" = "1" ]; then
               echo "  ⚠️  PERFORMANCE MOBILE SOTTO SOGLIA CRITICA: ${PERF}%"
               HAS_ERRORS=1
             fi
-            if [ "$(echo "$A11Y < 80" | bc -l 2>/dev/null || echo 0)" = "1" ]; then
+            if [ -n "$A11Y" ] && [ "$(echo "$A11Y < 80" | bc -l 2>/dev/null)" = "1" ]; then
               echo "  ⚠️  ACCESSIBILITÀ MOBILE SOTTO SOGLIA: ${A11Y}%"
               HAS_ERRORS=1
             fi
@@ -206,13 +227,26 @@ jobs:
         env:
           INPUT_URLS: ${{ inputs.urls }}
         run: |
+          url_from_post() {
+            local raw="$1"
+            if echo "$raw" | grep -q '_posts/'; then
+              local d=$(dirname "$raw" | xargs basename)
+              local s=$(basename "$raw" .md | sed 's/^[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}-//')
+              echo "/${d}/${s}/"
+            elif echo "$raw" | grep -q '^/'; then
+              echo "$raw"
+            else
+              echo "/${raw}"
+            fi
+          }
+
           : > /tmp/hermes_urls.txt
 
           echo "/" >> /tmp/hermes_urls.txt
 
           if [ -n "$INPUT_URLS" ]; then
             for u in $INPUT_URLS; do
-              echo "${u}" >> /tmp/hermes_urls.txt
+              url_from_post "$u" >> /tmp/hermes_urls.txt
             done
           else
             BEFORE="${{ github.event.workflow_run.head_commit.id }}"
@@ -223,9 +257,7 @@ jobs:
             if git cat-file -e "$BEFORE" 2>/dev/null; then
               git diff --name-only "$BEFORE" HEAD -- '_posts/**.md' '_posts/**.Rmd' 2>/dev/null | while read post; do
                 [ -z "$post" ] && continue
-                cat_dir=$(basename "$(dirname "$post")")
-                slug=$(basename "$post" .md | sed 's/^[0-9-]*//' | sed 's/^-//')
-                echo "/${cat_dir}/${slug}/" >> /tmp/hermes_urls.txt
+                url_from_post "$post" >> /tmp/hermes_urls.txt
               done
             fi
           fi
@@ -333,14 +365,27 @@ jobs:
         env:
           INPUT_URLS: ${{ inputs.urls }}
         run: |
-          : > /tmp/lh_urls.txt
+          full_url() {
+            local raw="$1"
+            if echo "$raw" | grep -q '_posts/'; then
+              local d=$(dirname "$raw" | xargs basename)
+              local s=$(basename "$raw" .md | sed 's/^[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}-//')
+              echo "https://gabrielebaldassarre.com/${d}/${s}/"
+            elif echo "$raw" | grep -q '^http'; then
+              echo "$raw"
+            elif echo "$raw" | grep -q '^/'; then
+              echo "https://gabrielebaldassarre.com${raw}"
+            else
+              echo "https://gabrielebaldassarre.com/${raw}"
+            fi
+          }
 
-          # Sempre la homepage
+          : > /tmp/lh_urls.txt
           echo "https://gabrielebaldassarre.com/" >> /tmp/lh_urls.txt
 
           if [ -n "$INPUT_URLS" ]; then
             for u in $INPUT_URLS; do
-              echo "https://gabrielebaldassarre.com${u}" >> /tmp/lh_urls.txt
+              full_url "$u" >> /tmp/lh_urls.txt
             done
           else
             BEFORE="${{ github.event.workflow_run.head_commit.id }}"
@@ -351,9 +396,7 @@ jobs:
             if git cat-file -e "$BEFORE" 2>/dev/null; then
               git diff --name-only "$BEFORE" HEAD -- '_posts/**.md' '_posts/**.Rmd' 2>/dev/null | while read post; do
                 [ -z "$post" ] && continue
-                cat_dir=$(basename "$(dirname "$post")")
-                slug=$(basename "$post" .md | sed 's/^[0-9-]*//' | sed 's/^-//')
-                echo "https://gabrielebaldassarre.com/${cat_dir}/${slug}/" >> /tmp/lh_urls.txt
+                full_url "$post" >> /tmp/lh_urls.txt
               done
             fi
           fi
