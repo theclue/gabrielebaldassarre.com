@@ -1,4 +1,4 @@
-name: Deploy blog su Cloudflare Pages
+name: Deploy blog on Cloudflare Pages
 
 on:
   push:
@@ -10,17 +10,16 @@ on:
       - "**.html"
       - "**.js"
       - "**.liquid"
-      - "**/*.md"
-      - "**/*.Rmd"
-      - "**/*.R"
+      - "**.md"
+      - "**.Rmd"
+      - "**.R"
       - "**.rb"
       - "**.yml"
       - "Gemfile"
       - "Gemfile.lock"
-      - "!.github/workflows/broken-links.yml"
-      - "!.github/workflows/deploy-docker-tag.yml"
-      - "!.github/workflows/prettier.yml"
-      - "!lighthouse_results/**"
+      - "!.github/workflows/broadcast-social.yml"
+      - "!.github/workflows/seo-pipeline.yml"
+      - "!.github/workflows/deploy-on-cloudflare-pages.yml"
       - "!README.md"
   pull_request:
     branches:
@@ -34,17 +33,16 @@ on:
       - "**.html"
       - "**.js"
       - "**.liquid"
-      - "**/*.md"
-      - "**/*.Rmd"
-      - "**/*.R"
+      - "**.md"
+      - "**.Rmd"
+      - "**.R"
       - "**.rb"
       - "**.yml"
       - "Gemfile"
       - "Gemfile.lock"
-      - "!.github/workflows/broken-links.yml"
-      - "!.github/workflows/deploy-docker-tag.yml"
-      - "!.github/workflows/prettier.yml"
-      - "!lighthouse_results/**"
+      - "!.github/workflows/broadcast-social.yml"
+      - "!.github/workflows/seo-pipeline.yml"
+      - "!.github/workflows/deploy-on-cloudflare-pages.yml"
       - "!README.md"
   workflow_dispatch:
 
