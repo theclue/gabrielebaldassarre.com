@@ -180,7 +180,7 @@ jobs:
             echo "🔍 Analisi: ${URL}"
 
             # Mobile
-            MOBILE=$(curl -s "https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${URL}&strategy=mobile&key=${API_KEY}")
+            MOBILE=$(curl -s "https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${URL}&strategy=mobile&category=performance&category=accessibility&category=seo&category=best-practices&key=${API_KEY}")
             PSI_ERROR=$(echo "$MOBILE" | jq -r '.error.message // ""')
             if [ -n "$PSI_ERROR" ]; then
               echo "  ❌ Errore API PageSpeed: ${PSI_ERROR}"
@@ -197,7 +197,7 @@ jobs:
             echo "  📱 Mobile  | Perf: ${PERF}% | A11y: ${A11Y}% | SEO: ${SEO}% | LCP: ${LCP} | TBT: ${TBT} | CLS: ${CLS}"
 
             # Desktop
-            DESKTOP=$(curl -s "https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${URL}&strategy=desktop&key=${API_KEY}")
+            DESKTOP=$(curl -s "https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${URL}&strategy=desktop&category=performance&category=accessibility&category=seo&category=best-practices&key=${API_KEY}")
             D_PSI_ERR=$(echo "$DESKTOP" | jq -r '.error.message // ""')
             if [ -n "$D_PSI_ERR" ]; then
               echo "  ❌ Errore API PageSpeed (desktop): ${D_PSI_ERR}"
@@ -206,6 +206,12 @@ jobs:
               D_A11Y=$(echo "$DESKTOP" | jq -r '(.lighthouseResult.categories.accessibility.score // 0) * 100')
               echo "  🖥️  Desktop | Perf: ${D_PERF}% | A11y: ${D_A11Y}%"
             fi
+
+            # Salva report completo per artifact
+            SAFE_NAME=$(echo "${path}" | tr '/' '_' | cut -c1-50)
+            mkdir -p psi-reports
+            echo "$MOBILE" > "psi-reports/${SAFE_NAME}-mobile.json"
+            echo "$DESKTOP" > "psi-reports/${SAFE_NAME}-desktop.json"
 
             # Alert solo su problemi seri
             if [ -n "$PERF" ] && [ "$(echo "$PERF < 50" | bc -l 2>/dev/null)" = "1" ]; then
@@ -225,6 +231,14 @@ jobs:
           else
             echo "✅ PageSpeed Insights: tutto nella norma"
           fi
+
+      - name: Salva report PageSpeed 📥
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pagespeed-reports
+          path: psi-reports/
+          retention-days: 30
 
   hermes-seo:
     name: Hermes SEO Audit
@@ -295,15 +309,29 @@ jobs:
             URL="https://gabrielebaldassarre.com${path}"
             echo "📋 ${URL}"
 
-            RESULT=$(curl -s "https://hermesforge.dev/api/seo?url=${URL}${HERMES_AUTH}")
+            RESULT=$(curl -s -w "\n%{http_code}" "https://hermesforge.dev/api/seo?url=${URL}${HERMES_AUTH}")
+            HTTP_CODE=$(echo "$RESULT" | tail -1)
+            JSON_BODY=$(echo "$RESULT" | sed '$d')
 
-            SCORE=$(echo "$RESULT" | jq -r '.score // "N/A"')
-            GRADE=$(echo "$RESULT" | jq -r '.grade // "N/A"')
-            ISSUES=$(echo "$RESULT" | jq -r '.issues // []')
+            if [ "$HTTP_CODE" != "200" ]; then
+              echo "  ❌ Hermes API ha risposto HTTP ${HTTP_CODE}"
+              echo "     Raw (primi 200 char): $(echo "$JSON_BODY" | head -c 200)"
+              continue
+            fi
+
+            if ! echo "$JSON_BODY" | jq . >/dev/null 2>&1; then
+              echo "  ❌ Hermes API non ha restituito JSON valido"
+              echo "     Raw (primi 200 char): $(echo "$JSON_BODY" | head -c 200)"
+              continue
+            fi
+
+            SCORE=$(echo "$JSON_BODY" | jq -r '.score // "N/A"')
+            GRADE=$(echo "$JSON_BODY" | jq -r '.grade // "N/A"')
+            ISSUES=$(echo "$JSON_BODY" | jq -r '.issues // []')
             ISSUE_COUNT=$(echo "$ISSUES" | jq 'length')
-            WARNINGS=$(echo "$RESULT" | jq -r '.warnings // []')
+            WARNINGS=$(echo "$JSON_BODY" | jq -r '.warnings // []')
             WARN_COUNT=$(echo "$WARNINGS" | jq 'length')
-            PASSED=$(echo "$RESULT" | jq -r '.passed // []')
+            PASSED=$(echo "$JSON_BODY" | jq -r '.passed // []')
             PASS_COUNT=$(echo "$PASSED" | jq 'length')
 
             echo "  Punteggio: ${SCORE}/100 (${GRADE})"
@@ -419,23 +447,34 @@ jobs:
             echo "⚠️  Nessun URL raccolto con successo — assertion saltate"
           fi
 
-          # Rinomina file con timestamp e commit per identificazione
+          # Salva report HTML e JSON con timestamp
           TS=$(date +'%Y%m%d-%H%M%S')
           COMMIT=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
           mkdir -p lighthouse-results
-          echo "📄 Report generati in .lighthouseci/"
-          ls -la .lighthouseci/ 2>/dev/null || echo "  (nessun report generato)"
+          echo "📄 Report generati in .lighthouseci/:"
+          ls -laR .lighthouseci/ 2>/dev/null || echo "  (nessun report generato)"
+
+          # Assertions
           if [ -f .lighthouseci/assertion-results.json ]; then
             cp .lighthouseci/assertion-results.json "lighthouse-results/assertions-${TS}-${COMMIT}.json"
           else
-            echo "[{\"note\": \"no_assertions_ran\", \"timestamp\": \"${TS}\", \"commit\": \"${COMMIT}\"}]" > "lighthouse-results/assertions-${TS}-${COMMIT}.json"
+            echo "[{\"note\":\"no_assertions\",\"ts\":\"${TS}\",\"commit\":\"${COMMIT}\"}]" > "lighthouse-results/assertions-${TS}-${COMMIT}.json"
           fi
-          for f in .lighthouseci/*.html; do
-            [ -f "$f" ] && cp "$f" "lighthouse-results/$(basename "$f" .html)-${TS}.html"
+
+          # Tutti i file HTML e JSON (inclusi quelli in sottodirectory)
+          find .lighthouseci -name '*.html' -exec cp {} "lighthouse-results/" \;
+          find .lighthouseci -name '*.json' ! -name 'assertion-results.json' -exec cp {} "lighthouse-results/" \;
+
+          # Rinomina con timestamp per distinguerli
+          for f in lighthouse-results/*.html; do
+            [ -f "$f" ] && mv "$f" "lighthouse-results/$(basename "$f" .html)-${TS}.html"
           done
-          for f in .lighthouseci/*.json; do
-            [ -f "$f" ] && [ "$(basename "$f")" != "assertion-results.json" ] && cp "$f" "lighthouse-results/$(basename "$f" .json)-${TS}.json"
+          for f in lighthouse-results/*.json; do
+            [ -f "$f" ] && [ "$(basename "$f")" != "assertions-${TS}-${COMMIT}.json" ] && mv "$f" "lighthouse-results/$(basename "$f" .json)-${TS}.json"
           done
+
+          echo "📦 File salvati:"
+          ls -la lighthouse-results/
 
           echo ""
           echo "✅ Lighthouse CI completato"
