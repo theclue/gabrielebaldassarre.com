@@ -5,6 +5,7 @@ excerpt: Una pipeline completa di SEO auditing automatica per il mio blog Jekyll
 master: /assets/images/seo-pipeline-farsi-trovare.png
 broadcast:
   channels: [linkedin, mastodon]
+  sent: true
 header:
   overlay_filter: 0.5
 tags: [SEO, Jekyll, GitHub Actions, CI/CD, DevOps, webperf, LLM, PageSpeed, GEO]
