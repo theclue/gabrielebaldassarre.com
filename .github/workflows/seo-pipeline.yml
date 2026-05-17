@@ -129,8 +129,6 @@ jobs:
 
           : > /tmp/psi_urls.txt
 
-          echo "/" >> /tmp/psi_urls.txt
-
           if [ -n "$INPUT_URLS" ]; then
             for u in $INPUT_URLS; do
               url_from_post "$u" >> /tmp/psi_urls.txt
@@ -261,8 +259,6 @@ jobs:
 
           : > /tmp/hermes_urls.txt
 
-          echo "/" >> /tmp/hermes_urls.txt
-
           if [ -n "$INPUT_URLS" ]; then
             for u in $INPUT_URLS; do
               url_from_post "$u" >> /tmp/hermes_urls.txt
@@ -283,15 +279,11 @@ jobs:
           HERMES_API_KEY: ${{ secrets.HERMES_API_KEY }}
         run: |
           echo "🔬 Hermes SEO Audit in corso..."
-          echo ""
+          echo "   Rate limit: 1 richiesta ogni 300s (anche con API key)"
           HERMES_AUTH=""
           HERMES_SLEEP=302
           if [ -n "$HERMES_API_KEY" ]; then
             HERMES_AUTH="&key=${HERMES_API_KEY}"
-            HERMES_SLEEP=32
-            echo "   Con API key — rate limit esteso"
-          else
-            echo "   Senza API key — rate limit: 1 richiesta ogni 300s (ottieni key gratuita su hermesforge.dev/api/docs)"
           fi
 
           TOTAL=$(wc -l < /tmp/hermes_urls.txt 2>/dev/null || echo 0)
@@ -385,7 +377,6 @@ jobs:
           }
 
           : > /tmp/lh_urls.txt
-          echo "https://gabrielebaldassarre.com/" >> /tmp/lh_urls.txt
 
           if [ -n "$INPUT_URLS" ]; then
             for u in $INPUT_URLS; do

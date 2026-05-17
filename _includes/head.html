@@ -9,6 +9,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
 
+<!-- Dublin Core -->
+<meta name="DC.title" content="{{ page.title | default: site.title | escape }}">
+<meta name="DC.creator" content="{{ site.author.name }}">
+<meta name="DC.date" content="{{ page.date | default: site.time | date: '%Y-%m-%d' }}">
+<meta name="DC.language" content="{{ site.locale | slice: 0,2 | default: 'it' }}">
+<meta name="DC.rights" content="MIT">
+<meta name="DC.description" content="{{ seo_description | escape }}">
+
 <!-- Self-hosted font preload (improves CLS / LCP for code blocks) -->
 <link rel="preload" href="{{ '/assets/fonts/JetBrainsMono-Regular.woff2' | relative_url }}" as="font" type="font/woff2" crossorigin>
 

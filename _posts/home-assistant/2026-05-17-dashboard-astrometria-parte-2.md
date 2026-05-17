@@ -3,7 +3,7 @@ category: Home Assistant
 title: "Il cielo in salotto, parte 2: Sol"
 excerpt: "La seconda sezione della dashboard di astrometria: immagini live del Sole da SOHO e GOES-16, la previsione delle aurore boreali OVATION, e i dati del vento solare con grafici in tempo reale tramite ApexCharts. Tutto da fonti pubbliche NASA e NOAA, senza API key."
 header:
-  overlay_image: /assets/images/home-assistant-overlay.jpg
+  overlay_image: /assets/images/dashboard-astrometria-header.png
   overlay_filter: 0.5
 ---
 

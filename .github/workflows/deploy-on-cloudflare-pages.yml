@@ -73,6 +73,58 @@ jobs:
             exit 1
           fi
 
+      - name: Valida immagini e link 🔬
+        run: |
+          echo "🔬 Validazione pre-deploy..."
+          HAS_ERRORS=0
+
+          # Trova post modificati
+          BEFORE="HEAD~1"
+          if ! git cat-file -e "$BEFORE" 2>/dev/null; then BEFORE="HEAD"; fi
+          git diff --name-only "$BEFORE" HEAD -- '_posts/**.md' '_posts/**.Rmd' 2>/dev/null > /tmp/val_posts.txt
+
+          while read -r post; do
+            [ -z "$post" ] && continue
+            echo "  📋 ${post}"
+
+            # Estrai path immagine: master:, header.overlay_image, {% cloudinary %}, Markdown ![alt](path)
+            IMGS=$(
+              grep -oP 'master:\s*\K/assets/images/\S+' "$post" 2>/dev/null || true
+              grep -oP 'overlay_image:\s*\K/assets/images/\S+' "$post" 2>/dev/null || true
+              grep -oP 'cloudinary.*?/assets/images/[^"% ]+' "$post" 2>/dev/null | grep -oP '/assets/images/\S+' || true
+              grep -oP '!\[.*?\]\(/assets/images/[^)]+' "$post" 2>/dev/null | grep -oP '/assets/images/[^)]+' || true
+            )
+
+            while read -r img; do
+              [ -z "$img" ] && continue
+              local_img="${img#/}"  # Rimuovi / iniziale
+              if [ ! -f "$local_img" ]; then
+                echo "  ❌ IMMAGINE MANCANTE: ${img}"
+                HAS_ERRORS=1
+              fi
+            done <<< "$IMGS"
+
+            # Estrai link interni [text](/path) e verifica esistenza in _site/
+            LINKS=$(grep -oP '\[.*?\]\(/[^)]+' "$post" 2>/dev/null | grep -oP '(?<=\()/[^)]+' | grep -v 'http' | grep -v '\.(png|jpg|svg|webp|woff2)' | sort -u)
+            while read -r link; do
+              [ -z "$link" ] && continue
+              # Normalizza: da /fisica/stati-spin/ -> _site/fisica/stati-spin/index.html
+              link_path="_site${link}"
+              [ "${link_path: -1}" != "/" ] && link_path="${link_path}.html"
+              [ -d "$link_path" ] && link_path="${link_path}/index.html"
+              if [ ! -f "$link_path" ] && [ ! -d "$(dirname "$link_path")" ]; then
+                echo "  ⚠️  LINK ROTTO: ${link}"
+              fi
+            done <<< "$LINKS"
+
+          done < /tmp/val_posts.txt
+
+          if [ "$HAS_ERRORS" -eq 1 ]; then
+            echo "❌ Deploy bloccato: immagini mancanti"
+            exit 1
+          fi
+          echo "✅ Validazione superata"
+
       - name: Deploy 🚀
         uses: cloudflare/wrangler-action@v4
         with:
@@ -114,7 +166,12 @@ jobs:
             done
           fi
 
-          # 3. Deduplicate and warm
+          # 3. Body images in {% cloudinary %} tags
+          grep -rh '{% cloudinary' _posts/ 2>/dev/null | grep -oP '/assets/images/[^" ]+' | while read img; do
+            grep -rl "$img" _posts/ >> /tmp/to_warm.txt 2>/dev/null
+          done
+
+          # 4. Deduplicate and warm
           sort -u /tmp/to_warm.txt | while read -r post; do
             [ -z "$post" ] && continue
             master=$(grep -oP 'master:\s*\K\S+' "$post" 2>/dev/null | head -1 | tr -d '"')
@@ -124,6 +181,11 @@ jobs:
               curl -sf -o /dev/null --max-time 30 "${base}/w_1922,h_724,c_fill,g_auto,q_auto,f_auto/https://gabrielebaldassarre.com${master}" || echo "  (warmup overlay scaduto, probabilmente già in cache)"
               curl -sf -o /dev/null --max-time 30 "${base}/w_600,c_fill,g_auto,q_auto,f_auto/https://gabrielebaldassarre.com${master}" || echo "  (warmup teaser scaduto, probabilmente già in cache)"
             fi
+            # Warmup anche le immagini body in {% cloudinary %}
+            grep -oP '{% cloudinary[^%]*/assets/images/[^" ]+' "$post" 2>/dev/null | grep -oP '/assets/images/\S+' | while read body_img; do
+              echo "Warm-up body: ${body_img}"
+              curl -sf -o /dev/null --max-time 30 "${base}/q_auto,f_auto/https://gabrielebaldassarre.com${body_img}" || true
+            done
           done
 
           # Report

@@ -669,6 +669,8 @@ def broadcast_post(filepath, dry_run=False):
             text = text[:max_chars].rsplit(" ", 1)[0]
 
         target_count += 1
+        if ch_type == "linkedin":
+            target_count += 1  # Secondo draft (link post nativo)
 
         # Build Cloudinary URL for the social crop
         transforms = SOCIAL_CROPS[ch_type]["transforms"]
@@ -682,12 +684,28 @@ def broadcast_post(filepath, dry_run=False):
         if photo_url:
             print(f"    Immagine: {photo_url}")
 
-        draft_id = create_buffer_draft(ch_id, text, photo_url, label=ch_type)
-        if draft_id:
-            print(f"  ✅ Draft creato: {draft_id}")
-            created_count += 1
+        if ch_type == "linkedin":
+            # LinkedIn: crea DUE draft — con immagine (come ora) + solo testo (link post nativo)
+            draft_id_img = create_buffer_draft(ch_id, text, photo_url, label=ch_type)
+            if draft_id_img:
+                print(f"  ✅ Draft immagine creato: {draft_id_img}")
+                created_count += 1
+            else:
+                print(f"  ❌ Fallita creazione draft immagine per {ch_type}")
+
+            draft_id_link = create_buffer_draft(ch_id, text, photo_url=None, label=ch_type)
+            if draft_id_link:
+                print(f"  ✅ Draft link creato: {draft_id_link}")
+                created_count += 1
+            else:
+                print(f"  ❌ Fallita creazione draft link per {ch_type}")
         else:
-            print(f"  ❌ Fallita creazione draft per {ch_type}")
+            draft_id = create_buffer_draft(ch_id, text, photo_url, label=ch_type)
+            if draft_id:
+                print(f"  ✅ Draft creato: {draft_id}")
+                created_count += 1
+            else:
+                print(f"  ❌ Fallita creazione draft per {ch_type}")
 
     if created_count == 0:
         print("  FALLITO: Nessun draft creato")

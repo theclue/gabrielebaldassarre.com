@@ -924,6 +924,10 @@ header .entry-meta {
 }
 .footer-wrapper a { color: var(--color-text-muted); }
 .footer-wrapper a:hover { color: var(--color-accent); }
+.footer-line {
+  margin: 0.25em 0;
+  line-height: 1.6;
+}
 
 /* --- Browser upgrade banner --- */
 

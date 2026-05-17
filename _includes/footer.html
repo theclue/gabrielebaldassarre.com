@@ -1,7 +1,3 @@
-<span>
-    &copy; {{ site.time | date: '%Y' }} {{ site.copyright }}
-    &middot; Nessun cookie, nessun tracker, nessuna raccolta dati.
-    &middot; Contenuti sotto <a href="https://github.com/theclue/gabrielebaldassarre.com/blob/main/LICENSE">licenza MIT</a>
-    {% unless site.atom_feed.hide %} &middot; <a href="{% if site.atom_feed.path %}{{ site.atom_feed.path }}{% else %}{{ '/feed.xml' | relative_url }}{% endif %}">{% include icon.html name="rss" %}</a>
-    {% endunless %}
-</span>
+<p class="footer-line">&copy; {{ site.time | date: '%Y' }} {{ site.copyright }}</p>
+<p class="footer-line">Nessun cookie, nessun tracker, nessuna raccolta dati.</p>
+<p class="footer-line">Contenuti sotto <a href="https://github.com/theclue/gabrielebaldassarre.com/blob/main/LICENSE">licenza MIT</a>{% unless site.atom_feed.hide %} &middot; <a href="{% if site.atom_feed.path %}{{ site.atom_feed.path }}{% else %}{{ '/feed.xml' | relative_url }}{% endif %}">{% include icon.html name="rss" %}</a>{% endunless %}</p>
