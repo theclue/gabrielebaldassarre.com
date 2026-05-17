@@ -1,5 +1,5 @@
 # Gabriele Baldassarre Personal Blog
-# Copyright (C) 2025 Gabriele Baldassarre
+# Copyright (C) 2026 Gabriele Baldassarre
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -25,16 +25,12 @@ copyright:        "Gabriele Baldassarre"
        
 
 future:      false  # publish future dated posts --  true, false (default) 
-highlighter: rouge
-markdown:    kramdown
 
 # Site Settings
 locale                   : it-IT
 lang                     : it_IT
-title                    : "Gabriele Baldassarre"
 title_separator          : "|"
 name                     : "Gabriele Baldassarre"
-description              : "Pochi grassi e ingredienti rigorosamente POSIX standard"
 url                      : "https://gabrielebaldassarre.com"
 baseurl                  : "/"
 repository               : "theclue/gabrielebaldassarre.com"
@@ -195,7 +191,6 @@ plugins:
   - jekyll-feed
   - jekyll-include-cache
   - jekyll-toc
-  - jekyll-cloudinary
   - kramdown-parser-gfm
 
 # Table of Contents (jekyll-toc)
@@ -225,8 +220,16 @@ compress_html:
 
 # Cloudinary
 cloudinary:
-  # cloud_name is injected via CLOUDINARY_CLOUD_NAME environment variable
+  cloud_name: did6lsgza
   only_prod: true
+  presets:
+    screenshot:
+      figure: always
+      min_width: 320
+      max_width: 1600
+      fallback_max_width: 800
+      steps: 3
+      sizes: "(min-width: 50rem) 50rem, 90vw"
 
 # Defaults
 defaults:

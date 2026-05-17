@@ -676,7 +676,7 @@ kbd {
   line-height: 1.7;
 }
 .entry-content > * { max-width: var(--content-max); margin-inline: auto; }
-.entry-content > figure,
+.entry-content > figure { max-width: 90%; }
 .entry-content > .full-bleed,
 .entry-content > pre,
 .entry-content > .highlight,

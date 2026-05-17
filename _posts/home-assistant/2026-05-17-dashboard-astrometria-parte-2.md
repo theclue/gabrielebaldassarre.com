@@ -196,7 +196,7 @@ multiscrape:
     sensor:
       - unique_id: noaa_space_weather_noon_10_7cm_radio_flux
         name: "NOAA Space Weather - Noon 10.7cm Radio Flux"
-        value_template: "{{ value_json[-1].f10.7 }}"
+        value_template: {{ value_json[-1]["f10.7"] | jsonify }}
         unit_of_measurement: "sfu"
 
       - unique_id: noaa_space_weather_solar_wind_speed

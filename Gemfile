@@ -40,5 +40,4 @@ group :jekyll_plugins do
   gem 'jekyll-gist'
   gem 'jekyll-figure'
   gem 'jekyll-toc'
-  gem 'jekyll-cloudinary'
 end

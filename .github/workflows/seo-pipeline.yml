@@ -271,6 +271,8 @@ jobs:
 
           : > /tmp/hermes_urls.txt
 
+          echo "/" >> /tmp/hermes_urls.txt
+
           if [ -n "$INPUT_URLS" ]; then
             for u in $INPUT_URLS; do
               url_from_post "$u" >> /tmp/hermes_urls.txt
@@ -300,9 +302,9 @@ jobs:
           HERMES_AUTH=""
           HERMES_SLEEP=302
           if [ -n "$HERMES_API_KEY" ]; then
-            HERMES_AUTH="&api_key=${HERMES_API_KEY}"
+            HERMES_AUTH="&key=${HERMES_API_KEY}"
             HERMES_SLEEP=32
-            echo "   Con API key — rate limit: 1 richiesta ogni 30s"
+            echo "   Con API key — rate limit esteso"
           else
             echo "   Senza API key — rate limit: 1 richiesta ogni 300s (ottieni key gratuita su hermesforge.dev/api/docs)"
           fi
@@ -424,8 +426,7 @@ jobs:
 
       - name: Lighthouse CI 🟢
         run: |
-          echo "🏠 Avvio Lighthouse CI su URL live (post-deploy, post-warmup)..."
-          echo "   Asset Cloudinary già cachati → nessun falso positivo"
+          echo "🏠 Avvio Lighthouse CI..."
           echo ""
 
           npm install -g @lhci/cli --quiet
