@@ -56,13 +56,8 @@ jobs:
               normalize_url "$u" >> /tmp/indexnow_urls.txt
             done
           else
-            BEFORE="${{ github.event.workflow_run.head_commit.id }}"
-            if [ -z "$BEFORE" ] || ! git cat-file -e "$BEFORE" 2>/dev/null; then
-              BEFORE="HEAD~1"
-            fi
-
-            if git cat-file -e "$BEFORE" 2>/dev/null; then
-              git diff --name-only "$BEFORE" HEAD -- '_posts/**.md' '_posts/**.Rmd' 2>/dev/null | while read post; do
+            if git cat-file -e "HEAD~1" 2>/dev/null; then
+              git diff --name-only HEAD~1 HEAD -- '_posts/**.md' '_posts/**.Rmd' 2>/dev/null | while read post; do
                 [ -z "$post" ] && continue
                 normalize_url "$post" >> /tmp/indexnow_urls.txt
               done
@@ -141,13 +136,8 @@ jobs:
               url_from_post "$u" >> /tmp/psi_urls.txt
             done
           else
-            BEFORE="${{ github.event.workflow_run.head_commit.id }}"
-            if [ -z "$BEFORE" ] || ! git cat-file -e "$BEFORE" 2>/dev/null; then
-              BEFORE="HEAD~1"
-            fi
-
-            if git cat-file -e "$BEFORE" 2>/dev/null; then
-              git diff --name-only "$BEFORE" HEAD -- '_posts/**.md' '_posts/**.Rmd' 2>/dev/null | while read post; do
+            if git cat-file -e "HEAD~1" 2>/dev/null; then
+              git diff --name-only HEAD~1 HEAD -- '_posts/**.md' '_posts/**.Rmd' 2>/dev/null | while read post; do
                 [ -z "$post" ] && continue
                 url_from_post "$post" >> /tmp/psi_urls.txt
               done
@@ -278,13 +268,8 @@ jobs:
               url_from_post "$u" >> /tmp/hermes_urls.txt
             done
           else
-            BEFORE="${{ github.event.workflow_run.head_commit.id }}"
-            if [ -z "$BEFORE" ] || ! git cat-file -e "$BEFORE" 2>/dev/null; then
-              BEFORE="HEAD~1"
-            fi
-
-            if git cat-file -e "$BEFORE" 2>/dev/null; then
-              git diff --name-only "$BEFORE" HEAD -- '_posts/**.md' '_posts/**.Rmd' 2>/dev/null | while read post; do
+            if git cat-file -e "HEAD~1" 2>/dev/null; then
+              git diff --name-only HEAD~1 HEAD -- '_posts/**.md' '_posts/**.Rmd' 2>/dev/null | while read post; do
                 [ -z "$post" ] && continue
                 url_from_post "$post" >> /tmp/hermes_urls.txt
               done
@@ -407,13 +392,8 @@ jobs:
               full_url "$u" >> /tmp/lh_urls.txt
             done
           else
-            BEFORE="${{ github.event.workflow_run.head_commit.id }}"
-            if [ -z "$BEFORE" ] || ! git cat-file -e "$BEFORE" 2>/dev/null; then
-              BEFORE="HEAD~1"
-            fi
-
-            if git cat-file -e "$BEFORE" 2>/dev/null; then
-              git diff --name-only "$BEFORE" HEAD -- '_posts/**.md' '_posts/**.Rmd' 2>/dev/null | while read post; do
+            if git cat-file -e "HEAD~1" 2>/dev/null; then
+              git diff --name-only HEAD~1 HEAD -- '_posts/**.md' '_posts/**.Rmd' 2>/dev/null | while read post; do
                 [ -z "$post" ] && continue
                 full_url "$post" >> /tmp/lh_urls.txt
               done

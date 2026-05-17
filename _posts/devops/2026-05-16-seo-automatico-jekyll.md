@@ -1,8 +1,10 @@
 ---
 category: DevOps
 title: "Prova a prendermi: come ho insegnato al mio blog a farsi trovare"
-excerpt: Come ho costruito una pipeline di SEO auditing completamente automatica per il mio blog Jekyll con Lighthouse, PageSpeed Insights, IndexNow, microformati e posizionamento per LLM — tutto integrato in GitHub Actions.
+excerpt: Una pipeline completa di SEO auditing automatica per il mio blog Jekyll con Lighthouse, PageSpeed Insights, IndexNow, microformati e posizionamento per LLM — tutto integrato in GitHub Actions.
 master: /assets/images/seo-pipeline-farsi-trovare.png
+broadcast:
+  channels: [linkedin, mastodon]
 header:
   overlay_filter: 0.5
 tags: [SEO, Jekyll, GitHub Actions, CI/CD, DevOps, webperf, LLM, PageSpeed, GEO]
@@ -69,7 +71,7 @@ if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.co
 Ma la parte più elegante è il modo in cui trova i post da analizzare:
 
 ```bash
-git diff --name-only HEAD~1 HEAD -- '_posts/**'
+git diff --name-only HEAD~1 HEAD -- '_posts/**.md' '_posts/**.Rmd'
 ```
 
 In pratica, prende solo i file `.md` e `.Rmd` modificati nell'ultimo commit e di questi estrae la categoria e lo slug dal nome file, costruisce la lista di URL da testare e poi uno ad uno chiama i vari servizi passandogli la lista, oppure un URL alla volta in un loop bash. Nessun inventario da mantenere.
