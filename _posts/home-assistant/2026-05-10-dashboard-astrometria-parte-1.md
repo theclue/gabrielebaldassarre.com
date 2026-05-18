@@ -5,6 +5,7 @@ excerpt: "Come costruire una dashboard di astrometria in Home Assistant per tene
 master: /assets/images/astrometria-dashboard-distorci.png
 broadcast:
   channels: [linkedin, mastodon]
+  sent: true
 header:
   overlay_filter: 0.5
 ---
