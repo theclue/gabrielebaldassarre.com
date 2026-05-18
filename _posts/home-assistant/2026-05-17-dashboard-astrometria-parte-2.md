@@ -5,6 +5,7 @@ excerpt: "La seconda sezione della dashboard di astrometria: immagini live del S
 master: /assets/images/astrometria-dashboard-distorci-2.png
 broadcast:
   channels: [linkedin, mastodon]
+  sent: true
 header:
   overlay_filter: 0.5
 ---
