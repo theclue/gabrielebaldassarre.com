@@ -321,7 +321,7 @@ I report HTML e JSON sono salvati come workflow artifact con timestamp e commit 
 
 Molti di questi servizi richiedono una API key, spesso passata come parametro nelle chiamate `curl`. Come le si passa al workflow senza committare in chiaro sul repository?
 
-Ma con le [Secrets](https://docs.github.com/en/actions/security-for-github-actions/security-guides/using-secrets-in-github-actions) ovviamente! Anche Github, infatti, ha questa funzionalità che non può mancare ad un orchestratore di CICD. Si configurano in Settings → Secrets and variables → Actions e le mie si presentano più o meno così:
+Ma con le [Secrets](https://docs.github.com/en/actions/security-for-github-actions/security-guides/using-secrets-in-github-actions) ovviamente! Anche Github, infatti, ha questa funzionalità che non può mancare ad un orchestratore di CICD. Si configurano in Settings → Secrets and variables → Actions.
 
 ---
 

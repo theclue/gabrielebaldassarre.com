@@ -2,35 +2,30 @@
 category: Home Assistant
 title: "Il cielo in salotto, parte 2: Sol"
 excerpt: "La seconda sezione della dashboard di astrometria: immagini live del Sole da SOHO e GOES-16, la previsione delle aurore boreali OVATION, e i dati del vento solare con grafici in tempo reale tramite ApexCharts. Tutto da fonti pubbliche NASA e NOAA, senza API key."
+master: /assets/images/astrometria-dashboard-distorci-2.png
+broadcast:
+  channels: [linkedin, mastodon]
 header:
-  overlay_image: /assets/images/dashboard-astrometria-header.png
   overlay_filter: 0.5
 ---
 
-{% assign part1_post = site.posts | where: "url", "/home-assistant/dashboard-astrometria-parte-1/" | first %}
-{% if part1_post %}
-Nella [prima parte]({{ part1_post.url | relative_url }}) abbiamo costruito il modulo Terra-Luna. Ora ci spostiamo verso il centro del sistema solare: il **Sole**.
-{% else %}
-Nella prima parte abbiamo costruito il modulo Terra-Luna. Ora ci spostiamo verso il centro del sistema solare: il **Sole**.
-{% endif %}
+Nella {% post_link /home-assistant/dashboard-astrometria-parte-1/ "prima parte" %} abbiamo costruito il modulo Terra-Luna. Ora ci spostiamo verso il centro del sistema solare: il **Sole**.
 
 Il Sole non è un oggetto statico. È una stella attiva, percorsa da correnti di plasma, squarciata periodicamente da eruzioni gigantesche, capace di lanciare nello spazio ondate di particelle che raggiungono la Terra in pochi giorni e interferiscono con le nostre reti elettriche, le comunicazioni radio e, nei casi più spettacolari, producono aurore boreali visibili anche alle latitudini italiane. Monitorare l'attività solare non è puro esercizio accademico: è space weather, e può avere conseguenze molto concrete.
 
 Questa sezione della dashboard raccoglie tutto questo in un unico colpo d'occhio.
 
+{% cloudinary /assets/images/astrometria-dashboard.png alt="La dashboard di astrometria" caption="Intanto, vi ricordo, questo è quello che ci prefiggiamo di ottenere e oggi ci concentreremo sulla colonna centrale" %}
+
 ---
 
 ## NASA Eyes on the Solar System
-
-### Perché
 
 Prima di entrare nei dati quantitativi, ho voluto includere un elemento puramente visivo e divulgativo: **NASA Eyes on the Solar System**, un simulatore 3D interattivo sviluppato dalla NASA che mostra la posizione in tempo reale di pianeti, lune, sonde e asteroidi nel sistema solare.
 
 È uno strumento straordinario per visualizzare le distanze cosmiche in modo intuitivo: puoi seguire la traiettoria del Voyager 1, ora a più di 23 miliardi di chilometri dalla Terra, oppure vedere dove si trova in questo momento il James Webb Space Telescope. Tutto in scala e in tempo reale.
 
-### Configurazione
-
-Si incorpora nella dashboard tramite una card `iframe` che punta all'applicazione web della NASA:
+Si incorpora nella dashboard tramite una card `iframe` che punta all'applicazione web della NASA. Non è esattamente l'integrazione più elegante che si sia mai vista in Lovelace, ma funziona:
 
 ```yaml
 type: iframe
@@ -44,9 +39,11 @@ aspect_ratio: 75%
 
 ## Immagini live del Sole
 
-### Il concetto: button_card_templates
+Qui non usiamo API Rest o servizi complessi, ma ci limitiamo a visualizzare gli stream media messi a disposizione della NASA o dal NOAA, manipolati con CSS per conformarmi visivamente all'aspetto del dashboard.
 
-Per le immagini live ho scelto un approccio basato sui **template globali di `custom:button-card`**. L'idea è definire una volta sola uno stile "tile con immagine di sfondo" e riutilizzarlo per tutte le sorgenti visive. I template si definiscono nella configurazione globale del dashboard Lovelace:
+### Riutilizzare il markup Lovelace: button_card_templates
+
+Per le immagini live ho scelto un approccio basato sui **template globali di `custom:button-card`**. L'idea è definire una volta sola uno stile "tile con immagine di sfondo" e riutilizzarlo per tutte le sorgenti visive, così da definire il markup una sola volta, in perfetto stile [DRY](https://www.geeksforgeeks.org/software-engineering/dont-repeat-yourselfdry-in-software-development/). I template si definiscono nella configurazione globale del dashboard Lovelace e, nel momento in cui scrivo, devono per forza essere definite in Yaml:
 
 ```yaml
 button_card_templates:
@@ -85,13 +82,15 @@ button_card_templates:
           - height: 100%
 ```
 
-Ogni tile con immagine live diventa poi solo poche righe di configurazione, con la variabile `picture` che riceve l'URL dell'immagine.
+Ogni tile con immagine live diventa poi solo poche righe di configurazione, con la variabile `picture` che riceve l'URL dell'immagine. Vediamo subito gli esempi che popolano il nostro dashboard.
+
+**Nota:** non tutti sanno che effettivamente è possibile accedere al file Yaml complessivo di un intero dashboard. Lo si fa dal menù modifica dashboard in alto a destra, da dove è raggiungibile l'editor di configurazione testuale. I templati vanno direttamente nel _root node_. 
 
 ### SOHO Lasco C3
 
 **SOHO** (Solar and Heliospheric Observatory) è un satellite congiunto ESA-NASA in orbita attorno al punto di Lagrange L1 tra Terra e Sole, a circa 1,5 milioni di chilometri dalla Terra. Uno dei suoi strumenti più famosi è **LASCO C3**, un coronagrafo che oscura il disco solare (come un'eclissi artificiale) per rendere visibile la corona solare esterna. Le immagini vengono aggiornate ogni pochi minuti e rese disponibili pubblicamente dalla NASA.
 
-Perché è utile? Il LASCO C3 è lo strumento primario per il rilevamento delle **CME** (Coronal Mass Ejection): espulsioni di miliardi di tonnellate di plasma che, quando sono dirette verso la Terra, possono causare tempeste geomagnetiche.
+Perché è utile? Il LASCO C3 è lo strumento primario per il rilevamento delle **CME** (Coronal Mass Ejection): espulsioni di miliardi di tonnellate di plasma che, quando sono dirette verso la Terra, possono causare tempeste geomagnetiche. Forse più utili per chi fa radioastronomia che astrofotografia, ma sono proprio belle da vedere in dashboard, questo è sicuro.
 
 ```yaml
 type: custom:button-card
@@ -129,7 +128,7 @@ tap_action:
 
 Il modello **OVATION** (Oval Variation, Assessment, Tracking, Intensity and Online Nowcasting) di NOAA è il sistema di nowcasting più usato per la previsione delle aurore boreali e australi. Produce ogni 30 minuti una mappa globale della probabilità di avvistamento aurorale basandosi sul vento solare misurato dai satelliti.
 
-Per chi vive nell'Europa settentrionale, questa mappa è preziosissima: durante le tempeste geomagnetiche più intense (indice Kp ≥ 7), le aurore diventano visibili anche a latitudini sorprendentemente basse. Certo, la probabilità di osservare una aurora boreale, chessò, in Lombardia rimane piuttosto bassa (ma [meno bassa di quanto si credi!](https://www.ilgiorno.it/cronaca/aurora-boreale-kdhk6hp7)) e proprio per questo avere questo indicatore in dashboard è importante per evitare di perdersi i momenti giusti.
+Per chi vive nell'Europa settentrionale, questa mappa è preziosissima: durante le tempeste geomagnetiche più intense (indice Kp ≥ 7), le aurore diventano visibili anche a latitudini sorprendentemente basse. Certo, la probabilità di osservare una aurora boreale, chessò, in Lombardia rimane piuttosto bassa (ma [meno bassa di quanto si credi](https://www.ilgiorno.it/cronaca/aurora-boreale-kdhk6hp7)) e proprio per questo avere questo indicatore in dashboard è importante per evitare di perdersi i momenti giusti.
 
 ```yaml
 type: custom:button-card
@@ -160,6 +159,8 @@ cards:
   - # Aurora OVATION
 ```
 
+{% cloudinary /assets/images/astrometria-dashboard-immagini-sole-noaa.png alt="Live Sun, NOAA" caption="Immagini della superficie del Sole e indicatori NOAA Space Weather" %}
+
 ---
 
 ## NOAA Space Weather: i KPI dello spazio meteorologico
@@ -187,7 +188,7 @@ L'**indice Kp** misura le perturbazioni del campo magnetico terrestre su scala g
 
 ### Configurazione multiscrape
 
-I dati vengono recuperati tramite l'integrazione **multiscrape** (disponibile su HACS), che permette di interrogare l'API NOAA e mappare ogni campo su un sensore separato:
+I dati vengono recuperati tramite l'integrazione [Multiscrape](https://github.com/danieldotnl/ha-multiscrape) (disponibile anche su HACS), che permette di interrogare una API REST (o in generale qualsiasi cosa), in questo caso l'API NOAA, e mappare ogni campo su un sensore separato in un'unica operazione. Al momento in cui scrivo, il setup va necessariamente fatto in Yaml:
 
 ```yaml
 multiscrape:
@@ -246,17 +247,15 @@ Il vento solare ha due parametri magnetici che determinano se una tempesta geoma
 
 Monitorare l'andamento di BZ nelle ultime ore è fondamentale: un BZ negativo prolungato è il segnale che una tempesta è in corso o imminente.
 
-### Fonte dati
-
-NOAA SWPC pubblica queste misure (aggiornate ogni minuto dal satellite DSCOVR al punto L1) in formato JSON:
+NOAA SWPC pubblica queste misure (aggiornate ogni minuto dal satellite DSCOVR al punto L1) in formato JSON, tanto per cambiare:
 
 ```
 https://services.swpc.noaa.gov/products/solar-wind/mag-1-day.json
 ```
 
-La risposta è un array di array: la prima riga è l'intestazione, le successive sono i dati.
+Per grafici molto densi che possono richiedere la visualizzazioni di più serie di dati, in genere preferisco ApexCharts, che ha una [fantastica card](https://github.com/RomRider/apexcharts-card) per Lovelace:
 
-### Configurazione ApexCharts
+La linea orizzontale a y=0 è il riferimento visivo chiave: quando BZ scende sotto quella linea e ci rimane, è il momento di controllare le previsioni aurorali.
 
 ```yaml
 type: custom:apexcharts-card
@@ -291,26 +290,9 @@ apex_config:
         strokeDashArray: 4
 ```
 
-La linea orizzontale a y=0 è il riferimento visivo chiave: quando BZ scende sotto quella linea e ci rimane, è il momento di controllare le previsioni aurorali.
+{% cloudinary /assets/images/astrometria-dashboard-vento-solare.png alt="Grafici del vento solare" caption="ApexChart è estremamente flessibile e consente di ottenere layout e combinazioni molto complesse, anche se, ammetto, raramente mi trovo a rappresentare grafici diversi da istogrammi, scatterplot o spezzate...che ci volete fare, sono un tradizionalista!" %}
 
 ---
 
-## Riepilogo
 
-| Componente | Fonte | Tecnologia |
-|---|---|---|
-| Simulatore sistema solare | NASA Eyes | `iframe` |
-| Coronagrafo SOHO C3 | NASA SOHO | `custom:button-card` + template |
-| Sole in UV, GOES-16 SUVI | NOAA | `custom:button-card` + template |
-| Previsione aurore OVATION | NOAA SWPC | `custom:button-card` + template |
-| Radio Flux F10.7 | NOAA SWPC | `multiscrape` + `tile` |
-| Vento Solare (km/s) | NOAA SWPC | `multiscrape` + `tile` |
-| Indice Kp | NOAA SWPC | `multiscrape` + `tile` |
-| Grafici BT / BZ | NOAA SWPC DSCOVR | `custom:apexcharts-card` |
-
-{% assign part3_post = site.posts | where: "url", "/home-assistant/dashboard-astrometria-parte-3/" | first %}
-{% if part3_post %}
-Nella [terza parte]({{ part3_post.url | relative_url }}) chiudiamo il cerchio con lo spazio profondo: l'immagine astronomica del giorno della NASA (APOD), la posizione in tempo reale della ISS e i prossimi lanci spaziali.
-{% else %}
-Nella terza parte chiudiamo il cerchio con lo spazio profondo: l'immagine astronomica del giorno della NASA (APOD), la posizione in tempo reale della ISS e i prossimi lanci spaziali.
-{% endif %}
+Nella {% post_link /home-assistant/dashboard-astrometria-parte-3/ "terza parte" %} chiudiamo il cerchio con lo spazio profondo: l'immagine astronomica del giorno della NASA (APOD), la posizione in tempo reale della ISS e il bollettino prossimi lanci spaziali.

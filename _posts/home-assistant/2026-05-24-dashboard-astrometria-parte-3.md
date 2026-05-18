@@ -7,17 +7,7 @@ header:
   overlay_filter: 0.5
 ---
 
-{% assign part1_post = site.posts | where: "url", "/home-assistant/dashboard-astrometria-parte-1/" | first %}
-{% assign part2_post = site.posts | where: "url", "/home-assistant/dashboard-astrometria-parte-2/" | first %}
-{% if part1_post and part2_post %}
-Nella [prima parte]({{ part1_post.url | relative_url }}) abbiamo costruito il modulo Terra-Luna, nella [seconda]({{ part2_post.url | relative_url }}) abbiamo monitorato il Sole. In questa terza e ultima parte ci spingiamo oltre: lo spazio profondo, la stazione spaziale e i razzi che la raggiungono.
-{% elsif part1_post %}
-Nella [prima parte]({{ part1_post.url | relative_url }}) abbiamo costruito il modulo Terra-Luna, nella seconda abbiamo monitorato il Sole. In questa terza e ultima parte ci spingiamo oltre: lo spazio profondo, la stazione spaziale e i razzi che la raggiungono.
-{% elsif part2_post %}
-Nella prima parte abbiamo costruito il modulo Terra-Luna, nella [seconda]({{ part2_post.url | relative_url }}) abbiamo monitorato il Sole. In questa terza e ultima parte ci spingiamo oltre: lo spazio profondo, la stazione spaziale e i razzi che la raggiungono.
-{% else %}
-Nella prima parte abbiamo costruito il modulo Terra-Luna, nella seconda abbiamo monitorato il Sole. In questa terza e ultima parte ci spingiamo oltre: lo spazio profondo, la stazione spaziale e i razzi che la raggiungono.
-{% endif %}
+Nella {% post_link /home-assistant/dashboard-astrometria-parte-1/ "prima parte" %} abbiamo costruito il modulo Terra-Luna, nella {% post_link /home-assistant/dashboard-astrometria-parte-2/ "seconda" %} abbiamo monitorato il Sole. In questa terza e ultima parte ci spingiamo oltre: lo spazio profondo, la stazione spaziale e i razzi che la raggiungono.
 
 ---
 

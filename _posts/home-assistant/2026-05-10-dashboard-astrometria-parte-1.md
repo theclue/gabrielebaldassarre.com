@@ -2,8 +2,10 @@
 category: Home Assistant
 title: "Il cielo in salotto, parte 1: Sistema Terra-Luna"
 excerpt: "Come costruire una dashboard di astrometria in Home Assistant per tenere d'occhio la Luna, il Sole e lo spazio profondo. Prima parte: l'architettura generale e il modulo Terra-Luna, con disco lunare in tempo reale via API NASA, template sensor per il formato data NASA e il sensore di fase lunare con icone e immagine dinamica."
+master: /assets/images/astrometria-dashboard-distorci.png
+broadcast:
+  channels: [linkedin, mastodon]
 header:
-  overlay_image: /assets/images/dashboard-astrometria-header.png
   overlay_filter: 0.5
 ---
 
@@ -17,9 +19,7 @@ La dashboard è divisa in tre sezioni:
 2. **Sol** — immagini live del Sole, aurora boreale, vento solare (parte 2)
 3. **Spazio profondo e bollettini** — l'immagine del giorno NASA (APOD), posizione della ISS, prossimi lanci (parte 3)
 
-{% figure caption:"Al termine di questa serie di articoli, l'aspetto del dashboard sarà - speriamo - più o meno questo" %}
-![La dashboard di astrometria](/assets/images/astrometria-dashboard.png)
-{% endfigure %}
+{% cloudinary /assets/images/astrometria-dashboard.png alt="La dashboard di astrometria" caption="Al termine di questa serie di articoli, l'aspetto del dashboard sarà - speriamo - più o meno questo" %}
 
 ## Cosa serve: le integrazioni HACS
 
@@ -41,11 +41,7 @@ La Luna è l'oggetto celeste più osservato e fotografato da sempre. Per un astr
 
 ### L'integrazione `moon` nativa
 
-Home Assistant include di serie un'integrazione chiamata semplicemente **Moon** che calcola localmente, senza dipendenze esterne, la fase lunare corrente. Si abilita da *Impostazioni → Dispositivi e servizi → Aggiungi integrazione* cercando "Moon", oppure aggiungendo una riga al `configuration.yaml`:
-
-```yaml
-moon:
-```
+Home Assistant include di serie un'integrazione chiamata semplicemente **Moon** che calcola localmente, senza dipendenze esterne, la fase lunare corrente. Si abilita da *Impostazioni → Dispositivi e servizi → Aggiungi integrazione* cercando "Moon".
 
 Questo crea l'entità `sensor.moon` con stati come `new_moon`, `waxing_crescent`, `first_quarter`, `waxing_gibbous`, `full_moon`, `waning_gibbous`, `last_quarter`, `waning_crescent`. 
 
@@ -166,9 +162,7 @@ badges:
     entity: sensor.sun_next_dusk
 ```
 
-{% figure caption:"La foto della Luna può finalmente essere visualizzata in dashboard utilizzando una qualsiasi card che possa visualizzare un flusso di fotocamera." %}
-![Il disco lunare](/assets/images/fasi-lunari.png)
-{% endfigure %}
+{% cloudinary /assets/images/fasi-lunari.png alt="Il disco lunare" caption="La foto della Luna può finalmente essere visualizzata in dashboard utilizzando una qualsiasi card che possa visualizzare un flusso di fotocamera." %}
 
 ### La custom:lunar-phase-card
 
@@ -203,9 +197,7 @@ graph_config:
   time_step_size: 30
 ```
 
-{% figure caption:"Card di sintesi della Luna" %}
-![La Moon card](/assets/images/moon-card.png)
-{% endfigure %}
+{% cloudinary /assets/images/moon-card.png alt="La Moon card" caption="Card di sintesi della Luna" %}
 
 `use_default: true` dice alla card di calcolare autonomamente la fase senza affidarsi a un sensore esterno — il che la rende indipendente dal REST sensor NASA e dal sensore `moon`. Questo è utile per avere ridondanza: anche se l'API NASA fosse irraggiungibile, la card continua a mostrare la fase calcolata internamente.
 
@@ -253,9 +245,7 @@ template:
 ```
 {% endraw %}
 
-{% figure caption:"Badge costruito a partire dal sensore. Notare l'immagine e le descrizioni in italiano" %}
-![Badge fasi lunari](/assets/images/fasi-lunari-header.png)
-{% endfigure %}
+{% cloudinary /assets/images/fasi-lunari-header.png alt="Badge fasi lunari" caption="Badge costruito a partire dal sensore. Notare l'immagine e le descrizioni in italiano" %}
 
 Alcune note:
 
@@ -270,9 +260,4 @@ Alcune note:
 
 In questa prima parte abbiamo costruito il modulo **Sistema Terra-Luna**:
 
-{% assign part2_post = site.posts | where: "url", "/home-assistant/dashboard-astrometria-parte-2/" | first %}
-{% if part2_post %}
-Nella [seconda parte]({{ part2_post.url | relative_url }}) ci sposteremo sul Sole: immagini live da SOHO e GOES-16, la previsione delle aurore boreali OVATION, e i dati dello spazio meteorologico con grafici BT/BZ in tempo reale.
-{% else %}
-Nella seconda parte ci sposteremo sul Sole: immagini live da SOHO e GOES-16, la previsione delle aurore boreali OVATION, e i dati dello spazio meteorologico con grafici BT/BZ in tempo reale.
-{% endif %}
+Nella {% post_link /home-assistant/dashboard-astrometria-parte-2/ "seconda parte" %} ci sposteremo sul Sole: immagini live da SOHO e GOES-16, la previsione delle aurore boreali OVATION, e i dati dello spazio meteorologico con grafici BT/BZ in tempo reale.
