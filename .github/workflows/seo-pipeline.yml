@@ -223,7 +223,7 @@ jobs:
           fi
 
       - name: Salva report PageSpeed 📥
-        if: always()
+        if: steps.find.outputs.no_urls != 'true'
         uses: actions/upload-artifact@v4
         with:
           name: pagespeed-reports
@@ -399,7 +399,16 @@ jobs:
           echo "URL da verificare: ${count}"
           cat /tmp/lh_urls.txt
 
+          if [ "$count" -eq 0 ]; then
+            echo "no_urls=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Nessun URL da analizzare con Lighthouse ℹ️
+        if: steps.find.outputs.no_urls == 'true'
+        run: echo "Nessun URL da analizzare — tutti i post sono invariati."
+
       - name: Lighthouse CI 🟢
+        if: steps.find.outputs.no_urls != 'true'
         run: |
           echo "🏠 Avvio Lighthouse CI..."
           echo ""
@@ -439,7 +448,11 @@ jobs:
           COMMIT=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
           mkdir -p lighthouse-results
           echo "📄 Report generati in .lighthouseci/:"
-          ls -laR .lighthouseci/ 2>/dev/null || echo "  (nessun report generato)"
+          if [ -d .lighthouseci ]; then
+            ls -laR .lighthouseci/
+          else
+            echo "  (nessun report generato)"
+          fi
 
           # Assertions
           if [ -f .lighthouseci/assertion-results.json ]; then
@@ -449,8 +462,8 @@ jobs:
           fi
 
           # Tutti i file HTML e JSON (inclusi quelli in sottodirectory)
-          find .lighthouseci -name '*.html' -exec cp {} "lighthouse-results/" \;
-          find .lighthouseci -name '*.json' ! -name 'assertion-results.json' -exec cp {} "lighthouse-results/" \;
+          find .lighthouseci -name '*.html' -exec cp {} "lighthouse-results/" \; 2>/dev/null || true
+          find .lighthouseci -name '*.json' ! -name 'assertion-results.json' -exec cp {} "lighthouse-results/" \; 2>/dev/null || true
 
           # Rinomina con timestamp per distinguerli
           for f in lighthouse-results/*.html; do
@@ -467,7 +480,7 @@ jobs:
           echo "✅ Lighthouse CI completato"
 
       - name: Salva report Lighthouse 📥
-        if: always()
+        if: steps.find.outputs.no_urls != 'true'
         uses: actions/upload-artifact@v4
         with:
           name: lighthouse-reports
