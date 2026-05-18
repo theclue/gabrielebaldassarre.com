@@ -1,0 +1,166 @@
+name: Collect Incubator PR
+
+on:
+  push:
+    branches: ['work/**']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: work-pipelines
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: main
+
+      - name: Assemble incubator branch
+        id: collect
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git fetch origin main '+refs/heads/work/*:refs/remotes/origin/work/*'
+
+          # Preserva incubator esistente se c'è (rispetta rebase manuali), altrimenti crea da main
+          if git ls-remote --heads origin incubator | grep -q incubator; then
+            git fetch origin incubator
+            git checkout -B incubator origin/incubator
+            git rebase origin/main || git checkout -B incubator origin/main
+          else
+            git checkout -B incubator origin/main
+          fi
+
+          branches=$(git branch -r --list 'origin/work/*' --format='%(refname:short)' | sed 's|origin/||' | sort)
+          merged=""
+          skipped=""
+
+          for branch in $branches; do
+            if git merge --no-ff "origin/${branch}" -m "enrich: merge ${branch}" 2>/dev/null; then
+              merged="${merged}  - \`${branch}\`\n"
+              echo "  ✅ merged ${branch}"
+            else
+              skipped="${skipped}  - \`${branch}\` (conflitto)\n"
+              echo "  ⚠️  conflict in ${branch} — skipped"
+              git merge --abort 2>/dev/null || true
+            fi
+          done
+
+          if git diff --quiet origin/main; then
+            {
+              echo "no_changes=true"
+              echo "branch_count=0"
+            } >> "$GITHUB_OUTPUT"
+            echo "Nessuna work branch da includere — niente da mergiare."
+            exit 0
+          fi
+
+          git push -f origin incubator
+
+          count=$(echo "$branches" | grep -c . 2>/dev/null || echo 0)
+          {
+            echo "no_changes=false"
+            echo "branch_count=${count}"
+          } >> "$GITHUB_OUTPUT"
+
+          # --- Build PR body ---
+          {
+            echo '## Pipeline Enrichments'
+            echo ''
+            echo 'Contributi accumulati dalle pipeline automatiche dopo il deploy su main.'
+            echo ''
+
+            if [ -n "$merged" ]; then
+              echo '### Branch inclusi'
+              echo ''
+              echo "$merged"
+            fi
+            if [ -n "$skipped" ]; then
+              echo '### Saltati (conflitto)'
+              echo ''
+              echo "$skipped"
+            fi
+
+            echo ''
+            echo '### Dettaglio per post'
+            echo ''
+            git diff --stat origin/main..incubator -- _posts/ | while read -r line; do
+              case "$line" in
+                *'|'*)
+                  file=$(echo "$line" | awk '{print $1}')
+                  changes=$(echo "$line" | awk '{$1=""; print $0}' | xargs)
+                  title=$(grep -oP 'title:\s*"\K[^"]+' "$file" 2>/dev/null | head -1 || echo "$file")
+                  echo "- **${title}** (\`${file}\`) → ${changes}"
+                  ;;
+                *)
+                  echo "$line"
+                  ;;
+              esac
+            done
+
+            echo ''
+            echo '### Commit history'
+            echo ''
+            echo '```'
+            git log --oneline origin/main..incubator --format='  %s' -- _posts/
+            echo '```'
+
+            echo ''
+            echo '### Diff'
+            echo ''
+            echo '<details><summary>Mostra diff completo</summary>'
+            echo ''
+            echo '```diff'
+            git diff origin/main..incubator -- _posts/
+            echo '```'
+            echo ''
+            echo '</details>'
+
+            echo ''
+            echo '---'
+            echo ''
+            echo '### Come rigettare modifiche'
+            echo ''
+            echo '**Opzione 1 — cancella una work branch:**'
+            echo '```bash'
+            echo 'git push origin --delete work/{pipeline}/{categoria}-{slug}'
+            echo '```'
+            echo 'Il collector si triggera automaticamente e questa PR si aggiorna.'
+            echo ''
+            echo '**Opzione 2 — rebase interattivo su incubator (temporaneo):**'
+            echo '```bash'
+            echo 'git fetch origin incubator'
+            echo 'git checkout incubator'
+            echo 'git rebase -i origin/main   # droppa/squash i commit indesiderati'
+            echo 'git push -f origin incubator'
+            echo '```'
+            echo '⚠️ Il rebase sopravvive a un run successivo del collector, MA i commit dei `work/*` vengono comunque ri-mergiati ad ogni trigger. Per un drop permanente combina con l Opzione 1 (cancella il work branch).'
+            echo ''
+            echo '**Opzione 3 — rigetta tutto:** cancella TUTTI i branch `work/*/*` e chiudi questa PR.'
+          } > /tmp/pr_body.md
+
+      - name: Create or update PR 📨
+        if: steps.collect.outputs.no_changes == 'false'
+        run: |
+          EXISTING=$(gh pr list --base main --head incubator --state open --json number --jq '.[0].number // ""')
+          BRANCH_COUNT="${{ steps.collect.outputs.branch_count }}"
+
+          if [ -n "$EXISTING" ]; then
+            gh pr edit "$EXISTING" --body-file /tmp/pr_body.md
+            echo "PR #${EXISTING} aggiornata (${BRANCH_COUNT} work branch)."
+          else
+            gh pr create \
+              --base main \
+              --head incubator \
+              --title "enrich: pipeline contributions (${BRANCH_COUNT} work branches)" \
+              --body-file /tmp/pr_body.md
+          fi

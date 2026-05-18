@@ -2,6 +2,7 @@ name: Deploy blog on Cloudflare Pages
 
 on:
   push:
+    branches: [main, master]
     paths:
       - "assets/**"
       - "_sass/**"
@@ -11,7 +12,6 @@ on:
       - "**.js"
       - "**.liquid"
       - "**.md"
-      - "**.Rmd"
       - "**.R"
       - "**.rb"
       - "**.yml"
@@ -22,9 +22,7 @@ on:
       - "!.github/workflows/deploy-on-cloudflare-pages.yml"
       - "!README.md"
   pull_request:
-    branches:
-      - master
-      - main
+    branches: [main, master]
     paths:
       - "assets/**"
       - "_sass/**"
@@ -34,7 +32,6 @@ on:
       - "**.js"
       - "**.liquid"
       - "**.md"
-      - "**.Rmd"
       - "**.R"
       - "**.rb"
       - "**.yml"
@@ -60,6 +57,8 @@ jobs:
     steps:
       - name: Checkout 🛎️
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
       - name: Set up Docker (Buildx) 🐋
         uses: docker/setup-buildx-action@v4
       - name: Build 🔧
@@ -78,10 +77,11 @@ jobs:
           echo "🔬 Validazione pre-deploy..."
           HAS_ERRORS=0
 
-          # Trova post modificati
-          BEFORE="HEAD~1"
-          if ! git cat-file -e "$BEFORE" 2>/dev/null; then BEFORE="HEAD"; fi
-          git diff --name-only "$BEFORE" HEAD -- '_posts/**.md' '_posts/**.Rmd' 2>/dev/null > /tmp/val_posts.txt
+          if git cat-file -e "HEAD~1" 2>/dev/null; then
+            git diff --name-only HEAD~1 HEAD -- '_posts/**.md' '_posts/**.Rmd' 2>/dev/null > /tmp/val_posts.txt
+          else
+            find _posts -name '*.md' -o -name '*.Rmd' | sort > /tmp/val_posts.txt
+          fi
 
           while read -r post; do
             [ -z "$post" ] && continue
@@ -108,24 +108,29 @@ jobs:
             LINKS=$(grep -oP '\[.*?\]\(/[^)]+' "$post" 2>/dev/null | grep -oP '(?<=\()/[^)]+' | grep -v 'http' | grep -v '\.(png|jpg|svg|webp|woff2)' | sort -u)
             while read -r link; do
               [ -z "$link" ] && continue
-              # Normalizza: da /fisica/stati-spin/ -> _site/fisica/stati-spin/index.html
-              link_path="_site${link}"
-              [ "${link_path: -1}" != "/" ] && link_path="${link_path}.html"
-              [ -d "$link_path" ] && link_path="${link_path}/index.html"
-              if [ ! -f "$link_path" ] && [ ! -d "$(dirname "$link_path")" ]; then
-                echo "  ⚠️  LINK ROTTO: ${link}"
+              # Normalizza: prova prima /index.html (directory permalink), poi .html (flat permalink)
+              link_path="_site${link%/}"
+              if [ -d "$link_path" ]; then
+                link_path="${link_path}/index.html"
+              elif [ -f "${link_path}.html" ]; then
+                link_path="${link_path}.html"
+              fi
+              if [ ! -f "$link_path" ]; then
+                echo "  ❌ LINK ROTTO: ${link}"
+                HAS_ERRORS=1
               fi
             done <<< "$LINKS"
 
           done < /tmp/val_posts.txt
 
           if [ "$HAS_ERRORS" -eq 1 ]; then
-            echo "❌ Deploy bloccato: immagini mancanti"
+            echo "❌ Deploy bloccato: immagini mancanti o link rotti"
             exit 1
           fi
           echo "✅ Validazione superata"
 
       - name: Deploy 🚀
+        if: github.event_name != 'pull_request'
         uses: cloudflare/wrangler-action@v4
         with:
           apiToken: ${{ secrets.CLOUDFLARE_PAGES_API_TOKEN }}

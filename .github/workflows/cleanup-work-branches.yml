@@ -1,0 +1,77 @@
+name: Cleanup Work Branches
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: work-pipelines
+  cancel-in-progress: false
+
+jobs:
+  cleanup:
+    # Cancella i work/* solo se la PR è stata effettivamente mergiata
+    # (su merge di incubator → main, oppure dispatch manuale)
+    if: ${{ github.event_name == 'workflow_dispatch' || (github.event.pull_request.merged == true && github.event.pull_request.head.ref == 'incubator') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: main
+
+      - name: Delete merged work branches 🧹
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git fetch origin '+refs/heads/work/*:refs/remotes/origin/work/*' --prune
+          git fetch origin main
+
+          deleted=0
+          kept=0
+          : > /tmp/cleanup_report.txt
+
+          for ref in $(git branch -r --list 'origin/work/*' --format='%(refname:short)'); do
+            branch="${ref#origin/}"
+            sha=$(git rev-parse "$ref")
+
+            # Cancella solo se l'HEAD del work branch è già ancestor di main
+            # (cioè i suoi commit sono stati effettivamente assorbiti dal merge)
+            if git merge-base --is-ancestor "$sha" origin/main; then
+              echo "🗑️  delete ${branch} (mergiato in main)"
+              git push origin --delete "$branch" && deleted=$((deleted + 1))
+              echo "- \`${branch}\` → eliminato" >> /tmp/cleanup_report.txt
+            else
+              echo "✋ keep   ${branch} (non ancora in main — verrà incluso nel prossimo incubator)"
+              kept=$((kept + 1))
+              echo "- \`${branch}\` → mantenuto (commit non in main)" >> /tmp/cleanup_report.txt
+            fi
+          done
+
+          echo ""
+          echo "📊 Eliminati: ${deleted} | Mantenuti: ${kept}"
+
+          {
+            echo "## Cleanup work branches"
+            echo ""
+            echo "**Eliminati:** ${deleted} — **Mantenuti:** ${kept}"
+            echo ""
+            cat /tmp/cleanup_report.txt
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Delete incubator branch 🧹
+        if: ${{ github.event_name == 'pull_request' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Dopo merge della PR incubator → main, anche il branch incubator può essere
+          # cancellato: il prossimo run del collector lo ricrea da main.
+          if git ls-remote --heads origin incubator | grep -q incubator; then
+            git push origin --delete incubator && echo "🗑️  incubator eliminato"
+          fi

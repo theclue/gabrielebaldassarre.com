@@ -46,7 +46,7 @@ _layouts/              # Liquid templates (post.html, default.html, post-index.h
 _includes/             # Reusable Liquid partials (header, footer, analytics, search)
 _pages/                # Static pages (devops.html, fisica.html, SNA.html)
 _sass/                 # SCSS partials (_variables.scss, _main.scss, etc.)
-_data/                 # YAML data files (ui-text.yml for localization, mapping.yml)
+_data/                 # YAML data files (ui-text.yml for localization)
 R/                     # R scripts for content generation; data/ and data-raw/ for dependencies
 assets/                # Static assets (CSS, images, PDFs, figures)
 _site/                 # Generated output (created by Jekyll build, not committed)

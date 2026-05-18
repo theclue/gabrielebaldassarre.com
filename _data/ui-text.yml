@@ -35,6 +35,11 @@ en: &DEFAULT_EN
   and                        : "and"
   about_me                   : "About me"
   work                       : "Work"
+  home                       : "Home"
+  toggle_theme               : "Toggle dark mode"
+  menu_label                 : "Menu"
+  footer_no_tracking         : "No cookies, no trackers, no data collection."
+  footer_license             : "Contents under"
 en-US:
   <<: *DEFAULT_EN
 en-CA:
@@ -79,5 +84,9 @@ it: &DEFAULT_IT
   and                        : "e"
   about_me                   : "Chi sono"
   work                       : "Cosa faccio"
+  home                       : "Home"
+  toggle_theme               : "Attiva/disattiva tema scuro"
+  footer_no_tracking         : "Nessun cookie, nessun tracker, nessuna raccolta dati."
+  footer_license             : "Contenuti sotto"
 it-IT:
   <<: *DEFAULT_IT

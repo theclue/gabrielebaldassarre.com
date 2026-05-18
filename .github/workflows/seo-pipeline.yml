@@ -28,7 +28,8 @@ jobs:
       - name: Checkout 🛎️
         uses: actions/checkout@v6
         with:
-          fetch-depth: 0
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          fetch-depth: 2
 
       - name: Trova URL da notificare 🔍
         id: find
@@ -106,7 +107,8 @@ jobs:
       - name: Checkout 🛎️
         uses: actions/checkout@v6
         with:
-          fetch-depth: 0
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          fetch-depth: 2
 
       - name: Trova URL da verificare 🔍
         id: find
@@ -236,7 +238,8 @@ jobs:
       - name: Checkout 🛎️
         uses: actions/checkout@v6
         with:
-          fetch-depth: 0
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          fetch-depth: 2
 
       - name: Trova URL da verificare 🔍
         id: find
@@ -353,7 +356,8 @@ jobs:
       - name: Checkout 🛎️
         uses: actions/checkout@v6
         with:
-          fetch-depth: 0
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          fetch-depth: 2
 
       - name: Trova URL da verificare 🔍
         id: find

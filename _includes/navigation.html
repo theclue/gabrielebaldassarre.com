@@ -18,9 +18,6 @@
             <li><a href="{{ navpage.url | relative_url }}">{{ navpage.title | strip_html }}</a></li>
           {% endif %}
         {% endfor %}
-        {% for hotlink in site.data.hotlinks %}
-          <li><a href="{{ hotlink.url | relative_url }}">{{ hotlink.label }}</a></li>
-        {% endfor %}
         <li>
           <button type="button"
                   class="theme-toggle"

@@ -7,10 +7,6 @@ title: Tags Archive
 {% assign tags_list = site_tags | split:',' | sort %}
 
 <article>
-    <h1 class="entry-title">
-        <a>{{ page.title }}</a>
-    </h1>
-    
     <hr>
     
     <ul class="entry-meta inline-list">
@@ -25,7 +21,7 @@ title: Tags Archive
 {% for item in (0..site.tags.size) %}{% unless forloop.last %}
     {% capture this_word %}{{ tags_list[item] | strip_newlines }}{% endcapture %}
 	<article>
-        <h1 id="{{ this_word }}" class="entry-title" style="text-transform: capitalize">{{ this_word }}</h1>
+        <h2 id="{{ this_word }}" class="entry-title" style="text-transform: capitalize">{{ this_word }}</h2>
             <ul>
                 {% for post in site.tags[this_word] %}
                     {% if post.title != null %}

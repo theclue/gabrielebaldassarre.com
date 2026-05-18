@@ -1,13 +1,10 @@
 <!doctype html>
 <html lang="{{ site.locale | slice: 0,2 | default: 'it' }}" class="no-js">
 <head>
-  {% include analytics-head.html %}
   {% include head.html %}
 </head>
 <body id="post-index">
-  {% include analytics-body.html %}
   {% include_cached skip-links.html %}
-  {% include browser-upgrade.html %}
   {% include navigation.html %}
 
   <main id="main" role="main" class="container">
@@ -23,5 +20,9 @@
   {% include scripts.html %}
   <script src="{{ '/assets/js/navigation.js' | relative_url }}" defer></script>
   <script src="{{ '/assets/js/theme-toggle.js' | relative_url }}" defer></script>
+  {% if page.mermaid %}
+  <script src="{{ '/assets/vendor/mermaid/mermaid.min.js' | relative_url }}" defer></script>
+  <script src="{{ '/assets/js/mermaid-init.js' | relative_url }}" defer></script>
+  {% endif %}
 </body>
 </html>
