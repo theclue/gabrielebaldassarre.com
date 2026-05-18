@@ -11,7 +11,7 @@ header:
 
 Nella {% post_link /home-assistant/dashboard-astrometria-parte-1/ "prima parte" %} abbiamo costruito il modulo Terra-Luna. Ora ci spostiamo verso il centro del sistema solare: il **Sole**.
 
-Il Sole non è un oggetto statico. È una stella attiva, percorsa da correnti di plasma, squarciata periodicamente da eruzioni gigantesche, capace di lanciare nello spazio ondate di particelle che raggiungono la Terra in pochi giorni e interferiscono con le nostre reti elettriche, le comunicazioni radio e, nei casi più spettacolari, producono aurore boreali visibili anche alle latitudini italiane. Monitorare l'attività solare non è puro esercizio accademico: è space weather, e può avere conseguenze molto concrete.
+Il Sole non è un oggetto statico. È una stella attiva, percorsa da correnti di plasma, squarciata periodicamente da eruzioni gigantesche, capace di lanciare nello spazio ondate di particelle che raggiungono la Terra in pochi giorni e interferiscono con le nostre reti elettriche, le comunicazioni radio e, nei casi più spettacolari, producono aurore boreali visibili anche alle latitudini italiane. Monitorare l'attività solare non è puro esercizio accademico: è _space weather_, e può avere conseguenze molto concrete per un astrofilo e un astrofotografo.
 
 Questa sezione della dashboard raccoglie tutto questo in un unico colpo d'occhio.
 

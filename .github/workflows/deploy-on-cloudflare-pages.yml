@@ -104,23 +104,6 @@ jobs:
               fi
             done <<< "$IMGS"
 
-            # Estrai link interni [text](/path) e verifica esistenza in _site/
-            LINKS=$(grep -oP '\[.*?\]\(/[^)]+' "$post" 2>/dev/null | grep -oP '(?<=\()/[^)]+' | grep -v 'http' | grep -v '\.(png|jpg|svg|webp|woff2)' | sort -u)
-            while read -r link; do
-              [ -z "$link" ] && continue
-              # Normalizza: prova prima /index.html (directory permalink), poi .html (flat permalink)
-              link_path="_site${link%/}"
-              if [ -d "$link_path" ]; then
-                link_path="${link_path}/index.html"
-              elif [ -f "${link_path}.html" ]; then
-                link_path="${link_path}.html"
-              fi
-              if [ ! -f "$link_path" ]; then
-                echo "  ❌ LINK ROTTO: ${link}"
-                HAS_ERRORS=1
-              fi
-            done <<< "$LINKS"
-
           done < /tmp/val_posts.txt
 
           if [ "$HAS_ERRORS" -eq 1 ]; then

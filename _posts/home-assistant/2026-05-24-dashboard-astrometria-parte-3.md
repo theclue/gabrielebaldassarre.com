@@ -2,8 +2,8 @@
 category: Home Assistant
 title: "Il cielo in salotto, parte 3: Spazio Profondo e Bollettini"
 excerpt: "La terza e ultima sezione della dashboard di astrometria: l'immagine astronomica del giorno NASA (APOD) con API key e secrets.yaml, la posizione in tempo reale della ISS con multiscrape, e i prossimi lanci spaziali. Come integrare tutto in Home Assistant con REST sensor, Generic Camera e multiscrape."
+master: /assets/images/seo-pipeline-farsi-trovare.png
 header:
-  overlay_image: /assets/images/home-assistant-overlay.jpg
   overlay_filter: 0.5
 ---
 

@@ -20,22 +20,9 @@ La dashboard è divisa in tre sezioni:
 3. **Spazio profondo e bollettini** — l'immagine del giorno NASA (APOD), posizione della ISS, prossimi lanci (parte 3)
 
 {% cloudinary /assets/images/astrometria-dashboard.png alt="La dashboard di astrometria" caption="Al termine di questa serie di articoli, l'aspetto del dashboard sarà - speriamo - più o meno questo" %}
-
-## Cosa serve: le integrazioni HACS
-
-Prima di entrare nel merito, elenco le card custom installate via [HACS](https://hacs.xyz) che vengono usate in questa o nelle prossime parti:
-
-- **`custom:lunar-phase-card`** — visualizza la fase lunare con grafico dell'arco celeste
-- **`custom:button-card`** — card altamente configurabile, usata per le tile con immagine live (parti 2 e 3)
-- **`custom:apexcharts-card`** — grafici per i dati del vento solare (parte 2)
-
-Tutte le altre integrazioni (REST sensor, Generic Camera, multiscrape) sono native o disponibili tramite HACS come integrazione, non come card.
-
 ---
 
 ## La Luna
-
-### Perché
 
 La Luna è l'oggetto celeste più osservato e fotografato da sempre. Per un astrofilo o un appassionato di astrofotografia, la fase lunare è una variabile critica: la notte di luna piena è splendida da guardare a occhio nudo, ma rende quasi inutili le sessioni di deep sky a causa della luce diffusa. Sapere in anticipo la fase e l'orario del tramonto del sole (che definisce l'inizio della notte astronomica) permette di pianificare le sessioni di osservazione con precisione.
 
