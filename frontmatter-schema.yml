@@ -29,14 +29,13 @@ words_per_minute: integer?                       # Override WPM per reading time
 # ── header — Hero image e parametri visivi ─────────────────────────────
 
 header:
-  # Legacy (DEPRECATED — in migrazione verso master:)
-  overlay_image:   string?                       # Percorso immagine hero (relativo o assoluto)
+  overlay_image:   string?                       # Percorso immagine hero. Alternativa a page.master, supporta Cloudinary transforms
   overlay_filter:  number?                       # Opacità overlay (0–1, default: 0.5)
   overlay_alt:     string?                       # Testo alternativo (default: page.title)
   teaser:          string?                       # Immagine teaser per card/anteprima
   og_image:        string?                       # Immagine Open Graph (default: master)
 
-  # Transform & overlay parameters (applicati solo se page.master è presente)
+  # Transform & overlay parameters (applicati a master o overlay_image)
   logo:             boolean|string?              # true = site_logo, "custom.png" = logo custom, false/nil = nessuno
   caption:          string?                      # Testo alt per hero (solo attributo alt="")
   transform:        "keystone"|"cinematic"?      # Template di trasformazione visiva
@@ -48,31 +47,33 @@ broadcast:
   channels:        [string]?                     # Canali target: linkedin, mastodon, bluesky, youtube
   sent:            boolean?                      # true = già inviato, la pipeline lo salta
 
-  # Per-channel image overrides (applicati a page.master via Cloudinary)
+  # Per-channel image config (applicati a page.master o overlay_image via Cloudinary)
   mastodon_image:
-    logo:          boolean|string?               # Logo overlay per Mastodon
-    caption:       boolean|string?               # true = page.title, stringa = testo custom
-    color:         string?                       # Colore testo (white, black, ...)
-    transform:     "keystone"|"cinematic"?       # Template di trasformazione
-    intensity:     "low"|"medium"|"high"?        # Intensità
+    overlay_image: string?                        # Override immagine per questo canale (default: page.master)
+    logo:           boolean|string?               # Logo overlay per Mastodon
+    caption:        boolean|string?               # true = page.title, stringa = testo custom
+    color:          string?                       # Colore testo (white, black, ...)
+    transform:      "keystone"|"cinematic"?       # Template di trasformazione
+    intensity:      "low"|"medium"|"high"?        # Intensità
 
   linkedin_image:
-    logo:          boolean|string?               # Logo overlay per LinkedIn
-    caption:       boolean|string?               # true = page.title, stringa = testo custom
-    color:         string?                       # Colore testo
-    transform:     "keystone"|"cinematic"?       # Template di trasformazione
-    intensity:     "low"|"medium"|"high"?        # Intensità
+    overlay_image: string?                        # Override immagine per questo canale (default: page.master)
+    logo:           boolean|string?               # Logo overlay per LinkedIn
+    caption:        boolean|string?               # true = page.title, stringa = testo custom
+    color:          string?                       # Colore testo
+    transform:      "keystone"|"cinematic"?       # Template di trasformazione
+    intensity:      "low"|"medium"|"high"?        # Intensità
 
-# ── Transform presets (Cloudinary) ─────────────────────────────────────
-# Keystone: prospettiva 3D, effetto poster su muro, bordo al vivo
-#   low:    e_distort:4:2:96:0:0:100:100:98/e_shadow:25,x_4,y_4/b_rgb:0f0f23
-#   medium: e_distort:8:5:92:0:0:100:100:95/e_shadow:40,x_8,y_8/b_rgb:0f0f23
-#   high:   e_distort:12:8:88:0:0:100:100:90/e_shadow:50,x_10,y_10/b_rgb:0f0f23
+# ── Transform presets (Cloudinary) — % values, colon-separated ─────────
+# Keystone: prospettiva 3/4 asimmetrica, effetto poster inclinato
+#   low:    b_rgb:0f0f23/e_distort:1p:1p:94p:10p:100p:100p:0p:95p
+#   medium: b_rgb:0f0f23/e_distort:2p:2p:88p:15p:100p:100p:0p:95p
+#   high:   b_rgb:0f0f23/e_distort:4p:3p:82p:20p:100p:100p:0p:95p
 #
-# Cinematic: distorsione + ombra + vignettatura, look "Apple keynote"
-#   low:    e_distort:4:2:96:0:0:100:100:98/e_shadow:25,x_4,y_4/b_rgb:0a0a1a/e_vignette:30
-#   medium: e_distort:8:5:92:0:0:100:100:95/e_shadow:40,x_8,y_8/b_rgb:0a0a1a/e_vignette:60
-#   high:   e_distort:12:8:88:0:0:100:100:90/e_shadow:50,x_10,y_10/b_rgb:0a0a1a/e_vignette:90
+# Cinematic: stesse distorsioni, sfondo navy (#0a0a1a vs #0f0f23)
+#   low:    b_rgb:0a0a1a/e_distort:1p:1p:94p:10p:100p:100p:0p:95p
+#   medium: b_rgb:0a0a1a/e_distort:2p:2p:88p:15p:100p:100p:0p:95p
+#   high:   b_rgb:0a0a1a/e_distort:4p:3p:82p:20p:100p:100p:0p:95p
 
 # ── Cloudinary overlay parameters ──────────────────────────────────────
 # Logo circolare: c_fill,g_face,w_{size},h_{size},r_max,f_auto,q_auto,bo_2px_solid_rgb:ffffff

@@ -351,29 +351,41 @@ def cloudinary_social_url(master_path, social_config, post_title, channel_type):
     # Transform preset
     transform_name = config.get('transform', '')
     intensity = config.get('intensity', 'medium')
+    # Safe crop after distortion (percentage-based, anchored top-left)
+    CROP_BY_INTENSITY = {
+        'low':    'c_crop,g_north_west,x_0.01,y_0.12,w_0.93,h_0.52',
+        'medium': 'c_crop,g_north_west,x_0.02,y_0.18,w_0.85,h_0.48',
+        'high':   'c_crop,g_north_west,x_0.04,y_0.22,w_0.78,h_0.42',
+    }
+
     PRESETS = {
         'keystone': {
-            'low':    'e_distort:4p:2p:96p:0p:0p:100p:100p:98p/e_shadow:25,x_4,y_4/b_rgb:0f0f23',
-            'medium': 'e_distort:8p:5p:92p:0p:0p:100p:100p:95p/e_shadow:40,x_8,y_8/b_rgb:0f0f23',
-            'high':   'e_distort:12p:8p:88p:0p:0p:100p:100p:90p/e_shadow:50,x_10,y_10/b_rgb:0f0f23',
+            'low':    'b_rgb:0f0f23/e_distort:1p:1p:94p:10p:100p:100p:0p:95p',
+            'medium': 'b_rgb:0f0f23/e_distort:2p:2p:88p:15p:100p:100p:0p:95p',
+            'high':   'b_rgb:0f0f23/e_distort:4p:3p:82p:20p:100p:100p:0p:95p',
         },
         'cinematic': {
-            'low':    'e_distort:4p:2p:96p:0p:0p:100p:100p:98p/e_shadow:25,x_4,y_4/b_rgb:0a0a1a/e_vignette:30',
-            'medium': 'e_distort:8p:5p:92p:0p:0p:100p:100p:95p/e_shadow:40,x_8,y_8/b_rgb:0a0a1a/e_vignette:60',
-            'high':   'e_distort:12p:8p:88p:0p:0p:100p:100p:90p/e_shadow:50,x_10,y_10/b_rgb:0a0a1a/e_vignette:90',
+            'low':    'b_rgb:0a0a1a/e_distort:1p:1p:94p:10p:100p:100p:0p:95p',
+            'medium': 'b_rgb:0a0a1a/e_distort:2p:2p:88p:15p:100p:100p:0p:95p',
+            'high':   'b_rgb:0a0a1a/e_distort:4p:3p:82p:20p:100p:100p:0p:95p',
         }
     }
     preset = PRESETS.get(transform_name, {}).get(intensity, '')
     if preset:
         parts.append(preset)
 
-    # Base crop (per-channel dimensions)
+    # Base crop: manual crop after distort, or AI-gravity if no transform
     crop_cfg = SOCIAL_CROPS.get(channel_type, SOCIAL_CROPS['linkedin'])
     width = crop_cfg.get('width', 1200)
     height = crop_cfg.get('height', 630)
-    parts.append(f"c_fill,g_auto,w_{width},h_{height},f_auto,q_auto")
+    if preset:
+        safe_crop = CROP_BY_INTENSITY.get(intensity, CROP_BY_INTENSITY['medium'])
+        parts.append(safe_crop)
+        parts.append(f"c_fill,g_auto,w_{width},h_{height},f_auto,q_auto")
+    else:
+        parts.append(f"c_fill,g_auto,w_{width},h_{height},f_auto,q_auto")
 
-    # Caption text + gradient
+    # Caption text + letterbox (only when caption present)
     caption_raw = config.get('caption')
     caption_text = None
     if caption_raw is True:
@@ -382,29 +394,47 @@ def cloudinary_social_url(master_path, social_config, post_title, channel_type):
         caption_text = str(caption_raw)
     if caption_text:
         caption_color = config.get('color', 'white')
-        parts.append('e_gradient_fade:symmetric,50')
+        # Letterbox: semi-transparent black bar behind text+logo
+        bar_url = f"{SITE_URL}/assets/images/1x1-black.png"
+        bar_b64 = base64.b64encode(bar_url.encode()).decode()
+        parts.append(f"l_fetch:{bar_b64},c_scale,w_{width},h_120,o_80,g_south")
+        parts.append('fl_layer_apply,g_south')
 
-    # Logo overlay (l_fetch: requires base64-encoded URL)
+    # Logo overlay: bigger (w_70), more room for 2-line caption
     logo_ref = config.get('logo')
     if logo_ref:
         logo_path = "/assets/logos/the-16bit-robot.png"
-        logo_url = (
-            f"https://res.cloudinary.com/{CLOUDINARY_CLOUD_NAME}/image/fetch/"
-            f"c_fill,g_face,w_60,h_60,r_max,f_auto,q_auto,bo_2px_solid_white/"
-            f"{SITE_URL}{logo_path}"
-        )
-        logo_b64 = base64.b64encode(logo_url.encode()).decode()
-        parts.append(f"l_fetch:{logo_b64},g_south_east,w_60,o_80,x_30,y_30")
-        parts.append('fl_layer_apply')
-
-    # Text overlay
-    if caption_text:
-        encoded = caption_text.replace('%', '%25').replace(',', '%2C').replace(' ', '%20')
+        logo_full = f"{SITE_URL}{logo_path}"
+        logo_b64 = base64.b64encode(logo_full.encode()).decode()
         parts.append(
-            f"l_text:Roboto_36_bold:{encoded},co_{caption_color},"
-            f"g_south_west,x_30,y_50,w_800,c_fit"
+            f"l_fetch:{logo_b64},"
+            f"c_fill,g_face,w_70,h_70,r_max,bo_2px_solid_white"
         )
-        parts.append('fl_layer_apply')
+        parts.append('fl_layer_apply,g_south_east,o_80,x_25,y_25')
+
+    # Text overlay: split on ':' → 2 lines (1st smaller), or single line
+    if caption_text:
+        if ':' in caption_text:
+            first, second = caption_text.split(':', 1)
+            first = f"{first.strip()}:"
+            second = second.strip()
+            # First line: smaller, positioned higher, colon appended
+            enc1 = first.replace('%', '%25').replace(',', '%2C').replace(' ', '%20')
+            parts.append(
+                f"l_text:Roboto_28_bold:{enc1},co_{caption_color},w_800,c_fit"
+            )
+            parts.append('fl_layer_apply,g_south_west,x_25,y_70')
+            enc2 = second.replace('%', '%25').replace(',', '%2C').replace(' ', '%20')
+            parts.append(
+                f"l_text:Roboto_36_bold:{enc2},co_{caption_color},w_800,c_fit"
+            )
+            parts.append('fl_layer_apply,g_south_west,x_25,y_30')
+        else:
+            encoded = caption_text.replace('%', '%25').replace(',', '%2C').replace(' ', '%20')
+            parts.append(
+                f"l_text:Roboto_38_bold:{encoded},co_{caption_color},w_800,c_fit"
+            )
+            parts.append('fl_layer_apply,g_south_west,x_25,y_30')
 
     return f"https://res.cloudinary.com/{CLOUDINARY_CLOUD_NAME}/image/fetch/{'/'.join(parts)}/{full_url}"
 
@@ -691,19 +721,25 @@ def broadcast_post(filepath, dry_run=False):
         if ch_type == "linkedin":
             target_count += 1  # Secondo draft (link post nativo)
 
-        # Build Cloudinary URL for the social crop
-        # Check for per-channel image config in frontmatter
+        # Resolve social image: broadcast.{channel}_image.overlay_image overrides page.master
         social_config = None
         broadcast_fm = fm.get('broadcast', {})
         if isinstance(broadcast_fm, dict):
             social_config = broadcast_fm.get(f"{ch_type}_image")
 
-        if master_image:
+        # Check for per-channel overlay_image override
+        social_image = master_image
+        if social_config and isinstance(social_config, dict):
+            override = social_config.get('overlay_image')
+            if override:
+                social_image = override if override.startswith('/') else f"/{override}"
+
+        if social_image:
             if social_config and isinstance(social_config, dict):
-                photo_url = cloudinary_social_url(master_image, social_config, post_info['title'], ch_type)
+                photo_url = cloudinary_social_url(social_image, social_config, post_info['title'], ch_type)
             else:
                 transforms = SOCIAL_CROPS[ch_type]["transforms"]
-                photo_url = cloudinary_url(master_image, transforms)
+                photo_url = cloudinary_url(social_image, transforms)
         else:
             photo_url = None
 

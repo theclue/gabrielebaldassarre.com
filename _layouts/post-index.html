@@ -5,7 +5,7 @@ layout: default
 {%- if page.master %}
   {%- assign overlay = page.master | cloudinary_hero: page.header %}
 {%- elsif page.header.overlay_image %}
-  {%- assign overlay = page.header.overlay_image | relative_url %}
+  {%- assign overlay = page.header.overlay_image | cloudinary_hero: page.header %}
 {%- endif %}
 {% if overlay %}
 <div class="main-header-image">

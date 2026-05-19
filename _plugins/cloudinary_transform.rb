@@ -4,18 +4,23 @@ module Jekyll
   module CloudinaryTransform
     TRANSFORM_PRESETS = {
       'keystone' => {
-        'low'    => 'e_distort:4p:2p:96p:0p:0p:100p:100p:98p/e_shadow:25,x_4,y_4/b_rgb:0f0f23',
-        'medium' => 'e_distort:8p:5p:92p:0p:0p:100p:100p:95p/e_shadow:40,x_8,y_8/b_rgb:0f0f23',
-        'high'   => 'e_distort:12p:8p:88p:0p:0p:100p:100p:90p/e_shadow:50,x_10,y_10/b_rgb:0f0f23'
+        'low'    => 'b_rgb:0f0f23/e_distort:1p:1p:94p:10p:100p:100p:0p:95p',
+        'medium' => 'b_rgb:0f0f23/e_distort:2p:2p:88p:15p:100p:100p:0p:95p',
+        'high'   => 'b_rgb:0f0f23/e_distort:4p:3p:82p:20p:100p:100p:0p:95p'
       },
       'cinematic' => {
-        'low'    => 'e_distort:4p:2p:96p:0p:0p:100p:100p:98p/e_shadow:25,x_4,y_4/b_rgb:0a0a1a/e_vignette:30',
-        'medium' => 'e_distort:8p:5p:92p:0p:0p:100p:100p:95p/e_shadow:40,x_8,y_8/b_rgb:0a0a1a/e_vignette:60',
-        'high'   => 'e_distort:12p:8p:88p:0p:0p:100p:100p:90p/e_shadow:50,x_10,y_10/b_rgb:0a0a1a/e_vignette:90'
+        'low'    => 'b_rgb:0a0a1a/e_distort:1p:1p:94p:10p:100p:100p:0p:95p',
+        'medium' => 'b_rgb:0a0a1a/e_distort:2p:2p:88p:15p:100p:100p:0p:95p',
+        'high'   => 'b_rgb:0a0a1a/e_distort:4p:3p:82p:20p:100p:100p:0p:95p'
       }
     }.freeze
 
-    CIRCLE_BORDER = 'bo_2px_solid_white'.freeze
+    # Safe crop after distortion: anchors to top-left (north_west), removes background fill
+    CROP_BY_INTENSITY = {
+      'low'    => 'c_crop,g_north_west,x_0.01,y_0.12,w_0.93,h_0.52',
+      'medium' => 'c_crop,g_north_west,x_0.02,y_0.18,w_0.85,h_0.48',
+      'high'   => 'c_crop,g_north_west,x_0.04,y_0.22,w_0.78,h_0.42'
+    }.freeze
 
     # -- helpers --
 
@@ -64,24 +69,25 @@ module Jekyll
 
       parts = []
 
-      # Transforms (before crop, so distortion fills the frame)
+      # Transforms (distortion + background)
       transform_name = header['transform'].to_s
       intensity      = header['intensity'].to_s
-      if TRANSFORM_PRESETS[transform_name] && TRANSFORM_PRESETS[transform_name][intensity]
-        parts << TRANSFORM_PRESETS[transform_name][intensity]
+      has_transform = TRANSFORM_PRESETS[transform_name] && TRANSFORM_PRESETS[transform_name][intensity]
+      if has_transform
+        parts << has_transform
+        parts << CROP_BY_INTENSITY[intensity] || CROP_BY_INTENSITY['medium']
+        parts << 'c_fill,g_auto,w_1922,h_724,f_auto,q_auto'
+      else
+        parts << 'c_fill,g_auto,w_1922,h_724,f_auto,q_auto'
       end
 
-      # Base crop
-      parts << 'c_fill,g_auto,w_1922,h_724,f_auto,q_auto'
-
-      # Logo overlay (l_fetch: requires base64-encoded URL)
+      # Logo overlay: raw fetch + transforms inline, placement in fl_layer_apply
       logo_ref = header['logo']
       logo_path = resolve_logo(logo_ref, site)
       if logo_path
         logo_full_url = logo_path.start_with?('http') ? logo_path : "#{site.config['url']}#{logo_path}"
-        logo_url = logo_circle_url(logo_full_url, 80)
-        parts << "l_fetch:#{b64_encode(logo_url)},g_north_east,w_80,o_85,x_96,y_40"
-        parts << 'fl_layer_apply'
+        parts << "l_fetch:#{b64_encode(logo_full_url)},c_fill,g_face,w_80,h_80,r_max,bo_2px_solid_white"
+        parts << 'fl_layer_apply,g_north_east,o_85,x_96,y_40'
       end
 
       "https://res.cloudinary.com/#{name}/image/fetch/#{parts.join('/')}/#{image_path}"
@@ -99,39 +105,57 @@ module Jekyll
       caption_color = 'white'
       config_h = config.is_a?(Hash) ? config : {}
 
-      # Transforms
+      # Transforms (distortion + background)
       transform_name = config_h['transform'].to_s
       intensity      = config_h['intensity'].to_s
-      if TRANSFORM_PRESETS[transform_name] && TRANSFORM_PRESETS[transform_name][intensity]
-        parts << TRANSFORM_PRESETS[transform_name][intensity]
+      has_transform = TRANSFORM_PRESETS[transform_name] && TRANSFORM_PRESETS[transform_name][intensity]
+      if has_transform
+        parts << has_transform
+        parts << (CROP_BY_INTENSITY[intensity] || CROP_BY_INTENSITY['medium'])
+        parts << "c_fill,g_auto,w_#{width},h_#{height},f_auto,q_auto"
+      else
+        parts << "c_fill,g_auto,w_#{width},h_#{height},f_auto,q_auto"
       end
-
-      # Base crop
-      parts << "c_fill,g_auto,w_#{width},h_#{height},f_auto,q_auto"
 
       # Caption
       caption_raw = config_h['caption']
       if caption_raw
         caption_text = caption_raw == true ? post_title : caption_raw.to_s
         caption_color = config_h['color'] || 'white'
-        parts << 'e_gradient_fade:symmetric,50'
+
+        # Letterbox: semi-transparent black bar behind text+logo (only when caption present)
+        bar_url = "#{site.config['url']}/assets/images/1x1-black.png"
+        parts << "l_fetch:#{b64_encode(bar_url)},c_scale,w_#{width},h_120,o_80"
+        parts << 'fl_layer_apply,g_south'
       end
 
-      # Logo overlay (l_fetch: requires base64-encoded URL)
+      # Logo overlay: bigger (w_70), pushes top edge up, more room for 2-line caption
       logo_ref = config_h['logo']
       logo_path = resolve_logo(logo_ref, site)
       if logo_path
         logo_full_url = logo_path.start_with?('http') ? logo_path : "#{site.config['url']}#{logo_path}"
-        logo_url = logo_circle_url(logo_full_url, 60)
-        parts << "l_fetch:#{b64_encode(logo_url)},g_south_east,w_60,o_80,x_30,y_30"
-        parts << 'fl_layer_apply'
+        parts << "l_fetch:#{b64_encode(logo_full_url)},c_fill,g_face,w_70,h_70,r_max,bo_2px_solid_white"
+        parts << 'fl_layer_apply,g_south_east,o_80,x_25,y_25'
       end
 
-      # Text overlay
+      # Text overlay: if caption contains ':', split into 2 lines (1st smaller)
       if caption_text && !caption_text.empty?
-        encoded = caption_text.gsub('%', '%25').gsub(',', '%2C').gsub(' ', '%20')
-        parts << "l_text:Roboto_36_bold:#{encoded},co_#{caption_color},g_south_west,x_30,y_50,w_800,c_fit"
-        parts << 'fl_layer_apply'
+        if caption_text.include?(':')
+          first, second = caption_text.split(':', 2)
+          first = "#{first.strip}:"
+          second = second.strip
+          # First line: smaller, positioned higher, colon appended
+          enc1 = first.gsub('%', '%25').gsub(',', '%2C').gsub(' ', '%20')
+          parts << "l_text:Roboto_28_bold:#{enc1},co_#{caption_color},w_800,c_fit"
+          parts << 'fl_layer_apply,g_south_west,x_25,y_70'
+          enc2 = second.gsub('%', '%25').gsub(',', '%2C').gsub(' ', '%20')
+          parts << "l_text:Roboto_36_bold:#{enc2},co_#{caption_color},w_800,c_fit"
+          parts << 'fl_layer_apply,g_south_west,x_25,y_30'
+        else
+          encoded = caption_text.gsub('%', '%25').gsub(',', '%2C').gsub(' ', '%20')
+          parts << "l_text:Roboto_38_bold:#{encoded},co_#{caption_color},w_800,c_fit"
+          parts << 'fl_layer_apply,g_south_west,x_25,y_30'
+        end
       end
 
       "https://res.cloudinary.com/#{name}/image/fetch/#{parts.join('/')}/#{full_image_url}"
