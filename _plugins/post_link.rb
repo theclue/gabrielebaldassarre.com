@@ -1,4 +1,5 @@
 require 'set'
+require 'shellwords'
 
 module Jekyll
   class PostLinkTag < Liquid::Tag
@@ -13,17 +14,12 @@ module Jekyll
     #   {% post_link "/url/" "text" %}
     #   {% post_link '/url/' 'text' %}
     #   {% post_link /url/ %}           (falls back to post title)
-    MARKUP_RE = /\A\s*(?:"([^"]+)"|'([^']+)'|(\S+))\s*(?:"([^"]+)"|'([^']+)'|(\S+))?\s*\z/m
 
     def initialize(tag_name, markup, tokens)
       super
-      if markup =~ MARKUP_RE
-        @post_ref  = ($1 || $2 || $3)&.strip
-        @link_text = ($4 || $5 || $6)&.strip
-      else
-        @post_ref  = markup.strip
-        @link_text = nil
-      end
+      args = Shellwords.shellsplit(markup.strip)
+      @post_ref  = args[0]
+      @link_text = args[1]
     end
 
     def render(context)
@@ -33,7 +29,7 @@ module Jekyll
       if post
         baseurl = (context.registers[:site].config["baseurl"] || "").chomp("/")
         url = "#{baseurl}#{post.url}"
-        "[#{@link_text || post.data['title']}](#{url})"
+        %(<a href="#{url}">#{@link_text || post.data['title']}</a>)
       else
         unless @@warned_refs.include?(@post_ref)
           @@warned_refs << @post_ref

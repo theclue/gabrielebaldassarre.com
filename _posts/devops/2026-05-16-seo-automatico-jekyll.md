@@ -35,7 +35,7 @@ Così è nata la mia pipeline di SEO automatica, la prima di una serie che nella
 
 ## Il workflow di supporto autoriale: l'idea
 
-Banalmente, una volta terminato il processo di pubblicazione di un articolo, il suo permalink viene passato a una serie di servizi che lo analizzano e lo notificano ai motori di ricerca. Il tutto orchestrato da [un unico file YAML](https://github.com/theclue/gabrielebaldassarre.com/blob/main/.github/workflows/seo-pipeline.yml). Zero servizi a pagamento, zero login da fare, zero dashboard da aprire, zero notifiche da controllare manualmente — tutto descritto programmaticamente dal contenuto del repository git e guidato da CICD.
+Banalmente, una volta terminato il processo di pubblicazione di un articolo, il suo permalink viene passato a una serie di servizi che lo analizzano e lo notificano ai motori di ricerca. Il tutto orchestrato da {% repo_url "/.github/workflows/seo-pipeline.yml" "un unico file YAML" %}. Zero servizi a pagamento, zero login da fare, zero dashboard da aprire, zero notifiche da controllare manualmente — tutto descritto programmaticamente dal contenuto del repository git e guidato da CICD.
 
 In questo articolo non andrò a riportare il codice nella sua interezza, per non appesantire la lettura, ma solo i suoi principi di base e le sue caratteristiche più istruttive. Chiaramente, sentitevi liberi di riutilizzare il workflow secondo le vostre esigenze: ne sarei felice!
 

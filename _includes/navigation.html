@@ -12,7 +12,6 @@
 
     <nav id="nav-menu" aria-label="{{ site.data.ui-text[site.locale].menu_label | default: 'Main navigation' }}">
       <ul class="navigation-bar">
-        <li><a href="{{ '/' | relative_url }}">{{ site.data.ui-text[site.locale].home | default: 'Home' }}</a></li>
         {% for navpage in site.pages %}
           {% if navpage.show_nav == true %}
             <li><a href="{{ navpage.url | relative_url }}">{{ navpage.title | strip_html }}</a></li>

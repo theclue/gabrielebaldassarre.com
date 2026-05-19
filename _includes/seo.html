@@ -1,4 +1,3 @@
-<!-- begin _includes/seo.html -->
 {%- if site.url -%}
   {%- assign seo_url = site.url | append: site.baseurl -%}
 {%- endif -%}
@@ -195,6 +194,56 @@
     {%- endfor %}
   ]
   {%- endif %}
+  {%- if page.readability %},
+  "wordCount": {{ page.readability.word_count | jsonify }},
+  "additionalProperty": [
+    {
+      "@type": "PropertyValue",
+      "propertyID": "flesch_vacca",
+      "name": "Flesch-Kincaid (Franchini-Vacca 1972)",
+      "value": {{ page.readability.flesch_vacca | jsonify }},
+      "description": {{ page.readability.flesch_vacca_label | jsonify }}
+    },
+    {
+      "@type": "PropertyValue",
+      "propertyID": "gulpease",
+      "name": "GULPEASE Readability Index",
+      "value": {{ page.readability.gulpease | jsonify }},
+      "description": {{ page.readability.gulpease_label | jsonify }}
+    },
+    {
+      "@type": "PropertyValue",
+      "propertyID": "lexical_educational_level",
+      "name": "Lexical Educational Level",
+      "value": {{ page.readability.educational_level | jsonify }},
+      "description": "School level estimated on purely lexical grounds (Flesch-Kincaid, Franchini-Vacca 1972). Does not reflect cognitive complexity of content."
+    },
+    {
+      "@type": "PropertyValue",
+      "propertyID": "lexical_typical_age_range",
+      "name": "Lexical Typical Age Range",
+      "value": {{ page.readability.typical_age_range | jsonify }}
+    },
+    {
+      "@type": "PropertyValue",
+      "propertyID": "sentence_count",
+      "name": "Sentence Count",
+      "value": {{ page.readability.sentence_count | jsonify }}
+    },
+    {
+      "@type": "PropertyValue",
+      "propertyID": "syllable_count",
+      "name": "Syllable Count",
+      "value": {{ page.readability.syllable_count | jsonify }}
+    },
+    {
+      "@type": "PropertyValue",
+      "propertyID": "avg_sentence_length",
+      "name": "Average Sentence Length",
+      "value": {{ page.readability.avg_sentence_length | jsonify }}
+    }
+  ]
+  {%- endif %}
 }
 {%- else -%}
 {
@@ -294,4 +343,3 @@
 {% if site.baidu_site_verification %}
   <meta name="baidu-site-verification" content="{{ site.baidu_site_verification }}">
 {% endif %}
-<!-- end _includes/seo.html -->

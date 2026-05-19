@@ -150,6 +150,8 @@ jobs:
 
       - name: Create or update PR 📨
         if: steps.collect.outputs.no_changes == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           EXISTING=$(gh pr list --base main --head incubator --state open --json number --jq '.[0].number // ""')
           BRANCH_COUNT="${{ steps.collect.outputs.branch_count }}"

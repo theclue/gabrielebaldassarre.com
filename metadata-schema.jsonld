@@ -1,0 +1,109 @@
+{
+  "@context": "https://schema.org",
+  "@type": "DefinedTermSet",
+  "@id": "https://gabrielebaldassarre.com/metadata-schema.jsonld",
+  "name": "gabrielebaldassarre.com — Custom Metadata Ontology",
+  "description": "Schema dei metadati custom utilizzati nei JSON-LD del blog. Ogni proprietà è namespace-izzata per distinguere metriche lessicali (deterministiche, calcolate a build-time) da metriche cognitive (LLM-based, stimate in pipeline asincrona).",
+  "hasDefinedTerm": [
+    {
+      "@type": "DefinedTerm",
+      "termCode": "flesch_vacca",
+      "name": "Flesch-Kincaid (Franchini-Vacca 1972)",
+      "description": "Adattamento italiano dell'indice di leggibilità Flesch-Kincaid. Formula (versione 1972): F=206−(0.65×S)−P con S=sillabe/100 parole, P=parole medie per frase. La versione 1972 è indicata come più attendibile dal Gruppo Universitario Linguistico-Pedagogico (fonte: Wikipedia).",
+      "citation": [
+        {
+          "@type": "CreativeWork",
+          "author": [{"@type": "Person", "name": "Valerio Franchina"}, {"@type": "Person", "name": "Roberto Vacca"}],
+          "name": "Adaptation of Flesh readability index on a bilingual text written by the same author both in Italian and English languages",
+          "datePublished": "1986",
+          "publication": {"@type": "PublicationIssue", "isPartOf": {"@type": "PublicationVolume", "name": "Linguaggi", "volumeNumber": 3}, "pageStart": "47", "pageEnd": "49"}
+        },
+        {
+          "@type": "CreativeWork",
+          "author": [{"@type": "Person", "name": "Valerio Franchina"}, {"@type": "Person", "name": "Roberto Vacca"}],
+          "name": "Adattamento italiano della formula di Flesch per la leggibilità (versione 1972)",
+          "datePublished": "1972",
+          "description": "Versione originale del 1972, citata da Wikipedia come la più attendibile per la lingua italiana."
+        }
+      ],
+      "inDefinedTermSet": { "@id": "https://gabrielebaldassarre.com/metadata-schema.jsonld" }
+    },
+    {
+      "@type": "DefinedTerm",
+      "termCode": "gulpease",
+      "name": "GULPEASE Readability Index",
+      "description": "Indice di leggibilità specifico per la lingua italiana. Formula: G=89−(LP/10)+(3×SP) dove LP=lettere/100 parole, SP=frasi/100 parole. Range 0–100, valori alti = testo più facile. Sviluppato dal GULP (Gruppo Universitario Linguistico-Pedagogico).",
+      "inDefinedTermSet": { "@id": "https://gabrielebaldassarre.com/metadata-schema.jsonld" }
+    },
+    {
+      "@type": "DefinedTerm",
+      "termCode": "lexical_educational_level",
+      "name": "Lexical Educational Level",
+      "description": "Livello scolastico italiano stimato su base puramente lessicale (Flesch-Vacca 1972). NON riflette la complessità cognitiva del contenuto: un testo su meccanica quantistica scritto con frasi brevi può risultare 'scuola primaria' lessicalmente pur richiedendo competenze universitarie. Per la complessità cognitiva si usa il namespace 'cognitive_*' (pipeline LLM-based, calcolata asincronamente).",
+      "inDefinedTermSet": { "@id": "https://gabrielebaldassarre.com/metadata-schema.jsonld" }
+    },
+    {
+      "@type": "DefinedTerm",
+      "termCode": "lexical_typical_age_range",
+      "name": "Lexical Typical Age Range",
+      "description": "Età tipica associata al lexical_educational_level. Mappatura: scuola primaria=6-11, secondaria I grado=11-14, secondaria II grado=14-19, università=19-24, post-laurea=24+.",
+      "inDefinedTermSet": { "@id": "https://gabrielebaldassarre.com/metadata-schema.jsonld" }
+    },
+    {
+      "@type": "DefinedTerm",
+      "termCode": "word_count",
+      "name": "Word Count",
+      "description": "Numero di parole nel contenuto testuale del post (strip HTML e Markdown). Esposto come wordCount nativo schema.org/Article.",
+      "inDefinedTermSet": { "@id": "https://gabrielebaldassarre.com/metadata-schema.jsonld" }
+    },
+    {
+      "@type": "DefinedTerm",
+      "termCode": "sentence_count",
+      "name": "Sentence Count",
+      "description": "Numero di frasi rilevate nel testo.",
+      "inDefinedTermSet": { "@id": "https://gabrielebaldassarre.com/metadata-schema.jsonld" }
+    },
+    {
+      "@type": "DefinedTerm",
+      "termCode": "syllable_count",
+      "name": "Syllable Count",
+      "description": "Numero totale di sillabe rilevate con conteggio euristico su vocali italiane.",
+      "inDefinedTermSet": { "@id": "https://gabrielebaldassarre.com/metadata-schema.jsonld" }
+    },
+    {
+      "@type": "DefinedTerm",
+      "termCode": "avg_sentence_length",
+      "name": "Average Sentence Length",
+      "description": "Lunghezza media delle frasi in parole (word_count / sentence_count).",
+      "inDefinedTermSet": { "@id": "https://gabrielebaldassarre.com/metadata-schema.jsonld" }
+    },
+    {
+      "@type": "DefinedTerm",
+      "termCode": "cognitive_educational_level",
+      "name": "Cognitive Educational Level",
+      "description": "[FUTURO — pipeline LLM-based] Livello scolastico stimato in base alla complessità cognitiva del contenuto (lessicografia specialistica, densità concettuale, carico cognitivo intrinseco). Popolato asincronamente da una pipeline secondaria che arricchisce il frontmatter. Quando presente, il native 'educationalLevel' schema.org rifletterà questo valore.",
+      "inDefinedTermSet": { "@id": "https://gabrielebaldassarre.com/metadata-schema.jsonld" }
+    },
+    {
+      "@type": "DefinedTerm",
+      "termCode": "cognitive_load",
+      "name": "Cognitive Load Index",
+      "description": "[FUTURO — pipeline LLM-based] Indice sintetico di fatica cognitiva (0–100). Combina complessità lessicografica, densità concettuale e tasso di informazione. Valori alti = maggiore sforzo cognitivo richiesto.",
+      "inDefinedTermSet": { "@id": "https://gabrielebaldassarre.com/metadata-schema.jsonld" }
+    },
+    {
+      "@type": "DefinedTerm",
+      "termCode": "intended_audience",
+      "name": "Intended Audience",
+      "description": "[FUTURO — pipeline LLM-based] Profilo del lettore ideale: 'general', 'enthusiast', 'practitioner', 'researcher', 'expert'.",
+      "inDefinedTermSet": { "@id": "https://gabrielebaldassarre.com/metadata-schema.jsonld" }
+    },
+    {
+      "@type": "DefinedTerm",
+      "termCode": "intended_intent",
+      "name": "Intended Intent",
+      "description": "[FUTURO — pipeline LLM-based] Obiettivo comunicativo del post: 'inform', 'teach', 'persuade', 'entertain', 'inspire', 'document'.",
+      "inDefinedTermSet": { "@id": "https://gabrielebaldassarre.com/metadata-schema.jsonld" }
+    }
+  ]
+}
