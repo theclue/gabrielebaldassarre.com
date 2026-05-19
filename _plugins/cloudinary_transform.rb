@@ -36,19 +36,16 @@ module Jekyll
       Base64.strict_encode64(url)
     end
 
-    # Build Cloudinary URL for a circular logo
-    # size: integer (e.g. 80 for nav, 60 for social overlay)
-    def self.logo_circle_url(logo_path, size, context = nil)
-      return logo_path if dev_bypass?
+    # Build Cloudinary URL for a circular logo (expects full remote URL)
+    def self.logo_circle_url(full_logo_url, size)
+      return full_logo_url if dev_bypass?
 
-      name = cloud_name(context)
-      return logo_path unless name
+      name = cloud_name
+      return full_logo_url unless name
 
-      [
-        "https://res.cloudinary.com/#{name}/image/fetch",
-        "c_fill,g_face,w_#{size},h_#{size},r_max,f_auto,q_auto,#{CIRCLE_BORDER}",
-        logo_path
-      ].join('/')
+      "https://res.cloudinary.com/#{name}/image/fetch/" \
+        "c_fill,g_face,w_#{size},h_#{size},r_max,f_auto,q_auto,#{CIRCLE_BORDER}/" \
+        "#{full_logo_url}"
     end
 
     # Resolve logo reference: true → site_logo, string → custom, nil/false → none
@@ -81,7 +78,8 @@ module Jekyll
       logo_ref = header['logo']
       logo_path = resolve_logo(logo_ref, site)
       if logo_path
-        logo_url = logo_circle_url(logo_path, 80, context)
+        logo_full_url = logo_path.start_with?('http') ? logo_path : "#{site.config['url']}#{logo_path}"
+        logo_url = logo_circle_url(logo_full_url, 80)
         parts << "l_fetch:#{b64_encode(logo_url)},g_north_east,w_80,o_85,x_96,y_40"
         parts << 'fl_layer_apply'
       end
@@ -123,7 +121,8 @@ module Jekyll
       logo_ref = config_h['logo']
       logo_path = resolve_logo(logo_ref, site)
       if logo_path
-        logo_url = logo_circle_url(logo_path, 60)
+        logo_full_url = logo_path.start_with?('http') ? logo_path : "#{site.config['url']}#{logo_path}"
+        logo_url = logo_circle_url(logo_full_url, 60)
         parts << "l_fetch:#{b64_encode(logo_url)},g_south_east,w_60,o_80,x_30,y_30"
         parts << 'fl_layer_apply'
       end
@@ -148,7 +147,12 @@ module Jekyll
 
     # Liquid filter: site.site_logo | cloudinary_logo: 80
     def cloudinary_logo(logo_path, size = 80)
-      CloudinaryTransform.logo_circle_url(logo_path, size.to_i, @context)
+      return logo_path if CloudinaryTransform.dev_bypass?
+      site = @context.registers[:site]
+      site_url = site.config['url']
+      cloud_name = CloudinaryTransform.cloud_name(@context)
+      full_url = logo_path.start_with?('http') ? logo_path : "#{site_url}#{logo_path}"
+      "https://res.cloudinary.com/#{cloud_name}/image/fetch/w_#{size},h_#{size},c_fit,f_auto,q_auto/#{full_url}"
     end
   end
 end
