@@ -31,6 +31,7 @@ locale                   : it-IT
 lang                     : it_IT
 title_separator          : "|"
 name                     : "Gabriele Baldassarre"
+site_logo                : "/assets/logos/the-16bit-robot.png"
 url                      : "https://gabrielebaldassarre.com"
 baseurl                  : "/"
 repository               : "theclue/gabrielebaldassarre.com"

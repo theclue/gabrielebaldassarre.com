@@ -11,6 +11,7 @@ import os
 import re
 import sys
 import time
+import base64
 import urllib.request
 import urllib.error
 
@@ -111,9 +112,9 @@ def parse_frontmatter(filepath):
     return fm, fm_raw, body, content
 
 
-def update_file_frontmatter(filepath, fm, new_key, new_value):
-    """Aggiunge una chiave `new_key: new_value` dentro il blocco `broadcast:` del frontmatter,
-    preservando TUTTA la formattazione originale del resto del file."""
+def update_file_frontmatter(filepath, fm, updates):
+    """Aggiorna il frontmatter YAML con le chiavi specificate, preservando la formattazione.
+    `updates` è un dict: { 'broadcast': { 'sent': True } }"""
     with open(filepath) as f:
         content = f.read()
 
@@ -123,73 +124,20 @@ def update_file_frontmatter(filepath, fm, new_key, new_value):
     fm_text = content[start:end]
     after_fm = content[end:]
 
-    lines = fm_text.split("\n")
-    new_lines = []
-    in_broadcast = False
-    broadcast_indent = 0
-    broadcast_inserted = False
+    import yaml
+    new_fm = yaml.safe_load(fm_text) or {}
 
-    for i, line in enumerate(lines):
-        new_lines.append(line)
+    def deep_merge(base, updates):
+        for k, v in updates.items():
+            if isinstance(v, dict) and isinstance(base.get(k), dict):
+                deep_merge(base[k], v)
+            else:
+                base[k] = v
 
-        stripped = line.strip()
+    deep_merge(new_fm, updates)
 
-        if re.match(r'^broadcast:', stripped):
-            in_broadcast = True
-            broadcast_indent = len(line) - len(line.lstrip())
-
-        if in_broadcast:
-            # Check next line: if it's at the same or lower indent level,
-            # we're either at end of broadcast block or it's an empty broadcast
-            next_line = lines[i + 1] if i + 1 < len(lines) else ""
-            next_stripped = next_line.strip()
-            next_indent = len(next_line) - len(next_line.lstrip()) if next_line.strip() else 999
-
-            # End of broadcast block: next line is at same or outer indent level
-            if next_indent <= broadcast_indent and next_stripped and not next_stripped.startswith("#"):
-                # Check if sent: true already exists in this block
-                block_lines = fm_text.split("\n")
-                block_start = 0
-                for j, bl in enumerate(block_lines):
-                    if re.match(r'^broadcast:', bl.strip()):
-                        block_start = j
-                        break
-                # Search forward to end of broadcast block
-                block_end = len(block_lines)
-                for j in range(block_start + 1, len(block_lines)):
-                    bl_stripped = block_lines[j].strip()
-                    bl_indent = len(block_lines[j]) - len(block_lines[j].lstrip()) if bl_stripped else 999
-                    if bl_stripped and bl_indent <= broadcast_indent and not bl_stripped.startswith("#"):
-                        block_end = j
-                        break
-                block_text = "\n".join(block_lines[block_start:block_end])
-                if "sent:" not in block_text:
-                    indent = " " * (broadcast_indent + 2)
-                    new_lines.insert(len(new_lines), f"{indent}sent: true")
-                in_broadcast = False
-                broadcast_inserted = True
-
-    # If broadcast block wasn't found or is a simple scalar, handle that
-    if not broadcast_inserted:
-        # Find broadcast: line
-        for i, line in enumerate(new_lines):
-            if re.match(r'^broadcast:', line.strip()):
-                val = line.split(":", 1)[1].strip()
-                if val in ("true", "false", ""):
-                    # Replace scalar with mapping
-                    indent = " " * (len(line) - len(line.lstrip()))
-                    new_lines[i] = f"{indent}broadcast:"
-                    new_lines.insert(i + 1, f"{indent}  sent: true")
-                broadcast_inserted = True
-                break
-
-    # If broadcast key doesn't exist at all
-    if not broadcast_inserted:
-        new_lines.append("broadcast:")
-        new_lines.append("  sent: true")
-
-    new_fm = "\n".join(new_lines)
-    new_content = f"{before_fm}{new_fm}{after_fm}"
+    new_fm_yaml = yaml.dump(new_fm, allow_unicode=True, default_flow_style=False, sort_keys=False)
+    new_content = f"{before_fm}{new_fm_yaml}{after_fm}"
 
     with open(filepath, "w") as f:
         f.write(new_content)
@@ -388,6 +336,77 @@ def cloudinary_url(master_path, transforms):
         f"https://res.cloudinary.com/{CLOUDINARY_CLOUD_NAME}/image/fetch/"
         f"{transforms}/{SITE_URL}{master_path}"
     )
+
+
+def cloudinary_social_url(master_path, social_config, post_title, channel_type):
+    """Costruisce un URL Cloudinary con transform + logo + caption per social media."""
+    if not master_path or not CLOUDINARY_CLOUD_NAME:
+        return None
+
+    full_url = f"{SITE_URL}{master_path}"
+
+    parts = []
+    config = social_config or {}
+
+    # Transform preset
+    transform_name = config.get('transform', '')
+    intensity = config.get('intensity', 'medium')
+    PRESETS = {
+        'keystone': {
+            'low':    'e_distort:4p:2p:96p:0p:0p:100p:100p:98p/e_shadow:25,x_4,y_4/b_rgb:0f0f23',
+            'medium': 'e_distort:8p:5p:92p:0p:0p:100p:100p:95p/e_shadow:40,x_8,y_8/b_rgb:0f0f23',
+            'high':   'e_distort:12p:8p:88p:0p:0p:100p:100p:90p/e_shadow:50,x_10,y_10/b_rgb:0f0f23',
+        },
+        'cinematic': {
+            'low':    'e_distort:4p:2p:96p:0p:0p:100p:100p:98p/e_shadow:25,x_4,y_4/b_rgb:0a0a1a/e_vignette:30',
+            'medium': 'e_distort:8p:5p:92p:0p:0p:100p:100p:95p/e_shadow:40,x_8,y_8/b_rgb:0a0a1a/e_vignette:60',
+            'high':   'e_distort:12p:8p:88p:0p:0p:100p:100p:90p/e_shadow:50,x_10,y_10/b_rgb:0a0a1a/e_vignette:90',
+        }
+    }
+    preset = PRESETS.get(transform_name, {}).get(intensity, '')
+    if preset:
+        parts.append(preset)
+
+    # Base crop (per-channel dimensions)
+    crop_cfg = SOCIAL_CROPS.get(channel_type, SOCIAL_CROPS['linkedin'])
+    width = crop_cfg.get('width', 1200)
+    height = crop_cfg.get('height', 630)
+    parts.append(f"c_fill,g_auto,w_{width},h_{height},f_auto,q_auto")
+
+    # Caption text + gradient
+    caption_raw = config.get('caption')
+    caption_text = None
+    if caption_raw is True:
+        caption_text = post_title
+    elif caption_raw:
+        caption_text = str(caption_raw)
+    if caption_text:
+        caption_color = config.get('color', 'white')
+        parts.append('e_gradient_fade:symmetric,50')
+
+    # Logo overlay (l_fetch: requires base64-encoded URL)
+    logo_ref = config.get('logo')
+    if logo_ref:
+        logo_path = "/assets/logos/the-16bit-robot.png"
+        logo_url = (
+            f"https://res.cloudinary.com/{CLOUDINARY_CLOUD_NAME}/image/fetch/"
+            f"c_fill,g_face,w_60,h_60,r_max,f_auto,q_auto,bo_2px_solid_white/"
+            f"{SITE_URL}{logo_path}"
+        )
+        logo_b64 = base64.b64encode(logo_url.encode()).decode()
+        parts.append(f"l_fetch:{logo_b64},g_south_east,w_60,o_80,x_30,y_30")
+        parts.append('fl_layer_apply')
+
+    # Text overlay
+    if caption_text:
+        encoded = caption_text.replace('%', '%25').replace(',', '%2C').replace(' ', '%20')
+        parts.append(
+            f"l_text:Roboto_36_bold:{encoded},co_{caption_color},"
+            f"g_south_west,x_30,y_50,w_800,c_fit"
+        )
+        parts.append('fl_layer_apply')
+
+    return f"https://res.cloudinary.com/{CLOUDINARY_CLOUD_NAME}/image/fetch/{'/'.join(parts)}/{full_url}"
 
 
 def buffer_graphql(query, variables=None):
@@ -673,9 +692,18 @@ def broadcast_post(filepath, dry_run=False):
             target_count += 1  # Secondo draft (link post nativo)
 
         # Build Cloudinary URL for the social crop
-        transforms = SOCIAL_CROPS[ch_type]["transforms"]
+        # Check for per-channel image config in frontmatter
+        social_config = None
+        broadcast_fm = fm.get('broadcast', {})
+        if isinstance(broadcast_fm, dict):
+            social_config = broadcast_fm.get(f"{ch_type}_image")
+
         if master_image:
-            photo_url = cloudinary_url(master_image, transforms)
+            if social_config and isinstance(social_config, dict):
+                photo_url = cloudinary_social_url(master_image, social_config, post_info['title'], ch_type)
+            else:
+                transforms = SOCIAL_CROPS[ch_type]["transforms"]
+                photo_url = cloudinary_url(master_image, transforms)
         else:
             photo_url = None
 
@@ -714,7 +742,7 @@ def broadcast_post(filepath, dry_run=False):
     # Step 4: Mark as sent in frontmatter — only if ALL targeted channels succeeded
     if not dry_run:
         if created_count >= target_count:
-            update_file_frontmatter(filepath, fm, "broadcast.sent", True)
+            update_file_frontmatter(filepath, fm, {'broadcast': {'sent': True}})
             print(f"  Frontmatter aggiornato: broadcast.sent = true")
         else:
             print(f"  ATTENZIONE: {created_count}/{target_count} canali creati — broadcast.sent NON impostato")

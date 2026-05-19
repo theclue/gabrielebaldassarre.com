@@ -415,6 +415,24 @@ main {
 }
 .site-brand:hover { color: var(--color-accent); }
 
+.site-branding {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.site-logo {
+  border-radius: 50%;
+  display: block;
+  opacity: 0.95;
+  transition: filter 0.3s ease, opacity 0.3s ease;
+}
+
+[data-theme="dark"] .site-logo {
+  filter: saturate(0.85) brightness(0.95);
+  opacity: 0.92;
+}
+
 .navigation-bar {
   list-style: none;
   margin: 0;

@@ -1,6 +1,18 @@
 <header class="site-header">
   <div class="container site-header__inner">
-    <a class="site-brand" href="{{ '/' | relative_url }}">{{ site.title }}</a>
+    <div class="site-branding">
+      {% if site.site_logo %}
+      <a href="{{ '/' | relative_url }}" class="site-logo-link" aria-label="{{ site.name | default: site.title }}">
+        <img src="{% if jekyll.environment == 'production' %}{{ site.site_logo | cloudinary_logo: 80 }}{% else %}{{ site.site_logo | relative_url }}{% endif %}"
+             alt="{{ site.name | default: site.title }} logo"
+             class="site-logo"
+             width="40"
+             height="40"
+             decoding="async">
+      </a>
+      {% endif %}
+      <a class="site-brand" href="{{ '/' | relative_url }}">{{ site.title }}</a>
+    </div>
 
     <button type="button"
             class="nav-toggle"

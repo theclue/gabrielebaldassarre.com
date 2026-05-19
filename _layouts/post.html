@@ -3,7 +3,7 @@ layout: default
 ---
 <article class="hentry" itemscope itemtype="https://schema.org/BlogPosting">
   {%- if page.master %}
-    {%- assign overlay = page.master | cloudinary_url: "w_1922,h_724,c_fill,g_auto,q_auto,f_auto" %}
+    {%- assign overlay = page.master | cloudinary_hero: page.header %}
   {%- elsif page.header.overlay_image %}
     {%- assign overlay = page.header.overlay_image | relative_url %}
   {%- endif %}

@@ -1,0 +1,98 @@
+# Frontmatter Schema — gabrielebaldassarre.com
+# ============================================
+# Schema di riferimento per il frontmatter YAML dei post Jekyll.
+# Questo file descrive tutti i campi, i loro tipi, valori di default e
+# comportamento. È la source of truth per pipeline automatiche (broadcast,
+# SEO, readability) e per la validazione pre-deploy.
+#
+# Convenzioni:
+#   ? campo           → campo opzionale
+#   [campo, ...]      → array
+#   campo: tipo       → tipo atteso
+#   default: valore   → valore predefinito se omesso
+#   DEPRECATED        → supportato per retrocompatibilità, in via di rimozione
+
+# ── Root-level fields ──────────────────────────────────────────────────
+
+title:           string                          # Titolo del post (obbligatorio)
+subtitle:        string?                         # Sottotitolo
+excerpt:         string?                         # Estratto (SEO + preview card)
+description:     string?                         # Meta description (default: excerpt)
+category:        string?                         # Categoria principale (es. "DevOps", "Fisica")
+tags:            [string]?                       # Tag del post
+master:          string?                         # Percorso immagine master (Cloudinary)
+canonical_url:   string?                         # URL canonico (se diverso dal permalink)
+mermaid:         boolean?                        # Abilita diagrammi Mermaid nella pagina
+future:          boolean?                        # Forza pubblicazione post futuro
+words_per_minute: integer?                       # Override WPM per reading time
+
+# ── header — Hero image e parametri visivi ─────────────────────────────
+
+header:
+  # Legacy (DEPRECATED — in migrazione verso master:)
+  overlay_image:   string?                       # Percorso immagine hero (relativo o assoluto)
+  overlay_filter:  number?                       # Opacità overlay (0–1, default: 0.5)
+  overlay_alt:     string?                       # Testo alternativo (default: page.title)
+  teaser:          string?                       # Immagine teaser per card/anteprima
+  og_image:        string?                       # Immagine Open Graph (default: master)
+
+  # Transform & overlay parameters (applicati solo se page.master è presente)
+  logo:             boolean|string?              # true = site_logo, "custom.png" = logo custom, false/nil = nessuno
+  caption:          string?                      # Testo alt per hero (solo attributo alt="")
+  transform:        "keystone"|"cinematic"?      # Template di trasformazione visiva
+  intensity:        "low"|"medium"|"high"?       # Intensità della trasformazione (default: medium)
+
+# ── broadcast — Configurazione social e pipeline ───────────────────────
+
+broadcast:
+  channels:        [string]?                     # Canali target: linkedin, mastodon, bluesky, youtube
+  sent:            boolean?                      # true = già inviato, la pipeline lo salta
+
+  # Per-channel image overrides (applicati a page.master via Cloudinary)
+  mastodon_image:
+    logo:          boolean|string?               # Logo overlay per Mastodon
+    caption:       boolean|string?               # true = page.title, stringa = testo custom
+    color:         string?                       # Colore testo (white, black, ...)
+    transform:     "keystone"|"cinematic"?       # Template di trasformazione
+    intensity:     "low"|"medium"|"high"?        # Intensità
+
+  linkedin_image:
+    logo:          boolean|string?               # Logo overlay per LinkedIn
+    caption:       boolean|string?               # true = page.title, stringa = testo custom
+    color:         string?                       # Colore testo
+    transform:     "keystone"|"cinematic"?       # Template di trasformazione
+    intensity:     "low"|"medium"|"high"?        # Intensità
+
+# ── Transform presets (Cloudinary) ─────────────────────────────────────
+# Keystone: prospettiva 3D, effetto poster su muro, bordo al vivo
+#   low:    e_distort:4:2:96:0:0:100:100:98/e_shadow:25,x_4,y_4/b_rgb:0f0f23
+#   medium: e_distort:8:5:92:0:0:100:100:95/e_shadow:40,x_8,y_8/b_rgb:0f0f23
+#   high:   e_distort:12:8:88:0:0:100:100:90/e_shadow:50,x_10,y_10/b_rgb:0f0f23
+#
+# Cinematic: distorsione + ombra + vignettatura, look "Apple keynote"
+#   low:    e_distort:4:2:96:0:0:100:100:98/e_shadow:25,x_4,y_4/b_rgb:0a0a1a/e_vignette:30
+#   medium: e_distort:8:5:92:0:0:100:100:95/e_shadow:40,x_8,y_8/b_rgb:0a0a1a/e_vignette:60
+#   high:   e_distort:12:8:88:0:0:100:100:90/e_shadow:50,x_10,y_10/b_rgb:0a0a1a/e_vignette:90
+
+# ── Cloudinary overlay parameters ──────────────────────────────────────
+# Logo circolare: c_fill,g_face,w_{size},h_{size},r_max,f_auto,q_auto,bo_2px_solid_rgb:ffffff
+# Hero logo: w_80, g_north_east, x_96, y_40 (top-right, ~5% margin)
+# Social logo: w_60, g_south_east, x_30, y_30 (bottom-right)
+# Social caption: Roboto 36px bold, g_south_west, w_800, c_fit, 2 righe
+# Gradient fade: e_gradient_fade:symmetric,50 (quando caption presente)
+# Font: Roboto (Google Font, il più simile al system font stack del blog)
+
+# ── Readability (popolato a build-time dal plugin readability.rb) ──────
+# page.readability.flesch_vacca          → Flesch-Kincaid Franchini-Vacca 1972 (0–100)
+# page.readability.gulpease              → GULPEASE (0–100)
+# page.readability.word_count            → Numero parole
+# page.readability.sentence_count        → Numero frasi
+# page.readability.syllable_count        → Numero sillabe
+# page.readability.avg_sentence_length   → Lunghezza media frase
+# page.readability.educational_level     → Livello scolastico lessicale (inglese)
+# page.readability.typical_age_range     → Fascia d'età lessicale
+
+# ── Custom Liquid tags ─────────────────────────────────────────────────
+# {% post_link /url/ "text" %}  → Link interno safe (fallback a plain text)
+# {% repo_url path "text" %}   → Link a file su GitHub (fallback a plain text)
+# {% cloudinary path %}         → Immagine via Cloudinary (body)
