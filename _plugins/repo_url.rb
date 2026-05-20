@@ -7,15 +7,19 @@ module Jekyll
       args = Shellwords.shellsplit(markup.strip)
       @path = args[0]&.sub(%r{^/}, '')
       @link_text = args[1]
+      @role    = Jekyll::LinkMeta.extract_kv(markup.to_s, 'role')
+      @context = Jekyll::LinkMeta.extract_kv(markup.to_s, 'context')
+      @target  = Jekyll::LinkMeta.extract_kv(markup.to_s, 'target')
     end
 
     def render(context)
       site = context.registers[:site]
       repo = site.config['repository']
+      text = @link_text || @path
 
       unless repo
         Jekyll.logger.warn "repo_url:", "repository not set in _config.yml"
-        return @link_text || @path
+        return text
       end
 
       source_root = site.source
@@ -23,10 +27,24 @@ module Jekyll
 
       if File.exist?(full_path)
         url = "https://github.com/#{repo}/blob/main/#{@path}"
-        %(<a href="#{url}">#{@link_text || @path}</a>)
+
+        if @role
+          page = context.registers[:page]
+          page['link_objects'] ||= []
+          meta = Jekyll::LinkMeta.validated({
+            'url' => url, 'text' => text,
+            'role' => @role, 'context' => @context, 'target' => @target || 'external-authoritative',
+            'name' => (@link_text || File.basename(@path.to_s, '.*'))
+          })
+          page['link_objects'] << meta if meta
+        end
+
+        icon_name = 'github'
+        icon_svg = Jekyll::LinkMeta.icon_svg(icon_name)
+        %(<a href="#{url}">#{text}#{icon_svg}</a>)
       else
         Jekyll.logger.warn "repo_url:", "file not found: #{@path} — rendering as plain text"
-        @link_text || @path
+        text
       end
     end
   end

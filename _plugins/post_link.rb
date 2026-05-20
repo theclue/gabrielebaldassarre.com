@@ -3,23 +3,19 @@ require 'shellwords'
 
 module Jekyll
   class PostLinkTag < Liquid::Tag
-    # Deduplicates warnings within a single build (feed plugin re-processes Liquid tags)
     @@warned_refs = Set.new
     Jekyll::Hooks.register :site, :after_reset do
       @@warned_refs.clear
     end
-
-    # Handles all these forms:
-    #   {% post_link /url/ "text" %}
-    #   {% post_link "/url/" "text" %}
-    #   {% post_link '/url/' 'text' %}
-    #   {% post_link /url/ %}           (falls back to post title)
 
     def initialize(tag_name, markup, tokens)
       super
       args = Shellwords.shellsplit(markup.strip)
       @post_ref  = args[0]
       @link_text = args[1]
+      @role      = Jekyll::LinkMeta.extract_kv(markup.to_s, 'role')
+      @context   = Jekyll::LinkMeta.extract_kv(markup.to_s, 'context')
+      @target    = Jekyll::LinkMeta.extract_kv(markup.to_s, 'target')
     end
 
     def render(context)
@@ -29,7 +25,21 @@ module Jekyll
       if post
         baseurl = (context.registers[:site].config["baseurl"] || "").chomp("/")
         url = "#{baseurl}#{post.url}"
-        %(<a href="#{url}">#{@link_text || post.data['title']}</a>)
+        text = @link_text || post.data['title']
+
+        # Register link metadata if role is present
+        if @role
+          page = context.registers[:page]
+          page['link_objects'] ||= []
+          meta = Jekyll::LinkMeta.validated({
+            'url' => url, 'text' => text,
+            'role' => @role, 'context' => @context, 'target' => @target || 'internal',
+            'name' => post.data['title']
+          })
+          page['link_objects'] << meta if meta
+        end
+
+        %(<a href="#{url}">#{text}</a>)
       else
         unless @@warned_refs.include?(@post_ref)
           @@warned_refs << @post_ref

@@ -27,11 +27,15 @@ module Jekyll
       @caption = nil
       @loading = "lazy"
       @transforms = "q_auto,f_auto"
+      @role = nil
+      @context = nil
+      @step = nil
+      @compare_with = nil
+      @representative = nil
+      @long_desc = nil
 
       # Parse path (first word before any key=value)
-      # If first word is not a path but second is, skip the first (legacy preset)
       if markup =~ /\A\s*(\S+)\s+(\/\S+)(.*)\z/m
-        # Second word starts with / → it's the real path
         @path = $2
         rest = $1 + " " + ($3 || "")
       elsif markup =~ /\A\s*(\S+)(.*)\z/m
@@ -39,15 +43,15 @@ module Jekyll
         rest = $2
       end
       if @path
-        if rest =~ /alt\s*=\s*"(.*?)"/
-          @alt = $1
-        end
-        if rest =~ /caption\s*=\s*"(.*?)"/
-          @caption = $1
-        end
-        if rest =~ /loading\s*=\s*"(.*?)"/
-          @loading = $1
-        end
+        @alt        = extract_attr(rest, 'alt')
+        @caption    = extract_attr(rest, 'caption')
+        @loading    = extract_attr(rest, 'loading') || @loading
+        @role       = extract_attr(rest, 'role')
+        @context    = extract_attr(rest, 'context')
+        @step       = extract_attr(rest, 'step')
+        @compare_with = extract_attr(rest, 'compare_with')
+        @representative = extract_attr(rest, 'representativeOfPage')
+        @long_desc  = extract_attr(rest, 'long_description')
       end
     end
 
@@ -55,7 +59,6 @@ module Jekyll
       return "" if @path.nil? || @path.empty?
 
       path = @path
-      # Make relative paths absolute
       unless path.start_with?("/") || path.start_with?("http")
         path = "/#{path}"
       end
@@ -72,12 +75,66 @@ module Jekyll
         src = path
       end
 
-      img_tag = %(<img src="#{src}" alt="#{@alt}" loading="#{@loading}" decoding="async">)
+      # Register image metadata for SEO
+      if @role
+        tag_meta = {
+          'src' => path,
+          'role' => @role,
+          'context' => @context,
+          'caption' => @caption,
+          'long_description' => @long_desc,
+          'step' => @step,
+          'compare_with' => @compare_with,
+          'representativeOfPage' => @representative
+        }.compact
+        page = context.registers[:page]
+        page['image_meta_body'] ||= []
+        page['image_meta_body'] << tag_meta
+      end
 
-      if @caption
-        %(<figure class="align-center">#{img_tag}<figcaption>#{@caption}</figcaption></figure>)
+      # Build HTML based on role
+      alt_attr = @role == 'decorative' ? '' : @alt
+
+      # Additional attributes
+      extra_attrs = []
+      extra_attrs << %(role="presentation") if @role == 'decorative'
+      extra_attrs << %(itemprop="image") if @representative == 'true'
+
+      img_tag = %(<img src="#{src}" alt="#{alt_attr}" loading="#{@loading}" decoding="async") + extra_attrs.map { |a| " #{a}" }.join + ">"
+
+      # Decorative: no figure, just img
+      return img_tag if @role == 'decorative'
+
+      # Figure attributes
+      fig_attrs = []
+      fig_attrs << %(id="step-#{@step.to_i}-image") if @step && @context == 'step'
+      fig_attrs << %(data-compare-with="#{@compare_with}") if @compare_with
+      fig_attrs << 'class="align-center ambient-image"' if @context == 'ambient'
+      fig_attrs_str = fig_attrs.empty? ? '' : " #{fig_attrs.join(' ')}"
+
+      # Caption
+      caption_parts = []
+      caption_parts << @caption if @caption && !@caption.empty?
+
+      # Long description for diagram/chart
+      if @long_desc && !@long_desc.empty? && %w[diagram chart].include?(@role)
+        caption_parts << %(<details class="long-description"><summary>Descrizione estesa</summary>#{@long_desc}</details>)
+      end
+
+      if caption_parts.empty?
+        %(<figure#{fig_attrs_str}>#{img_tag}</figure>)
       else
-        %(<figure class="align-center">#{img_tag}</figure>)
+        %(<figure#{fig_attrs_str}>#{img_tag}<figcaption>#{caption_parts.join(' ')}</figcaption></figure>)
+      end
+    end
+
+    private
+
+    def extract_attr(str, key)
+      if str =~ /#{Regexp.escape(key)}\s*=\s*"([^"]*)"/
+        $1
+      elsif str =~ /#{Regexp.escape(key)}\s*=\s*(\S+)/
+        $1
       end
     end
   end

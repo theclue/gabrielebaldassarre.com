@@ -10,14 +10,16 @@ layout: default
 {% if overlay %}
 <div class="main-header-image">
   <img src="{{ overlay }}"
-       alt="{{ page.header.overlay_alt | default: page.title | strip_html }}"
+       alt="{% if page.image_meta.role == 'decorative' %}{% elsif page.image_meta.caption %}{{ page.image_meta.caption }}{% else %}{{ page.header.overlay_alt | default: page.title | strip_html }}{% endif %}"
        loading="eager"
        decoding="async">
 </div>
 {% endif %}
 
+{% unless page.hide_title %}
 <article>
   <h1 class="entry-title">{{ page.title }}</h1>
 </article>
+{% endunless %}
 
 {{ content }}

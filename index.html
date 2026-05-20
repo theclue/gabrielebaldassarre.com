@@ -1,16 +1,19 @@
 ---
 layout: post-index
-title: Blog
+title: Gabriele Baldassarre - Personal Blog
+hide_title: true
 header:
   teaser: /assets/images/gabriele-baldassarre-teaser.jpg
 ---
+
+<h1 class="sr-only">{{ site.name | default: site.title }} — {{ site.description }}</h1>
 
 {% unless paginator.previous_page %}
 <article class="intro">
   <div class="grid two-col">
     <div class="col-1-2 intro-photo" aria-hidden="true">
-      <img src="{{ '/assets/images/gabriele-baldassarre.png' | relative_url }}"
-           alt=""
+      <img src="{{ '/assets/images/gabriele-baldassarre.png' | cloudinary_url: "f_auto,q_auto" }}"
+           alt="{{ site.name | default: site.title }}"
            loading="eager"
            decoding="async">
     </div>
@@ -51,13 +54,13 @@ header:
   {%- if post.master %}
     {%- assign card_img = post.master | cloudinary_url: "w_600,c_fill,g_auto,q_auto,f_auto" %}
   {%- elsif post.header.overlay_image %}
-    {%- assign card_img = post.header.overlay_image | relative_url %}
+    {%- assign card_img = post.header.overlay_image | cloudinary_url: "w_600,c_fill,g_auto,q_auto,f_auto" %}
   {%- endif %}
   {% if card_img %}
   <div class="featured-image">
     <a href="{{ post.url | relative_url }}" aria-hidden="true" tabindex="-1">
       <img src="{{ card_img }}"
-           alt=""
+           alt="{{ post.title | markdownify | strip_html | escape }}"
            loading="lazy"
            decoding="async">
     </a>

@@ -79,6 +79,111 @@
     },
     {
       "@type": "DefinedTerm",
+      "termCode": "image_role",
+      "name": "Image Role",
+      "description": "Natura intrinseca dell'asset visivo, indipendente dal contesto narrativo. Valori: decorative (alt=\"\", role=\"presentation\", no JSON-LD), screenshot (cattura schermata), diagram (schema architetturale, richiede long_description), chart (grafico quantitativo, richiede long_description), photo (fotografia reale), illustration (disegno concettuale), code (screenshot di codice).",
+      "inDefinedTermSet": { "@id": "https://gabrielebaldassarre.com/metadata-schema.jsonld" }
+    },
+    {
+      "@type": "DefinedTerm",
+      "termCode": "image_context",
+      "name": "Image Narrative Context",
+      "description": "Funzione narrativa dell'immagine nel flusso dell'articolo, ortogonale al role. Valori: step (illustra uno step del tutorial, richiede step:N), result (mostra il risultato atteso), architecture (mostra struttura/design/topologia), comparison (confronto prima/dopo, richiede compare_with), reference (materiale di riferimento esterno), evidence (prova/dimostrazione), ambient (contesto visivo non puramente decorativo).",
+      "inDefinedTermSet": { "@id": "https://gabrielebaldassarre.com/metadata-schema.jsonld" }
+    },
+    {
+      "@type": "DefinedTerm",
+      "termCode": "step",
+      "name": "Step Number",
+      "description": "Numero intero che identifica lo step del tutorial a cui l'immagine appartiene. Usato esclusivamente con image_context=step. Genera id=\"step-N-image\" e abilita il collegamento HowToStep nell'ImageObject JSON-LD.",
+      "inDefinedTermSet": { "@id": "https://gabrielebaldassarre.com/metadata-schema.jsonld" }
+    },
+    {
+      "@type": "DefinedTerm",
+      "termCode": "compare_with",
+      "name": "Compare With",
+      "description": "Percorso dell'immagine con cui questa va confrontata (es. 'prima.png'). Usato esclusivamente con image_context=comparison. Genera data-compare-with nell'HTML e il collegamento nell'ImageObject JSON-LD. Non genera automaticamente layout side-by-side (solo annotazione semantica).",
+      "inDefinedTermSet": { "@id": "https://gabrielebaldassarre.com/metadata-schema.jsonld" }
+    },
+    {
+      "@type": "DefinedTerm",
+      "termCode": "link_role",
+      "name": "Link Role",
+      "description": "Natura semantica del link. Valori: citation, source, definition, tool, prerequisite, deepening, related, self, demo, download, attribution, commercial. 12/12 ruoli hanno mapping nativo Schema.org su CreativeWork.",
+      "inDefinedTermSet": { "@id": "https://gabrielebaldassarre.com/metadata-schema.jsonld" }
+    },
+    {
+      "@type": "DefinedTerm",
+      "termCode": "link_context",
+      "name": "Link Narrative Context",
+      "description": "Funzione narrativa del link nel flusso dell'articolo. Valori: supports-claim, provides-context, enables-step, validates-result, credits-author, offers-alternative, extends-topic. Concetto editoriale senza equivalente Schema.org diretto.",
+      "inDefinedTermSet": { "@id": "https://gabrielebaldassarre.com/metadata-schema.jsonld" }
+    },
+    {
+      "@type": "DefinedTerm",
+      "termCode": "link_target",
+      "name": "Link Target Classification",
+      "description": "Classificazione della destinazione che guida gli attributi HTML rel e target. Valori: internal, external-authoritative (dofollow), external-community (ugc), external-commercial (sponsored), external-ugc. Link esterni generano automaticamente rel=\"noopener\" e target=\"_blank\" con icona MDI open-in-new.",
+      "inDefinedTermSet": { "@id": "https://gabrielebaldassarre.com/metadata-schema.jsonld" }
+    },
+    {
+      "@type": "DefinedTerm",
+      "termCode": "source_type",
+      "name": "Image Source Type",
+      "description": "Tipo di sorgente dell'immagine. Valori: mermaid (diagramma generato da testo Mermaid, reso SVG a build-time), raster (immagine bitmap tradizionale). Quando source_type=mermaid, viene generato anche un SoftwareSourceCode JSON-LD con programmingLanguage: Mermaid e il testo sorgente.",
+      "inDefinedTermSet": { "@id": "https://gabrielebaldassarre.com/metadata-schema.jsonld" }
+    },
+    {
+      "@type": "DefinedTerm",
+      "termCode": "diagram_type",
+      "name": "Mermaid Diagram Type",
+      "description": "Tipo di diagramma Mermaid. Valori: flowchart, sequence, class, state, er, gantt, pie, mindmap, gitgraph, journey, architecture. Determina il keyword Mermaid usato nel blocco di codice e guida le regole di accessibilità e rendering.",
+      "inDefinedTermSet": { "@id": "https://gabrielebaldassarre.com/metadata-schema.jsonld" }
+    },
+    {
+      "@type": "DefinedTerm",
+      "termCode": "mermaid_direction",
+      "name": "Mermaid Flowchart Direction",
+      "description": "Direzione del flowchart Mermaid. Valori: TB (top→bottom), LR (left→right), RL (right→left), BT (bottom→top). Si applica solo a diagram_type=flowchart.",
+      "inDefinedTermSet": { "@id": "https://gabrielebaldassarre.com/metadata-schema.jsonld" }
+    },
+    {
+      "@type": "DefinedTerm",
+      "termCode": "intended_audience",
+      "name": "Intended Audience",
+      "description": "Pubblico target dichiarato dall'autore. Valori: general (pubblico generico), curious (persone curiose con cultura generale), student (studenti con basi nel dominio), practitioner (professionisti che applicano), specialist (esperti del dominio specifico). Mappa su Schema.org audience.audienceType.",
+      "inDefinedTermSet": { "@id": "https://gabrielebaldassarre.com/metadata-schema.jsonld" }
+    },
+    {
+      "@type": "DefinedTerm",
+      "termCode": "proficiency_level",
+      "name": "Proficiency Level",
+      "description": "Livello di competenza richiesto per comprendere l'articolo. Valori: beginner (nessuna esperienza pregressa), intermediate (conoscenze base), advanced (esperienza significativa), expert (specialista). Mappa su Schema.org proficiencyLevel (TechArticle) o educationalLevel (BlogPosting).",
+      "inDefinedTermSet": { "@id": "https://gabrielebaldassarre.com/metadata-schema.jsonld" }
+    },
+    {
+      "@type": "DefinedTerm",
+      "termCode": "knowledge_prerequisites",
+      "name": "Knowledge Prerequisites",
+      "description": "Array di concetti/risorse che il lettore dovrebbe conoscere prima di leggere l'articolo. Ogni prerequisito ha: concept (identificativo), label (etichetta), url (link glossario), importance (required|recommended|helpful). I required mappano su Schema.org requires, i recommended su isBasedOn, gli helpful su relatedLink.",
+      "inDefinedTermSet": { "@id": "https://gabrielebaldassarre.com/metadata-schema.jsonld" }
+    },
+    {
+      "@type": "DefinedTerm",
+      "termCode": "difficulty_declared",
+      "name": "Declared Difficulty",
+      "description": "Stima soggettiva della difficoltà su tre assi (1-5): conceptual (difficoltà dei concetti), technical (difficoltà tecnica), mathematical (livello matematico, 0=nessuno). Valore editoriale, non ha equivalente Schema.org diretto. Usato per calcolare il difficulty_composite insieme alle metriche lessicali e semantiche.",
+      "inDefinedTermSet": { "@id": "https://gabrielebaldassarre.com/metadata-schema.jsonld" }
+    },
+    {
+      "@type": "DefinedTerm",
+      "termCode": "difficulty_composite",
+      "name": "Composite Difficulty Index",
+      "description": "Indice sintetico di difficoltà (0-5) calcolato a build time: 40% media difficulty_declared + 30% lessicale (Gulpease) + 30% semantico (concept_density, prerequisite_depth, definition_coverage). Se le componenti semantiche non sono disponibili, il composito è calcolato solo sulle disponibili. Label: Accessibile (≤2), Intermedio (≤3), Avanzato (≤4), Esperto (>4).",
+      "inDefinedTermSet": { "@id": "https://gabrielebaldassarre.com/metadata-schema.jsonld" }
+    },
+    {
+      "@type": "DefinedTerm",
       "termCode": "cognitive_educational_level",
       "name": "Cognitive Educational Level",
       "description": "[FUTURO — pipeline LLM-based] Livello scolastico stimato in base alla complessità cognitiva del contenuto (lessicografia specialistica, densità concettuale, carico cognitivo intrinseco). Popolato asincronamente da una pipeline secondaria che arricchisce il frontmatter. Quando presente, il native 'educationalLevel' schema.org rifletterà questo valore.",

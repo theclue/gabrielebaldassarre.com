@@ -178,6 +178,7 @@ plugins:
   - jekyll-paginate
   - jekyll-sitemap
   - jekyll-gist
+  - jekyll-figure
   - jemoji
   - jekyll-mentions
   - jekyll-redirect-from

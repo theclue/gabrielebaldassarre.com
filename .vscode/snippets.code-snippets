@@ -1,0 +1,72 @@
+{
+  "Post Link": {
+    "prefix": ";pl",
+    "body": "{% post_link \"$1\" \"$2\" %}",
+    "description": "Safe internal post link (falls back to plain text if post not found)"
+  },
+  "Repo URL": {
+    "prefix": ";rp",
+    "body": "{% repo_url \"$1\" \"$2\" %}",
+    "description": "GitHub repository file link (falls back to plain text if file not found)"
+  },
+  "Cloudinary Image": {
+    "prefix": ";cld",
+    "body": "{% cloudinary $1 alt=\"$2\" caption=\"$3\" loading=\"${4|lazy,eager|}\" %}",
+    "description": "Cloudinary image in post body"
+  },
+  "Hero Transform": {
+    "prefix": ";hero",
+    "body": "header:\n  transform: ${1|keystone,cinematic|}\n  intensity: ${2|low,medium,high|}\n  logo: true\n  overlay_image: $3",
+    "description": "Hero image with Cloudinary transform and logo overlay"
+  },
+  "Social LinkedIn": {
+    "prefix": ";soc-li",
+    "body": "broadcast:\n  channels: [linkedin]\n  linkedin_image:\n    logo: true\n    caption: \"$1\"\n    color: white\n    transform: ${2|keystone,cinematic|}\n    intensity: ${3|low,medium,high|}",
+    "description": "LinkedIn social image with logo, caption and transform"
+  },
+  "Social Mastodon": {
+    "prefix": ";soc-ma",
+    "body": "broadcast:\n  channels: [mastodon]\n  mastodon_image:\n    logo: true\n    caption: \"$1\"\n    color: white\n    transform: ${2|keystone,cinematic|}\n    intensity: ${3|low,medium,high|}",
+    "description": "Mastodon social image with logo, caption and transform"
+  },
+  "Master Image": {
+    "prefix": ";master",
+    "body": "master: /assets/images/${1:posts/}$2.png",
+    "description": "Master image path for Cloudinary"
+  },
+  "Broadcast Full": {
+    "prefix": ";fm",
+    "body": "broadcast:\n  channels: [linkedin, mastodon]\n  sent: false\n  linkedin_image:\n    logo: true\n    caption: \"$1\"\n    color: white\n    transform: keystone\n    intensity: medium\n  mastodon_image:\n    logo: true\n    caption: \"$1\"\n    color: white\n    transform: cinematic\n    intensity: medium",
+    "description": "Full broadcast frontmatter block (linkedin + mastodon)"
+  },
+  "Image Meta (Body)": {
+    "prefix": ";img",
+    "body": "{% cloudinary $1 alt=\"$2\" role=\"${3|screenshot,diagram,chart,photo,illustration,code,decorative|}\" context=\"${4|step,result,architecture,comparison,reference,evidence,ambient|}\" caption=\"$5\" %}",
+    "description": "Cloudinary image with semantic role and context metadata"
+  },
+  "Image Meta (Master)": {
+    "prefix": ";img-m",
+    "body": "image_meta:\n  role: ${1|screenshot,diagram,chart,photo,illustration,code,decorative|}\n  context: ${2|step,result,architecture,comparison,reference,evidence,ambient|}\n  caption: \"$3\"",
+    "description": "Master image metadata (under master: field)"
+  },
+  "Readability Fields": {
+    "prefix": ";read",
+    "body": "# page.readability.flesch_vacca        → ${1:0-100} Flesch-Kincaid (Franchini-Vacca 1972)\n# page.readability.gulpease            → ${2:0-100} GULPEASE\n# page.readability.word_count          → ${3:N}\n# page.readability.sentence_count      → ${4:N}\n# page.readability.syllable_count      → ${5:N}\n# page.readability.avg_sentence_length → ${6:N}\n# page.readability.educational_level   → ${7:es. Primary school}\n# page.readability.typical_age_range   → ${8:es. 6-11}",
+    "description": "Readability fields reference (populated at build time)"
+  },
+  "Difficulty Declared": {
+    "prefix": ";diff",
+    "body": "intended_audience: ${1|general,curious,student,practitioner,specialist|}\nproficiency_level: ${2|beginner,intermediate,advanced,expert|}\ndifficulty_declared:\n  conceptual: $3\n  technical: $4\n  mathematical: $5",
+    "description": "Frontmatter difficulty and audience metadata"
+  },
+  "Knowledge Prerequisites": {
+    "prefix": ";prereq",
+    "body": "knowledge_prerequisites:\n  - concept: $1\n    label: \"$2\"\n    url: $3\n    importance: ${4|required,recommended,helpful|}",
+    "description": "Knowledge prerequisites for the article"
+  },
+  "Link Meta": {
+    "prefix": ";xlink",
+    "body": "{% xlink \"$1\" \"$2\" role=\"${3|citation,source,definition,tool,prerequisite,deepening,related,self,demo,download,attribution,commercial|}\" context=\"${4|supports-claim,provides-context,enables-step,validates-result,credits-author,offers-alternative,extends-topic|}\" target=\"${5|internal,external-authoritative,external-community,external-commercial,external-ugc|}\" %}",
+    "description": "External link with semantic role, context and target metadata"
+  }
+}

@@ -1,0 +1,12 @@
+citation: citation
+source: isBasedOn
+definition: about
+tool: mentions
+prerequisite: isBasedOn
+deepening: relatedLink
+related: relatedLink
+self: mainEntityOfPage
+demo: workExample
+download: downloadUrl
+attribution: creator
+commercial: offers

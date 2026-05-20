@@ -3,11 +3,29 @@ category: Home Assistant
 title: "Illuminanza intelligente per lo smartworking: fisica, modelli e controllo in Home Assistant"
 excerpt: Come stimare l'illuminamento di un ambiente senza sensori fisici, usando la posizione del sole e la fotometria delle finestre, e come usare questa stima per automatizzare la luce ottimale quando si lavora da casa.
 master: /assets/images/homeassistant-illuminanza.png
+image_meta:
+  role: illustration
+  context: ambient
+  caption: "Illuminanza intelligente per smartworking"
 broadcast:
   channels: [linkedin, mastodon]
   sent: true
 header:
   overlay_filter: 0.5
+intended_audience: practitioner
+proficiency_level: advanced
+difficulty_declared:
+  conceptual: 4
+  technical: 4
+  mathematical: 4
+difficulty_computed:
+  semantic:
+    concept_count: 8
+    concept_density: 0.3
+    jargon_ratio: 6.5
+    definition_coverage: 0.0
+    external_knowledge_demand: 8
+    prerequisite_depth: 2.1
 ---
 
 Chi lavora da casa conosce il problema: la luce cambia continuamente durante la giornata, e spesso ci si ritrova a lavorare al computer con una illuminazione inadeguata senza rendersene conto. Troppa luce crea abbagliamento sullo schermo, troppa poca affatica gli occhi. La soluzione ideale è un sistema che compensi automaticamente la luce naturale con quella artificiale, mantenendo l'illuminamento costante.
@@ -22,7 +40,7 @@ La risposta è sì, con qualche compromesso.
 
 ## Il modello fisico: soleggiamento
 
-Il punto di partenza è `sun.sun`, l'entità built-in di Home Assistant che espone in ogni momento l'elevazione e l'azimuth del sole. A questi aggiungo un sensore di illuminanza esterna (`sensor.luminanza_esterna`) che viene da un'[integrazione](https://github.com/pnbruckner/ha-illuminance/) che ha esattamente questo scopo e misura i lux al suolo nelle condizioni meteo attuali — già corretta per la copertura nuvolosa la cui misura proviene tipicamente dall'integrazione meteo.
+Il punto di partenza è `sun.sun`, l'entità built-in di Home Assistant che espone in ogni momento l'elevazione e l'azimuth del sole. A questi aggiungo un sensore di illuminanza esterna (`sensor.luminanza_esterna`) che viene da un'{% xlink "https://github.com/pnbruckner/ha-illuminance/" "integrazione" role="tool" context="enables-step" target="external-community" %} che ha esattamente questo scopo e misura i lux al suolo nelle condizioni meteo attuali — già corretta per la copertura nuvolosa la cui misura proviene tipicamente dall'integrazione meteo.
 
 Il contributo della luce solare all'interno di una stanza dipende da tre fattori geometrici:
 
@@ -47,7 +65,7 @@ con $\alpha$ = elevazione solare, $\beta$ = inclinazione della finestra (90° pe
 
 **Correzione per la copertura nuvolosa.** Il modello appena descritto assume implicitamente che la luce solare sia **direzionale**: tutti i raggi arrivano dalla stessa direzione (quella del sole) e $\cos\theta$ cattura correttamente quanto di quella luce passa attraverso la finestra. Questa ipotesi è buona sotto cielo sereno.
 
-Sotto cielo coperto, invece, la situazione cambia radicalmente. Le nuvole diffondono la radiazione solare in tutte le direzioni: la luce non ha più una provenienza privilegiata ma arriva **isotropicamente** da tutta la volta celeste, con intensità approssimativamente uniforme su ogni direzione. Questo è il **modello di cielo diffuso isotropo** ([Liu e Jordan](https://sci-hub.mk/10.1016/0038-092x%2860%2990062-1), 1960), la formulazione più semplice e più usata per la componente diffusa: si assume che la luminanza del cielo sia la stessa in ogni punto dell'emisfero. In questo regime, il fattore geometrico rilevante non è più $\cos\theta$ — che descrive l'angolo tra il raggio direzionale e la normale alla finestra — ma il **view factor** della finestra verso il cielo: la frazione dell'emisfero celeste che la finestra "vede".
+Sotto cielo coperto, invece, la situazione cambia radicalmente. Le nuvole diffondono la radiazione solare in tutte le direzioni: la luce non ha più una provenienza privilegiata ma arriva **isotropicamente** da tutta la volta celeste, con intensità approssimativamente uniforme su ogni direzione. Questo è il **modello di cielo diffuso isotropo** ({% xlink "https://sci-hub.mk/10.1016/0038-092x%2860%2990062-1" "Liu e Jordan" role="citation" context="supports-claim" target="external-authoritative" %}, 1960), la formulazione più semplice e più usata per la componente diffusa: si assume che la luminanza del cielo sia la stessa in ogni punto dell'emisfero. In questo regime, il fattore geometrico rilevante non è più $\cos\theta$ — che descrive l'angolo tra il raggio direzionale e la normale alla finestra — ma il **view factor** della finestra verso il cielo: la frazione dell'emisfero celeste che la finestra "vede".
 
 Per una finestra piana verticale con inclinazione $\beta$ rispetto all'orizzontale, il view factor verso la metà superiore dell'emisfero è un risultato standard della radiometria:
 
@@ -153,7 +171,7 @@ La lampadina dell'ingresso ha una particolarità: riceve, infatti, un coefficien
 
 ## Quanta luce artificiale serve? Un controllo feedforward
 
-La letteratura ergonomica indica 300–500 lux come range ottimale per il lavoro al videoterminale (norma [UNI EN 12464-1](https://biblus.acca.it/uni-en-12464-1-illuminazione-dei-posti-di-lavoro-interni/), che, tra le altre cose, è una vera miniera di idee per possibili espansioni di questo modello). Ho scelto 400 lux come target default, regolabile tramite un helper `input_number`, così da facilitare eventuali fine tuning successivi.
+La letteratura ergonomica indica 300–500 lux come range ottimale per il lavoro al videoterminale (norma {% xlink "https://biblus.acca.it/uni-en-12464-1-illuminazione-dei-posti-di-lavoro-interni/" "UNI EN 12464-1" role="citation" context="supports-claim" target="external-authoritative" %}, che, tra le altre cose, è una vera miniera di idee per possibili espansioni di questo modello). Ho scelto 400 lux come target default, regolabile tramite un helper `input_number`, così da facilitare eventuali fine tuning successivi.
 
 Dirò una ovvieta, ma ci tengo a far notare che questo **non è un sistema retroazionato** in senso stretto. In un vero sistema a ciclo chiuso si misurerebbe l'illuminamento effettivo della stanza con un sensore fisico, si calcolerebbe l'errore rispetto al target, e si userebbe quell'errore per correggere l'intensità delle sorgenti luminose. Qui invece l'illuminamento reale non è mai misurato e non entra mai nel calcolo (che, poi, era la premessa dell'articolo!): si misura solo la **perturbazione** (la luce naturale stimata), e si usa un **modello del processo** (i lumen noti delle lampade) per calcolare preventivamente l'azione correttiva. È un controllo **feedforward**: efficiente e senza oscillazioni, ma che non si autocorregge se il modello è impreciso.
 
@@ -178,7 +196,7 @@ Ad oggi l'aggiunta delle variables è, credo, ancora prerogativa del codice Yaml
 
 ## Convivenza con Adaptive Lighting
 
-Ho già [Adaptive Lighting](https://github.com/basnijholt/adaptive-lighting) attivo sul soggiorno, che gestisce la temperatura colore in funzione della posizione del sole, e ti consiglio di fare lo stesso...è davvero divertente! Il fatto, però, è che l'integrazione può gestire anche la brightness, ma per lo smartworking questo crea un conflitto: AL vuole abbassare la luminosità al mattino presto o alla sera, mentre il compensatore feedforward vuole alzarla.
+Ho già {% xlink "https://github.com/basnijholt/adaptive-lighting" "Adaptive Lighting" role="tool" context="offers-alternative" target="external-community" %} attivo sul soggiorno, che gestisce la temperatura colore in funzione della posizione del sole, e ti consiglio di fare lo stesso...è davvero divertente! Il fatto, però, è che l'integrazione può gestire anche la brightness, ma per lo smartworking questo crea un conflitto: AL vuole abbassare la luminosità al mattino presto o alla sera, mentre il compensatore feedforward vuole alzarla.
 
 La soluzione è disabilitare temporaneamente il controllo brightness di AL durante le ore di smartworking, lasciandogli solo il controllo della temperatura colore:
 

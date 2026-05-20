@@ -19,7 +19,7 @@ subtitle:        string?                         # Sottotitolo
 excerpt:         string?                         # Estratto (SEO + preview card)
 description:     string?                         # Meta description (default: excerpt)
 category:        string?                         # Categoria principale (es. "DevOps", "Fisica")
-tags:            [string]?                       # Tag del post
+tags:            [string]                        # Tag del post
 master:          string?                         # Percorso immagine master (Cloudinary)
 canonical_url:   string?                         # URL canonico (se diverso dal permalink)
 mermaid:         boolean?                        # Abilita diagrammi Mermaid nella pagina
@@ -93,7 +93,99 @@ broadcast:
 # page.readability.educational_level     → Livello scolastico lessicale (inglese)
 # page.readability.typical_age_range     → Fascia d'età lessicale
 
+# ── Image metadata (semantic enrichment) ───────────────────────────────
+# Applicabile sia a master che a {% cloudinary %} body images
+# Vedi taxonomy completa: role × context matrix
+
+image_meta:
+  role:             "decorative|screenshot|diagram|chart|photo|illustration|code"
+  context:          "step|result|architecture|comparison|reference|evidence|ambient"
+  caption:          string?                       # Didascalia breve
+  long_description: string?                       # Obbligatorio per diagram e chart
+  step:             integer?                      # Obbligatorio se context=step
+  compare_with:     string?                       # Obbligatorio se context=comparison
+  representativeOfPage: boolean?                  # default: false
+
+# Role:
+#   decorative   → alt="" role="presentation", no figure, no JSON-LD
+#   screenshot   → figure + caption
+#   diagram      → figure + caption + long_description obbligatorio
+#   chart        → figure + caption + long_description obbligatorio
+#   photo        → figure + caption
+#   illustration → figure + caption
+#   code         → figure + caption
+
+# Context:
+#   step         → id="step-N-image" + HowToStep linking
+#   result       → representativeOfPage candidate
+#   architecture → natural pair with diagram
+#   comparison   → data-compare-with + compare_with required
+#   reference    → external source citation
+#   evidence     → proof/demonstration
+#   ambient      → class="ambient-image"
+
+# ── Mermaid diagrams ───────────────────────────────────────────────────
+# Sottocaso di role: diagram con source_type: mermaid
+# A build-time il sorgente Mermaid viene convertito in SVG dalla gem
+# jekyll-mermaid-prebuild (prefers-color-scheme: auto → light + dark SVG)
+
+mermaid:
+  diagram_type:   "flowchart|sequence|class|state|er|gantt|pie|mindmap|gitgraph|journey|architecture"
+  direction:      "TB|LR|RL|BT"                 # Solo per flowchart
+  accTitle:       string?                        # Accessibilità: titolo SVG (→ alt)
+  accDescr:       string?                        # Accessibilità: descrizione SVG (→ long_description)
+
+# I campi accTitle e accDescr nel sorgente Mermaid vengono mappati
+# automaticamente su alt e long_description della tassonomia immagini.
+
+# ── Content difficulty & audience ──────────────────────────────────────
+# Layer dichiarato (autore) + Layer calcolato (build time)
+
+intended_audience:    "general|curious|student|practitioner|specialist"
+proficiency_level:    "beginner|intermediate|advanced|expert"
+
+knowledge_prerequisites:
+  - concept:     string?                       # Identificativo concetto
+    label:       string                        # Etichetta human-readable
+    url:         string?                       # Link glossario/risorsa
+    importance:  "required|recommended|helpful"
+
+difficulty_declared:
+  conceptual:    1-5                           # Difficoltà concettuale
+  technical:     1-5                           # Difficoltà tecnica
+  mathematical:  0-5                           # Livello matematico (0=nessuno)
+
+# difficulty_computed:  (iniettato a runtime da difficulty.rb)
+# difficulty_composite: 40% declared + 30% lexical + 30% semantic
+# Badge: ◉◉◎◎◎ Accessibile / Intermedio / Avanzato / Esperto
+
 # ── Custom Liquid tags ─────────────────────────────────────────────────
 # {% post_link /url/ "text" %}  → Link interno safe (fallback a plain text)
 # {% repo_url path "text" %}   → Link a file su GitHub (fallback a plain text)
 # {% cloudinary path %}         → Immagine via Cloudinary (body)
+# {% xlink "url" "text" role="..." context="..." target="..." %}
+
+# ── Link metadata taxonomy ─────────────────────────────────────────────
+# Applicabile via {% xlink %}, {% post_link role="..." %}, {% repo_url role="..." %}
+
+# role — Cos'è il link
+#   citation        → Paper, libro, standard citato → Schema.org citation
+#   source          → Fonte primaria di dato/claim  → Schema.org isBasedOn
+#   definition      → Rimando a definizione         → Schema.org about
+#   tool            → Strumento/software menzionato → Schema.org mentions
+#   prerequisite    → Contenuto da conoscere prima  → Schema.org isBasedOn
+#   deepening       → Approfondimento facoltativo   → Schema.org relatedLink
+#   related         → Contenuto correlato           → Schema.org relatedLink
+#   self            → Auto-referenza                → Schema.org mainEntityOfPage
+#   demo            → Esempio/playground            → Schema.org workExample
+#   download        → File scaricabile              → Schema.org downloadUrl
+#   attribution     → Credito a un autore           → Schema.org creator
+#   commercial      → Link sponsorizzato            → Schema.org offers (rel=sponsored)
+
+# context — Che funzione ha
+#   supports-claim, provides-context, enables-step, validates-result,
+#   credits-author, offers-alternative, extends-topic
+
+# target — Dove porta
+#   internal, external-authoritative, external-community,
+#   external-commercial (→ sponsored), external-ugc

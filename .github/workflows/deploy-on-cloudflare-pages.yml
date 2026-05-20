@@ -139,6 +139,11 @@ jobs:
             BEFORE="HEAD~1"
           fi
 
+          CLD="https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/image/fetch"
+          SITE="https://gabrielebaldassarre.com"
+          LOGO="/assets/logos/the-16bit-robot.png"
+          BAR="/assets/images/1x1-black.png"
+
           : > /tmp/to_warm.txt
 
           # 1. Changed posts
@@ -154,9 +159,10 @@ jobs:
             done
           fi
 
-          # 3. Body images in {% cloudinary %} tags
-          grep -rh '{% cloudinary' _posts/ 2>/dev/null | grep -oP '/assets/images/[^" ]+' | while read img; do
-            grep -rl "$img" _posts/ >> /tmp/to_warm.txt 2>/dev/null
+          # 3. Body images in cloudinary tags — only from changed posts
+          sort -u /tmp/to_warm.txt | while read -r post; do
+            [ -z "$post" ] && continue
+            grep -oP '{% cloudinary[^%]*/assets/images/[^" ]+' "$post" 2>/dev/null | grep -oP '/assets/images/\S+' >> /tmp/to_warm_extra.txt || true
           done
 
           # 4. Deduplicate and warm
@@ -164,18 +170,34 @@ jobs:
             [ -z "$post" ] && continue
             master=$(grep -oP 'master:\s*\K\S+' "$post" 2>/dev/null | head -1 | tr -d '"')
             if [ -n "$master" ]; then
-              echo "Warm-up ${master}..."
-              base="https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/image/fetch"
-              curl -sf -o /dev/null --max-time 30 "${base}/w_1922,h_724,c_fill,g_auto,q_auto,f_auto/https://gabrielebaldassarre.com${master}" || echo "  (warmup overlay scaduto, probabilmente già in cache)"
-              curl -sf -o /dev/null --max-time 30 "${base}/w_600,c_fill,g_auto,q_auto,f_auto/https://gabrielebaldassarre.com${master}" || echo "  (warmup teaser scaduto, probabilmente già in cache)"
+              echo "🔥 ${master}"
+              h="c_fill,g_auto,f_auto,q_auto"
+              # Hero plain
+              curl -sf -o /dev/null --max-time 30 "${CLD}/${h},w_1922,h_724/${SITE}${master}" || true
+              # Social plain (LinkedIn + Mastodon)
+              curl -sf -o /dev/null --max-time 30 "${CLD}/${h},w_1200,h_627/${SITE}${master}" || true
+              curl -sf -o /dev/null --max-time 30 "${CLD}/${h},w_1200,h_675/${SITE}${master}" || true
+
+              # Transformed versions (keystone + cinematic medium)
+              for t in keystone cinematic; do
+                bg="0f0f23"
+                [ "$t" = "cinematic" ] && bg="0a0a1a"
+                pres="b_rgb:${bg}/e_distort:2p:2p:88p:15p:100p:100p:0p:95p/c_crop,g_north_west,x_0.02,y_0.18,w_0.85,h_0.48"
+                # Hero transform
+                curl -sf -o /dev/null --max-time 30 "${CLD}/${pres}/${h},w_1922,h_724/${SITE}${master}" || true
+                # Social transform plain
+                curl -sf -o /dev/null --max-time 30 "${CLD}/${pres}/${h},w_1200,h_627/${SITE}${master}" || true
+              done
             fi
-            # Warmup anche le immagini body in {% cloudinary %}
+            # Body images cloudinary
             grep -oP '{% cloudinary[^%]*/assets/images/[^" ]+' "$post" 2>/dev/null | grep -oP '/assets/images/\S+' | while read body_img; do
-              echo "Warm-up body: ${body_img}"
-              curl -sf -o /dev/null --max-time 30 "${base}/q_auto,f_auto/https://gabrielebaldassarre.com${body_img}" || true
+              curl -sf -o /dev/null --max-time 30 "${CLD}/q_auto,f_auto/${SITE}${body_img}" || true
             done
           done
 
-          # Report
+          # Logo + letterbox (always warm, used across all posts)
+          curl -sf -o /dev/null --max-time 30 "${CLD}/w_80,h_80,c_fit,f_auto,q_auto/${SITE}${LOGO}" || true
+          curl -sf -o /dev/null --max-time 30 "${CLD}/c_scale,w_1200,h_120,o_80/${SITE}${BAR}" || true
+
           count=$(sort -u /tmp/to_warm.txt | grep -c . 2>/dev/null || echo 0)
-          echo "Riscaldati ${count} post."
+          echo "✅ ${count} post riscaldati"

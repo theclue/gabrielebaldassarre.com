@@ -2,12 +2,16 @@
 category: Home Assistant
 title: "Il cielo in salotto, parte 3: Spazio Profondo e Bollettini"
 excerpt: "La terza e ultima sezione della dashboard di astrometria: l'immagine astronomica del giorno NASA (APOD) con API key e secrets.yaml, la posizione in tempo reale della ISS con multiscrape, e i prossimi lanci spaziali. Come integrare tutto in Home Assistant con REST sensor, Generic Camera e multiscrape."
-master: /assets/images/seo-pipeline-farsi-trovare.png
+master: /assets/images/astrometria-dashboard.png
+image_meta:
+  role: screenshot
+  context: reference
+  caption: "Dashboard di astrometria completa — Spazio Profondo"
 header:
   overlay_filter: 0.5
 ---
 
-Nella {% post_link /home-assistant/dashboard-astrometria-parte-1/ "prima parte" %} abbiamo costruito il modulo Terra-Luna, nella {% post_link /home-assistant/dashboard-astrometria-parte-2/ "seconda" %} abbiamo monitorato il Sole. In questa terza e ultima parte ci spingiamo oltre: lo spazio profondo, la stazione spaziale e i razzi che la raggiungono.
+Nella {% post_link /home-assistant/dashboard-astrometria-parte-1/ "prima parte" role="prerequisite" context="provides-context" target="internal" %} abbiamo costruito il modulo Terra-Luna, nella {% post_link /home-assistant/dashboard-astrometria-parte-2/ "seconda" role="prerequisite" context="provides-context" target="internal" %} abbiamo monitorato il Sole. In questa terza e ultima parte ci spingiamo oltre: lo spazio profondo, la stazione spaziale e i razzi che la raggiungono.
 
 ---
 
@@ -21,7 +25,7 @@ Avere l'APOD del giorno in dashboard, con immagine e didascalia, trasforma Home 
 
 ### L'API NASA
 
-La NASA mette a disposizione un'API pubblica e documentata per l'APOD all'indirizzo `https://api.nasa.gov/planetary/apod`. Richiede una chiave API che si ottiene gratuitamente registrandosi su [api.nasa.gov](https://api.nasa.gov).
+La NASA mette a disposizione un'API pubblica e documentata per l'APOD all'indirizzo `https://api.nasa.gov/planetary/apod`. Richiede una chiave API che si ottiene gratuitamente registrandosi su {% xlink "https://api.nasa.gov" "api.nasa.gov" role="tool" context="enables-step" target="external-authoritative" %}.
 
 Esiste anche una chiave `DEMO_KEY` che funziona senza registrazione, ma è soggetta a limiti di utilizzo più stringenti (30 richieste/ora, 50/giorno). Per un'installazione casalinga che interroga l'API una volta al giorno, la `DEMO_KEY` è sufficiente, ma consiglio di richiedere una chiave personale: è gratis e si ottiene in pochi minuti.
 
@@ -134,7 +138,7 @@ La Stazione Spaziale Internazionale orbita la Terra ogni 90 minuti a circa 400 k
 
 ### La fonte dati: wheretheiss.at
 
-L'API [Where the ISS At?](https://wheretheiss.at) è pubblica, gratuita e non richiede autenticazione. Il satellite 25544 è il NORAD ID della ISS:
+L'API {% xlink "https://wheretheiss.at" "Where the ISS At?" role="tool" context="enables-step" target="external-authoritative" %} è pubblica, gratuita e non richiede autenticazione. Il satellite 25544 è il NORAD ID della ISS:
 
 ```
 https://api.wheretheiss.at/v1/satellites/25544
@@ -205,7 +209,7 @@ I lanci spaziali sono diventati eventi frequenti: SpaceX, Rocket Lab, ULA e altr
 
 ### La fonte dati: RocketLaunch.Live
 
-**[RocketLaunch.Live](https://rocketlaunch.live)** offre un'API JSON gratuita per i prossimi lanci. L'endpoint per i due lanci più imminenti:
+{% xlink "https://rocketlaunch.live" "RocketLaunch.Live" role="tool" context="enables-step" target="external-authoritative" %} offre un'API JSON gratuita per i prossimi lanci. L'endpoint per i due lanci più imminenti:
 
 ```
 https://fdo.rocketlaunch.live/json/launches/next/2

@@ -177,6 +177,29 @@
   },
   "inLanguage": "it-IT",
   "isAccessibleForFree": true
+  {%- if page.proficiency_level %},
+  "proficiencyLevel": {{ page.proficiency_level | jsonify }}
+  {%- endif %}
+  {%- if page.intended_audience %},
+  "audience": {
+    "@type": "Audience",
+    "audienceType": {{ page.intended_audience | jsonify }}
+  }
+  {%- endif %}
+  {%- if page.difficulty_computed.lexical.reading_time_minutes %},
+  "timeRequired": "PT{{ page.difficulty_computed.lexical.reading_time_minutes }}M"
+  {%- endif %}
+  {%- if page.knowledge_prerequisites %},
+  "knowledge_prerequisites": [
+    {%- for prereq in page.knowledge_prerequisites %}
+    {
+      "@type": "CreativeWork",
+      "name": {{ prereq.label | jsonify }},
+      "url": {{ prereq.url | default: '#' | jsonify }}
+    }{%- unless forloop.last %},{% endunless %}
+    {%- endfor %}
+  ]
+  {%- endif %}
   {%- if page.tags %},
   "keywords": [{% for tag in page.tags %}{{ tag | jsonify }}{% unless forloop.last %},{% endunless %}{% endfor %}]
   {%- endif %}
@@ -324,6 +347,123 @@
 }
 </script>
 {%- endif -%}
+
+{%- if og_type == "article" and page.image_objects -%}
+<script type="application/ld+json">
+[
+  {%- for img in page.image_objects %}
+  {
+    "@context": "https://schema.org",
+    "@type": "ImageObject",
+    "contentUrl": {{ img.contentUrl | jsonify }}
+    {%- if img.caption %},
+    "caption": {{ img.caption | jsonify }}
+    {%- endif %}
+    {%- if img.representativeOfPage %},
+    "representativeOfPage": true
+    {%- endif %},
+    "additionalProperty": [
+      {
+        "@type": "PropertyValue",
+        "propertyID": "image_role",
+        "name": "Image Role",
+        "value": {{ img.role | jsonify }}
+      }
+      {%- if img.context %},
+      {
+        "@type": "PropertyValue",
+        "propertyID": "image_context",
+        "name": "Narrative Context",
+        "value": {{ img.context | jsonify }}
+      }
+      {%- endif %}
+      {%- if img.step > 0 %},
+      {
+        "@type": "PropertyValue",
+        "propertyID": "step",
+        "name": "Step Number",
+        "value": {{ img.step | jsonify }}
+      }
+      {%- endif %}
+      {%- if img.compare_with %},
+      {
+        "@type": "PropertyValue",
+        "propertyID": "compare_with",
+        "name": "Compare With",
+        "value": {{ img.compare_with | jsonify }}
+      }
+      {%- endif %}
+    ]
+  }{%- unless forloop.last %},{% endunless %}
+  {%- endfor %}
+]
+</script>
+{%- endif %}
+
+{%- if og_type == "article" and page.link_objects -%}
+<script type="application/ld+json">
+{
+  "@context": [
+    "https://schema.org",
+    { "gb": "https://gabrielebaldassarre.com/metadata-schema.jsonld#" }
+  ],
+  "@type": "WebPage",
+  "url": {{ canonical_url | jsonify }},
+  {%- assign link_groups = page.link_objects | group_by: "schema_prop" %}
+  {%- for group in link_groups %}
+  "{{ group.name }}": [
+    {%- for link in group.items %}
+    {
+      "@type": "CreativeWork",
+      "url": {{ link.url | jsonify }}
+      {%- if link.name %},
+      "name": {{ link.name | jsonify }}
+      {%- endif %},
+      "gb:link_role": {{ link.role | jsonify }}
+      {%- if link.context %},
+      "gb:link_context": {{ link.context | jsonify }}
+      {%- endif %}
+      {%- if link.target %},
+      "gb:link_target": {{ link.target | jsonify }}
+      {%- endif %}
+      {%- if link.doi %},
+      "identifier": {
+        "@type": "PropertyValue",
+        "propertyID": "doi",
+        "value": {{ link.doi | jsonify }}
+      }
+      {%- endif %}
+    }
+    {%- unless forloop.last %},{%- endunless %}
+    {%- endfor %}
+  ]
+  {%- unless forloop.last %},{%- endunless %}
+  {%- endfor %}
+}
+</script>
+{%- endif %}
+
+{%- if og_type == "article" and page.mermaid -%}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareSourceCode",
+  "programmingLanguage": "Mermaid",
+  "codeRepository": {{ canonical_url | jsonify }},
+  "description": "Mermaid diagram source code for this article"
+  {%- if page.mermaid_diagram_type %},
+  "additionalProperty": [
+    {
+      "@type": "PropertyValue",
+      "propertyID": "diagram_type",
+      "name": "Diagram Type",
+      "value": {{ page.mermaid_diagram_type | jsonify }}
+    }
+  ]
+  {%- endif %}
+}
+</script>
+{%- endif %}
 
 {% if site.google_site_verification %}
   <meta name="google-site-verification" content="{{ site.google_site_verification }}" />

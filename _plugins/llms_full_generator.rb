@@ -21,6 +21,22 @@ module Jekyll
         output << "date: #{date}\n"
         output << "url: #{url}\n"
         output << "excerpt: #{excerpt}\n"
+
+        # Static metadata for LLM retrieval context (generator runs before render)
+        audience = post.data['intended_audience']
+        output << "audience: #{audience}\n" if audience
+        proficiency = post.data['proficiency_level']
+        output << "proficiency: #{proficiency}\n" if proficiency
+        tags = post.data['tags']
+        output << "tags: #{tags.join(', ')}\n" if tags.is_a?(Array) && !tags.empty?
+        category = post.data['category']
+        output << "category: #{category}\n" if category
+        prereqs = post.data['knowledge_prerequisites']
+        if prereqs.is_a?(Array) && !prereqs.empty?
+          labels = prereqs.map { |p| p['label'] }.compact
+          output << "prerequisites: #{labels.join('; ')}\n" unless labels.empty?
+        end
+
         output << "---\n\n"
 
         # Read the raw source file and strip frontmatter

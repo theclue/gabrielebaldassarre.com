@@ -205,13 +205,18 @@ def get_post_info(fm, body, filepath):
     clean_body = re.sub(r'\n{3,}', '\n\n', clean_body)
     clean_body = clean_body.strip()[:1500]
 
+    intended_audience = fm.get("intended_audience", "")
+    proficiency = fm.get("proficiency_level", "")
+
     return {
         "title": title,
         "excerpt": excerpt,
         "category": category,
         "url": post_url,
         "slug": slug,
-        "body": clean_body
+        "body": clean_body,
+        "intended_audience": intended_audience,
+        "proficiency": proficiency
     }
 
 
@@ -228,6 +233,8 @@ def call_github_models(post_info, active_channels):
 Categoria: {post_info['category']}
 URL: {post_info['url']}
 Estratto: {post_info['excerpt']}
+Audience: {post_info.get('intended_audience', 'general')}
+Proficiency: {post_info.get('proficiency', 'intermediate')}
 
 Contenuto dell'articolo (primi paragrafi):
 {body_snippet}
@@ -397,7 +404,7 @@ def cloudinary_social_url(master_path, social_config, post_title, channel_type):
         # Letterbox: semi-transparent black bar behind text+logo
         bar_url = f"{SITE_URL}/assets/images/1x1-black.png"
         bar_b64 = base64.b64encode(bar_url.encode()).decode()
-        parts.append(f"l_fetch:{bar_b64},c_scale,w_{width},h_120,o_80,g_south")
+        parts.append(f"l_fetch:{bar_b64},c_scale,w_{width},h_120,o_80")
         parts.append('fl_layer_apply,g_south')
 
     # Logo overlay: bigger (w_70), more room for 2-line caption

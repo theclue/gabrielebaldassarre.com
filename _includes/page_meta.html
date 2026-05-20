@@ -30,4 +30,13 @@
           {{ words | divided_by: words_per_minute }} {{ site.data.ui-text[site.locale].minute_read | default: "minute read" }}
         {% endif %}
     {% endif %}
+    {% if document.difficulty_label %}
+      {% assign loc = site.data.ui-text[site.locale] %}
+      <span class="difficulty-badge"
+            title="{% if document.difficulty_declared_display %}{{ loc.difficulty_declared_label | default: 'Declared' }}: {{ document.difficulty_declared_display }} | {% endif %}{% if document.difficulty_gulpease_display %}{{ loc.difficulty_lexical_label | default: 'Lexical' }}: Gulpease {{ document.difficulty_gulpease_display }} | {% endif %}{%- assign aud_key = document.difficulty_audience_key | prepend: 'audience_' -%}{% if document.difficulty_audience_key %}{{ loc.difficulty_audience_label | default: 'Audience' }}: {{ loc[aud_key] | default: document.difficulty_audience_key }}{% endif %}"
+            aria-label="{{ loc[document.difficulty_label] | default: document.difficulty_label }}">
+        {% include icon.html name="brain" class="difficulty-icon" %}
+        {{ loc[document.difficulty_label] | default: document.difficulty_label }}
+      </span>
+    {% endif %}
 </div>

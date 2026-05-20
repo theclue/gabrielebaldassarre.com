@@ -39,6 +39,14 @@ RUN apt-get clean && \
 RUN npm config set registry https://registry.npmjs.org/ && \
     npm install -g purgecss
 
+# clean up
+RUN apt-get clean && \
+    apt-get autoremove && \
+    rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*  /tmp/*
+
+RUN npm config set registry https://registry.npmjs.org/ && \
+    npm install -g purgecss @mermaid-js/mermaid-cli
+
 # set the locale
 RUN sed -i "/${LOCALE}.UTF-8/s/^# //g" /etc/locale.gen && \
     locale-gen

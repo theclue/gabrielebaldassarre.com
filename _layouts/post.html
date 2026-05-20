@@ -10,7 +10,7 @@ layout: default
   {% if overlay %}
   <div class="featured-image main-header-image">
     <img src="{{ overlay }}"
-         alt="{{ page.header.overlay_alt | default: page.title | strip_html }}"
+         alt="{% if page.image_meta.role == 'decorative' %}{% elsif page.image_meta.caption %}{{ page.image_meta.caption }}{% else %}{{ page.header.overlay_alt | default: page.title | strip_html }}{% endif %}"
          loading="eager"
          decoding="async"
          fetchpriority="high">

@@ -13,6 +13,9 @@ permalink: /llms.txt
 {% for post in site.posts %}
 ## [{{ post.title | smartify }}]({{ post.url | absolute_url }})
 {% if post.excerpt %}{{ post.excerpt | strip_html | normalize_whitespace | truncate: 200 }}{% endif %}
+{% if post.difficulty_label %}  Difficulty: {{ post.difficulty_label | capitalize }}{% endif %}
+{% if post.intended_audience %}  Audience: {{ post.intended_audience }}{% endif %}
+{% if post.readability %}  Readability: Gulpease {{ post.readability.gulpease | round: 1 }}, Flesch-Vacca {{ post.readability.flesch_vacca | round: 1 }}{% endif %}
 {% endfor %}
 
 ## Pagine

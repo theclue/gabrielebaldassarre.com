@@ -3,12 +3,32 @@ category: DevOps
 title: "Prova a prendermi: come ho insegnato al mio blog a farsi trovare"
 excerpt: Una pipeline completa di SEO auditing automatica per il mio blog Jekyll con Lighthouse, PageSpeed Insights, IndexNow, microformati e posizionamento per LLM — tutto integrato in GitHub Actions.
 master: /assets/images/seo-pipeline-farsi-trovare.png
+image_meta:
+  role: illustration
+  context: ambient
+  caption: "Fiore luminescente in un bosco magico'"
 broadcast:
   channels: [linkedin, mastodon]
   sent: true
 header:
   overlay_filter: 0.5
 tags: [SEO, Jekyll, GitHub Actions, CI/CD, DevOps, webperf, LLM, PageSpeed, GEO]
+intended_audience: practitioner
+proficiency_level: intermediate
+knowledge_prerequisites:
+  - concept: jekyll
+    label: "Come funziona Jekyll"
+    importance: recommended
+  - concept: github-actions
+    label: "Basi di GitHub Actions"
+    importance: recommended
+  - concept: schema-org
+    label: "Cos'è Schema.org"
+    importance: helpful
+difficulty_declared:
+  conceptual: 3
+  technical: 4
+  mathematical: 0
 ---
 
 Pubblicare un articolo su un blog personale è facile. Assicurarsi che venga trovato dai motori di ricerca — e, sempre più, dai crawler AI — è un'altra storia. Per anni ho fatto come fanno tutti: scrivevo, applicavo il buon senso SEO di base, pubblicavo. Ogni tanto aprivo Google Search Console e se qualcosa era cambiato, o non stava funzionando, prendevo qualche contromisura seguendo, un po' svogliatamente, le raccomandazioni di questo o quel tool di auditing.
@@ -35,7 +55,7 @@ Così è nata la mia pipeline di SEO automatica, la prima di una serie che nella
 
 ## Il workflow di supporto autoriale: l'idea
 
-Banalmente, una volta terminato il processo di pubblicazione di un articolo, il suo permalink viene passato a una serie di servizi che lo analizzano e lo notificano ai motori di ricerca. Il tutto orchestrato da {% repo_url "/.github/workflows/seo-pipeline.yml" "un unico file YAML" %}. Zero servizi a pagamento, zero login da fare, zero dashboard da aprire, zero notifiche da controllare manualmente — tutto descritto programmaticamente dal contenuto del repository git e guidato da CICD.
+Banalmente, una volta terminato il processo di pubblicazione di un articolo, il suo permalink viene passato a una serie di servizi che lo analizzano e lo notificano ai motori di ricerca. Il tutto orchestrato da {% repo_url "/.github/workflows/seo-pipeline.yml" "un unico file YAML" role="source" context="supports-claim" target="external-authoritative" %}. Zero servizi a pagamento, zero login da fare, zero dashboard da aprire, zero notifiche da controllare manualmente — tutto descritto programmaticamente dal contenuto del repository git e guidato da CICD.
 
 In questo articolo non andrò a riportare il codice nella sua interezza, per non appesantire la lettura, ma solo i suoi principi di base e le sue caratteristiche più istruttive. Chiaramente, sentitevi liberi di riutilizzare il workflow secondo le vostre esigenze: ne sarei felice!
 
@@ -108,17 +128,17 @@ Ho colto l'occasione di questa pipeline per sistemare diversi aspetti di SEO str
 
 Trovarsi su Google non basta più. Nel 2026, una fetta crescente del traffico verso i contenuti tecnici arriva dai crawler AI — ChatGPT, Perplexity, Claude, Gemini, Copilot. Questi sistemi non navigano il web come un browser: arrivano, leggono l'HTML e se ne vanno. Se il tuo contenuto non è immediatamente accessibile, per loro non esiste.
 
-Secondo [AI Advisors](https://www.ai-advisors.ai/blog/how-to-get-cited-by-microsoft-copilot), i crawler AI cercano tre cose: contenuti ben strutturati, segnali di autorità chiari, e una gerarchia di heading che renda ovvio di cosa parla ogni sezione. Non è diverso da ciò che vuole Google, ma è più esigente in termini di pulizia strutturale e metadati.
+Secondo {% xlink "https://www.ai-advisors.ai/blog/how-to-get-cited-by-microsoft-copilot" "AI Advisors" role="source" context="supports-claim" target="external-authoritative" %}, i crawler AI cercano tre cose: contenuti ben strutturati, segnali di autorità chiari, e una gerarchia di heading che renda ovvio di cosa parla ogni sezione. Non è diverso da ciò che vuole Google, ma è più esigente in termini di pulizia strutturale e metadati.
 
 Ne ho approfittato quindi per sistemare, lato template Jekyll, questi elementi statici:
 
-**robots.txt per crawler AI.** GPTBot, CCBot, anthropic-ai, PerplexityBot, Google-Extended e altri: tutti possono accedere ai contenuti testuali ma non agli asset binari. Con l'esplosione del traffico da AI crawler, è diventato rilevante. Ma attenzione a non stressare troppo la CDN: il traffico da AI può essere [davvero invadente](https://vulpinecitrus.info/blog/one-in-every-2000-ipv4-visualizing-ddos-ai-web-scrapers/).
+**robots.txt per crawler AI.** GPTBot, CCBot, anthropic-ai, PerplexityBot, Google-Extended e altri: tutti possono accedere ai contenuti testuali ma non agli asset binari. Con l'esplosione del traffico da AI crawler, è diventato rilevante. Ma attenzione a non stressare troppo la CDN: il traffico da AI può essere {% xlink "https://vulpinecitrus.info/blog/one-in-every-2000-ipv4-visualizing-ddos-ai-web-scrapers/" "davvero invadente" role="source" context="supports-claim" target="external-community" %}.
 
-**llms.txt e llms-full.txt.** Il primo è un indice strutturato dei post in formato Markdown — una specie di sitemap per LLM. Il secondo è l'intero corpus del blog in un unico file markdown, generato automaticamente a ogni build da un [semplicissimo plugin Jekyll](https://github.com/theclue/gabrielebaldassarre.com/blob/main/_plugins/llms_full_generator.rb). Lo standard è ancora acerbo e usato da pochi attori (solo OpenAI, al momento in cui scrivo), ma adottarlo costa talmente poco che non farlo sarebbe pigrizia.
+**llms.txt e llms-full.txt.** Il primo è un indice strutturato dei post in formato Markdown — una specie di sitemap per LLM. Il secondo è l'intero corpus del blog in un unico file markdown, generato automaticamente a ogni build da un {% xlink "https://github.com/theclue/gabrielebaldassarre.com/blob/main/_plugins/llms_full_generator.rb" "semplicissimo plugin Jekyll" role="source" context="supports-claim" target="external-community" name="llms_full_generator.rb" %}. Lo standard è ancora acerbo e usato da pochi attori (solo OpenAI, al momento in cui scrivo), ma adottarlo costa talmente poco che non farlo sarebbe pigrizia.
 
 **Core Web Vitals sotto controllo.** Lighthouse CI e PageSpeed Insights verificano a ogni deploy che LCP (Largest Contentful Paint), CLS (Cumulative Layout Shift) e TBT (Total Blocking Time) restino entro soglie accettabili. Le mie pagine sono statiche, quindi i valori sono naturalmente buoni, ma il controllo automatico mi avvisa se qualcosa degenera — un'immagine troppo pesante, un font che blocca il rendering, un layout che slitta, un javascript che crea problemi.
 
-{% cloudinary screenshot /assets/images/pagespeed-insights-esempio-report.png alt="Esempio di report Pagespeed Insights" caption="PSI è un po' più old school e da molto peso agli aspetti tecnici" %}
+{% cloudinary /assets/images/pagespeed-insights-esempio-report.png alt="Esempio di report Pagespeed Insights" caption="PSI è un po' più old school e da molto peso agli aspetti tecnici" role="screenshot" context="result" %}
 
 ---
 
@@ -167,9 +187,9 @@ Ho creato un glossario YAML (`_data/glossary.yml`) con i termini tecnici che uso
 
 L'obiettivo è costruire un mini knowledge graph semantico, così che un motore di ricerca — o un LLM — che atterra su una mia pagina possa risalire al contesto tecnico in cui si inserisce.
 
-Dopo aver definito il proprio modello di metadati di schema, mon fa male fare un passaggio su [Schema Validator](https://validator.schema.org)
+Dopo aver definito il proprio modello di metadati di schema, mon fa male fare un passaggio su {% xlink "https://validator.schema.org" "Schema Validator" role="tool" context="enables-step" target="external-authoritative" %}
 
-{% cloudinary screenshot /assets/images/schema-validator-esempio-report.png alt="Una vista molto dev-friendly dello schema validator. A quanto pare questo strumento non è così severo rispetto agli altri che abbiamo visto" %}
+{% cloudinary /assets/images/schema-validator-esempio-report.png alt="Una vista molto dev-friendly dello schema validator. A quanto pare questo strumento non è così severo rispetto agli altri che abbiamo visto" role="screenshot" context="result" %}
 
 ---
 
@@ -177,7 +197,7 @@ Dopo aver definito il proprio modello di metadati di schema, mon fa male fare un
 
 La Generative Engine Optimization (GEO) è la pratica di strutturare i contenuti perché vengano citati dai motori di ricerca AI — ChatGPT, Perplexity, Claude, Gemini. Non si tratta di ranking. Si tratta di _citation rate_: quanto spesso il tuo brand appare nelle risposte generate.
 
-Secondo [LLMrefs](https://llmrefs.com/generative-engine-optimization), la sovrapposizione tra i link di Google e le fonti citate dagli AI è scesa dal 70% a meno del 20%. In particolare, le AI citano tranquillamente risultati che, invece, nelle SERP dei motori di ricerca sono ben lontane dalla prima pagina di risultati, senza timore. I due mondi si stanno separando. E i criteri che usano gli AI per scegliere cosa citare sono diversi.
+Secondo {% xlink "https://llmrefs.com/generative-engine-optimization" "LLMrefs" role="source" context="supports-claim" target="external-authoritative" %}, la sovrapposizione tra i link di Google e le fonti citate dagli AI è scesa dal 70% a meno del 20%. In particolare, le AI citano tranquillamente risultati che, invece, nelle SERP dei motori di ricerca sono ben lontane dalla prima pagina di risultati, senza timore. I due mondi si stanno separando. E i criteri che usano gli AI per scegliere cosa citare sono diversi.
 
 Cosa ho fatto, in concreto, per applicare GEO al mio blog:
 
@@ -216,7 +236,7 @@ La risposta è un 200 se l'URL è stato accettato, 202 se è in attesa di valida
 
 #### Hermes SEO Audit
 
-Un'[API pubblica](https://hermesforge.dev/tools/seo) (con key opzionale per limiti più alti — 5 req/giorno anonimo, 50 con key gratuita). Restituisce un JSON con score, grade, issues, warnings e passed. Lo uso per avere un quadro immediato dello stato SEO di una pagina.
+Un'{% xlink "https://hermesforge.dev/tools/seo" "API pubblica" role="tool" context="enables-step" target="external-authoritative" name="Hermes SEO Audit API" %} (con key opzionale per limiti più alti — 5 req/giorno anonimo, 50 con key gratuita). Restituisce un JSON con score, grade, issues, warnings e passed. Lo uso per avere un quadro immediato dello stato SEO di una pagina.
 
 ```bash
 curl -s "https://hermesforge.dev/api/seo?url=https://gabrielebaldassarre.com/fisica/stati-spin/&key=YOUR_KEY"
@@ -249,7 +269,7 @@ Hermes è, in realtà, una suite ben più grande — offre anche screenshot API,
 
 #### PageSpeed Insights
 
-L'[API ufficiale Google](https://developers.google.com/speed/docs/insights/v5/about?hl=it) per Core Web Vitals. Richiede una API key gratuita da Google Cloud Console. Restituisce le categorie performance, accessibility, SEO e best-practices, sia per mobile che per desktop.
+L'{% xlink "https://developers.google.com/speed/docs/insights/v5/about?hl=it" "API ufficiale Google" role="tool" context="enables-step" target="external-authoritative" name="PageSpeed Insights API v5" %} per Core Web Vitals. Richiede una API key gratuita da Google Cloud Console. Restituisce le categorie performance, accessibility, SEO e best-practices, sia per mobile che per desktop.
 
 ```bash
 curl -s "https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=https://gabrielebaldassarre.com/&strategy=mobile&category=performance&category=accessibility&category=seo&category=best-practices&key=YOUR_KEY"
@@ -272,11 +292,11 @@ Output a console:
 
 Il report JSON completo — ben più ricco della sintesi a console — viene salvato come artifact del workflow, accessibile per 30 giorni.
 
-{% cloudinary screenshot /assets/images/pagespeed-insights-abilita-api.png alt="Pagina per abilitare le API di PageSpeed Insights" caption="Per utilizzare le API di PageSpeed Insights è necessario un progetto su Google Cloud Platform. Questa cosa non mi fa impazzire, ma se non altro sono gratuite" %}
+{% cloudinary /assets/images/pagespeed-insights-abilita-api.png alt="Pagina per abilitare le API di PageSpeed Insights" caption="Per utilizzare le API di PageSpeed Insights è necessario un progetto su Google Cloud Platform. Questa cosa non mi fa impazzire, ma se non altro sono gratuite" role="screenshot" context="reference" %}
 
 #### Lighthouse CI
 
-Qui cominciamo a calare i pezzi grossi. [Lighthouse CI](https://github.com/GoogleChrome/lighthouse-ci) non è un servizio remoto con una API REST, ma un headless Chrome eseguito **in locale** sulla VM del runner di GitHub Actions. Naviga le pagine, raccoglie metriche, e produce report HTML con screenshot, waterfall di rete e diagnostica.
+Qui cominciamo a calare i pezzi grossi. {% xlink "https://github.com/GoogleChrome/lighthouse-ci" "Lighthouse CI" role="tool" context="enables-step" target="external-community" name="Lighthouse CI" %} non è un servizio remoto con una API REST, ma un headless Chrome eseguito **in locale** sulla VM del runner di GitHub Actions. Naviga le pagine, raccoglie metriche, e produce report HTML con screenshot, waterfall di rete e diagnostica.
 
 ```bash
 npm install -g @lhci/cli --quiet
@@ -311,7 +331,7 @@ Essendo un tool locale, ipoteticamente potrebbe anche essere eseguito a _build t
 
 Nel mio caso, ad esempio, che uso una CDN per le immagini, durante il build gli asset non sono ancora pubblici e i loro URL non sono ancora risolti. L'audit pre-deploy soffrirebbe di falsi positivi. Eseguo quindi Lighthouse **post-deploy**, quando il sito è live e Cloudinary ha già cachato tutte le immagini.
 
-{% cloudinary screenshot /assets/images/lighhouse-ci-esempio-report.png alt="Esempio di report Lighthouse" caption="Lighthouse CI fornisce un report molto dettagliato. Come vedete, già non sono messo così male come scoring" %}
+{% cloudinary /assets/images/lighhouse-ci-esempio-report.png alt="Esempio di report Lighthouse" caption="Lighthouse CI fornisce un report molto dettagliato. Come vedete, già non sono messo così male come scoring" role="screenshot" context="result" %}
 
 I report HTML e JSON sono salvati come workflow artifact con timestamp e commit hash nel nome (`assertions-20260516-164500-a1b2c3d.json`), da dove li recupero per un'ispezione ad oggi manuale. Sono incredibilmente ricchi di informazioni. Forse anche troppe, per un umano... se capite dove voglio arrivare.
 
@@ -321,7 +341,7 @@ I report HTML e JSON sono salvati come workflow artifact con timestamp e commit 
 
 Molti di questi servizi richiedono una API key, spesso passata come parametro nelle chiamate `curl`. Come le si passa al workflow senza committare in chiaro sul repository?
 
-Ma con le [Secrets](https://docs.github.com/en/actions/security-for-github-actions/security-guides/using-secrets-in-github-actions) ovviamente! Anche Github, infatti, ha questa funzionalità che non può mancare ad un orchestratore di CICD. Si configurano in Settings → Secrets and variables → Actions.
+Ma con le {% xlink "https://docs.github.com/en/actions/security-for-github-actions/security-guides/using-secrets-in-github-actions" "Secrets" role="definition" context="provides-context" target="external-authoritative" %} ovviamente! Anche Github, infatti, ha questa funzionalità che non può mancare ad un orchestratore di CICD. Si configurano in Settings → Secrets and variables → Actions.
 
 ---
 
