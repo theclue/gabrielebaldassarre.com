@@ -68,5 +68,20 @@
     "prefix": ";xlink",
     "body": "{% xlink \"$1\" \"$2\" role=\"${3|citation,source,definition,tool,prerequisite,deepening,related,self,demo,download,attribution,commercial|}\" context=\"${4|supports-claim,provides-context,enables-step,validates-result,credits-author,offers-alternative,extends-topic|}\" target=\"${5|internal,external-authoritative,external-community,external-commercial,external-ugc|}\" %}",
     "description": "External link with semantic role, context and target metadata"
+  },
+  "Series Frontmatter": {
+    "prefix": ";series",
+    "body": "series:\n  id: \"$1\"\n  title: \"$2\"\n  part: $3\n  total_parts: $4",
+    "description": "Multi-post series navigation metadata"
+  },
+  "Series Index Tag": {
+    "prefix": ";sidx",
+    "body": "{% include series_index.html %}",
+    "description": "Include series table of contents (in layout by default)"
+  },
+  "Series Nav Tag": {
+    "prefix": ";snav",
+    "body": "{% include series_nav.html %}",
+    "description": "Include prev/next series navigation (in layout by default)"
   }
 }

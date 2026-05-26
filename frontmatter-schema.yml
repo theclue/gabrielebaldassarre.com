@@ -19,7 +19,7 @@ subtitle:        string?                         # Sottotitolo
 excerpt:         string?                         # Estratto (SEO + preview card)
 description:     string?                         # Meta description (default: excerpt)
 category:        string?                         # Categoria principale (es. "DevOps", "Fisica")
-tags:            [string]                        # Tag del post
+tags:            [string]?                       # Tag del post
 master:          string?                         # Percorso immagine master (Cloudinary)
 canonical_url:   string?                         # URL canonico (se diverso dal permalink)
 mermaid:         boolean?                        # Abilita diagrammi Mermaid nella pagina
@@ -138,26 +138,88 @@ mermaid:
 # I campi accTitle e accDescr nel sorgente Mermaid vengono mappati
 # automaticamente su alt e long_description della tassonomia immagini.
 
+# ── Series — Multi-post series navigation ────────────────────────────────
+# I post che appartengono a una serie vengono collegati automaticamente con:
+#   - Navigazione prev/next (_includes/series_nav.html)
+#   - Indice della serie (_includes/series_index.html)
+#   - Structured data ItemList per SEO (_includes/seo.html)
+#
+# L'associazione è gestita dal plugin _plugins/series.rb a build time
+# raggruppando i post per series.id e ordinandoli per data.
+#
+# L'agente /annotate-post può popolare questi campi automaticamente
+# quando riconosce il pattern "parte X" nel titolo o reference incrociate.
+
+series:
+  id:           string?                       # Identificatore univoco della serie (kebab-case, es. "dashboard-astrometria")
+  title:        string?                       # Titolo human-readable della serie (es. "Il cielo in salotto")
+  part:         integer?                      # Numero di questo post nella serie (1-based)
+  total_parts:  integer?                      # Numero totale di post nella serie
+
 # ── Content difficulty & audience ──────────────────────────────────────
 # Layer dichiarato (autore) + Layer calcolato (build time)
+# 
+# Pipeline:
+#   1. Autore (o LLM via /annotate-post) popola:
+#      - intended_audience, proficiency_level, difficulty_declared
+#      - knowledge_prerequisites (concept, label, url, sameAs, importance, depth)
+#      - difficulty_computed.semantic (metriche qualitative dell'LLM)
+#   2. A build time, difficulty.rb:
+#      - Fonde difficulty_computed.semantic con difficulty_computed.lexical (Gulpease)
+#      - Ricalcola difficulty_composite (40% declared + 30% lexical + 30% semantic)
+#      - Genera difficulty_label, difficulty_declared_display, etc.
+#      - Popola il termsdictionary da tutti i knowledge_prerequisites dei post
+#   3. Le modifiche alle formule di calcolo NON richiedono di ri-eseguire LLM
 
 intended_audience:    "general|curious|student|practitioner|specialist"
 proficiency_level:    "beginner|intermediate|advanced|expert"
 
 knowledge_prerequisites:
-  - concept:     string?                       # Identificativo concetto
+  - concept:     string                        # Identificativo canonico (kebab-case, es. "home-assistant")
     label:       string                        # Etichetta human-readable
-    url:         string?                       # Link glossario/risorsa
-    importance:  "required|recommended|helpful"
+    url:         string?                       # Link a risorsa esterna (Wikipedia, docs, articolo)
+    sameAs:      string?                       # URL Wikidata (es. "https://www.wikidata.org/wiki/Q5731200")
+    importance:  "required|recommended|helpful" # required=bloccante, recommended=importante-ma-non-bloccante, helpful=arricchimento
+    depth:       0-5                           # Profondità nel grafo della conoscenza (0=comune, 4+=specialistico)
 
 difficulty_declared:
   conceptual:    1-5                           # Difficoltà concettuale
   technical:     1-5                           # Difficoltà tecnica
   mathematical:  0-5                           # Livello matematico (0=nessuno)
 
-# difficulty_computed:  (iniettato a runtime da difficulty.rb)
+# difficulty_computed (iniettato dall'agente LLM, fuso con lexical a build time):
+#   semantic:
+#     concept_count                  # Concetti NON definiti inline
+#     concept_density                # concept_count / paragrafi prosa
+#     jargon_ratio                   # (termini_tecnici / parole_prosa) * 100
+#     definition_coverage            # concetti_definiti / totale_concetti
+#     external_knowledge_demand      # Concetti né definiti né linkati
+#     prerequisite_depth             # Media pesata delle profondità dei concetti
+#     math_density                   # (formule_matematiche / paragrafi) * 10
+#     code_density                   # (righe_codice / righe_totali) * 10
+#     blocking_prerequisite_count    # Numero di prerequisiti con importance=required
+#
+#   lexical: (popolato a build time da readability.rb)
+#     flesch_reading_ease, gulpease, avg_sentence_length,
+#     word_count, reading_time_minutes
+#
 # difficulty_composite: 40% declared + 30% lexical + 30% semantic
 # Badge: ◉◉◎◎◎ Accessibile / Intermedio / Avanzato / Esperto
+
+# ── Terms Dictionary (auto-popolato a build time) ───────────────────────
+# Il termsdictionary è popolato dal plugin difficulty.rb a build time
+# pescando i knowledge_prerequisites di tutti i post e deduplicando per
+# campo `concept`. Sostituisce il file hardcoded _data/glossary.yml.
+#
+# Ogni entry eredita:
+#   concept, label, url, sameAs, depth (dal primo post che lo menziona)
+#   post_count: numero di post che menzionano il concetto
+#   posts: [url dei post che lo menzionano]
+#
+# Usato per:
+#   - SEO (DefinedTerm in JSON-LD)
+#   - Ricerca semantica
+#   - Validazione incrociata dei prerequisiti
 
 # ── Custom Liquid tags ─────────────────────────────────────────────────
 # {% post_link /url/ "text" %}  → Link interno safe (fallback a plain text)

@@ -56,6 +56,12 @@ en: &DEFAULT_EN
   difficulty_axis_conceptual  : "Conceptual"
   difficulty_axis_technical   : "Technical"
   difficulty_axis_mathematical: "Mathematical"
+  series_label                : "Series"
+  series_part_label           : "Part"
+  series_of                   : "of"
+  series_previous             : "Previous"
+  series_next                 : "Next"
+  series_index_label          : "Articles in this series"
 en-US:
   <<: *DEFAULT_EN
 en-CA:
@@ -120,5 +126,11 @@ it: &DEFAULT_IT
   difficulty_axis_conceptual  : "Concettuale"
   difficulty_axis_technical   : "Tecnico"
   difficulty_axis_mathematical: "Matematico"
+  series_label                : "Serie"
+  series_part_label           : "Parte"
+  series_of                   : "di"
+  series_previous             : "Precedente"
+  series_next                 : "Successivo"
+  series_index_label          : "Articoli della serie"
 it-IT:
   <<: *DEFAULT_IT

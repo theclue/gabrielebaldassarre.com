@@ -165,7 +165,77 @@
       "@type": "DefinedTerm",
       "termCode": "knowledge_prerequisites",
       "name": "Knowledge Prerequisites",
-      "description": "Array di concetti/risorse che il lettore dovrebbe conoscere prima di leggere l'articolo. Ogni prerequisito ha: concept (identificativo), label (etichetta), url (link glossario), importance (required|recommended|helpful). I required mappano su Schema.org requires, i recommended su isBasedOn, gli helpful su relatedLink.",
+      "description": "Array di concetti/risorse che il lettore dovrebbe conoscere prima di leggere l'articolo. Ogni prerequisito ha: concept (identificativo canonico kebab-case), label (etichetta human-readable), url (link a risorsa esterna), sameAs (URL Wikidata per grounding ontologico), importance (required|recommended|helpful — bloccante/importante/arricchimento), depth (profondità nel grafo della conoscenza, 0=comune, 4+=specialistico). Popolato dall'agente LLM via /annotate-post. Alimenta il termsdictionary a build time.",
+      "inDefinedTermSet": { "@id": "https://gabrielebaldassarre.com/metadata-schema.jsonld" }
+    },
+    {
+      "@type": "DefinedTerm",
+      "termCode": "termsdictionary",
+      "name": "Terms Dictionary",
+      "description": "Dizionario canonico dei concetti del blog, popolato automaticamente a build time dal plugin difficulty.rb pescando i knowledge_prerequisites di tutti i post. Ogni entry ha: concept, label, url, sameAs, depth, post_count, posts[]. Sostituisce _data/glossary.yml per i contenuti generati dai post, ma importa comunque il glossary hardcoded per retrocompatibilità. Esposto come site.data.termsdictionary e usato per SEO (DefinedTerm in JSON-LD) e ricerca semantica.",
+      "inDefinedTermSet": { "@id": "https://gabrielebaldassarre.com/metadata-schema.jsonld" }
+    },
+    {
+      "@type": "DefinedTerm",
+      "termCode": "math_density",
+      "name": "Math Density",
+      "description": "Densità di formule matematiche nell'articolo: (numero_formule_LaTeX / numero_paragrafi) * 10. Una formula multi-linea conta come 1. Formule puramente decorative escluse. Popolato dall'agente LLM. Alta densità segnala contenuto tecnico-scientifico.",
+      "inDefinedTermSet": { "@id": "https://gabrielebaldassarre.com/metadata-schema.jsonld" }
+    },
+    {
+      "@type": "DefinedTerm",
+      "termCode": "code_density",
+      "name": "Code Density",
+      "description": "Densità di codice sorgente nell'articolo: (righe_di_codice / righe_totali_articolo) * 10. Alta densità segnala un articolo tecnico-pratico (tutorial, configurazioni). Popolato dall'agente LLM.",
+      "inDefinedTermSet": { "@id": "https://gabrielebaldassarre.com/metadata-schema.jsonld" }
+    },
+    {
+      "@type": "DefinedTerm",
+      "termCode": "blocking_prerequisite_count",
+      "name": "Blocking Prerequisite Count",
+      "description": "Numero di prerequisiti con importance=required. Indicatore di soglia d'ingresso: più alto è, più concetti sono indispensabili per comprendere o completare l'articolo. Usato nel calcolo del composite difficulty.",
+      "inDefinedTermSet": { "@id": "https://gabrielebaldassarre.com/metadata-schema.jsonld" }
+    },
+    {
+      "@type": "DefinedTerm",
+      "termCode": "concept_count",
+      "name": "Concept Count",
+      "description": "Numero di concetti specialistici NON definiti inline nell'articolo. Misura la densità di conoscenza presupposta. Concetti spiegati nel testo (con frasi come 'X è...') non contano.",
+      "inDefinedTermSet": { "@id": "https://gabrielebaldassarre.com/metadata-schema.jsonld" }
+    },
+    {
+      "@type": "DefinedTerm",
+      "termCode": "concept_density",
+      "name": "Concept Density",
+      "description": "concept_count / numero_paragrafi_prosa. Indica la concentrazione di concetti presupposti per unità narrativa.",
+      "inDefinedTermSet": { "@id": "https://gabrielebaldassarre.com/metadata-schema.jsonld" }
+    },
+    {
+      "@type": "DefinedTerm",
+      "termCode": "jargon_ratio",
+      "name": "Jargon Ratio",
+      "description": "(termini_tecnici / parole_prosa_totali) * 100. Misura la saturazione di gergo tecnico nel testo narrativo, escludendo codice e listati.",
+      "inDefinedTermSet": { "@id": "https://gabrielebaldassarre.com/metadata-schema.jsonld" }
+    },
+    {
+      "@type": "DefinedTerm",
+      "termCode": "definition_coverage",
+      "name": "Definition Coverage",
+      "description": "concetti_definiti_inline / totale_concetti_identificati. 0.0 = nessun concetto spiegato, il lettore deve sapere tutto. 1.0 = ogni concetto definito nell'articolo.",
+      "inDefinedTermSet": { "@id": "https://gabrielebaldassarre.com/metadata-schema.jsonld" }
+    },
+    {
+      "@type": "DefinedTerm",
+      "termCode": "external_knowledge_demand",
+      "name": "External Knowledge Demand",
+      "description": "Numero di concetti né definiti inline né linkati a risorse esterne. Misura la quantità di conoscenza che il lettore deve possedere senza supporto. Link sameAs Wikidata (arricchimento LLM) non riducono questo valore perché non presenti nel testo originale.",
+      "inDefinedTermSet": { "@id": "https://gabrielebaldassarre.com/metadata-schema.jsonld" }
+    },
+    {
+      "@type": "DefinedTerm",
+      "termCode": "prerequisite_depth",
+      "name": "Prerequisite Depth",
+      "description": "Media pesata della profondità nel grafo della conoscenza per tutti i concetti identificati. Scala: 0=comune, 1=base, 2=intermedio, 3=avanzato, 4+=specialistico. Media dei valori depth dei knowledge_prerequisites.",
       "inDefinedTermSet": { "@id": "https://gabrielebaldassarre.com/metadata-schema.jsonld" }
     },
     {
@@ -179,7 +249,7 @@
       "@type": "DefinedTerm",
       "termCode": "difficulty_composite",
       "name": "Composite Difficulty Index",
-      "description": "Indice sintetico di difficoltà (0-5) calcolato a build time: 40% media difficulty_declared + 30% lessicale (Gulpease) + 30% semantico (concept_density, prerequisite_depth, definition_coverage). Se le componenti semantiche non sono disponibili, il composito è calcolato solo sulle disponibili. Label: Accessibile (≤2), Intermedio (≤3), Avanzato (≤4), Esperto (>4).",
+      "description": "Indice sintetico di difficoltà (0-5) calcolato a build time dal plugin difficulty.rb. Formula pesata: 40% media difficulty_declared + 30% lessicale (Gulpease) + 30% semantico. La componente semantica pesa: concept_density (20%), prerequisite_depth (25%), inv_definition_coverage (15%), knowledge_gap (15%), blocking_pressure (15%), technical_density/math+code (10%). Label: Accessibile (≤2), Intermedio (≤3), Avanzato (≤4), Esperto (>4).",
       "inDefinedTermSet": { "@id": "https://gabrielebaldassarre.com/metadata-schema.jsonld" }
     },
     {
@@ -198,16 +268,51 @@
     },
     {
       "@type": "DefinedTerm",
-      "termCode": "intended_audience",
-      "name": "Intended Audience",
-      "description": "[FUTURO — pipeline LLM-based] Profilo del lettore ideale: 'general', 'enthusiast', 'practitioner', 'researcher', 'expert'.",
+      "termCode": "intended_intent",
+      "name": "Intended Intent",
+      "description": "[FUTURO — pipeline LLM-based] Obiettivo comunicativo del post: 'inform', 'teach', 'persuade', 'entertain', 'inspire', 'document'.",
       "inDefinedTermSet": { "@id": "https://gabrielebaldassarre.com/metadata-schema.jsonld" }
     },
     {
       "@type": "DefinedTerm",
-      "termCode": "intended_intent",
-      "name": "Intended Intent",
-      "description": "[FUTURO — pipeline LLM-based] Obiettivo comunicativo del post: 'inform', 'teach', 'persuade', 'entertain', 'inspire', 'document'.",
+      "termCode": "article_content_type",
+      "name": "Article Content Type",
+      "description": "Classification of the dominant structural format of a post. Values: narrative (long-form linear prose), tutorial (step-by-step instructions with code/config blocks), conceptual (theory-heavy, definitional). Guides the image placement policy: density targets, placement rules, and role selection adapt to the content type. Determined by the /annotate-post agent during semantic analysis.",
+      "inDefinedTermSet": { "@id": "https://gabrielebaldassarre.com/metadata-schema.jsonld" }
+    },
+    {
+      "@type": "DefinedTerm",
+      "termCode": "image_placement_policy",
+      "name": "Image Placement Policy",
+      "description": "Rule set governing where, how often, and what type of images to place in a post. Comprises six dimensions: density (images per word count by content type), spatial placement (adjacency to explanatory text), role selection (which image_meta.role for which narrative context), decorative imaging constraints, cognitive load adaptation (adjust density based on concept_density and gulpease), and coherence/accessibility checks. Invoked by the /annotate-post agent to suggest optimal image positioning. Documented in .opencode/commands/annotate-post.md.",
+      "inDefinedTermSet": { "@id": "https://gabrielebaldassarre.com/metadata-schema.jsonld" }
+    },
+    {
+      "@type": "DefinedTerm",
+      "termCode": "image_density_target",
+      "name": "Image Density Target",
+      "description": "Prescribed image frequency per content type. narrative: 1 image per 400-500 words (minimum 1). tutorial: 1 image per 200-300 words with mandatory visual per actionable step. conceptual: 1 diagram per section plus one global overview diagram. Density adapts to cognitive load: increased when concept_density > 3, reduced when gulpease < 50.",
+      "inDefinedTermSet": { "@id": "https://gabrielebaldassarre.com/metadata-schema.jsonld" }
+    },
+    {
+      "@type": "DefinedTerm",
+      "termCode": "spatial_contiguity",
+      "name": "Spatial Contiguity Principle",
+      "description": "Instructional design principle (Mayer 2001): corresponding words and pictures must be presented near each other on the page to reduce split-attention effect. In blog context: every image must be adjacent to the paragraph it explains, never separated by unrelated text. Enforced by the /annotate-post agent as an error-level placement rule.",
+      "inDefinedTermSet": { "@id": "https://gabrielebaldassarre.com/metadata-schema.jsonld" }
+    },
+    {
+      "@type": "DefinedTerm",
+      "termCode": "pre_training_principle",
+      "name": "Pre-Training Principle",
+      "description": "Instructional design principle (Mayer 2005): learners understand a multimedia presentation better when they receive pre-training on the names and characteristics of key components before the full explanation. In blog context: architecture diagrams should appear before their detailed breakdown to establish a mental model. Applied by the /annotate-post agent as an info-level placement rule.",
+      "inDefinedTermSet": { "@id": "https://gabrielebaldassarre.com/metadata-schema.jsonld" }
+    },
+    {
+      "@type": "DefinedTerm",
+      "termCode": "cognitive_overload_reduction",
+      "name": "Cognitive Overload Reduction",
+      "description": "Image placement strategy: avoid clustering multiple images without intervening text, as this breaks the scanning flow and increases extraneous cognitive load (Sweller 1988). In blog context: limit consecutive images to 1, enforce text separation. Applied by the /annotate-post agent as a warning-level placement rule.",
       "inDefinedTermSet": { "@id": "https://gabrielebaldassarre.com/metadata-schema.jsonld" }
     }
   ]

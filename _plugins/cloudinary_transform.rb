@@ -163,6 +163,8 @@ module Jekyll
 
     # Liquid filter: page.master | cloudinary_hero: page.header
     def cloudinary_hero(image_path, header = {})
+      return image_path if CloudinaryTransform.dev_bypass?
+
       site = @context.registers[:site]
       site_url = site.config['url']
       full_url = image_path.start_with?('http') ? image_path : "#{site_url}#{image_path}"

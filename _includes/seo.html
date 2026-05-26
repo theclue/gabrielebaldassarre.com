@@ -279,6 +279,28 @@
 {%- endif -%}
 </script>
 
+{%- if og_type == "article" and page.series -%}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  "name": {{ page.series.title | jsonify }},
+  "numberOfItems": {{ page.series.total_parts }},
+  "itemListOrder": "https://schema.org/ItemListOrderAscending",
+  "itemListElement": [
+    {%- for spost in page.series.posts %}
+    {
+      "@type": "ListItem",
+      "position": {{ forloop.index }},
+      "name": {{ spost.title | markdownify | strip_html | strip_newlines | jsonify }},
+      "url": {{ spost.url | absolute_url | jsonify }}
+    }{%- unless forloop.last %},{%- endunless %}
+    {%- endfor %}
+  ]
+}
+</script>
+{%- endif -%}
+
 {%- if og_type == "article" and page.categories.size > 0 -%}
 <script type="application/ld+json">
 {

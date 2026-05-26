@@ -1,0 +1,17 @@
+{%- assign _ui = site.data.ui-text[site.locale] -%}
+{%- if page.series.previous_post or page.series.next_post -%}
+<nav class="series-nav" aria-label="{{ _ui.series_label | default: 'Serie' }}: {{ page.series.title | escape }}">
+  <div class="series-nav__links">
+    {%- if page.series.previous_post -%}
+    <a href="{{ page.series.previous_post.url | relative_url }}" class="series-nav__pill" rel="prev">
+      {% include icon.html name="chevron-left" %} {{ _ui.series_part_label | default: 'Parte' }} {{ page.series.previous_post.part }}
+    </a>
+    {%- endif -%}
+    {%- if page.series.next_post -%}
+    <a href="{{ page.series.next_post.url | relative_url }}" class="series-nav__pill" rel="next">
+      {{ _ui.series_part_label | default: 'Parte' }} {{ page.series.next_post.part }} {% include icon.html name="chevron-right" %}
+    </a>
+    {%- endif -%}
+  </div>
+</nav>
+{%- endif -%}

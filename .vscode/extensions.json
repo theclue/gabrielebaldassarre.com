@@ -1,0 +1,19 @@
+{
+  "recommendations": [
+    "shopify.ruby-lsp",
+    "sissel.shopify-liquid",
+    "redhat.vscode-yaml",
+    "yzhang.markdown-all-in-one",
+    "streetsidesoftware.code-spell-checker",
+    "streetsidesoftware.code-spell-checker-italian",
+    "bierner.markdown-emoji",
+    "bierner.markdown-footnotes",
+    "bierner.markdown-mermaid",
+    "mhutchie.git-graph",
+    "eamodio.gitlens",
+    "ms-vscode.makefile-tools",
+    "timonwong.shellcheck",
+    "stkb.rewrap",
+    "gruntfuggly.todo-tree"
+  ]
+}

@@ -1,0 +1,46 @@
+{%- assign _ui = site.data.ui-text[site.locale] -%}
+{%- if page.series.posts and page.series.posts.size > 1 -%}
+{%- assign _mesi = "gennaio,febbraio,marzo,aprile,maggio,giugno,luglio,agosto,settembre,ottobre,novembre,dicembre" | split: "," -%}
+{%- assign _loc = site.data.ui-text[site.locale] -%}
+<section class="series-index" id="series">
+  <h2>{{ _ui.series_index_label | default: 'Articoli della serie' }}: {{ page.series.title | escape }}</h2>
+
+  <div class="series-index__meta post-date">
+    {%- if page.series.total_reading_time -%}
+      {% include icon.html name="clock-outline" %} {{ page.series.total_reading_time }} {{ _ui.minute_read | default: 'minuti di lettura' }}
+    {%- endif -%}
+    {%- if page.series.total_reading_time and page.series.difficulty_label -%}
+      <span aria-hidden="true">&middot;</span>
+    {%- endif -%}
+    {%- if page.series.difficulty_label -%}
+      <span class="difficulty-badge" aria-label="{{ _loc[page.series.difficulty_label] | default: page.series.difficulty_label }}">
+        {% include icon.html name="brain" class="difficulty-icon" %} {{ _loc[page.series.difficulty_label] | default: page.series.difficulty_label }}
+      </span>
+    {%- endif -%}
+  </div>
+
+  <ol class="series-index__list">
+    {%- for spost in page.series.posts -%}
+    <li{% if spost.url == page.url %} class="series-index__current" aria-current="true"{% endif %}>
+      <div class="post-date">
+        {%- if spost.url == page.url -%}
+          <strong>{{ spost.title | markdownify | strip_html }}</strong>
+        {%- else -%}
+          <a href="{{ spost.url | relative_url }}">{{ spost.title | markdownify | strip_html }}</a>
+        {%- endif -%}
+        {%- if spost.date %}
+          {%- assign _ts = spost.date %}
+          {%- assign _mi = _ts | date: "%-m" | plus: 0 | minus: 1 %}
+          {%- assign _anno = _ts | date: "%Y" %}
+          {%- assign _data_it = _ts | date: "%-d" | append: " " | append: _mesi[_mi] | append: " " | append: _anno %}
+          {% include icon.html name="calendar" %} <time datetime="{{ _ts | date_to_xmlschema }}">{{ _data_it }}</time>
+        {%- endif %}
+      </div>
+      {%- if spost.excerpt -%}
+      <p class="series-index__excerpt">{{ spost.excerpt | markdownify | strip_html }}</p>
+      {%- endif -%}
+    </li>
+    {%- endfor -%}
+  </ol>
+</section>
+{%- endif -%}

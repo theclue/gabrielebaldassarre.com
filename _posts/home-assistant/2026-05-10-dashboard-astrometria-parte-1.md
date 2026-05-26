@@ -26,6 +26,11 @@ difficulty_computed:
     definition_coverage: 0.0
     external_knowledge_demand: 7
     prerequisite_depth: 1.9
+series:
+  id: "dashboard-astrometria"
+  title: "Il cielo in salotto"
+  part: 1
+  total_parts: 3
 ---
 
 Ci sono progetti che iniziano con un'idea semplice e finiscono per diventare qualcosa di più grande. Questo è uno di quelli. Tutto è partito da una domanda banale: *posso sapere dalla mia dashboard di Home Assistant in che fase è la Luna stasera?* La risposta è ovviamente sì — ma una volta aperta quella porta, è difficile fermarsi.

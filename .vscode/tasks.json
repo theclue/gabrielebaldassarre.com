@@ -1,0 +1,166 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build",
+      "type": "shell",
+      "command": "make site",
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "dev",
+      "type": "shell",
+      "command": "make dev",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "isBackground": false,
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "dedicated",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "clean",
+      "type": "shell",
+      "command": "make clean",
+      "presentation": {
+        "echo": true,
+        "reveal": "silent",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "knitr",
+      "type": "shell",
+      "command": "make knitr",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "New post",
+      "type": "shell",
+      "command": "rake post title='${input:postTitle}' category='${input:postCategory}'${input:postSubtitle}",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "New draft",
+      "type": "shell",
+      "command": "rake draft title='${input:draftTitle}'",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Publish draft",
+      "type": "shell",
+      "command": "rake publish draft='${input:pubDraft}' category='${input:pubCategory}'",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "problemMatcher": []
+    }
+  ],
+  "inputs": [
+    {
+      "id": "postTitle",
+      "type": "promptString",
+      "description": "Titolo del post",
+      "default": ""
+    },
+    {
+      "id": "postCategory",
+      "type": "pickString",
+      "description": "Categoria (sottodirectory in _posts/)",
+      "options": [
+        "Home Assistant",
+        "DevOps",
+        "Fisica",
+        "Reti Sociali",
+        "Meccanica"
+      ]
+    },
+    {
+      "id": "postSubtitle",
+      "type": "promptString",
+      "description": "Sottotitolo (lascia vuoto per omettere)",
+      "default": ""
+    },
+    {
+      "id": "draftTitle",
+      "type": "promptString",
+      "description": "Titolo della bozza",
+      "default": ""
+    },
+    {
+      "id": "pubDraft",
+      "type": "pickString",
+      "description": "Bozza da pubblicare",
+      "options": [
+        "_drafts/quanto-piccolo-mondo-harry-potter.md",
+        "_drafts/2026-05-18-pipeline-cicd-jekyll-github-actions.md",
+        "_drafts/betweeness-formalismo-matematico.md"
+      ]
+    },
+    {
+      "id": "pubCategory",
+      "type": "pickString",
+      "description": "Categoria di destinazione",
+      "options": [
+        "Home Assistant",
+        "DevOps",
+        "Fisica",
+        "Reti Sociali",
+        "Meccanica"
+      ]
+    }
+  ]
+}

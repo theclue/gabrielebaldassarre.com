@@ -12,6 +12,11 @@ broadcast:
   sent: true
 header:
   overlay_filter: 0.5
+series:
+  id: "dashboard-astrometria"
+  title: "Il cielo in salotto"
+  part: 2
+  total_parts: 3
 ---
 
 Nella {% post_link /home-assistant/dashboard-astrometria-parte-1/ "prima parte" role="prerequisite" context="provides-context" target="internal" %} abbiamo costruito il modulo Terra-Luna. Ora ci spostiamo verso il centro del sistema solare: il **Sole**.

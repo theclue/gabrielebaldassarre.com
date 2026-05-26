@@ -20,17 +20,178 @@ difficulty_declared:
   mathematical: 4
 difficulty_computed:
   semantic:
-    concept_count: 8
-    concept_density: 0.3
-    jargon_ratio: 6.5
-    definition_coverage: 0.0
-    external_knowledge_demand: 8
-    prerequisite_depth: 2.1
+    concept_count: 18
+    concept_density: 0.5
+    jargon_ratio: 4.7
+    definition_coverage: 0.39
+    external_knowledge_demand: 16
+    prerequisite_depth: 2.3
+    math_density: 2.4
+    code_density: 2.7
+    blocking_prerequisite_count: 1
+knowledge_prerequisites:
+  - concept: "home-assistant"
+    label: "Home Assistant"
+    url: "https://www.home-assistant.io/"
+    sameAs: "https://www.wikidata.org/wiki/Q5731200"
+    importance: "required"
+    depth: 2
+  - concept: "fotometria"
+    label: "Fotometria"
+    url: "https://it.wikipedia.org/wiki/Fotometria"
+    sameAs: "https://www.wikidata.org/wiki/Q189405"
+    importance: "recommended"
+    depth: 3
+  - concept: "jinja2"
+    label: "Jinja2"
+    url: "https://jinja.palletsprojects.com/"
+    sameAs: "https://www.wikidata.org/wiki/Q1683625"
+    importance: "recommended"
+    depth: 2
+  - concept: "illuminamento"
+    label: "Illuminamento"
+    url: "https://it.wikipedia.org/wiki/Illuminamento"
+    sameAs: "https://www.wikidata.org/wiki/Q87754"
+    importance: "required"
+    depth: 2
+  - concept: "zigbee"
+    label: "Zigbee"
+    url: "https://it.wikipedia.org/wiki/ZigBee"
+    sameAs: "https://www.wikidata.org/wiki/Q199053"
+    importance: "recommended"
+    depth: 2
+  - concept: "radiometria"
+    label: "Radiometria"
+    url: "https://it.wikipedia.org/wiki/Radiometria"
+    sameAs: "https://www.wikidata.org/wiki/Q127139"
+    importance: "recommended"
+    depth: 3
+  - concept: "isotropia"
+    label: "Isotropia"
+    url: "https://it.wikipedia.org/wiki/Isotropia"
+    sameAs: "https://www.wikidata.org/wiki/Q220914"
+    importance: "recommended"
+    depth: 4
+  - concept: "irradianza"
+    label: "Irradianza"
+    url: "https://it.wikipedia.org/wiki/Irradianza"
+    sameAs: "https://www.wikidata.org/wiki/Q654222"
+    importance: "recommended"
+    depth: 3
+  - concept: "adaptive-lighting"
+    label: "Adaptive Lighting"
+    url: "https://github.com/basnijholt/adaptive-lighting"
+    importance: "recommended"
+    depth: 2
+  - concept: "yaml"
+    label: "YAML"
+    url: "https://it.wikipedia.org/wiki/YAML"
+    sameAs: "https://www.wikidata.org/wiki/Q281876"
+    importance: "recommended"
+    depth: 1
+  - concept: "lux"
+    label: "Lux"
+    url: "https://it.wikipedia.org/wiki/Lux"
+    sameAs: "https://www.wikidata.org/wiki/Q217315"
+    importance: "recommended"
+    depth: 2
+  - concept: "lumen"
+    label: "Lumen"
+    url: "https://it.wikipedia.org/wiki/Lumen_(unit%C3%A0_di_misura)"
+    sameAs: "https://www.wikidata.org/wiki/Q484092"
+    importance: "recommended"
+    depth: 2
+  - concept: "view-factor"
+    label: "View factor"
+    url: "https://en.wikipedia.org/wiki/View_factor"
+    sameAs: "https://www.wikidata.org/wiki/Q13414738"
+    importance: "recommended"
+    depth: 4
+  - concept: "trasmittanza"
+    label: "Trasmittanza"
+    url: "https://it.wikipedia.org/wiki/Trasmittanza"
+    sameAs: "https://www.wikidata.org/wiki/Q1461423"
+    importance: "recommended"
+    depth: 2
+  - concept: "angolo-di-incidenza"
+    label: "Angolo di incidenza"
+    url: "https://it.wikipedia.org/wiki/Angolo_di_incidenza_(ottica)"
+    sameAs: "https://www.wikidata.org/wiki/Q208573"
+    importance: "recommended"
+    depth: 2
+  - concept: "flusso-luminoso"
+    label: "Flusso luminoso"
+    url: "https://it.wikipedia.org/wiki/Flusso_luminoso"
+    sameAs: "https://www.wikidata.org/wiki/Q107780"
+    importance: "recommended"
+    depth: 2
+  - concept: "controllo-feedforward"
+    label: "Controllo feedforward"
+    url: "https://it.wikipedia.org/wiki/Controllo_feedforward"
+    sameAs: "https://www.wikidata.org/wiki/Q5280047"
+    importance: "recommended"
+    depth: 3
+  - concept: "philips-hue"
+    label: "Philips Hue"
+    url: "https://www.philips-hue.com/"
+    sameAs: "https://www.wikidata.org/wiki/Q1630694"
+    importance: "helpful"
+    depth: 2
+  - concept: "cri-color-rendering-index"
+    label: "CRI (Color Rendering Index)"
+    url: "https://it.wikipedia.org/wiki/Indice_di_resa_cromatica"
+    sameAs: "https://www.wikidata.org/wiki/Q1816933"
+    importance: "helpful"
+    depth: 2
+  - concept: "cob-chip-on-board"
+    label: "COB (Chip on Board)"
+    url: "https://it.wikipedia.org/wiki/Chip_on_board"
+    sameAs: "https://www.wikidata.org/wiki/Q3484717"
+    importance: "helpful"
+    depth: 2
+  - concept: "ray-tracing"
+    label: "Ray tracing"
+    url: "https://it.wikipedia.org/wiki/Ray_tracing"
+    sameAs: "https://www.wikidata.org/wiki/Q898828"
+    importance: "helpful"
+    depth: 3
+  - concept: "openstreetmap"
+    label: "OpenStreetMap"
+    url: "https://www.openstreetmap.org/"
+    sameAs: "https://www.wikidata.org/wiki/Q936"
+    importance: "helpful"
+    depth: 2
+  - concept: "modello-cielo-diffuso-isotropo"
+    label: "Modello di cielo diffuso isotropo"
+    importance: "recommended"
+    depth: 4
+  - concept: "copertura-nuvolosa"
+    label: "Copertura nuvolosa"
+    url: "https://it.wikipedia.org/wiki/Copertura_nuvolosa"
+    sameAs: "https://www.wikidata.org/wiki/Q211828"
+    importance: "helpful"
+    depth: 1
+  - concept: "uni-en-12464-1"
+    label: "UNI EN 12464-1"
+    url: "https://biblus.acca.it/uni-en-12464-1-illuminazione-dei-posti-di-lavoro-interni/"
+    importance: "helpful"
+    depth: 3
+  - concept: "distanza-angolare"
+    label: "Distanza angolare"
+    url: "https://it.wikipedia.org/wiki/Distanza_angolare"
+    sameAs: "https://www.wikidata.org/wiki/Q53763"
+    importance: "helpful"
+    depth: 2
+  - concept: "tomorrow-io"
+    label: "Tomorrow.io"
+    url: "https://www.tomorrow.io/"
+    importance: "helpful"
+    depth: 2
 ---
 
 Chi lavora da casa conosce il problema: la luce cambia continuamente durante la giornata, e spesso ci si ritrova a lavorare al computer con una illuminazione inadeguata senza rendersene conto. Troppa luce crea abbagliamento sullo schermo, troppa poca affatica gli occhi. La soluzione ideale è un sistema che compensi automaticamente la luce naturale con quella artificiale, mantenendo l'illuminamento costante.
 
-In questo articolo descrivo come ho costruito questo sistema in Home Assistant, partendo da zero sensori di luminosità fisici — che non ho — fino a una automazione che stabilizza l'illuminamento del soggiorno durante le ore di lavoro.
+In questo articolo descrivo come ho costruito questo sistema in {% xlink "https://www.home-assistant.io/" "Home Assistant" role="prerequisite" context="provides-context" target="external-community" %}, partendo da zero sensori di luminosità fisici — che non ho — fino a una automazione che stabilizza l'illuminamento del soggiorno durante le ore di lavoro.
 
 ## Il problema: non ho sensori di luce
 

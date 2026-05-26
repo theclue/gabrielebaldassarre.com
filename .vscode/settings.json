@@ -1,0 +1,119 @@
+{
+  "files.associations": {
+    "*.html": "liquid",
+    "*.css": "liquid"
+  },
+  "[liquid]": {
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true,
+    "editor.wordWrap": "off",
+    "files.trimTrailingWhitespace": false
+  },
+  "[markdown]": {
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true,
+    "editor.wordWrap": "wordWrapColumn",
+    "editor.wordWrapColumn": 100,
+    "editor.quickSuggestions": {
+      "comments": "off",
+      "strings": "off",
+      "other": "off"
+    }
+  },
+  "[yaml]": {
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true,
+    "editor.autoIndent": "keep"
+  },
+  "[ruby]": {
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true,
+    "editor.defaultFormatter": "Shopify.ruby-lsp"
+  },
+  "[json]": {
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true
+  },
+  "[jsonc]": {
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true
+  },
+  "[shellscript]": {
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true
+  },
+  "files.exclude": {
+    "_site": true,
+    ".jekyll-cache": true,
+    ".sass-cache": true,
+    ".bundle": true,
+    "vendor": true
+  },
+  "search.exclude": {
+    "_site/**": true,
+    ".jekyll-cache/**": true,
+    ".bundle/**": true,
+    "vendor/**": true,
+    "Gemfile.lock": true
+  },
+  "files.watcherExclude": {
+    "_site/**": true,
+    ".jekyll-cache/**": true,
+    ".bundle/**": true,
+    "vendor/**": true
+  },
+  "spellright.language": [
+    "it",
+    "en"
+  ],
+  "spellright.documentTypes": [
+    "markdown",
+    "liquid",
+    "yaml"
+  ],
+  "cSpell.language": "en,it",
+  "cSpell.words": [
+    "astrometria",
+    "Baldassarre",
+    "cloudinary",
+    "frontmatter",
+    "Gulpease",
+    "jekyll",
+    "kramdown",
+    "Mastodon",
+    "OpenGraph",
+    "opencode",
+    "sameAs",
+    "smartworking",
+    "termsdictionary",
+    "xlink"
+  ],
+  "cSpell.enableFiletypes": [
+    "markdown",
+    "liquid",
+    "yaml",
+    "ruby"
+  ],
+  "liquid.formatNextIndent": 2,
+  "liquid.rules": {
+    "auto_closing": false,
+    "ignore": []
+  },
+  "markdown.extension.toc.levels": "2..4",
+  "yaml.format.enable": true,
+  "yaml.format.singleQuote": false,
+  "yaml.format.bracketSpacing": true,
+  "yaml.schemas": {
+    "./frontmatter-schema.yml": [
+      "_posts/**/*.md"
+    ]
+  },
+  "emmet.includeLanguages": {
+    "liquid": "html"
+  },
+  "rubyLsp.formatter": "auto",
+  "makefile.configureOnOpen": false,
+  "markdown.copyFiles.destination": {
+    "**/*.md": "${workspaceFolder}/assets/images"
+  }
+}

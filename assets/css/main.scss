@@ -1088,7 +1088,108 @@ figure.highlight pre {
 .highlight .gs { font-weight: bold; }
 
 /* ---------------------------------------------------------------------------
-   9. PRINT
+   9. SERIES NAVIGATION
+   --------------------------------------------------------------------------- */
+
+.series-nav {
+  margin-block: var(--space-lg);
+  display: flex;
+  justify-content: center;
+}
+
+.series-nav__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.series-nav__pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  font-size: var(--fs-200);
+  font-weight: 500;
+  padding: var(--space-2xs) var(--space-sm);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-muted);
+  text-decoration: none;
+  background-color: var(--color-bg-elevated);
+  transition: all var(--dur-fast) var(--ease-out);
+}
+
+.series-nav__pill .icon {
+  width: 1em;
+  height: 1em;
+}
+
+.series-nav__pill:hover {
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+  background-color: var(--color-bg-subtle);
+}
+
+/* Series index */
+.series-index {
+  margin-block: var(--space-xl);
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--color-border);
+}
+
+.series-index h2 {
+  font-size: var(--fs-400);
+  color: var(--color-text);
+  margin-bottom: var(--space-2xs);
+}
+
+.series-index__meta {
+  margin-bottom: var(--space-md);
+}
+
+.series-index__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.series-index__list li {
+  padding-block: var(--space-sm);
+}
+
+.series-index__list li + li {
+  border-top: 1px solid var(--color-border);
+}
+
+.series-index__list .post-date {
+  font-size: var(--fs-200);
+  margin-bottom: var(--space-2xs);
+}
+
+.series-index__list .post-date a {
+  color: var(--color-link);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+  font-weight: 600;
+}
+
+.series-index__list .post-date a:hover {
+  color: var(--color-link-hover);
+}
+
+.series-index__list .post-date strong {
+  color: var(--color-text);
+}
+
+.series-index__excerpt {
+  font-size: var(--fs-200);
+  color: var(--color-text-muted);
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* ---------------------------------------------------------------------------
+   10. PRINT
    --------------------------------------------------------------------------- */
 
 @media print {

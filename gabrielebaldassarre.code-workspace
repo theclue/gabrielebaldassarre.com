@@ -1,0 +1,33 @@
+{
+  "folders": [
+    {
+      "name": "⚙️ Root",
+      "path": "."
+    },
+    {
+      "name": "📝 Posts",
+      "path": "_posts"
+    },
+    {
+      "name": "🧠 Data & Ontology",
+      "path": "_data"
+    },
+    {
+      "name": "🖼 Assets",
+      "path": "assets"
+    },
+    {
+      "name": "🔌 Plugins",
+      "path": "_plugins"
+    }
+  ],
+  "settings": {
+    "files.exclude": {
+      "_site": true,
+      ".jekyll-cache": true,
+      ".sass-cache": true,
+      ".bundle": true,
+      "vendor": true
+    }
+  }
+}
