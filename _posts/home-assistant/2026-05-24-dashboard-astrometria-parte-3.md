@@ -1,35 +1,36 @@
 ---
 category: Home Assistant
-title: "Il cielo in salotto, parte 3: Lo spazio profondo"
-excerpt: "La terza e ultima sezione della dashboard di astrometria: l'immagine astronomica del giorno NASA (APOD) con API key e secrets.yaml, la posizione in tempo reale della ISS con multiscrape, e i prossimi lanci spaziali. Come integrare tutto in Home Assistant con REST sensor, Generic Camera e multiscrape."
+title: 'Il cielo in salotto, parte 3: Lo spazio profondo'
+excerpt: 'La terza e ultima sezione della dashboard di astrometria: l''immagine astronomica
+  del giorno NASA (APOD) con API key e secrets.yaml, la posizione in tempo reale della
+  ISS con multiscrape, e i prossimi lanci spaziali. Come integrare tutto in Home Assistant
+  con REST sensor, Generic Camera e multiscrape.'
 master: /assets/images/astrometria-dashboard-3.png
 image_meta:
   role: screenshot
   context: reference
-  caption: "Dashboard di astrometria completa — Spazio profondo"
-header:
-  transform: keystone
-  intensity: medium
-  logo: false
+  caption: Dashboard di astrometria completa — Spazio profondo
 header:
   overlay_filter: 0.5
 series:
-  id: "dashboard-astrometria"
-  title: "Il cielo in salotto"
+  id: dashboard-astrometria
+  title: Il cielo in salotto
   part: 3
   total_parts: 3
 broadcast:
-  channels: [linkedin, mastodon]
-  sent: false
+  channels:
+  - linkedin
+  - mastodon
+  sent: true
   linkedin_image:
     logo: true
-    caption: ""
+    caption: ''
     color: white
     transform: keystone
     intensity: medium
   mastodon_image:
     logo: home-assistant.png
-    caption: ""
+    caption: ''
     color: white
     transform: cinematic
     intensity: medium
@@ -51,57 +52,58 @@ difficulty_computed:
     code_density: 4.2
     blocking_prerequisite_count: 2
 knowledge_prerequisites:
-  - concept: "home-assistant"
-    label: "Home Assistant"
-    url: "https://www.home-assistant.io/"
-    sameAs: "https://www.wikidata.org/wiki/Q5731200"
-    importance: "required"
-    depth: 2
-  - concept: "yaml"
-    label: "YAML"
-    url: "https://yaml.org/"
-    sameAs: "https://www.wikidata.org/wiki/Q1372812"
-    importance: "required"
-    depth: 1
-  - concept: "rest-apis"
-    label: "REST API"
-    url: "https://en.wikipedia.org/wiki/Representational_state_transfer"
-    sameAs: "https://www.wikidata.org/wiki/Q749568"
-    importance: "recommended"
-    depth: 1
-  - concept: "jinja2-templates"
-    label: "Template Jinja2"
-    url: "https://www.home-assistant.io/docs/configuration/templating/"
-    importance: "recommended"
-    depth: 2
-  - concept: "multiscrape"
-    label: "Multiscrape"
-    url: "https://github.com/danieldotnl/ha-multiscrape"
-    importance: "recommended"
-    depth: 2
-  - concept: "nasa-apod"
-    label: "NASA APOD"
-    url: "https://apod.nasa.gov/apod/"
-    sameAs: "https://www.wikidata.org/wiki/Q196669"
-    importance: "helpful"
-    depth: 1
-  - concept: "iss"
-    label: "International Space Station"
-    url: "https://en.wikipedia.org/wiki/International_Space_Station"
-    sameAs: "https://www.wikidata.org/wiki/Q25271"
-    importance: "helpful"
-    depth: 1
-  - concept: "norad-id"
-    label: "NORAD ID (Satellite Catalog Number)"
-    url: "https://en.wikipedia.org/wiki/Satellite_Catalog_Number"
-    sameAs: "https://www.wikidata.org/wiki/Q376515"
-    importance: "helpful"
-    depth: 2
-  - concept: "secrets-management"
-    label: "Gestione delle secrets"
-    url: "https://www.home-assistant.io/docs/configuration/secrets/"
-    importance: "recommended"
-    depth: 1
+- concept: home-assistant
+  label: Home Assistant
+  url: https://www.home-assistant.io/
+  sameAs: https://www.wikidata.org/wiki/Q5731200
+  importance: required
+  depth: 2
+- concept: yaml
+  label: YAML
+  url: https://yaml.org/
+  sameAs: https://www.wikidata.org/wiki/Q1372812
+  importance: required
+  depth: 1
+- concept: rest-apis
+  label: REST API
+  url: https://en.wikipedia.org/wiki/Representational_state_transfer
+  sameAs: https://www.wikidata.org/wiki/Q749568
+  importance: recommended
+  depth: 1
+- concept: jinja2-templates
+  label: Template Jinja2
+  url: https://www.home-assistant.io/docs/configuration/templating/
+  importance: recommended
+  depth: 2
+- concept: multiscrape
+  label: Multiscrape
+  url: https://github.com/danieldotnl/ha-multiscrape
+  importance: recommended
+  depth: 2
+- concept: nasa-apod
+  label: NASA APOD
+  url: https://apod.nasa.gov/apod/
+  sameAs: https://www.wikidata.org/wiki/Q196669
+  importance: helpful
+  depth: 1
+- concept: iss
+  label: International Space Station
+  url: https://en.wikipedia.org/wiki/International_Space_Station
+  sameAs: https://www.wikidata.org/wiki/Q25271
+  importance: helpful
+  depth: 1
+- concept: norad-id
+  label: NORAD ID (Satellite Catalog Number)
+  url: https://en.wikipedia.org/wiki/Satellite_Catalog_Number
+  sameAs: https://www.wikidata.org/wiki/Q376515
+  importance: helpful
+  depth: 2
+- concept: secrets-management
+  label: Gestione delle secrets
+  url: https://www.home-assistant.io/docs/configuration/secrets/
+  importance: recommended
+  depth: 1
+
 ---
 
 Nella {% post_link /home-assistant/dashboard-astrometria-parte-1/ "prima parte" role="prerequisite" context="provides-context" target="internal" %} abbiamo costruito il modulo Terra-Luna, nella {% post_link /home-assistant/dashboard-astrometria-parte-2/ "seconda" role="prerequisite" context="provides-context" target="internal" %} abbiamo monitorato il Sole. In questa terza e ultima parte ci spingiamo oltre: lo spazio profondo, la stazione spaziale e i razzi che la raggiungono. Dopo le misurazioni e i grafici dell'ultima volta, su questa colonna inseriremo _card_ con uno scopo più sognante e divulgativo.
