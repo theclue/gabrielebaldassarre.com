@@ -114,6 +114,7 @@
   "rubyLsp.formatter": "auto",
   "makefile.configureOnOpen": false,
   "markdown.copyFiles.destination": {
-    "**/*.md": "${workspaceFolder}/assets/images"
+    "_posts/**/*.md": "${workspaceFolder}/assets/images/${fileName}",
+    "**/*.md": "${workspaceFolder}/assets/images/${fileName}"
   }
 }

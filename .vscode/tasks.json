@@ -107,6 +107,24 @@
         "clear": true
       },
       "problemMatcher": []
+    },
+    {
+      "label": "Convert image to Cloudinary",
+      "type": "shell",
+      "command": "ruby",
+      "args": [
+        "${workspaceFolder}/.vscode/clipboard-image-to-cloudinary.rb",
+        "${file}"
+      ],
+      "presentation": {
+        "echo": true,
+        "reveal": "silent",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "problemMatcher": []
     }
   ],
   "inputs": [
