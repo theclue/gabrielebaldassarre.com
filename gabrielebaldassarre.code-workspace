@@ -28,6 +28,10 @@
       ".sass-cache": true,
       ".bundle": true,
       "vendor": true
-    }
+    },
+    "devstock.unsplashApiKey": "",
+    "devstock.imageSize": "large",
+    "devstock.downloadPath": "assets/images",
+    "devstock.triggerPattern": "{/unsplash}"
   }
 }

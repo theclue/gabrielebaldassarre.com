@@ -61,7 +61,7 @@ module Jekyll
     end
 
     # Build Cloudinary URL for hero (overlay_image) with optional transform + logo
-    def self.hero_url(image_path, header, site, context = nil)
+    def self.hero_url(image_path, header, site, context = nil, width = 1922, height = 724)
       return image_path if dev_bypass?
 
       name = cloud_name(context)
@@ -76,9 +76,9 @@ module Jekyll
       if has_transform
         parts << has_transform
         parts << CROP_BY_INTENSITY[intensity] || CROP_BY_INTENSITY['medium']
-        parts << 'c_fill,g_auto,w_1922,h_724,f_auto,q_auto'
+        parts << "c_fill,g_auto,w_#{width},h_#{height},f_auto,q_auto"
       else
-        parts << 'c_fill,g_auto,w_1922,h_724,f_auto,q_auto'
+        parts << "c_fill,g_auto,w_#{width},h_#{height},f_auto,q_auto"
       end
 
       # Logo overlay: raw fetch + transforms inline, placement in fl_layer_apply
@@ -138,6 +138,9 @@ module Jekyll
         parts << 'fl_layer_apply,g_south_east,o_80,x_25,y_25'
       end
 
+      # Text width: image width minus logo area (~70px) and margins (~130px)
+      text_w = width - 200
+
       # Text overlay: if caption contains ':', split into 2 lines (1st smaller)
       if caption_text && !caption_text.empty?
         if caption_text.include?(':')
@@ -146,14 +149,14 @@ module Jekyll
           second = second.strip
           # First line: smaller, positioned higher, colon appended
           enc1 = first.gsub('%', '%25').gsub(',', '%252C').gsub(':', '%3A').gsub(' ', '%20').gsub('#', '%23').gsub('?', '%3F').gsub('/', '%2F').gsub('&', '%26').gsub('=', '%3D').gsub('\\', '%5C').gsub('+', '%2B')
-          parts << "l_text:Roboto@google_28_700:#{enc1},co_#{caption_color},w_800,c_fit"
+          parts << "l_text:Roboto@google_28_700:#{enc1},co_#{caption_color},w_#{text_w},c_fit"
           parts << 'fl_layer_apply,g_south_west,x_25,y_70'
           enc2 = second.gsub('%', '%25').gsub(',', '%252C').gsub(':', '%3A').gsub(' ', '%20').gsub('#', '%23').gsub('?', '%3F').gsub('/', '%2F').gsub('&', '%26').gsub('=', '%3D').gsub('\\', '%5C').gsub('+', '%2B')
-          parts << "l_text:Roboto@google_36_700:#{enc2},co_#{caption_color},w_800,c_fit"
+          parts << "l_text:Roboto@google_36_700:#{enc2},co_#{caption_color},w_#{text_w},c_fit"
           parts << 'fl_layer_apply,g_south_west,x_25,y_30'
         else
           encoded = caption_text.gsub('%', '%25').gsub(',', '%252C').gsub(':', '%3A').gsub(' ', '%20').gsub('#', '%23').gsub('?', '%3F').gsub('/', '%2F').gsub('&', '%26').gsub('=', '%3D').gsub('\\', '%5C').gsub('+', '%2B')
-          parts << "l_text:Roboto@google_38_700:#{encoded},co_#{caption_color},w_800,c_fit"
+          parts << "l_text:Roboto@google_38_700:#{encoded},co_#{caption_color},w_#{text_w},c_fit"
           parts << 'fl_layer_apply,g_south_west,x_25,y_30'
         end
       end
@@ -169,6 +172,16 @@ module Jekyll
       site_url = site.config['url']
       full_url = image_path.start_with?('http') ? image_path : "#{site_url}#{image_path}"
       CloudinaryTransform.hero_url(full_url, header || {}, site, @context)
+    end
+
+    # Liquid filter: post.master | cloudinary_card: post.header, 600, 340
+    def cloudinary_card(image_path, header = {}, width = 600, height = 340)
+      return image_path if CloudinaryTransform.dev_bypass?
+
+      site = @context.registers[:site]
+      site_url = site.config['url']
+      full_url = image_path.start_with?('http') ? image_path : "#{site_url}#{image_path}"
+      CloudinaryTransform.hero_url(full_url, header || {}, site, @context, width, height)
     end
 
     # Liquid filter: site.site_logo | cloudinary_logo: 80

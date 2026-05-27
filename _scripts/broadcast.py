@@ -448,6 +448,9 @@ def cloudinary_social_url(master_path, social_config, post_title, channel_type):
 
     # Text overlay: split on ':' → 2 lines (1st smaller, 2nd uppercase), or single line uppercase
     if caption_text:
+        # Text width: image width minus logo area (88px) and margins (~112px)
+        text_w = width - 200
+
         if ':' in caption_text:
             first, second = caption_text.split(':', 1)
             first = f"{first.strip()}:"
@@ -455,18 +458,18 @@ def cloudinary_social_url(master_path, social_config, post_title, channel_type):
             # First line: smaller, positioned higher, colon appended
             enc1 = _encode_caption(first)
             parts.append(
-                f"l_text:Roboto@google_35_700:{enc1},co_{caption_color},w_800,c_fit"
+                f"l_text:Roboto@google_35_700:{enc1},co_{caption_color},w_{text_w},c_fit"
             )
             parts.append('fl_layer_apply,g_south_west,x_25,y_88')
             enc2 = _encode_caption(second)
             parts.append(
-                f"l_text:Roboto@google_45_700:{enc2},co_{caption_color},w_800,c_fit"
+                f"l_text:Roboto@google_45_700:{enc2},co_{caption_color},w_{text_w},c_fit"
             )
             parts.append('fl_layer_apply,g_south_west,x_25,y_38')
         else:
             encoded = _encode_caption(caption_text.upper())
             parts.append(
-                f"l_text:Roboto@google_48_700:{encoded},co_{caption_color},w_800,c_fit"
+                f"l_text:Roboto@google_48_700:{encoded},co_{caption_color},w_{text_w},c_fit"
             )
             parts.append('fl_layer_apply,g_south_west,x_25,y_38')
 
