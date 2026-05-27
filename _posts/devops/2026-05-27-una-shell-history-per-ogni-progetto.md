@@ -1,12 +1,13 @@
 ---
 category: DevOps
-title: "Una shell history per ogni progetto"
-excerpt: "Come separare la history di ZSH per progetto usando la root git, senza plugin esterni e con un semplice hook. Un biscottino da terminale veloce e pratico."
+title: Una shell history per ogni progetto
+excerpt: Come separare la history di ZSH per progetto usando la root git, senza plugin
+  esterni e con un semplice hook. Un biscottino da terminale veloce e pratico.
 master: /assets/images/wargames-terminal-screen.png
 image_meta:
   role: illustration
   context: ambient
-  caption: ""
+  caption: ''
 header:
   transform: keystone
   intensity: medium
@@ -28,7 +29,13 @@ broadcast:
     caption: 'Bash Tips: Git-based shell history'
     transform: keystone
     intensity: medium
-tags: [zsh, terminal, bash, git, produttività]
+  sent: true
+tags:
+- zsh
+- terminal
+- bash
+- git
+- produttività
 intended_audience: practitioner
 proficiency_level: intermediate
 mermaid: true
@@ -41,57 +48,58 @@ difficulty_computed:
     concept_count: 5
     concept_density: 0.2
     jargon_ratio: 3.9
-    definition_coverage: 0.50
+    definition_coverage: 0.5
     external_knowledge_demand: 5
     prerequisite_depth: 1.7
     math_density: 0.0
     code_density: 3.6
     blocking_prerequisite_count: 1
 knowledge_prerequisites:
-  - concept: zsh
-    label: ZSH
-    url: https://www.zsh.org/
-    sameAs: https://www.wikidata.org/wiki/Q306138
-    importance: required
-    depth: 1
-  - concept: git
-    label: Git
-    url: https://git-scm.com/
-    sameAs: https://www.wikidata.org/wiki/Q186055
-    importance: recommended
-    depth: 2
-  - concept: shell-configuration
-    label: File di configurazione della shell (.zshrc, .bashrc)
-    url: https://zsh.sourceforge.io/Intro/intro_3.html
-    importance: recommended
-    depth: 1
-  - concept: unix-signals
-    label: Segnali Unix (SIGTERM)
-    url: https://it.wikipedia.org/wiki/SIGTERM
-    sameAs: https://www.wikidata.org/wiki/Q2210496
-    importance: helpful
-    depth: 2
-  - concept: xdg-base-directory
-    label: XDG Base Directory Specification
-    url: https://specifications.freedesktop.org/basedir-spec/latest/
-    sameAs: https://www.wikidata.org/wiki/Q306122
-    importance: helpful
-    depth: 2
-  - concept: zsh-hooks
-    label: Hook functions di ZSH (chpwd, add-zsh-hook)
-    url: https://zsh.sourceforge.io/Doc/Release/Functions.html#Hook-Functions
-    importance: recommended
-    depth: 2
-  - concept: zsh-builtins
-    label: Builtin di ZSH (fc, autoload, typeset, print)
-    url: https://zsh.sourceforge.io/Doc/Release/Shell-Builtin-Commands.html
-    importance: recommended
-    depth: 2
-  - concept: zsh-traps
-    label: Trap functions di ZSH (TRAPEXIT, TRAPTERM)
-    url: https://zsh.sourceforge.io/Doc/Release/Functions.html#Trap-Functions
-    importance: recommended
-    depth: 2
+- concept: zsh
+  label: ZSH
+  url: https://www.zsh.org/
+  sameAs: https://www.wikidata.org/wiki/Q306138
+  importance: required
+  depth: 1
+- concept: git
+  label: Git
+  url: https://git-scm.com/
+  sameAs: https://www.wikidata.org/wiki/Q186055
+  importance: recommended
+  depth: 2
+- concept: shell-configuration
+  label: File di configurazione della shell (.zshrc, .bashrc)
+  url: https://zsh.sourceforge.io/Intro/intro_3.html
+  importance: recommended
+  depth: 1
+- concept: unix-signals
+  label: Segnali Unix (SIGTERM)
+  url: https://it.wikipedia.org/wiki/SIGTERM
+  sameAs: https://www.wikidata.org/wiki/Q2210496
+  importance: helpful
+  depth: 2
+- concept: xdg-base-directory
+  label: XDG Base Directory Specification
+  url: https://specifications.freedesktop.org/basedir-spec/latest/
+  sameAs: https://www.wikidata.org/wiki/Q306122
+  importance: helpful
+  depth: 2
+- concept: zsh-hooks
+  label: Hook functions di ZSH (chpwd, add-zsh-hook)
+  url: https://zsh.sourceforge.io/Doc/Release/Functions.html#Hook-Functions
+  importance: recommended
+  depth: 2
+- concept: zsh-builtins
+  label: Builtin di ZSH (fc, autoload, typeset, print)
+  url: https://zsh.sourceforge.io/Doc/Release/Shell-Builtin-Commands.html
+  importance: recommended
+  depth: 2
+- concept: zsh-traps
+  label: Trap functions di ZSH (TRAPEXIT, TRAPTERM)
+  url: https://zsh.sourceforge.io/Doc/Release/Functions.html#Trap-Functions
+  importance: recommended
+  depth: 2
+
 ---
 
 Se lavorate su più progetti contemporaneamente — e chi non lo fa? — vi sarà capitato di premere `Ctrl+R` per ripescare un comando e trovarvi tra i piedi il comando sbagliato. Il `docker compose down` del progetto A che non c'entra niente col progetto B. Il `kubectl` del cluster di staging mentre siete sul cluster di produzione. L'`rsync` verso il server del cliente sbagliato.
