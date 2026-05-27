@@ -401,12 +401,15 @@ def cloudinary_social_url(master_path, social_config, post_title, channel_type):
         parts.append(f"c_fill,g_auto,w_{width},h_{height},f_auto,q_auto")
 
     # Caption text resolution
-    caption_raw = config.get('caption')
     caption_text = None
-    if caption_raw is True:
+    if 'caption' not in config:
         caption_text = post_title
-    elif caption_raw:
-        caption_text = str(caption_raw)
+    else:
+        caption_raw = config['caption']
+        if caption_raw is True:
+            caption_text = post_title
+        elif caption_raw:
+            caption_text = str(caption_raw)
     if caption_text:
         caption_color = config.get('color', 'white')
 
@@ -416,10 +419,10 @@ def cloudinary_social_url(master_path, social_config, post_title, channel_type):
     if has_south_overlay:
         bar_url = f"{SITE_URL}/assets/images/1x1-black.png"
         bar_b64 = base64.b64encode(bar_url.encode()).decode()
-        parts.append(f"l_fetch:{bar_b64},c_scale,w_{width},h_120,o_80")
+        parts.append(f"l_fetch:{bar_b64},c_scale,w_{width},h_150,o_80")
         parts.append('fl_layer_apply,g_south')
 
-    # Logo overlay: bigger (w_70), more room for 2-line caption
+    # Logo overlay: bigger (w_88), more room for 2-line caption
     if logo_ref:
         if logo_ref is True:
             logo_path = SITE_LOGO
@@ -431,9 +434,9 @@ def cloudinary_social_url(master_path, social_config, post_title, channel_type):
         logo_b64 = base64.b64encode(logo_full.encode()).decode()
         parts.append(
             f"l_fetch:{logo_b64},"
-            f"c_fill,g_face,w_70,h_70,r_max,bo_2px_solid_white"
+            f"c_fill,g_face,w_88,h_88,r_max,bo_2px_solid_white"
         )
-        parts.append('fl_layer_apply,g_south_east,o_80,x_25,y_25')
+        parts.append('fl_layer_apply,g_south_east,o_80,x_31,y_31')
 
     # Text overlay: split on ':' → 2 lines (1st smaller), or single line
     if caption_text:
@@ -444,20 +447,20 @@ def cloudinary_social_url(master_path, social_config, post_title, channel_type):
             # First line: smaller, positioned higher, colon appended
             enc1 = first.replace('%', '%25').replace(',', '%2C').replace(' ', '%20')
             parts.append(
-                f"l_text:Roboto_28_bold:{enc1},co_{caption_color},w_800,c_fit"
+                f"l_text:Roboto_35_bold:{enc1},co_{caption_color},w_800,c_fit"
             )
-            parts.append('fl_layer_apply,g_south_west,x_25,y_70')
+            parts.append('fl_layer_apply,g_south_west,x_25,y_88')
             enc2 = second.replace('%', '%25').replace(',', '%2C').replace(' ', '%20')
             parts.append(
-                f"l_text:Roboto_36_bold:{enc2},co_{caption_color},w_800,c_fit"
+                f"l_text:Roboto_45_bold:{enc2},co_{caption_color},w_800,c_fit"
             )
-            parts.append('fl_layer_apply,g_south_west,x_25,y_30')
+            parts.append('fl_layer_apply,g_south_west,x_25,y_38')
         else:
             encoded = caption_text.replace('%', '%25').replace(',', '%2C').replace(' ', '%20')
             parts.append(
-                f"l_text:Roboto_38_bold:{encoded},co_{caption_color},w_800,c_fit"
+                f"l_text:Roboto_48_bold:{encoded},co_{caption_color},w_800,c_fit"
             )
-            parts.append('fl_layer_apply,g_south_west,x_25,y_30')
+            parts.append('fl_layer_apply,g_south_west,x_25,y_38')
 
     return f"https://res.cloudinary.com/{CLOUDINARY_CLOUD_NAME}/image/fetch/{'/'.join(parts)}/{full_url}"
 
