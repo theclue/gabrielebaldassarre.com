@@ -145,15 +145,15 @@ module Jekyll
           first = "#{first.strip}:"
           second = second.strip
           # First line: smaller, positioned higher, colon appended
-          enc1 = first.gsub('%', '%25').gsub(',', '%2C').gsub(' ', '%20')
-          parts << "l_text:Roboto_28_bold:#{enc1},co_#{caption_color},w_800,c_fit"
+          enc1 = first.gsub('%', '%25').gsub(',', '%252C').gsub(':', '%3A').gsub(' ', '%20').gsub('#', '%23').gsub('?', '%3F').gsub('/', '%2F').gsub('&', '%26').gsub('=', '%3D').gsub('\\', '%5C').gsub('+', '%2B')
+          parts << "l_text:Roboto@google_28_700:#{enc1},co_#{caption_color},w_800,c_fit"
           parts << 'fl_layer_apply,g_south_west,x_25,y_70'
-          enc2 = second.gsub('%', '%25').gsub(',', '%2C').gsub(' ', '%20')
-          parts << "l_text:Roboto_36_bold:#{enc2},co_#{caption_color},w_800,c_fit"
+          enc2 = second.gsub('%', '%25').gsub(',', '%252C').gsub(':', '%3A').gsub(' ', '%20').gsub('#', '%23').gsub('?', '%3F').gsub('/', '%2F').gsub('&', '%26').gsub('=', '%3D').gsub('\\', '%5C').gsub('+', '%2B')
+          parts << "l_text:Roboto@google_36_700:#{enc2},co_#{caption_color},w_800,c_fit"
           parts << 'fl_layer_apply,g_south_west,x_25,y_30'
         else
-          encoded = caption_text.gsub('%', '%25').gsub(',', '%2C').gsub(' ', '%20')
-          parts << "l_text:Roboto_38_bold:#{encoded},co_#{caption_color},w_800,c_fit"
+          encoded = caption_text.gsub('%', '%25').gsub(',', '%252C').gsub(':', '%3A').gsub(' ', '%20').gsub('#', '%23').gsub('?', '%3F').gsub('/', '%2F').gsub('&', '%26').gsub('=', '%3D').gsub('\\', '%5C').gsub('+', '%2B')
+          parts << "l_text:Roboto@google_38_700:#{encoded},co_#{caption_color},w_800,c_fit"
           parts << 'fl_layer_apply,g_south_west,x_25,y_30'
         end
       end

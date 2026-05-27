@@ -355,8 +355,9 @@ def cloudinary_url(master_path, transforms):
 
 def _encode_caption(text):
     """Percent-encode special characters for Cloudinary l_text overlays."""
-    out = text.replace('%', '%25').replace(',', '%2C').replace(':', '%3A').replace(' ', '%20')
+    out = text.replace('%', '%25').replace(',', '%252C').replace(':', '%3A').replace(' ', '%20')
     out = out.replace('#', '%23').replace('?', '%3F').replace('/', '%2F')
+    out = out.replace('&', '%26').replace('=', '%3D').replace('\\', '%5C').replace('+', '%2B')
     return out
 
 
@@ -445,27 +446,27 @@ def cloudinary_social_url(master_path, social_config, post_title, channel_type):
         )
         parts.append('fl_layer_apply,g_south_east,o_80,x_31,y_31')
 
-    # Text overlay: split on ':' → 2 lines (1st smaller), or single line
+    # Text overlay: split on ':' → 2 lines (1st smaller, 2nd uppercase), or single line uppercase
     if caption_text:
         if ':' in caption_text:
             first, second = caption_text.split(':', 1)
             first = f"{first.strip()}:"
-            second = second.strip()
+            second = second.strip().upper()
             # First line: smaller, positioned higher, colon appended
             enc1 = _encode_caption(first)
             parts.append(
-                f"l_text:Roboto_35_bold:{enc1},co_{caption_color},w_800,c_fit"
+                f"l_text:Roboto@google_35_700:{enc1},co_{caption_color},w_800,c_fit"
             )
             parts.append('fl_layer_apply,g_south_west,x_25,y_88')
             enc2 = _encode_caption(second)
             parts.append(
-                f"l_text:Roboto_45_bold:{enc2},co_{caption_color},w_800,c_fit"
+                f"l_text:Roboto@google_45_700:{enc2},co_{caption_color},w_800,c_fit"
             )
             parts.append('fl_layer_apply,g_south_west,x_25,y_38')
         else:
-            encoded = _encode_caption(caption_text)
+            encoded = _encode_caption(caption_text.upper())
             parts.append(
-                f"l_text:Roboto_48_bold:{encoded},co_{caption_color},w_800,c_fit"
+                f"l_text:Roboto@google_48_700:{encoded},co_{caption_color},w_800,c_fit"
             )
             parts.append('fl_layer_apply,g_south_west,x_25,y_38')
 
@@ -702,15 +703,7 @@ def broadcast_post(filepath, dry_run=False):
         print("  SIMULAZIONE - salto chiamate LLM e Buffer")
         return True
 
-    # Step 1: Generate social copy via LLM
-    print("  Generazione copy social via GitHub Models...")
-    copy = call_github_models(post_info, active_channels)
-    if not copy:
-        print("  FALLITA generazione copy social")
-        return False
-    print("  Copy generato con successo")
-
-    # Step 2: Resolve Buffer channels
+    # Step 1: Resolve Buffer channels
     print("  Risoluzione canali Buffer...")
     channel_map = get_buffer_channels()
     if not channel_map:
@@ -718,7 +711,54 @@ def broadcast_post(filepath, dry_run=False):
         return False
     print(f"  Canali trovati: {list(channel_map.keys())}")
 
-    # Step 3: Create drafts in Buffer
+    # Step 2: Generate and warmup social images BEFORE LLM (fail fast, save tokens)
+    print("  Generazione e warmup immagini social (Cloudinary)...")
+    channel_photo_urls = {}
+    image_failed = False
+    for ch_type in active_channels:
+        if ch_type not in channel_map:
+            continue
+        if ch_type not in SOCIAL_CROPS:
+            continue
+
+        broadcast_fm = fm.get('broadcast', {})
+        social_config = None
+        if isinstance(broadcast_fm, dict):
+            social_config = broadcast_fm.get(f"{ch_type}_image")
+
+        social_image = master_image
+        if social_config and isinstance(social_config, dict):
+            override = social_config.get('overlay_image')
+            if override:
+                social_image = override if override.startswith('/') else f"/{override}"
+
+        photo_url = None
+        if social_image:
+            if social_config and isinstance(social_config, dict):
+                photo_url = cloudinary_social_url(social_image, social_config, post_info['title'], ch_type)
+            else:
+                transforms = SOCIAL_CROPS[ch_type]["transforms"]
+                photo_url = cloudinary_url(social_image, transforms)
+
+        if photo_url:
+            print(f"    Warmup {ch_type}...")
+            if not warmup_cloudinary_url(photo_url, ch_type):
+                image_failed = True
+        channel_photo_urls[ch_type] = photo_url
+
+    if image_failed:
+        print("  FALLITO: warmup immagini Cloudinary non riuscito — esco senza consumare token LLM")
+        return False
+
+    # Step 3: Generate social copy via LLM
+    print("  Generazione copy social via GitHub Models...")
+    copy = call_github_models(post_info, active_channels)
+    if not copy:
+        print("  FALLITA generazione copy social")
+        return False
+    print("  Copy generato con successo")
+
+    # Step 4: Create drafts in Buffer
     created_count = 0
     target_count = 0
     for ch_type in active_channels:
@@ -751,58 +791,19 @@ def broadcast_post(filepath, dry_run=False):
             text = text[:max_chars].rsplit(" ", 1)[0]
 
         target_count += 1
-        if ch_type == "linkedin":
-            target_count += 1  # Secondo draft (link post nativo)
-
-        # Resolve social image: broadcast.{channel}_image.overlay_image overrides page.master
-        social_config = None
-        broadcast_fm = fm.get('broadcast', {})
-        if isinstance(broadcast_fm, dict):
-            social_config = broadcast_fm.get(f"{ch_type}_image")
-
-        # Check for per-channel overlay_image override
-        social_image = master_image
-        if social_config and isinstance(social_config, dict):
-            override = social_config.get('overlay_image')
-            if override:
-                social_image = override if override.startswith('/') else f"/{override}"
-
-        if social_image:
-            if social_config and isinstance(social_config, dict):
-                photo_url = cloudinary_social_url(social_image, social_config, post_info['title'], ch_type)
-            else:
-                transforms = SOCIAL_CROPS[ch_type]["transforms"]
-                photo_url = cloudinary_url(social_image, transforms)
-        else:
-            photo_url = None
+        photo_url = channel_photo_urls.get(ch_type)
 
         print(f"  Creazione draft per {ch_type} (canale: {ch_id})...")
         print(f"    Lunghezza testo: {len(text)} caratteri")
         if photo_url:
             print(f"    Immagine: {photo_url}")
 
-        if ch_type == "linkedin":
-            # LinkedIn: crea DUE draft — con immagine (come ora) + solo testo (link post nativo)
-            draft_id_img = create_buffer_draft(ch_id, text, photo_url, label=ch_type)
-            if draft_id_img:
-                print(f"  ✅ Draft immagine creato: {draft_id_img}")
-                created_count += 1
-            else:
-                print(f"  ❌ Fallita creazione draft immagine per {ch_type}")
-
-            draft_id_link = create_buffer_draft(ch_id, text, photo_url=None, label=ch_type)
-            if draft_id_link:
-                print(f"  ✅ Draft link creato: {draft_id_link}")
-                created_count += 1
-            else:
-                print(f"  ❌ Fallita creazione draft link per {ch_type}")
+        draft_id = create_buffer_draft(ch_id, text, photo_url, label=ch_type)
+        if draft_id:
+            print(f"  ✅ Draft creato: {draft_id}")
+            created_count += 1
         else:
-            draft_id = create_buffer_draft(ch_id, text, photo_url, label=ch_type)
-            if draft_id:
-                print(f"  ✅ Draft creato: {draft_id}")
-                created_count += 1
-            else:
-                print(f"  ❌ Fallita creazione draft per {ch_type}")
+            print(f"  ❌ Fallita creazione draft per {ch_type}")
 
     if created_count == 0:
         print("  FALLITO: Nessun draft creato")

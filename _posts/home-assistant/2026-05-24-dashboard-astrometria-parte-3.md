@@ -11,7 +11,6 @@ header:
   transform: keystone
   intensity: medium
   logo: false
-header:
   overlay_filter: 0.5
 series:
   id: "dashboard-astrometria"
@@ -24,11 +23,13 @@ broadcast:
   linkedin_image:
     logo: true
     color: white
+    caption: "Astronomia in Home Assistant - Pt. 3: Completiamo il dashboard"
     transform: keystone
     intensity: medium
   mastodon_image:
     logo: home-assistant.png
     color: white
+    caption: "Space dashboard for HA - Part 3: Final touches"
     transform: keystone
     intensity: low
 intended_audience: practitioner
