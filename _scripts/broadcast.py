@@ -425,7 +425,7 @@ def cloudinary_social_url(master_path, social_config, post_title, channel_type):
     has_south_overlay = bool(caption_text) or bool(logo_ref)
     if has_south_overlay:
         bar_url = f"{SITE_URL}/assets/images/1x1-black.png"
-        bar_b64 = base64.b64encode(bar_url.encode()).decode().replace('=', '')
+        bar_b64 = base64.b64encode(bar_url.encode()).decode()
         parts.append(f"l_fetch:{bar_b64},c_scale,w_{width},h_150,o_80")
         parts.append('fl_layer_apply,g_south')
 
@@ -438,7 +438,7 @@ def cloudinary_social_url(master_path, social_config, post_title, channel_type):
         else:
             logo_path = SITE_LOGO
         logo_full = f"{SITE_URL}{logo_path}"
-        logo_b64 = base64.b64encode(logo_full.encode()).decode().replace('=', '')
+        logo_b64 = base64.b64encode(logo_full.encode()).decode()
         parts.append(
             f"l_fetch:{logo_b64},"
             f"c_fill,g_face,w_88,h_88,r_max,bo_2px_solid_white"
