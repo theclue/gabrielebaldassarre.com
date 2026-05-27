@@ -28,7 +28,6 @@ broadcast:
     intensity: medium
   mastodon_image:
     logo: home-assistant.png
-    caption: ""
     color: white
     transform: keystone
     intensity: low

@@ -353,6 +353,13 @@ def cloudinary_url(master_path, transforms):
     )
 
 
+def _encode_caption(text):
+    """Percent-encode special characters for Cloudinary l_text overlays."""
+    out = text.replace('%', '%25').replace(',', '%2C').replace(':', '%3A').replace(' ', '%20')
+    out = out.replace('#', '%23').replace('?', '%3F').replace('/', '%2F')
+    return out
+
+
 def cloudinary_social_url(master_path, social_config, post_title, channel_type):
     """Costruisce un URL Cloudinary con transform + logo + caption per social media."""
     if not master_path or not CLOUDINARY_CLOUD_NAME:
@@ -418,7 +425,7 @@ def cloudinary_social_url(master_path, social_config, post_title, channel_type):
     has_south_overlay = bool(caption_text) or bool(logo_ref)
     if has_south_overlay:
         bar_url = f"{SITE_URL}/assets/images/1x1-black.png"
-        bar_b64 = base64.b64encode(bar_url.encode()).decode()
+        bar_b64 = base64.b64encode(bar_url.encode()).decode().replace('=', '')
         parts.append(f"l_fetch:{bar_b64},c_scale,w_{width},h_150,o_80")
         parts.append('fl_layer_apply,g_south')
 
@@ -431,7 +438,7 @@ def cloudinary_social_url(master_path, social_config, post_title, channel_type):
         else:
             logo_path = SITE_LOGO
         logo_full = f"{SITE_URL}{logo_path}"
-        logo_b64 = base64.b64encode(logo_full.encode()).decode()
+        logo_b64 = base64.b64encode(logo_full.encode()).decode().replace('=', '')
         parts.append(
             f"l_fetch:{logo_b64},"
             f"c_fill,g_face,w_88,h_88,r_max,bo_2px_solid_white"
@@ -445,18 +452,18 @@ def cloudinary_social_url(master_path, social_config, post_title, channel_type):
             first = f"{first.strip()}:"
             second = second.strip()
             # First line: smaller, positioned higher, colon appended
-            enc1 = first.replace('%', '%25').replace(',', '%2C').replace(' ', '%20')
+            enc1 = _encode_caption(first)
             parts.append(
                 f"l_text:Roboto_35_bold:{enc1},co_{caption_color},w_800,c_fit"
             )
             parts.append('fl_layer_apply,g_south_west,x_25,y_88')
-            enc2 = second.replace('%', '%25').replace(',', '%2C').replace(' ', '%20')
+            enc2 = _encode_caption(second)
             parts.append(
                 f"l_text:Roboto_45_bold:{enc2},co_{caption_color},w_800,c_fit"
             )
             parts.append('fl_layer_apply,g_south_west,x_25,y_38')
         else:
-            encoded = caption_text.replace('%', '%25').replace(',', '%2C').replace(' ', '%20')
+            encoded = _encode_caption(caption_text)
             parts.append(
                 f"l_text:Roboto_48_bold:{encoded},co_{caption_color},w_800,c_fit"
             )
