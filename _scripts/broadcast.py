@@ -14,9 +14,17 @@ import time
 import base64
 import urllib.request
 import urllib.error
+import yaml
 
 CLOUDINARY_CLOUD_NAME = os.environ.get("CLOUDINARY_CLOUD_NAME", "")
 SITE_URL = "https://gabrielebaldassarre.com"
+
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+REPO_ROOT = os.path.dirname(SCRIPT_DIR)
+with open(os.path.join(REPO_ROOT, '_config.yml')) as _f:
+    _config = yaml.safe_load(_f)
+SITE_LOGO = _config.get('site_logo', '/assets/logos/the-16bit-robot.png')
+
 BUFFER_API_TOKEN = os.environ.get("BUFFER_API_TOKEN", "")
 GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN", "")
 
@@ -392,7 +400,7 @@ def cloudinary_social_url(master_path, social_config, post_title, channel_type):
     else:
         parts.append(f"c_fill,g_auto,w_{width},h_{height},f_auto,q_auto")
 
-    # Caption text + letterbox (only when caption present)
+    # Caption text resolution
     caption_raw = config.get('caption')
     caption_text = None
     if caption_raw is True:
@@ -401,16 +409,24 @@ def cloudinary_social_url(master_path, social_config, post_title, channel_type):
         caption_text = str(caption_raw)
     if caption_text:
         caption_color = config.get('color', 'white')
-        # Letterbox: semi-transparent black bar behind text+logo
+
+    # Letterbox: semi-transparent black bar behind text and/or logo
+    logo_ref = config.get('logo')
+    has_south_overlay = bool(caption_text) or bool(logo_ref)
+    if has_south_overlay:
         bar_url = f"{SITE_URL}/assets/images/1x1-black.png"
         bar_b64 = base64.b64encode(bar_url.encode()).decode()
         parts.append(f"l_fetch:{bar_b64},c_scale,w_{width},h_120,o_80")
         parts.append('fl_layer_apply,g_south')
 
     # Logo overlay: bigger (w_70), more room for 2-line caption
-    logo_ref = config.get('logo')
     if logo_ref:
-        logo_path = "/assets/logos/the-16bit-robot.png"
+        if logo_ref is True:
+            logo_path = SITE_LOGO
+        elif isinstance(logo_ref, str):
+            logo_path = logo_ref if logo_ref.startswith(('/', 'http')) else f"/assets/logos/{logo_ref}"
+        else:
+            logo_path = SITE_LOGO
         logo_full = f"{SITE_URL}{logo_path}"
         logo_b64 = base64.b64encode(logo_full.encode()).decode()
         parts.append(

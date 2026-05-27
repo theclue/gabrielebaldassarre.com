@@ -23,7 +23,6 @@ broadcast:
   sent: false
   linkedin_image:
     logo: true
-    caption: ""
     color: white
     transform: keystone
     intensity: medium
@@ -31,8 +30,8 @@ broadcast:
     logo: home-assistant.png
     caption: ""
     color: white
-    transform: cinematic
-    intensity: medium
+    transform: keystone
+    intensity: low
 intended_audience: practitioner
 proficiency_level: intermediate
 difficulty_declared:
@@ -54,13 +53,11 @@ knowledge_prerequisites:
   - concept: "home-assistant"
     label: "Home Assistant"
     url: "https://www.home-assistant.io/"
-    sameAs: "https://www.wikidata.org/wiki/Q5731200"
     importance: "required"
     depth: 2
   - concept: "yaml"
     label: "YAML"
     url: "https://yaml.org/"
-    sameAs: "https://www.wikidata.org/wiki/Q1372812"
     importance: "required"
     depth: 1
   - concept: "rest-apis"
@@ -82,7 +79,6 @@ knowledge_prerequisites:
   - concept: "nasa-apod"
     label: "NASA APOD"
     url: "https://apod.nasa.gov/apod/"
-    sameAs: "https://www.wikidata.org/wiki/Q196669"
     importance: "helpful"
     depth: 1
   - concept: "iss"
@@ -94,7 +90,6 @@ knowledge_prerequisites:
   - concept: "norad-id"
     label: "NORAD ID (Satellite Catalog Number)"
     url: "https://en.wikipedia.org/wiki/Satellite_Catalog_Number"
-    sameAs: "https://www.wikidata.org/wiki/Q376515"
     importance: "helpful"
     depth: 2
   - concept: "secrets-management"
