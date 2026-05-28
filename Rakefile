@@ -119,5 +119,80 @@ task :clean do
   sh "make clean"
 end
 
+## ── Knitr ──────────────────────────────────────────────────────────────────────
+
+# Usage: rake knit["_posts/reti-sociali/2018-08-17-reti-smallworld.Rmd"]
+desc "Knit a single .Rmd file via Docker (outputs .md alongside)"
+task :knit, [:file] do |t, args|
+  rmd = args[:file] || abort("Missing file= argument. Usage: rake knit['path/to/file.Rmd']")
+  abort "#{rmd} not found." unless File.exist?(rmd)
+
+  md = rmd.sub(/\.Rmd$/i, ".md")
+  puts "Knitting: #{rmd} → #{md}"
+
+  # Run build_one.R inside the knitr Docker container
+  sh "docker run --rm -v #{Dir.pwd}:/srv/jekyll -w /srv/jekyll " \
+     "-e TZ=Europe/Rome " \
+     "gabrielebaldassarre/knitr:latest " \
+     "Rscript R/build_one.R '#{rmd}' '#{md}'"
+end
+
+# Usage: rake knit_all
+desc "Knit all .Rmd files (builds Docker image if needed)"
+task :knit_all do
+  sh "make knitr"
+end
+
+## ── New Rmd post ────────────────────────────────────────────────────────────────
+
+# Usage: rake new_rmd["Reti Smallworld - Analisi Quantitativa","Reti Sociali"]
+desc "Create a new .Rmd post from template"
+task :new_rmd, [:title, :category] do |t, args|
+  title    = args[:title] || abort("Missing title argument. Usage: rake new_rmd['Title','Category']")
+  category = args[:category] || abort("Missing category argument")
+
+  slug = title.downcase.strip.gsub(" ", "-").gsub(/[^\w-]/, "")
+  date = ENV["date"] ? Time.parse(ENV["date"]).strftime("%Y-%m-%d") : Time.now.strftime("%Y-%m-%d")
+
+  dir = File.join(POSTS, category.downcase.strip.gsub(" ", "-"))
+  filename = File.join(dir, "#{date}-#{slug}.Rmd")
+
+  FileUtils.mkdir_p(dir)
+  abort "#{filename} already exists." if File.exist?(filename)
+
+  template = File.join(SOURCE, "R", "includes", "template.Rmd")
+  abort "Template not found: #{template}" unless File.exist?(template)
+
+  content = File.read(template)
+  content = content.sub(/^title:.*/, "title: \"#{title}\"")
+  content = content.sub(/^category:.*/, "category: \"#{category}\"")
+
+  File.write(filename, content)
+  puts "Created: #{filename}"
+end
+
+## ── New Rmd draft ───────────────────────────────────────────────────────────────
+
+# Usage: rake new_rmd_draft["Analisi Reti"]
+desc "Create a new .Rmd draft in _drafts/"
+task :new_rmd_draft, [:title] do |t, args|
+  title = args[:title] || abort("Missing title argument")
+  slug = title.downcase.strip.gsub(" ", "-").gsub(/[^\w-]/, "")
+  filename = File.join(DRAFTS, "#{slug}.Rmd")
+
+  abort "#{filename} already exists." if File.exist?(filename)
+
+  template = File.join(SOURCE, "R", "includes", "template.Rmd")
+  abort "Template not found: #{template}" unless File.exist?(template)
+
+  content = File.read(template)
+  content = content.sub(/^title:.*/, "title: \"#{title}\"")
+  content = content.sub(/^category:.*/, "category: ")
+  content = content.sub(/^tags:.*/, "tags: []")
+
+  File.write(filename, content)
+  puts "Created: #{filename}"
+end
+
 desc "Build the site"
 task default: :build

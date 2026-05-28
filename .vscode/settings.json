@@ -47,20 +47,28 @@
     ".jekyll-cache": true,
     ".sass-cache": true,
     ".bundle": true,
-    "vendor": true
+    "vendor": true,
+    "renv/library": true,
+    "renv/staging": true,
+    "renv/sandbox": true,
+    "renv/python": true
   },
   "search.exclude": {
     "_site/**": true,
     ".jekyll-cache/**": true,
     ".bundle/**": true,
     "vendor/**": true,
-    "Gemfile.lock": true
+    "Gemfile.lock": true,
+    "renv/library/**": true,
+    "renv/staging/**": true,
+    "renv/sandbox/**": true
   },
   "files.watcherExclude": {
     "_site/**": true,
     ".jekyll-cache/**": true,
     ".bundle/**": true,
-    "vendor/**": true
+    "vendor/**": true,
+    "renv/library/**": true
   },
   "spellright.language": [
     "it",

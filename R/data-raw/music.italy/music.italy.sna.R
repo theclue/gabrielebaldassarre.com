@@ -3,7 +3,7 @@
 ######################
 if (!require("pacman")) install.packages("pacman"); invisible(library(pacman))
 tryCatch({
-  p_load("tidyverse", "igraph", "sna", "poweRlaw", "intergraph", "qgraph", "RColorBrewer", "centiserve", "linkcomm")
+  p_load("tidyverse", "igraph", "sna", "poweRlaw", "intergraph", "qgraph", "RColorBrewer", "centiserve")
 }, warning=function(w){
   stop(conditionMessage(w))
 })

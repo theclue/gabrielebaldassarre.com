@@ -83,6 +83,7 @@ author:
     - label: "Mastodon"
       icon: "mastodon"
       url: "https://mastodon.social/@gabriob"
+  kofi: "gabriob"
 
 # Reading Files
 include:
@@ -92,6 +93,7 @@ exclude:
   - "*.sublime-project"
   - "*.sublime-workspace"
   - vendor
+  - renv
   - .asset-cache
   - .bundle
   - .jekyll-assets-cache

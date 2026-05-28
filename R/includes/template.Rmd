@@ -1,0 +1,65 @@
+---
+title: ""
+excerpt: ""
+category: ""
+tags: []
+header:
+  overlay_filter: 0.5
+  overlay_image: /assets/images/
+  teaser: /assets/images/
+editor_options:
+  chunk_output_type: inline
+---
+
+```{r setup, include = FALSE, cache = FALSE}
+# ── gabrielebaldassarre.com — Rmd template ───────────────────────
+# Standard setup chunk: packages, par(), theme, paths.
+# This runs in both RStudio (interactive) and Docker (batch).
+
+if (!require("pacman")) install.packages("pacman")
+invisible(library(pacman))
+tryCatch({
+  p_load("tidyverse", "rprojroot")
+}, warning = function(w) stop(conditionMessage(w)))
+
+root <- find_root(is_git_root)
+
+# ── Shared chunk options ─────────────────────────────────────────
+knitr::opts_chunk$set(
+  dev        = "svglite",
+  dev.args   = list(bg = "transparent"),
+  fig.retina = 2,
+  echo       = FALSE,
+  warning    = FALSE,
+  message    = FALSE,
+  cache      = TRUE
+)
+
+# ── Plot defaults ────────────────────────────────────────────────
+old.par <- par(
+  mar = c(4, 4, 2, 1),
+  mgp = c(3, 0.4, 0),
+  tck = -0.01,
+  cex.axis = 0.9,
+  las = 1
+)
+
+# ── Blog theme ───────────────────────────────────────────────────
+if (file.exists(file.path(root, "R", "includes", "theme_gabriob.R"))) {
+  source(file.path(root, "R", "includes", "theme_gabriob.R"))
+}
+```
+
+<!--
+  Your content here. Chunk metadata for figures:
+
+  ```{r myplot, fig.asp = .7,
+        fig.alt    = "Alt text for accessibility",
+        fig.cap    = "Caption shown below the figure",
+        fig.role   = "chart",
+        fig.context = "result"}
+  ```
+
+  fig.role:    chart | diagram | screenshot | photo | illustration
+  fig.context: result | step | architecture | comparison | evidence | reference
+-->

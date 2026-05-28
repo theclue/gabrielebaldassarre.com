@@ -93,7 +93,7 @@ If the post has no series indicators, skip this step entirely.
 
 8. For concepts that are **required** prerequisites but have no link in the
    article, consider adding an explicit `{% xlink %}` in the body at the
-   first mention of the concept, pointing to Wikipedia or official docs. Consider annotating the link with the relevant Wikidata term, too.
+   first mention of the concept, pointing to Wikipedia or official docs. Consider annotating the link with the relevant Wikidata term, too, but only if you are absolutely sure it's relevant or it's exactly the equivalent concept, as `sameAs` relationships _are_ semantically strict.
    Use `role="prerequisite"` and `context="provides-context"` and `sameAs="<Wikidata Term"`>.
 
 9. Write the modified content back to the file.

@@ -1,0 +1,5 @@
+# ── gabrielebaldassarre.com — R environment ──────────────────────────
+# Copy to .Renviron and fill in values (NOT committed to git)
+#
+# CLOUDINARY_CLOUD_NAME=did6lsgza
+# BUFFER_API_TOKEN=your_token_here

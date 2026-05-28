@@ -11,6 +11,7 @@ Thumbs.db
 .ruby-version
 
 *.lock
+!renv.lock
 
 .geany/session.ini
 
@@ -27,6 +28,13 @@ cache/
 .Rproj.user
 .Rhistory
 .RData
+.Renviron
+renv/library/
+renv/staging/
+renv/sandbox/
+renv/python/
+
+cache/
 
 .bundle
 .tweet-cache

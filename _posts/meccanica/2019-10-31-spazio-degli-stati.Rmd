@@ -13,7 +13,7 @@ editor_options:
 ```{r phase.setup, include = FALSE, cache = FALSE}
 if (!require("pacman")) install.packages("pacman"); invisible(library(pacman))
 tryCatch({
-  p_load("tidyverse", "phaseR")
+  p_load("tidyverse")
 }, warning=function(w){
   stop(conditionMessage(w))
 })
@@ -113,4 +113,4 @@ Giacché non abbiamo risolto suddette equazioni, ne fornisce solo una vista appr
 
 Certo, al crescere dell'ordine del sistema, la visualizzazione diventa complessa e inefficace, per non dire impossibile. Resta, tuttavia, uno strumento prezioso anche per visualizzare mentalmente come un sistema evolve e per spiegare come la sua dinamica è descritta da vettori in un campo. Questo concetto, tra l'altro, risulta essenziale nello studio della Meccanica Quantistica, oltre che ovviamente in Meccanica Razionale.
 
-Prossimamente faremo qualche esempio pratico di realizzazione di ritratti di fase tramite R, visto che [esiste un package](https://cran.r-project.org/web/packages/phaseR/vignettes/my-vignette.html) semplice e intuitivo adatto allo scopo. Alla prossima!
+Prossimamente faremo qualche esempio pratico di realizzazione di ritratti di fase tramite R. Alla prossima!

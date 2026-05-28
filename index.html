@@ -22,6 +22,13 @@ header:
       <h2 class="intro-heading">{{ site.data.ui-text[site.locale].about_me | default: "About me" }}</h2>
       <hr>
       {{ site.author.bio }}
+      {% if site.author.kofi %}
+      <p class="intro-social">
+        <a href="https://ko-fi.com/{{ site.author.kofi }}" rel="nofollow noopener noreferrer" title="{{ site.data.ui-text[site.locale].support_me }}">
+          {% include icon.html name="coffee" %} {{ site.data.ui-text[site.locale].support_me }}
+        </a>
+      </p>
+      {% endif %}
       {% if site.author.links %}
       <p class="intro-social">
         {% for link in site.author.links %}

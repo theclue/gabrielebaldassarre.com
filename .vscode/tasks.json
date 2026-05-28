@@ -125,6 +125,66 @@
         "clear": true
       },
       "problemMatcher": []
+    },
+    {
+      "label": "Knit current Rmd",
+      "type": "shell",
+      "command": "rake",
+      "args": ["knit['${relativeFile}']"],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Knit all Rmd",
+      "type": "shell",
+      "command": "rake",
+      "args": ["knit_all"],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "New Rmd post",
+      "type": "shell",
+      "command": "rake",
+      "args": ["new_rmd['${input:rmdTitle}','${input:rmdCategory}']"],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "New Rmd draft",
+      "type": "shell",
+      "command": "rake",
+      "args": ["new_rmd_draft['${input:rmdDraftTitle}']"],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "problemMatcher": []
     }
   ],
   "inputs": [
@@ -179,6 +239,30 @@
         "Reti Sociali",
         "Meccanica"
       ]
+    },
+    {
+      "id": "rmdTitle",
+      "type": "promptString",
+      "description": "Titolo del post Rmd",
+      "default": ""
+    },
+    {
+      "id": "rmdCategory",
+      "type": "pickString",
+      "description": "Categoria",
+      "options": [
+        "Home Assistant",
+        "DevOps",
+        "Fisica",
+        "Reti Sociali",
+        "Meccanica"
+      ]
+    },
+    {
+      "id": "rmdDraftTitle",
+      "type": "promptString",
+      "description": "Titolo della bozza Rmd",
+      "default": ""
     }
   ]
 }

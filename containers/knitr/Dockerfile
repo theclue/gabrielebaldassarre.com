@@ -71,5 +71,4 @@ RUN install2.r --error -n 4 \
     pacman \
     igraph \
     poweRlaw \
-    phaseR \
     && rm -rf /var/lib/apt/lists/*
