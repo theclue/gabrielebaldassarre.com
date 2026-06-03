@@ -4,21 +4,24 @@ help:
 	@echo Usage: make [TARGET]
 	@echo
 	@echo Targets:
-	@echo   build        Build the Jekyll Docker image
-	@echo   build-knitr  Build the R/knitr Docker image
-	@echo   site         Build the site into _site/
-	@echo   knitr        Convert .Rmd drafts to .md via R container
-	@echo   dev          Start local Jekyll dev server with live-reload
-	@echo   clean        Remove _site/ output
+	@echo "  build        Build the Jekyll Docker image"
+	@echo "  build-knitr  Build the R/knitr Docker image"
+	@echo "  build-seo    Build the SEO monitor Docker image"
+	@echo "  seo          Run SEO monitor (weekly) via Docker"
+	@echo "  site         Build the site into _site/"
+	@echo "  knitr        Convert .Rmd drafts to .md via R container"
+	@echo "  dev          Start local Jekyll dev server with live-reload"
+	@echo "  clean        Remove _site/ output"
 	@echo
 	@echo "Environment overrides  (defaults shown):"
 	@echo "  LOCALE=$(LOCALE)"
 	@echo "  LOCALE_LANG=$(LOCALE_LANG)"
 	@echo
 	@echo Examples:
-	@echo   make dev
-	@echo   make site
-	@echo   make LOCALE=en_US LOCALE_LANG=en-US site
+	@echo "  make dev"
+	@echo "  make site"
+	@echo '  make seo SEO_ARGS="--dry-run --force-report"'
+	@echo "  make LOCALE=en_US LOCALE_LANG=en-US site"
 
 clean:
 	@rm -rf _site

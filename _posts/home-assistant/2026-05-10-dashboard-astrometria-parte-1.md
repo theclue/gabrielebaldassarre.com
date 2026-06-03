@@ -35,7 +35,7 @@ series:
 
 Ci sono progetti che iniziano con un'idea semplice e finiscono per diventare qualcosa di più grande. Questo è uno di quelli. Tutto è partito da una domanda banale: *posso sapere dalla mia dashboard di Home Assistant in che fase è la Luna stasera?* La risposta è ovviamente sì — ma una volta aperta quella porta, è difficile fermarsi.
 
-Quello che descrivo in questa serie di articoli è una dashboard di **astrometria** — una parola un po' altisonante per dire: uno schermo dedicato a tutto quello che succede sopra la nostra testa, dai cicli lunari all'attività solare, dalle aurore boreali ai prossimi lanci spaziali. Non è un progetto per astronomi professionisti e il suo scopo è sicuramente divulgativo, in particolare per incuriosire i miei due bambini. Tuttavia, non è nemmenod el tutto inutile: astrofili, appassionati di astrofotografia, o semplicemente chi vuole sapere se stasera vale la pena alzare lo sguardo potrebbero trovarvi informazioni utili.
+Quello che descrivo in questa serie di articoli è una dashboard di **astrometria** — una parola un po' altisonante per dire: uno schermo dedicato a tutto quello che succede sopra la nostra testa, dai cicli lunari all'attività solare, dalle aurore boreali ai prossimi lanci spaziali. Non è un progetto per astronomi professionisti e il suo scopo è sicuramente divulgativo, in particolare per incuriosire i miei due bambini. Tuttavia, non è nemmeno del tutto inutile: astrofili, appassionati di astrofotografia, o semplicemente chi vuole sapere se stasera vale la pena alzare lo sguardo potrebbero trovarvi informazioni utili.
 
 La dashboard è divisa in tre sezioni:
 
@@ -56,7 +56,7 @@ Home Assistant include di serie un'integrazione chiamata semplicemente **Moon** 
 
 Questo crea l'entità `sensor.moon` con stati come `new_moon`, `waxing_crescent`, `first_quarter`, `waxing_gibbous`, `full_moon`, `waning_gibbous`, `last_quarter`, `waning_crescent`. 
 
-È la base dati, ma da sola non basta per visualizzare il disco lunare attuale, esteticamente molto più gradevole da mostrare in dashbard. Per quello, ci serve una fonte fotografica.
+È la base dati, ma da sola non basta per visualizzare il disco lunare attuale, esteticamente molto più gradevole da mostrare in dashboard. Per quello, ci serve una fonte fotografica.
 
 ### Il disco lunare in tempo reale: API NASA SVS
 
@@ -161,7 +161,7 @@ show_name: true
 show_state: true
 ```
 
-Ho completato aggiungendo nell'heading della sezione un badge con `sensor.sun_next_dusk`: l'orario del prossimo crepuscolo astronomico. È una piccola aggiunta, ma molto pratica: guardando la dashboard so immediatamente a che ora inizia il buio utile per l'osservazione. Il sensore `sun.sun` espone automaticamente questi attributi tramite l'integrazione sole nativa di HA. Questo, per praticità, l'intero codice dell'intestazione di sezione
+Ho completato aggiungendo nell'heading della sezione un badge con `sensor.sun_next_dusk`: l'orario del prossimo crepuscolo astronomico. È una piccola aggiunta, ma molto pratica: guardando la dashboard so immediatamente a che ora inizia il buio utile per l'osservazione. Il sensore `sun.sun` espone automaticamente questi attributi tramite l'integrazione sole nativa di HA. Questo, per praticità, è l'intero codice dell'intestazione di sezione:
 
 ```yaml
 type: heading
@@ -269,6 +269,4 @@ Alcune note:
 
 ## Riepilogo
 
-In questa prima parte abbiamo costruito il modulo **Sistema Terra-Luna**:
-
-Nella {% post_link /home-assistant/dashboard-astrometria-parte-2/ "seconda parte" role="deepening" context="extends-topic" target="internal" %} ci sposteremo sul Sole: immagini live da SOHO e GOES-16, la previsione delle aurore boreali OVATION, e i dati dello spazio meteorologico con grafici BT/BZ in tempo reale.
+In questa prima parte abbiamo costruito il modulo **Sistema Terra-Luna**. Nella {% post_link /home-assistant/dashboard-astrometria-parte-2/ "seconda parte" role="deepening" context="extends-topic" target="internal" %} ci sposteremo, invece, sul Sole: immagini live da SOHO e GOES-16, la previsione delle aurore boreali OVATION, e i dati dello spazio meteorologico con grafici BT/BZ in tempo reale.

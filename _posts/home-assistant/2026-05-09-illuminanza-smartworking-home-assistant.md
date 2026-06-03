@@ -195,7 +195,7 @@ In questo articolo descrivo come ho costruito questo sistema in {% xlink "https:
 
 ## Il problema: non ho sensori di luce
 
-I sensori di illuminanza fisici esistono, costano poco e funzionano bene. Ma non mi andava di acquistarli e di aggiungere altri dispositivi alla mia già piuttosto affollata costellazione Zigbee. Ho provato, allora, a volevo capire se fosse possibile stimare l'illuminamento con quello che già avevo: la posizione geografica della mia casa, le caratteristiche geometriche delle finestre, e le integrazioni meteo già presenti in Home Assistant.
+I sensori di illuminanza fisici esistono, costano poco e funzionano bene. Ma non mi andava di acquistarli e di aggiungere altri dispositivi alla mia già piuttosto affollata costellazione Zigbee. Volevo capire, allora, se fosse possibile stimare l'illuminamento con quello che già avevo: la posizione geografica della mia casa, le caratteristiche geometriche delle finestre, e le integrazioni meteo già presenti in Home Assistant.
 
 La risposta è sì, con qualche compromesso.
 
@@ -301,7 +301,7 @@ $$E_{lamp} = \frac{lm \cdot (brightness / 255)}{A_{room}}$$
 
 La linearità brightness → lumen è un'approssimazione (i LED non sono perfettamente lineari), ma sufficiente per questo scopo. 
 
-Per le striscie LED prese su Aliexpress, invece, ho usato un modello linearizzato che tiene conto delle caratteristiche (approssimate a dir poco) del dispositivo. A titolo d'esempio, per la striscia LED che illumina la mia zona pranzo (2 m di COB, per un totale di 960 LED CRI90, alimentati a 24VDC → ~15 W/m) la stima del flusso luminoso sarà:
+Per le strisce LED prese su Aliexpress, invece, ho usato un modello linearizzato che tiene conto delle caratteristiche (approssimate a dir poco) del dispositivo. A titolo d'esempio, per la striscia LED che illumina la mia zona pranzo (2 m di COB, per un totale di 960 LED CRI90, alimentati a 24VDC → ~15 W/m) la stima del flusso luminoso sarà:
 
 $$\Phi_{LED} = 2 \, m \times 15 \, W/m \times 93 \, lm/W \approx 2800 \, lm$$
 
@@ -334,13 +334,13 @@ La lampadina dell'ingresso ha una particolarità: riceve, infatti, un coefficien
 
 La letteratura ergonomica indica 300–500 lux come range ottimale per il lavoro al videoterminale (norma {% xlink "https://biblus.acca.it/uni-en-12464-1-illuminazione-dei-posti-di-lavoro-interni/" "UNI EN 12464-1" role="citation" context="supports-claim" target="external-authoritative" %}, che, tra le altre cose, è una vera miniera di idee per possibili espansioni di questo modello). Ho scelto 400 lux come target default, regolabile tramite un helper `input_number`, così da facilitare eventuali fine tuning successivi.
 
-Dirò una ovvieta, ma ci tengo a far notare che questo **non è un sistema retroazionato** in senso stretto. In un vero sistema a ciclo chiuso si misurerebbe l'illuminamento effettivo della stanza con un sensore fisico, si calcolerebbe l'errore rispetto al target, e si userebbe quell'errore per correggere l'intensità delle sorgenti luminose. Qui invece l'illuminamento reale non è mai misurato e non entra mai nel calcolo (che, poi, era la premessa dell'articolo!): si misura solo la **perturbazione** (la luce naturale stimata), e si usa un **modello del processo** (i lumen noti delle lampade) per calcolare preventivamente l'azione correttiva. È un controllo **feedforward**: efficiente e senza oscillazioni, ma che non si autocorregge se il modello è impreciso.
+Dirò un'ovvietà, ma ci tengo a far notare che questo **non è un sistema retroazionato** in senso stretto. In un vero sistema a ciclo chiuso si misurerebbe l'illuminamento effettivo della stanza con un sensore fisico, si calcolerebbe l'errore rispetto al target, e si userebbe quell'errore per correggere l'intensità delle sorgenti luminose. Qui invece l'illuminamento reale non è mai misurato e non entra mai nel calcolo (che, poi, era la premessa dell'articolo!): si misura solo la **perturbazione** (la luce naturale stimata), e si usa un **modello del processo** (i lumen noti delle lampade) per calcolare preventivamente l'azione correttiva. È un controllo **feedforward**: efficiente e senza oscillazioni, ma che non si autocorregge se il modello è impreciso.
 
 Qui c'è solo algebra: se la luce naturale copre già 200 lx, ho bisogno di altri 200 lx artificiali. Conoscendo il flusso massimo producibile dalle sorgenti disponibili ($E_{max,art} \approx 249 \, lx$ a piena potenza), la brightness necessaria è:
 
 $$brightness\% = \min\!\left(100, \frac{\max(0,\; E_{target} - E_{naturale})}{E_{max,art}} \times 100\right)$$
 
-A questo punto nond dovrebbe essere complicato realizzare una automazione che si adatti alle specifiche esigenze di ognuno. Il mio consiglio è, però, quello di utilizzare, all'interno dell'automazione delle `variables`, per praticità:
+A questo punto non dovrebbe essere complicato realizzare una automazione che si adatti alle specifiche esigenze di ognuno. Il mio consiglio è, però, quello di utilizzare, all'interno dell'automazione delle `variables`, per praticità:
 
 {% raw %}
 ```yaml
@@ -353,7 +353,7 @@ variables:
 ```
 {% endraw %}
 
-Ad oggi l'aggiunta delle variables è, credo, ancora prerogativa del codice Yaml. Bisogna, quindi, passare a questa modalità durante la stesura dell'automazione per inserirle. Poi, si puòà tranquillamente tornare in modalità visuale e riprendere il lavoro.
+Ad oggi l'aggiunta delle variables è, credo, ancora prerogativa del codice Yaml. Bisogna, quindi, passare a questa modalità durante la stesura dell'automazione per inserirle. Poi, si può tranquillamente tornare in modalità visuale e riprendere il lavoro.
 
 ## Convivenza con Adaptive Lighting
 

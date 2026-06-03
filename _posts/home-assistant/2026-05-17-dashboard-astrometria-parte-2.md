@@ -49,11 +49,11 @@ aspect_ratio: 75%
 
 ## Immagini live del Sole
 
-Qui non usiamo API Rest o servizi complessi, ma ci limitiamo a visualizzare gli stream media messi a disposizione della NASA o dal NOAA, manipolati con CSS per conformarmi visivamente all'aspetto del dashboard.
+Qui non usiamo API Rest o servizi complessi, ma ci limitiamo a visualizzare gli stream media messi a disposizione dalla NASA o dal NOAA, manipolati con CSS per conformarli visivamente all'aspetto del dashboard.
 
 ### Riutilizzare il markup Lovelace: button_card_templates
 
-Per le immagini live ho scelto un approccio basato sui **template globali di `custom:button-card`**. L'idea è definire una volta sola uno stile "tile con immagine di sfondo" e riutilizzarlo per tutte le sorgenti visive, così da definire il markup una sola volta, in perfetto stile {% xlink "https://www.geeksforgeeks.org/software-engineering/dont-repeat-yourselfdry-in-software-development/" "DRY" role="definition" context="provides-context" target="external-authoritative" name="Don't Repeat Yourself (DRY)" %}. I template si definiscono nella configurazione globale del dashboard Lovelace e, nel momento in cui scrivo, devono per forza essere definite in Yaml:
+Per le immagini live ho scelto un approccio basato sui **template globali di `custom:button-card`**. L'idea è definire una volta sola uno stile "tile con immagine di sfondo" e riutilizzarlo per tutte le sorgenti visive, così da definire il markup una sola volta, in perfetto stile {% xlink "https://www.geeksforgeeks.org/software-engineering/dont-repeat-yourselfdry-in-software-development/" "DRY" role="definition" context="provides-context" target="external-authoritative" name="Don't Repeat Yourself (DRY)" %}. I template si definiscono nella configurazione globale del dashboard Lovelace e, nel momento in cui scrivo, devono per forza essere definiti in Yaml:
 
 ```yaml
 button_card_templates:
@@ -94,7 +94,7 @@ button_card_templates:
 
 Ogni tile con immagine live diventa poi solo poche righe di configurazione, con la variabile `picture` che riceve l'URL dell'immagine. Vediamo subito gli esempi che popolano il nostro dashboard.
 
-**Nota:** non tutti sanno che effettivamente è possibile accedere al file Yaml complessivo di un intero dashboard. Lo si fa dal menù modifica dashboard in alto a destra, da dove è raggiungibile l'editor di configurazione testuale. I templati vanno direttamente nel _root node_. 
+**Nota:** non tutti sanno che effettivamente è possibile accedere al file Yaml complessivo di un intero dashboard. Lo si fa dal menù modifica dashboard in alto a destra, da dove è raggiungibile l'editor di configurazione testuale. I template vanno direttamente nel _root node_. 
 
 ### SOHO Lasco C3
 
@@ -138,7 +138,7 @@ tap_action:
 
 Il modello **OVATION** (Oval Variation, Assessment, Tracking, Intensity and Online Nowcasting) di NOAA è il sistema di nowcasting più usato per la previsione delle aurore boreali e australi. Produce ogni 30 minuti una mappa globale della probabilità di avvistamento aurorale basandosi sul vento solare misurato dai satelliti.
 
-Per chi vive nell'Europa settentrionale, questa mappa è preziosissima: durante le tempeste geomagnetiche più intense (indice Kp ≥ 7), le aurore diventano visibili anche a latitudini sorprendentemente basse. Certo, la probabilità di osservare una aurora boreale, chessò, in Lombardia rimane piuttosto bassa (ma {% xlink "https://www.ilgiorno.it/cronaca/aurora-boreale-kdhk6hp7" "meno bassa di quanto si credi" role="source" context="supports-claim" target="external-authoritative" %}) e proprio per questo avere questo indicatore in dashboard è importante per evitare di perdersi i momenti giusti.
+Per chi vive nell'Europa settentrionale, questa mappa è preziosissima: durante le tempeste geomagnetiche più intense (indice Kp ≥ 7), le aurore diventano visibili anche a latitudini sorprendentemente basse. Certo, la probabilità di osservare un'aurora boreale, chessò, in Lombardia rimane piuttosto bassa (ma {% xlink "https://www.ilgiorno.it/cronaca/aurora-boreale-kdhk6hp7" "meno bassa di quanto si creda" role="source" context="supports-claim" target="external-authoritative" %}) e proprio per questo avere questo indicatore in dashboard è importante per evitare di perdersi i momenti giusti.
 
 ```yaml
 type: custom:button-card
@@ -198,7 +198,7 @@ L'**indice Kp** misura le perturbazioni del campo magnetico terrestre su scala g
 
 ### Configurazione multiscrape
 
-I dati vengono recuperati tramite l'integrazione {% xlink "https://github.com/danieldotnl/ha-multiscrape" "Multiscrape" role="tool" context="enables-step" target="external-community" name="Multiscrape" %} (disponibile anche su HACS), che permette di interrogare una API REST (o in generale qualsiasi cosa), in questo caso l'API NOAA, e mappare ogni campo su un sensore separato in un'unica operazione. Al momento in cui scrivo, il setup va necessariamente fatto in Yaml:
+I dati vengono recuperati tramite l'integrazione {% xlink "https://github.com/danieldotnl/ha-multiscrape" "Multiscrape" role="tool" context="enables-step" target="external-community" name="Multiscrape" %} (disponibile anche su HACS), che permette di interrogare un'API REST (o in generale qualsiasi cosa), in questo caso l'API NOAA, e mappare ogni campo su un sensore separato in un'unica operazione. Al momento in cui scrivo, il setup va necessariamente fatto in Yaml:
 
 ```yaml
 multiscrape:
@@ -207,7 +207,7 @@ multiscrape:
     sensor:
       - unique_id: noaa_space_weather_noon_10_7cm_radio_flux
         name: "NOAA Space Weather - Noon 10.7cm Radio Flux"
-        value_template: {{ value_json[-1]["f10.7"] | jsonify }}
+        value_template: "{{ value_json[-1]['f10.7'] }}"
         unit_of_measurement: "sfu"
 
       - unique_id: noaa_space_weather_solar_wind_speed
@@ -263,7 +263,7 @@ NOAA SWPC pubblica queste misure (aggiornate ogni minuto dal satellite DSCOVR al
 https://services.swpc.noaa.gov/products/solar-wind/mag-1-day.json
 ```
 
-Per grafici molto densi che possono richiedere la visualizzazioni di più serie di dati, in genere preferisco ApexCharts, che ha una {% xlink "https://github.com/RomRider/apexcharts-card" "fantastica card" role="tool" context="enables-step" target="external-community" name="apexcharts-card" %} per Lovelace:
+Per grafici molto densi che possono richiedere la visualizzazione di più serie di dati, in genere preferisco ApexCharts, che ha una {% xlink "https://github.com/RomRider/apexcharts-card" "fantastica card" role="tool" context="enables-step" target="external-community" name="apexcharts-card" %} per Lovelace:
 
 La linea orizzontale a y=0 è il riferimento visivo chiave: quando BZ scende sotto quella linea e ci rimane, è il momento di controllare le previsioni aurorali.
 

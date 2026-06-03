@@ -1,0 +1,7 @@
+# dbt tests — data quality assertions
+# =====================================
+
+version: 2
+
+# These are run against the compiled models.
+# In CI, they validate data quality before applying to D1.

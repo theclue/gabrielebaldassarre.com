@@ -6,7 +6,7 @@ master: /assets/images/seo-pipeline-farsi-trovare.png
 image_meta:
   role: illustration
   context: ambient
-  caption: "Fiore luminescente in un bosco magico'"
+  caption: "Fiore luminescente in un bosco magico"
 broadcast:
   channels: [linkedin, mastodon]
   sent: true
@@ -167,7 +167,7 @@ Sul mio blog, ogni post ha già un blocco JSON-LD `BlogPosting` con titolo, desc
 }
 ```
 
-Ho creato un glossario YAML (`_data/glossary.yml`) con i termini tecnici che uso più spesso nel blog — spin quantistico, autovettore, illuminamento, legge di potenza, ecc. — ciascuno con definizione e URL sotto forma di entità **`DefinedTerm` e `DefinedTermSet`**. . Ogni post ora ha un blocco `about` che linka i termini del glossario pertinenti alla categoria. Sulle pagine indice (homepage, categorie), un `DefinedTermSet` elenca l'intero glossario.
+Ho creato un glossario YAML (`_data/glossary.yml`) con i termini tecnici che uso più spesso nel blog — spin quantistico, autovettore, illuminamento, legge di potenza, ecc. — ciascuno con definizione e URL sotto forma di entità **`DefinedTerm` e `DefinedTermSet`**. Ogni post ora ha un blocco `about` che linka i termini del glossario pertinenti alla categoria. Sulle pagine indice (homepage, categorie), un `DefinedTermSet` elenca l'intero glossario.
 
 ```json
 {
@@ -187,7 +187,7 @@ Ho creato un glossario YAML (`_data/glossary.yml`) con i termini tecnici che uso
 
 L'obiettivo è costruire un mini knowledge graph semantico, così che un motore di ricerca — o un LLM — che atterra su una mia pagina possa risalire al contesto tecnico in cui si inserisce.
 
-Dopo aver definito il proprio modello di metadati di schema, mon fa male fare un passaggio su {% xlink "https://validator.schema.org" "Schema Validator" role="tool" context="enables-step" target="external-authoritative" %}
+Dopo aver definito il proprio modello di metadati di schema, non fa male fare un passaggio su {% xlink "https://validator.schema.org" "Schema Validator" role="tool" context="enables-step" target="external-authoritative" %}.
 
 {% cloudinary /assets/images/schema-validator-esempio-report.png alt="Una vista molto dev-friendly dello schema validator. A quanto pare questo strumento non è così severo rispetto agli altri che abbiamo visto" role="screenshot" context="result" %}
 
@@ -339,7 +339,7 @@ I report HTML e JSON sono salvati come workflow artifact con timestamp e commit 
 
 #### Gestire secrets e API key
 
-Molti di questi servizi richiedono una API key, spesso passata come parametro nelle chiamate `curl`. Come le si passa al workflow senza committare in chiaro sul repository?
+Molti di questi servizi richiedono un'API key, spesso passata come parametro nelle chiamate `curl`. Come le si passa al workflow senza committare in chiaro sul repository?
 
 Ma con le {% xlink "https://docs.github.com/en/actions/security-for-github-actions/security-guides/using-secrets-in-github-actions" "Secrets" role="definition" context="provides-context" target="external-authoritative" %} ovviamente! Anche Github, infatti, ha questa funzionalità che non può mancare ad un orchestratore di CICD. Si configurano in Settings → Secrets and variables → Actions.
 

@@ -1,0 +1,107 @@
+version: 2
+
+models:
+  - name: dim_posts
+    description: Posts dimension snapshot with change timeline from post_history
+    config:
+      contract: {enforced: true}
+    columns:
+      - name: urn
+        data_type: text
+        constraints:
+          - type: not_null
+          - type: primary_key
+        tests: [unique, not_null]
+      - name: title
+        data_type: text
+        constraints:
+          - type: not_null
+        tests: [not_null]
+      - name: category
+        data_type: text
+        constraints:
+          - type: not_null
+        tests: [not_null]
+      - name: slug
+        data_type: text
+      - name: tags
+        data_type: text
+      - name: file_path
+        data_type: text
+      - name: first_seen_at
+        data_type: text
+      - name: last_modified_at
+        data_type: text
+      - name: valid_from
+        data_type: text
+      - name: valid_to
+        data_type: text
+      - name: is_current
+        data_type: boolean
+        tests: [not_null]
+
+  - name: fct_seo_metrics
+    description: Daily SEO performance KPIs per post URL
+    config:
+      contract: {enforced: true}
+    columns:
+      - name: post_urn
+        data_type: text
+      - name: url
+        data_type: text
+      - name: check_date
+        data_type: date
+      - name: source
+        data_type: text
+      - name: device
+        data_type: text
+      - name: performance_score
+        data_type: real
+      - name: accessibility_score
+        data_type: real
+      - name: seo_score
+        data_type: real
+      - name: best_practices_score
+        data_type: real
+      - name: lcp_ms
+        data_type: real
+      - name: tbt_ms
+        data_type: real
+      - name: cls
+        data_type: real
+      - name: fcp_ms
+        data_type: real
+      - name: flag_perf_critical
+        data_type: boolean
+      - name: flag_a11y_warning
+        data_type: boolean
+      - name: flag_lcp_slow
+        data_type: boolean
+
+  - name: fct_post_activity
+    description: Post change activity timeline with velocity metrics
+    columns:
+      - name: post_urn
+        data_type: text
+        tests: [not_null]
+      - name: change_type
+        data_type: text
+      - name: change_magnitude
+        data_type: integer
+      - name: changes_last_7d
+        data_type: integer
+      - name: cumulative_magnitude
+        data_type: integer
+
+  - name: fct_keyword_performance
+    description: Keyword trend KPIs
+    columns:
+      - name: keyword
+        data_type: text
+        tests: [not_null]
+      - name: data_points
+        data_type: integer
+      - name: has_trend_data
+        data_type: boolean
+      - name: has_rising_queries
+        data_type: boolean

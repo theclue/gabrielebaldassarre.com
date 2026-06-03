@@ -1,3 +1,5 @@
+require 'cgi'
+
 Jekyll::Hooks.register :site, :post_read do |site|
   cloud_name = ENV["CLOUDINARY_CLOUD_NAME"]
   if cloud_name && !cloud_name.empty?
@@ -93,14 +95,16 @@ module Jekyll
       end
 
       # Build HTML based on role
-      alt_attr = @role == 'decorative' ? '' : @alt
+      alt_attr = @role == 'decorative' ? '' : CGI.escapeHTML(@alt.to_s)
+      src_attr = CGI.escapeHTML(src.to_s)
+      loading_attr = CGI.escapeHTML(@loading.to_s)
 
       # Additional attributes
       extra_attrs = []
       extra_attrs << %(role="presentation") if @role == 'decorative'
       extra_attrs << %(itemprop="image") if @representative == 'true'
 
-      img_tag = %(<img src="#{src}" alt="#{alt_attr}" loading="#{@loading}" decoding="async") + extra_attrs.map { |a| " #{a}" }.join + ">"
+      img_tag = %(<img src="#{src_attr}" alt="#{alt_attr}" loading="#{loading_attr}" decoding="async") + extra_attrs.map { |a| " #{a}" }.join + ">"
 
       # Decorative: no figure, just img
       return img_tag if @role == 'decorative'

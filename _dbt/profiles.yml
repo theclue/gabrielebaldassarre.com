@@ -1,0 +1,13 @@
+# dbt profiles — local development with SQLite (same dialect as D1)
+# ===================================================================
+# CI uses dbt compile only (no DB connection needed).
+# For local dev: dbt run --profiles-dir _dbt
+
+gabriele_seo:
+  target: dev
+  outputs:
+    dev:
+      type: sqlite
+      threads: 1
+      schema: main
+      database: target/analytics.sqlite

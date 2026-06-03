@@ -175,7 +175,7 @@
     "name": {{ site.name | default: site.title | jsonify }},
     "url": {{ seo_url | jsonify }}
   },
-  "inLanguage": "it-IT",
+  "inLanguage": {{ page.locale | default: site.locale | default: "it-IT" | jsonify }},
   "isAccessibleForFree": true
   {%- if page.proficiency_level %},
   "proficiencyLevel": {{ page.proficiency_level | jsonify }}

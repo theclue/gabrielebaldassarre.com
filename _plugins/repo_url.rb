@@ -22,8 +22,17 @@ module Jekyll
         return text
       end
 
+      if @path.to_s.empty? || @path.to_s.include?('..')
+        Jekyll.logger.warn "repo_url:", "invalid path: #{@path.inspect} — rendering as plain text"
+        return text
+      end
+
       source_root = site.source
-      full_path = File.join(source_root, @path)
+      full_path = File.expand_path(File.join(source_root, @path))
+      unless full_path.start_with?(File.expand_path(source_root) + File::SEPARATOR)
+        Jekyll.logger.warn "repo_url:", "path escapes source root: #{@path} — rendering as plain text"
+        return text
+      end
 
       if File.exist?(full_path)
         url = "https://github.com/#{repo}/blob/main/#{@path}"

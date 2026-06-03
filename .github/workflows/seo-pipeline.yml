@@ -58,7 +58,7 @@ jobs:
             done
           else
             if git cat-file -e "HEAD~1" 2>/dev/null; then
-              git diff --name-only HEAD~1 HEAD -- '_posts/**.md' '_posts/**.Rmd' 2>/dev/null | while read post; do
+              git diff --name-only HEAD~1 HEAD 2>/dev/null | grep -E '^_posts/.*\.(md|Rmd)$' | while read post; do
                 [ -z "$post" ] && continue
                 normalize_url "$post" >> /tmp/indexnow_urls.txt
               done
@@ -137,7 +137,7 @@ jobs:
             done
           else
             if git cat-file -e "HEAD~1" 2>/dev/null; then
-              git diff --name-only HEAD~1 HEAD -- '_posts/**.md' '_posts/**.Rmd' 2>/dev/null | while read post; do
+              git diff --name-only HEAD~1 HEAD 2>/dev/null | grep -E '^_posts/.*\.(md|Rmd)$' | while read post; do
                 [ -z "$post" ] && continue
                 url_from_post "$post" >> /tmp/psi_urls.txt
               done
@@ -223,16 +223,42 @@ jobs:
           fi
 
       - name: Salva report PageSpeed 📥
-        if: steps.find.outputs.no_urls != 'true'
+        if: always() && steps.find.outputs.no_urls != 'true'
         uses: actions/upload-artifact@v4
         with:
           name: pagespeed-reports
           path: psi-reports/
           retention-days: 30
 
+      - name: Upload to R2 (pagespeed) ☁️
+        if: steps.find.outputs.no_urls != 'true'
+        env:
+          R2_ENDPOINT: ${{ secrets.CLOUDFLARE_R2_ENDPOINT }}
+          R2_KEY: ${{ secrets.CLOUDFLARE_R2_ACCESS_KEY_ID }}
+          R2_SECRET: ${{ secrets.CLOUDFLARE_R2_SECRET_ACCESS_KEY }}
+          R2_BUCKET: ${{ secrets.CLOUDFLARE_R2_SEO_BUCKET }}
+        run: |
+          pip install -q boto3
+          python3 -c "
+          import boto3, os, glob
+          from datetime import datetime, timezone
+          s3 = boto3.client('s3',
+            endpoint_url=os.environ['R2_ENDPOINT'],
+            aws_access_key_id=os.environ['R2_KEY'],
+            aws_secret_access_key=os.environ['R2_SECRET'])
+          bucket = os.environ.get('R2_BUCKET') or 'gabrielebaldassarre-seo'
+          now = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H%M%SZ')
+          for f in glob.glob('psi-reports/*.json'):
+              key = f'seo/pagespeed/{now}/{os.path.basename(f)}'
+              with open(f, 'rb') as fd:
+                  s3.upload_fileobj(fd, bucket, key)
+              print(f'  -> r2://{key}')
+          print('pagespeed reports uploaded to R2')
+          "
+
   hermes-seo:
     name: Hermes SEO Audit
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    if: false  # DISABLED: rate-limit causing pipeline stalls; debug TBD
     runs-on: ubuntu-latest
     steps:
       - name: Checkout 🛎️
@@ -268,7 +294,7 @@ jobs:
             done
           else
             if git cat-file -e "HEAD~1" 2>/dev/null; then
-              git diff --name-only HEAD~1 HEAD -- '_posts/**.md' '_posts/**.Rmd' 2>/dev/null | while read post; do
+              git diff --name-only HEAD~1 HEAD 2>/dev/null | grep -E '^_posts/.*\.(md|Rmd)$' | while read post; do
                 [ -z "$post" ] && continue
                 url_from_post "$post" >> /tmp/hermes_urls.txt
               done
@@ -388,7 +414,7 @@ jobs:
             done
           else
             if git cat-file -e "HEAD~1" 2>/dev/null; then
-              git diff --name-only HEAD~1 HEAD -- '_posts/**.md' '_posts/**.Rmd' 2>/dev/null | while read post; do
+              git diff --name-only HEAD~1 HEAD 2>/dev/null | grep -E '^_posts/.*\.(md|Rmd)$' | while read post; do
                 [ -z "$post" ] && continue
                 full_url "$post" >> /tmp/lh_urls.txt
               done
@@ -406,6 +432,23 @@ jobs:
       - name: Nessun URL da analizzare con Lighthouse ℹ️
         if: steps.find.outputs.no_urls == 'true'
         run: echo "Nessun URL da analizzare — tutti i post sono invariati."
+
+      - name: Setup Node.js 🟩
+        if: steps.find.outputs.no_urls != 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Cache npm global (@lhci/cli) 📦
+        if: steps.find.outputs.no_urls != 'true'
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.npm
+            ~/.cache/Cypress
+          key: ${{ runner.os }}-lhci-cli-v0.13-node20
+          restore-keys: |
+            ${{ runner.os }}-lhci-cli-
 
       - name: Lighthouse CI 🟢
         if: steps.find.outputs.no_urls != 'true'
@@ -480,7 +523,7 @@ jobs:
           echo "✅ Lighthouse CI completato"
 
       - name: Salva report Lighthouse 📥
-        if: steps.find.outputs.no_urls != 'true'
+        if: always() && steps.find.outputs.no_urls != 'true'
         uses: actions/upload-artifact@v4
         with:
           name: lighthouse-reports
@@ -489,3 +532,60 @@ jobs:
             .lighthouseci/*.html
             .lighthouseci/*.json
           retention-days: 30
+
+      - name: Upload to R2 (lighthouse) ☁️
+        if: steps.find.outputs.no_urls != 'true'
+        env:
+          R2_ENDPOINT: ${{ secrets.CLOUDFLARE_R2_ENDPOINT }}
+          R2_KEY: ${{ secrets.CLOUDFLARE_R2_ACCESS_KEY_ID }}
+          R2_SECRET: ${{ secrets.CLOUDFLARE_R2_SECRET_ACCESS_KEY }}
+          R2_BUCKET: ${{ secrets.CLOUDFLARE_R2_SEO_BUCKET }}
+        run: |
+          pip install -q boto3
+          python3 -c "
+          import boto3, os, glob
+          from datetime import datetime, timezone
+          s3 = boto3.client('s3',
+            endpoint_url=os.environ['R2_ENDPOINT'],
+            aws_access_key_id=os.environ['R2_KEY'],
+            aws_secret_access_key=os.environ['R2_SECRET'])
+          bucket = os.environ.get('R2_BUCKET') or 'gabrielebaldassarre-seo'
+          now = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H%M%SZ')
+          for f in glob.glob('lighthouse-results/*.json') + glob.glob('.lighthouseci/*.json'):
+              key = f'seo/lighthouse/{now}/{os.path.basename(f)}'
+              with open(f, 'rb') as fd:
+                  s3.upload_fileobj(fd, bucket, key)
+              print(f'  -> r2://{key}')
+          print('lighthouse reports uploaded to R2')
+          "
+
+  post-history:
+    name: Post change tracking (git diff)
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          fetch-depth: 2
+
+      - name: Setup Python 🐍
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+          cache-dependency-path: requirements-seo.txt
+
+      - name: Install SEO dependencies 📦
+        run: pip install -r requirements-seo.txt
+
+      - name: Compute post diffs and upload to R2 + D1 📜
+        env:
+          CLOUDFLARE_R2_ENDPOINT: ${{ secrets.CLOUDFLARE_R2_ENDPOINT }}
+          CLOUDFLARE_R2_ACCESS_KEY_ID: ${{ secrets.CLOUDFLARE_R2_ACCESS_KEY_ID }}
+          CLOUDFLARE_R2_SECRET_ACCESS_KEY: ${{ secrets.CLOUDFLARE_R2_SECRET_ACCESS_KEY }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_D1_API_TOKEN: ${{ secrets.CLOUDFLARE_D1_API_TOKEN }}
+          CLOUDFLARE_D1_DATABASE_ID: ${{ secrets.CLOUDFLARE_D1_DATABASE_ID }}
+        run: python3 _scripts/seo/post_history.py

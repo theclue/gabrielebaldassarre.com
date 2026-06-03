@@ -9,6 +9,14 @@
       "path": "_posts"
     },
     {
+      "name": "✏️ Drafts",
+      "path": "_drafts"
+    },
+    {
+      "name": "📔 R Workbooks",
+      "path": "R"
+    },
+    {
       "name": "🧠 Data & Ontology",
       "path": "_data"
     },

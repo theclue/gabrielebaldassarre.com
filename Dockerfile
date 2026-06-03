@@ -29,23 +29,12 @@ RUN apt-get update && \
     ruby-json ruby-bigdecimal ruby-io-console ruby-dev \
     tzdata pkg-config libz-dev  \
     libffi-dev libxml2-dev libxslt-dev \
-    libc-dev zlib1g-dev liblzma-dev patch
-
-# clean up
-RUN apt-get clean && \
-    apt-get autoremove && \
-    rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*  /tmp/*
-
-RUN npm config set registry https://registry.npmjs.org/ && \
-    npm install -g purgecss
-
-# clean up
-RUN apt-get clean && \
-    apt-get autoremove && \
-    rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*  /tmp/*
-
-RUN npm config set registry https://registry.npmjs.org/ && \
-    npm install -g purgecss @mermaid-js/mermaid-cli
+    libc-dev zlib1g-dev liblzma-dev patch && \
+    npm config set registry https://registry.npmjs.org/ && \
+    npm install -g purgecss @mermaid-js/mermaid-cli && \
+    apt-get clean && \
+    apt-get autoremove -y && \
+    rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/* /tmp/*
 
 # set the locale
 RUN sed -i "/${LOCALE}.UTF-8/s/^# //g" /etc/locale.gen && \

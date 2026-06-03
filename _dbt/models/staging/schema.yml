@@ -1,0 +1,36 @@
+version: 2
+
+models:
+  - name: stg_seo_snapshots
+    description: Deduplicated SEO snapshots with typed columns
+    columns:
+      - name: id
+        tests:
+          - unique
+          - not_null
+      - name: url
+        tests:
+          - not_null
+      - name: metric_value
+        tests:
+          - not_null
+      - name: source
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['pagespeed', 'lighthouse', 'hermes']
+
+  - name: stg_post_history
+    description: Enriched post change history with derived metrics
+    columns:
+      - name: post_urn
+        tests:
+          - not_null
+      - name: change_type
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['created', 'modified', 'deleted']
+      - name: change_magnitude
+        tests:
+          - not_null

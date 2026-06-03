@@ -36,6 +36,7 @@ url                      : "https://gabrielebaldassarre.com"
 baseurl                  : "/"
 repository               : "theclue/gabrielebaldassarre.com"
 teaser                   : "/assets/images/default-post-teaser.png"
+og_image                 : "/assets/images/default-post-teaser.png"
 words_per_minute         : 150
 atom_feed:
   hide                   : false
@@ -103,27 +104,10 @@ exclude:
   - assets/js/vendor
   - Capfile
   - CHANGELOG
-  - config
-  - Gemfile
-  - Gruntfile.js
-  - gulpfile.js
-  - LICENSE
-  - log
-  - node_modules
-  - package.json
-  - package-lock.json
-  - Rakefile
-  - README
-  - tmp
-  - /docs # ignore Minimal Mistakes /docs
-  - /test # ignore Minimal Mistakes /test
-  - R
-  - ".rvmrc"
-  - ".rbenv-version"
-  - "README.md"
-  - ".gitlab-ci.yml"
-  - ".gitlab-ci.yml-dist"
-  - "Dockerfile"
+  - Dockerfile
+  - Dockerfile.seo
+  - requirements-seo.txt
+  - seo-schema.sql
   - "default.conf"
   - helm
   - .Rproj.user
@@ -131,6 +115,16 @@ exclude:
   - Makefile
   - bin
   - "*.Rmd"
+  # SEO monitoring pipeline — fuori dalla sfera Jekyll, evita autoreload
+  # del dev server quando si modificano script Python / modelli dbt /
+  # config monitoring / artefatti CI.
+  - _scripts
+  - _dbt
+  - _seo-monitor.yml
+  - alerts.json
+  - lighthouse-results.json
+  - .lighthouseci
+  - .github
 
 keep_files:
   - .git
@@ -195,19 +189,6 @@ plugins:
 toc:
   min_level: 2
   max_level: 4
-
-# mimic GitHub Pages with --safe
-whitelist:
-  - jekyll-paginate
-  - jekyll-gist
-  - jemoji
-  - jekyll-redirect-from
-  - liquid_pluralize
-  - liquid_reading_time
-  - jekyll-feed
-  - jekyll-include-cache
-  - jekyll-toc
-
 
 # HTML Compression
 # - http://jch.penibelst.de/

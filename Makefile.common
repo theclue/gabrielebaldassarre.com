@@ -1,9 +1,10 @@
-.PHONY: help build build-knitr knitr dev site clean
+.PHONY: help build build-knitr build-seo knitr dev site clean seo
 .DEFAULT_GOAL := help
 
 ROOT_DIR := $(abspath $(patsubst %/,%,$(dir $(abspath $(firstword $(MAKEFILE_LIST))))))
 JEKYLL_VERSION := 4.4.1
 KNITR_IMAGE := gabrielebaldassarre/knitr:latest
+SEO_IMAGE := gabrielebaldassarre/seo:latest
 LOCALE := it_IT
 LOCALE_ISO := it
 LOCALE_LANG := it-IT
@@ -16,6 +17,9 @@ build:
 
 build-knitr:
 	@docker build --tag $(KNITR_IMAGE) containers/knitr/
+
+build-seo:
+	@docker build --tag $(SEO_IMAGE) -f Dockerfile.seo .
 
 _site: build
 	@docker run --rm -v $(ROOT_DIR):/srv/jekyll \
@@ -41,3 +45,8 @@ dev: build
 		-e LANGUAGE=$(LOCALE):$(LOCALE_ISO) \
 		-e LC_ALL=$(LOCALE).UTF-8 \
 		-it gabrielebaldassarre/blog:$(JEKYLL_VERSION)
+
+seo: build-seo
+	@docker run --rm -v $(ROOT_DIR):/workspace \
+		--env-file .env \
+		$(SEO_IMAGE) $(SEO_ARGS)

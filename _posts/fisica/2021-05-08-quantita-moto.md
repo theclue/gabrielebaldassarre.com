@@ -20,7 +20,7 @@ Dalla meccanica classica, sappiamo che un corpo in movimento imprime una forza s
 
 Ebbene, questo fenomeno è ben espresso dalla quantità di moto che, in effetti, per la seconda legge della dinamica, può essere espressa anche in $$ [N][s] $$ e quindi rappresentare la forza trasferita per unità di tempo.
 
-Ma qual'è questa forza impressa?
+Ma qual è questa forza impressa?
 
 Per rispondere a questa domanda, supponiamo che un corpo di massa $$ m $$ e avente velocità iniziale $$ v_i $$ subisca una forza per un intervallo di tempo _t_ durante il quale ha un'accelerazione che lo porta alla velocità finale $$ v_f $$ (ignoriamo tutti gli effetti di attrito sul sistema): Abbiamo quindi le quantità di moto iniziale
 
@@ -74,4 +74,4 @@ $$ \vec{F} = \frac{d\vec{p}}{dt} $$
 
 Integrando ambo i membri nell'intervallo di azione della forza abbiamo l'impulso:
 
-$$ \Delta p = \int_{t_1}^{t^2} Fdt $$
+$$ \Delta p = \int_{t_1}^{t_2} Fdt $$

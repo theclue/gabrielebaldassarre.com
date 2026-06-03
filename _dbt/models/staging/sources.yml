@@ -1,0 +1,103 @@
+version: 2
+
+sources:
+  - name: raw
+    description: Raw SEO data loaded into D1 by Python ETL scripts
+    tables:
+      - name: seo_snapshots
+        description: PageSpeed + Lighthouse metrics per URL
+        columns:
+          - name: id
+            tests:
+              - unique
+              - not_null
+          - name: post_urn
+            description: FK to posts dimension
+          - name: url
+            tests:
+              - not_null
+          - name: source
+            tests:
+              - not_null
+              - accepted_values:
+                  values: ['pagespeed', 'lighthouse', 'hermes']
+          - name: category
+            tests:
+              - not_null
+          - name: metric_name
+            tests:
+              - not_null
+          - name: metric_value
+            tests:
+              - not_null
+        freshness:
+          warn_after: {count: 7, period: day}
+        loaded_at_field: checked_at
+
+      - name: post_history
+        description: Git diff log for each post change
+        columns:
+          - name: id
+            tests:
+              - unique
+              - not_null
+          - name: post_urn
+            tests:
+              - not_null
+              - relationships:
+                  to: source('raw', 'posts')
+                  field: urn
+          - name: change_type
+            tests:
+              - not_null
+              - accepted_values:
+                  values: ['created', 'modified', 'deleted']
+        freshness:
+          warn_after: {count: 30, period: day}
+        loaded_at_field: changed_at
+
+      - name: keyword_trends
+        description: Google Trends data per keyword
+        columns:
+          - name: keyword
+            tests:
+              - not_null
+        freshness:
+          warn_after: {count: 14, period: day}
+        loaded_at_field: fetched_at
+
+      - name: search_console_data
+        description: Google Search Console metrics, split by (query, page, data_date, device, country)
+        columns:
+          - name: data_date
+            tests:
+              - not_null
+          - name: clicks
+            tests:
+              - not_null
+          - name: impressions
+            tests:
+              - not_null
+        freshness:
+          warn_after: {count: 14, period: day}
+        loaded_at_field: fetched_at
+
+      - name: posts
+        description: Post dimension table
+        columns:
+          - name: urn
+            tests:
+              - unique
+              - not_null
+          - name: title
+            tests:
+              - not_null
+          - name: category
+            tests:
+              - not_null
+
+      - name: alerts
+        description: SEO alert history
+        freshness:
+          warn_after: {count: 30, period: day}
+        loaded_at_field: fired_at

@@ -1,0 +1,58 @@
+name: SEO Monitor (Phase 2)
+
+on:
+  schedule:
+    - cron: '0 8 * * 1'   # Every Monday 8:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: seo-monitor
+  cancel-in-progress: false
+
+jobs:
+  monitor:
+    name: SEO Monitor — Weekly
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v6
+
+      - name: Setup Python 🐍
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install dependencies 📦
+        run: pip install -r requirements-seo.txt
+
+      - name: Run SEO Monitor 🔍
+        env:
+          CLOUDFLARE_R2_ENDPOINT: ${{ secrets.CLOUDFLARE_R2_ENDPOINT }}
+          CLOUDFLARE_R2_ACCESS_KEY_ID: ${{ secrets.CLOUDFLARE_R2_ACCESS_KEY_ID }}
+          CLOUDFLARE_R2_SECRET_ACCESS_KEY: ${{ secrets.CLOUDFLARE_R2_SECRET_ACCESS_KEY }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_D1_API_TOKEN: ${{ secrets.CLOUDFLARE_D1_API_TOKEN }}
+          CLOUDFLARE_D1_DATABASE_ID: ${{ secrets.CLOUDFLARE_D1_DATABASE_ID }}
+          SERPAPI_API_KEY: ${{ secrets.SERPAPI_API_KEY }}
+          GSC_SERVICE_ACCOUNT_B64: ${{ secrets.GSC_SERVICE_ACCOUNT_B64 }}
+        run: python3 _scripts/seo/monitor.py
+
+      - name: Upload alerts artifact 🚨
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: seo-alerts
+          path: alerts.json
+          retention-days: 90
+
+      - name: Upload monthly report artifact 📊
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: seo-monthly-report
+          path: seo-monthly-report.md
+          retention-days: 90

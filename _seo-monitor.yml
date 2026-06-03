@@ -1,0 +1,26 @@
+# SEO Monitor configuration — read by _scripts/seo/monitor.py
+# Secrets (API keys, tokens) live in GitHub Secrets, not here.
+
+thresholds:
+  performance_score: [score, 50, lt]
+  accessibility_score: [score, 80, lt]
+  seo_score: [score, 70, lt]
+  lcp_mobile: [lcp, 4000, gt]
+  cls: [cls, 0.25, gt]
+
+trends:
+  geo: "IT"
+  lookback: "today 3-m"
+
+search_console:
+  # Idempotenza: il lookback è una *finestra di sicurezza*, non lo stride
+  # del cron. Deve essere sufficiente ad assorbire run mancati o ritardi
+  # GSC (latenza dati ~2-3 giorni). Ogni esecuzione riemette gli stessi
+  # giorni: il dedup è garantito altrove
+  #   - R2: una chiave per giorno (seo/search-console/<YYYY-MM-DD>.json),
+  #         re-run = overwrite dello stesso oggetto, niente accumulo
+  #   - D1: UNIQUE (query, page, data_date, device, country) + INSERT OR
+  #         IGNORE → righe duplicate scartate a livello DB
+  # Alza `lookback_days` se la pipeline può saltare più di una settimana.
+  lookback_days: 14
+  query_limit: 500

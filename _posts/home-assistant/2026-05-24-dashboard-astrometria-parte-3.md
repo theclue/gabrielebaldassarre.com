@@ -123,7 +123,7 @@ Esiste anche una chiave `DEMO_KEY` che funziona senza registrazione, ma è sogge
 
 ### Proteggere la chiave: secrets.yaml
 
-Approfito di questo semplice caso per spendere due parole su un argomento essenziale per chi sviluppa in Home Assistant, ovvero le cosiddette **secrets**. Analogamente a quelle di una moltitudine di altri sistemi software, e Home Assistant {% xlink "https://www.home-assistant.io/docs/configuration/secrets/" "non fa eccezione" role="deepening" context="extends-topic" target="external-authoritative" %}, sono piccole porzioni di dato, tipicamente stringa, che vanno interpretati dal sistema software come _confidenziali_. In alcuni software sono gestiti da _sidecar_ di cifratura o di protezione particolari, mentre in altre circostanze, come Home Assistant, appunto, sono semplicemente gestite con maggiore cautela. Le chiavi API sono un tipico esempio di dati tipici da gestire con le secrets:  non vanno mai scritte direttamente nei file di configurazione, perché `configuration.yaml` e i file correlati possono finire accidentalmente in un repository git o in un backup condiviso o in file di log. Ma, d'altro canto, nemmeno sono chiavi _così_ importanti da richiedere {% xlink "https://gist.github.com/sondalex/70d279d6fd21af6814e119b8e83392e0" "keyring"%}, {% xlink "https://oneuptime.com/blog/post/2026-02-23-how-to-use-terraform-with-vault-for-secret-management/view" "Vault" %} e altre soluzioni sofisticate. La soluzione di compromesso è semplicemente quella di riportarla nel file `secrets.yaml`:
+Approfitto di questo semplice caso per spendere due parole su un argomento essenziale per chi sviluppa in Home Assistant, ovvero le cosiddette **secrets**. Analogamente a quelle di una moltitudine di altri sistemi software — e Home Assistant {% xlink "https://www.home-assistant.io/docs/configuration/secrets/" "non fa eccezione" role="deepening" context="extends-topic" target="external-authoritative" %} — sono piccole porzioni di dato, tipicamente stringa, che vanno interpretate dal sistema software come _confidenziali_. In alcuni software sono gestite da _sidecar_ di cifratura o di protezione particolari, mentre in altre circostanze, come Home Assistant, appunto, sono semplicemente gestite con maggiore cautela. Le chiavi API sono un tipico esempio di dati da gestire con le secrets:  non vanno mai scritte direttamente nei file di configurazione, perché `configuration.yaml` e i file correlati possono finire accidentalmente in un repository git o in un backup condiviso o in file di log. Ma, d'altro canto, nemmeno sono chiavi _così_ importanti da richiedere {% xlink "https://gist.github.com/sondalex/70d279d6fd21af6814e119b8e83392e0" "keyring"%}, {% xlink "https://oneuptime.com/blog/post/2026-02-23-how-to-use-terraform-with-vault-for-secret-management/view" "Vault" %} e altre soluzioni sofisticate. La soluzione di compromesso è semplicemente quella di riportarla nel file `secrets.yaml`:
 
 ```yaml
 # secrets.yaml
@@ -136,7 +136,7 @@ e nella configurazione si usa il riferimento con questa sintassi specifica:
 resource: "https://api.nasa.gov/planetary/apod?api_key=!secret nasa_api_key"
 ```
 
-Chiaramente `secrets.yaml` non va mai committato su git — aggiungilo al `.gitignore` se usi il controllo versione per la tua configurazione HA. Ci tengo, però, a precisare che la protezione delle secrets in Home Assistant, non va molto oltre quanto appena spiegato. Non è pensato, ripeto che non si sa mai, per dati _veramente, veramente_ confidenziali e preziosi. 
+Chiaramente `secrets.yaml` non va mai committato su git — aggiungilo al `.gitignore` se usi il controllo versione per la tua configurazione HA. Ci tengo, però, a precisare che la protezione delle secrets in Home Assistant, non va molto oltre quanto appena spiegato. Non è pensata, ripeto che non si sa mai, per dati _veramente, veramente_ confidenziali e preziosi. 
 
 ### Il REST sensor
 
@@ -153,7 +153,7 @@ La risposta dell'API APOD ha questa struttura:
 }
 ```
 
-Non ha senso scomodare un `multiscape` per un parsing così semplice, piuttosto stavolta costruiamo  un semplice sensore REST per la risposta APOD:
+Non ha senso scomodare un `multiscrape` per un parsing così semplice, piuttosto stavolta costruiamo  un semplice sensore REST per la risposta APOD:
 
 {% raw %}
 ```yaml
@@ -188,7 +188,7 @@ In *Impostazioni → Dispositivi e servizi → Generic Camera*, nel campo **Stil
 
 Questo crea `camera.apod_nasa_gov` (il nome, ovviamente, è libero). La camera si aggiorna automaticamente ogni volta che il sensore REST scarica un nuovo URL.
 
-{% cloudinary /assets/images/home-assistant-generic-camera.png alt="Pannello di configurazione di Generic Camera" caption="Configuriamo la fotocamera generica come tipo a immagine fissa, passando il template del sensore con l'URL diretto della foto" loading="lazy" role="screenshot", context="result" %}
+{% cloudinary /assets/images/home-assistant-generic-camera.png alt="Pannello di configurazione di Generic Camera" caption="Configuriamo la fotocamera generica come tipo a immagine fissa, passando il template del sensore con l'URL diretto della foto" loading="lazy" role="screenshot" context="result" %}
 
 ### La card nella dashboard
 
@@ -208,9 +208,7 @@ tap_action:
 ```
 {% endraw %}
 
-![alt text](image.png)
-
-{% cloudinary /assets/images/home-assistant-apod.png alt="Astronomical picture of the day" caption="La scheda finita, con l'immagine e la descrizione subito sotto" loading="lazy" role="screenshot", context="result" %}
+{% cloudinary /assets/images/home-assistant-apod.png alt="Astronomical picture of the day" caption="La scheda finita, con l'immagine e la descrizione subito sotto" loading="lazy" role="screenshot" context="result" %}
 
 Il `tap_action` punta all'entità della **camera**, non al sensore. Questo è il dettaglio chiave: se si lascia il comportamento predefinito (more-info del sensore), il tap apre il pannello del sensore con i valori degli attributi — utile, ma non spettacolare. Puntando la `tap_action` alla camera, il tap apre il modale della camera con l'immagine a tutta larghezza, che è quello che vogliamo.
 
@@ -220,7 +218,7 @@ Come dite? Quando questo accade recuperare il video da YouTube, encodarlo con ff
 
 ### La spiegazione in Markdown
 
-Torniamo alla realizzazione del bloggo APOD. Sotto l'immagine aggiungo una card Markdown che mostra la spiegazione dell'APOD, recuperata dall'attributo del sensore:
+Torniamo alla realizzazione del blocco APOD. Sotto l'immagine aggiungo una card Markdown che mostra la spiegazione dell'APOD, recuperata dall'attributo del sensore:
 
 {% raw %}
 ```yaml
@@ -245,7 +243,7 @@ La Stazione Spaziale Internazionale orbita la Terra ogni 90 minuti a circa 400 k
 
 ### La fonte dati: wheretheiss.at
 
-L'API {% xlink "https://wheretheiss.at" "Where the ISS At?" role="tool" context="enables-step" target="external-authoritative" %} è pubblica, gratuita e non richiede autenticazione. Viene interrogato passando a parametro il {% xlink "https://en.wikipedia.org/wiki/Satellite_Catalog_Number" "NORAD ID" role="definition" context="provides-context" target="external-authoritative" %} per i corpi in orbita. Il satellite 25544 è il NORAD ID della ISS:
+L'API {% xlink "https://wheretheiss.at" "Where the ISS At?" role="tool" context="enables-step" target="external-authoritative" %} è pubblica, gratuita e non richiede autenticazione. Viene interrogata passando come parametro il {% xlink "https://en.wikipedia.org/wiki/Satellite_Catalog_Number" "NORAD ID" role="definition" context="provides-context" target="external-authoritative" %} per i corpi in orbita. Il satellite 25544 è il NORAD ID della ISS:
 
 ```
 https://api.wheretheiss.at/v1/satellites/25544
@@ -301,7 +299,7 @@ multiscrape:
 ```
 {% endraw %}
 
-{% cloudinary /assets/images/home-assistant-iis.png alt="Badge IIS, con velocità e altitudine" caption="Ho deciso di creare due piccole pills, o badge, nella parte superiore del dashboard con le informazioni di velocità istantanea e altitudine della Stazione Spaziale Internazionale. Non credevo dovessero occupare più spazio di così" loading="lazy" role="screenshot", context="result" %}
+{% cloudinary /assets/images/home-assistant-iis.png alt="Badge IIS, con velocità e altitudine" caption="Ho deciso di creare due piccole pills, o badge, nella parte superiore del dashboard con le informazioni di velocità istantanea e altitudine della Stazione Spaziale Internazionale. Non credevo dovessero occupare più spazio di così" loading="lazy" role="screenshot" context="result" %}
 
 Alcune note:
 
@@ -323,7 +321,7 @@ I lanci spaziali sono diventati eventi frequenti: SpaceX, Rocket Lab, ULA e altr
 https://fdo.rocketlaunch.live/json/launches/next/2
 ```
 
-La struttura è un oggetto con un campo `result` che contiene un array di lanci. Per ogni lancio sono disponibili dozzine di campi: provider, veicolo, rampa di lancio, destinazione, missioni, finestra di lancio, link, tag. La risposta non è facilmente scomponibile: ho dovuto elencare tutti i campi. Due volte. Multiscape, stavolta, è stato praticamente indispensabile:
+La struttura è un oggetto con un campo `result` che contiene un array di lanci. Per ogni lancio sono disponibili dozzine di campi: provider, veicolo, rampa di lancio, destinazione, missioni, finestra di lancio, link, tag. La risposta non è facilmente scomponibile: ho dovuto elencare tutti i campi. Due volte. Multiscrape, stavolta, è stato praticamente indispensabile:
 
 {% raw %}
 ```yaml
@@ -406,7 +404,7 @@ multiscrape:
 ```
 {% endraw %}
 
-{% cloudinary /assets/images/home-assistant-lanci.png alt="I prossimi due lanci spaziali" caption="Il box con il bollettino dei lanci è semplice, ma efficace" loading="lazy" role="screenshot", context="result" %}
+{% cloudinary /assets/images/home-assistant-lanci.png alt="I prossimi due lanci spaziali" caption="Il box con il bollettino dei lanci è semplice, ma efficace" loading="lazy" role="screenshot" context="result" %}
 
 Alcuni dettagli che meritano spiegazione:
 

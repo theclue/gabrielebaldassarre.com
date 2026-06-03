@@ -21,7 +21,7 @@
 
   <ol class="series-index__list">
     {%- for spost in page.series.posts -%}
-    <li{% if spost.url == page.url %} class="series-index__current" aria-current="true"{% endif %}>
+    <li{% if spost.url == page.url %} class="series-index__current" aria-current="page"{% endif %}>
       <div class="post-date">
         {%- if spost.url == page.url -%}
           <strong>{{ spost.title | markdownify | strip_html }}</strong>
