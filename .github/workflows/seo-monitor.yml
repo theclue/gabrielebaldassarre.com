@@ -45,7 +45,7 @@ jobs:
 
       - name: Upload alerts artifact 🚨
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: seo-alerts
           path: alerts.json
@@ -53,7 +53,7 @@ jobs:
 
       - name: Upload monthly report artifact 📊
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: seo-monthly-report
           path: seo-monthly-report.md
