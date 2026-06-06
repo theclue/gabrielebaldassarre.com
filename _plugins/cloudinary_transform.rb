@@ -81,6 +81,17 @@ module Jekyll
         parts << "c_fill,g_auto,w_#{width},h_#{height},f_auto,q_auto"
       end
 
+      # Overlay image (left side, scaled to fill height with bottom air)
+      overlay_path = header['overlay']
+      if overlay_path
+        overlay_full_url = overlay_path.start_with?('http') ? overlay_path : "#{site.config['url']}#{overlay_path}"
+        overlay_h = (height * 0.72).to_i
+        overlay_x = (width * 0.03).to_i
+        overlay_y = (height * 0.06).to_i
+        parts << "l_fetch:#{b64_encode(overlay_full_url)},c_fit,h_#{overlay_h},f_auto,q_auto"
+        parts << "fl_layer_apply,g_south_west,x_#{overlay_x},y_#{overlay_y}"
+      end
+
       # Logo overlay: raw fetch + transforms inline, placement in fl_layer_apply
       logo_ref = header['logo']
       logo_path = resolve_logo(logo_ref, site)
@@ -127,6 +138,17 @@ module Jekyll
         bar_url = "#{site.config['url']}/assets/images/1x1-black.png"
         parts << "l_fetch:#{b64_encode(bar_url)},c_scale,w_#{width},h_120,o_80"
         parts << 'fl_layer_apply,g_south'
+      end
+
+      # Overlay image (left side, scaled to fill height with bottom air)
+      overlay_path = config_h['overlay']
+      if overlay_path
+        overlay_full_url = overlay_path.start_with?('http') ? overlay_path : "#{site.config['url']}#{overlay_path}"
+        overlay_h = (height * 0.68).to_i
+        overlay_x = (width * 0.03).to_i
+        overlay_y = (height * 0.08).to_i
+        parts << "l_fetch:#{b64_encode(overlay_full_url)},c_fit,h_#{overlay_h},f_auto,q_auto"
+        parts << "fl_layer_apply,g_south_west,x_#{overlay_x},y_#{overlay_y}"
       end
 
       # Logo overlay: bigger (w_70), pushes top edge up, more room for 2-line caption

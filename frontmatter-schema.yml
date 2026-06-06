@@ -38,6 +38,7 @@ header:
   # Transform & overlay parameters (applicati a master o overlay_image)
   logo:             boolean|string?              # true = site_logo, "custom.png" = logo custom, false/nil = nessuno
   caption:          string?                      # Testo alt per hero (solo attributo alt="")
+  overlay:          string?                      # Overlay foreground image (es. assets/overlays/<slug>.png). Collocato a sinistra, sopra il letterbox, mai sopra caption. Usato per modelli 3D o elementi compositivi.
   transform:        "keystone"|"cinematic"?      # Template di trasformazione visiva
   intensity:        "low"|"medium"|"high"?       # Intensità della trasformazione (default: medium)
 
@@ -53,6 +54,7 @@ broadcast:
     logo:           boolean|string?               # Logo overlay per Mastodon
     caption:        boolean|string?               # true = page.title, stringa = testo custom
     color:          string?                       # Colore testo (white, black, ...)
+    overlay:        string?                       # Overlay foreground image (es. assets/overlays/<slug>.png)
     transform:      "keystone"|"cinematic"?       # Template di trasformazione
     intensity:      "low"|"medium"|"high"?        # Intensità
 
@@ -61,6 +63,7 @@ broadcast:
     logo:           boolean|string?               # Logo overlay per LinkedIn
     caption:        boolean|string?               # true = page.title, stringa = testo custom
     color:          string?                       # Colore testo
+    overlay:        string?                       # Overlay foreground image (es. assets/overlays/<slug>.png)
     transform:      "keystone"|"cinematic"?       # Template di trasformazione
     intensity:      "low"|"medium"|"high"?        # Intensità
 
