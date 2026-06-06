@@ -1,69 +1,170 @@
 ---
 layout: post
-title: "I numeri non mentono (e io nemmeno): SEO monitoring per blogger fai-da-te"
+title: "SEO per squattrinati: il monitoraggio"
 category: DevOps
-excerpt: "Seconda parte della pipeline SEO automatica: un data lake su Cloudflare R2 e D1, Google Trends e Search Console, dbt per le trasformazioni e un report mensile automatizzato. Tutto open source, tutto in GitHub Actions, tutto gratis."
+excerpt: "Seconda parte della pipeline SEO con strumenti gratuiti e automatici: un data lake su Cloudflare R2 e D1, Google Trends e Search Console, dbt per l'ETL e un report mensile automatizzato, il tutto eseguito tramite GitHub Actions. Gratis."
+master: /assets/images/posts/.png
 header:
   overlay_filter: 0.5
-tags: [SEO, Jekyll, GitHub Actions, Cloudflare, dbt, Google Trends, Search Console, data engineering]
-intended_audience: practitioner
-proficiency_level: intermediate
+tags: [SEO, Jekyll, GitHub Actions, Cloudflare, dbt, Google Trends, Search Console, sqlite, datawarehousing]
+series:
+  id: "seo-automatico"
+  title: "SEO automatico"
+  part: 2
+  total_parts: 4
 broadcast:
   channels: [linkedin, mastodon]
-  sent: false
+  linkedin_image:
+    logo: true
+    caption: ""
+    color: white
+    transform: keystone
+    intensity: low
+  mastodon_image:
+    logo: true
+    caption: ""
+    color: white
+    transform: keystone
+    intensity: low
 ---
 
-Nella {% post_link /devops/seo-automatico-jekyll-parte-1/ "prima parte" role="prerequisite" context="provides-context" target="internal" %} abbiamo costruito il **blocco 1** della pipeline SEO: il supporto all'autorialità. A ogni deploy, Lighthouse, PageSpeed Insights e IndexNow analizzano i post nuovi o modificati e mi dicono se sto facendo danni. Funziona. Ma è un'istantanea. Un controllo puntuale, una tantum.
+Nella {% post_link /devops/seo-automatico-jekyll/ "prima parte" role="prerequisite" context="provides-context" target="internal" %} abbiamo costruito il **blocco 1** della pipeline SEO: il supporto all'autorialità. A ogni deploy, un workflow Github andava ad analizzare in ottica SEO i post nuovi o modificati tramite (individuati mediante `git diff`) e per ognuno di essi interrogava Lighthouse, PageSpeed Insights e IndexNow, segnalando potenziali problemi e fornendo indicazioni. Funziona. Ma è un'istantanea. Un controllo puntuale, una tantum. Un supporto alla fase di autorialità, appunto.
 
-Quello che manca è la **dimensione temporale**.
+Quello che mancava era la *dinamica* del sistema, la sua **dimensione temporale**.
 
-Il SEO non è un esame che passi una volta e sei a posto. È un ecosistema: i contenuti invecchiano, le keyword cambiano trend, Google aggiorna l'algoritmo, i crawler AI iniziano a citarti (o smettono). Senza monitoraggio continuo, non hai idea di _cosa_ stia succedendo al tuo blog. È come guidare senza cruscotto: sai che ti stai muovendo, ma non sai a che velocità, con quanta benzina, o se la temperatura del motore è nella norma.
+Il SEO non è un esame che passi una volta e sei a posto. È un ecosistema vitale: i contenuti invecchiano, le keyword cambiano trend, Google aggiorna l'algoritmo, i crawler AI iniziano a citarti (o smettono...ci torneremo). In generale, come ho detto altrove, evito che l'ansia da prestazione mi rovini il piacere della scrittura. Tuttavia, è innegabile, visitatori sul blog e commenti agli articoli sono la benzina motivazionale di chi ama la divulgazione e senza monitoraggio, senza la più vaga idea  di _cosa_ stia dentro e fuori il tuo blog, finisci presto in riserva.
 
-Così è nato il **blocco 2**: il monitoraggio.
+Così è nato il **blocco 2**: il monitoraggio SEO, appunto. In _free tier_, tanto per cambiare.
 
-E siccome sono un ingegnere e non un social media manager, l'ho costruito come si costruisce un sistema di monitoring che si rispetti: data lake, ETL, modelli dimensionali, alert e report. Tutto open source. Tutto su GitHub Actions. Tutto sfruttando i generosi free tier di Cloudflare.
-
----
+--
 
 ## Architettura: da zero a data lake in tre mosse
 
-Il blocco 2 non è collegato al blocco 1. Non c'è un trigger "a valle del deploy". È un **workflow indipendente, schedulato ogni lunedì alle 8:00 UTC**, che:
+Il blocco 2 non è collegato al blocco 1, che scattava andando a fare le pulci ai post nuovi e modificati. È un **workflow indipendente** di buon, vecchio ETL, schedulato ogni lunedì alle 8:00 del mattino che:
 
 1. **Raccoglie** dati dal mondo esterno (Google Trends, Search Console)
 2. **Consolida** i dati già prodotti dal blocco 1 (PageSpeed, Lighthouse) in un archivio permanente
-3. **Trasforma** i dati grezzi in metriche queryable
+3. **Trasforma** i dati grezzi in un piccolo datawarehouse
 4. **Allerta** se qualcosa supera le soglie
 5. **Produce** un report mensile
 
-Il tutto poggia su tre servizi Cloudflare:
+Il tutto poggia su due servizi Cloudflare:
 
-| Servizio | Ruolo | Free tier |
-|---|---|---|
-| **R2** (object storage) | Data lake raw — ogni JSON generato finisce qui, per sempre | 10 GB, 10M operazioni Classe A/mese |
-| **D1** (serverless SQLite) | Database analitico — metriche strutturate, queryable via HTTP | 5 GB, 5M righe lette/giorno |
-| **KV** (key-value) | Stato del workflow (ultimo timestamp, flag) | 1 GB, 100K letture/giorno |
+* **R2** (object storage): il Data Lake.
+* **D1** (serverless SQLite): il DWH.
 
-Perché Cloudflare e non, chessò, un PostgreSQL su Railway? Due motivi: (1) il free tier è _davvero_ generoso per un blog personale — ci sto dentro di tre ordini di grandezza, e (2) il sito è già su Cloudflare Pages, quindi tutto l'ecosistema è co-locato. Zero latenza di rete tra R2 e D1 quando si fanno operazioni di ETL.
+Perché Cloudflare e non, chessò, un PostgreSQL su Railway, o uno qualsiasi dei mille mila strumenti disponibili sui provider cloud maggiori, come AWS, GCP o Azure?
+
+Diversi motivi:
+
+1. Il free tier di Cloudflare è _davvero_ generoso per un blog personale — ci sto dentro di tre ordini di grandezza
+2. I servizi Cloudflare sono, in genere, molto semplici da configurare. Nel caso specifico, mi sembrava esagerato preparare un ambiente `terraform` per questo setup e la CLI di cloudflare, ovvero `wrangler`, si è dimostrata intuitiva, immediata e facilmente adattabile a Github Actions.
+3. L'inteto blog è già su Cloudflare Pages, quindi tutto l'ecosistema è co-locato, garantendomi zero latenza di rete tra R2 e D1 quando si fanno operazioni di ETL. Questo più a valore di _proof of concept_, per la verità, dato i numeri più che esigui mossi da un banale blog di provincia.
+
+In generale, comunque, avevo voglia di sperimentare con i servizi Cloudflare che, appunto, sono spesso bistrattati a favore dei soliti tre _pezzi grossi_ del cloud e che, invece, a mio parere sono sorprendentemente adatti per diverse classi di casi d'uso, a una frazione del costo e con molto meno complessità di deploy.
+
+Ma sto divagando. Dove eravamo rimasti?
 
 ---
 
-## Arricchire il blocco 1: niente più artifact effimeri
+## Step 1: preparare l'infrastruttura Cloudflare
 
-La prima modifica è stata al workflow esistente (`seo-pipeline.yml`). Prima, i report di PageSpeed e Lighthouse venivano salvati come **GitHub Artifacts con retention di 30 giorni**. Dopo un mese, sparivano. Impossibile fare analisi storica.
+Prima di scrivere una riga di Python, prepariamo due bei barili dove buttare i dati. Cloudflare mette a disposizione due servizi perfetti per un data lake da quattro soldi (nel senso che costa pocoa): **R2** per l'object storage e **D1** per il database SQLite serverless. Dome detto, la CLI  `wrangler` è stata una scoperta davvero piacevole. Installiamolo, tanto per cominciare:
 
-Ora, ogni job del blocco 1 carica i suoi JSON direttamente su **R2**:
-
-```
-r2://gabrielebaldassarre-seo/
-  seo/pagespeed/2026-05-26T083000Z/mio-post-mobile.json
-  seo/pagespeed/2026-05-26T083000Z/mio-post-desktop.json
-  seo/lighthouse/2026-05-26T083000Z/assertions-20260526.json
-  seo/history/2026-05-26T083000Z/una-shell-history-per-ogni-progetto.json
+```bash
+npm install -g wrangler
+wrangler login
 ```
 
-Il path include il timestamp ISO 8601 — ogni run è una snapshot immutabile. I GitHub Artifacts restano come cache a breve termine (30 giorni), ma la fonte di verità è R2.
+Fatto. Ora possiamo creare tutto ciò che ci serve.
 
-In più, ho aggiunto un **job di change tracking** che, a ogni deploy, calcola il `git diff` dei post modificati e lo salva sia su R2 (archivio raw) sia su D1 in una tabella `post_history` strutturata: commit hash, data, messaggio, tipo di modifica (`created`/`modified`/`deleted`), righe aggiunte e rimosse. Questo tracciamento è propedeutico alla **seontology** (sì, l'ho chiamata così) — l'ontologia semantica del blog che collegherà concetti, tag, keyword trends e modifiche ai contenuti. Ma questa è roba per il blocco 3.
+### R2: il data lake
+
+R2 è un object storage compatibile con l'API S3 di AWS. Non è un filesystem, non è un database: è un posto dove butti oggetti (nel nostro caso, JSON) e li recuperi quando ti servono, pagando solo per ciò che consumi. Qualsiasi libreria o tool che sa parlare S3 — `boto3`, `awscli`, `rclone` — funziona con R2 senza modifiche.
+
+Creare un bucket è una riga:
+
+```bash
+wrangler r2 bucket create unfantasticobucket-seo --location weur
+```
+
+Fine. Il bucket esiste. Non servono configurazioni aggiuntive, policy IAM o rete: R2 è _always-on_ e accessibile via internet in HTTP. Il location hint `weur` (Western Europe) mette il bucket fisicamente vicino al resto dell'infrastruttura Cloudflare, riducendo la latenza delle operazioni di ETL che vedremo dopo.
+
+Con `wrangler r2 bucket list` potete verificare che sia stato creato correttamente. Tutto a posto? Ok, continuiamo.
+
+### D1: il database
+
+D1 è SQLite, ma serverless. Dialetto SQL da esame di Basi di Dati all'Università, niente estensioni esotiche, configurazioni e fine-tuning. È perfetto per un progetto come questo, dove i dati sono pochi, le query sono semplici e la latenza di un round-trip HTTP è irrilevante. Altra riga:
+
+```bash
+wrangler d1 create unfantasticodatabase-seo
+```
+
+Output:
+
+```
+✅ Successfully created DB 'unfantasticodatabase-seo' in region EEUR
+database_id: XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
+```
+
+Il `database_id` è l'UUID che useremo per tutte le chiamate API successive. Salvatevelo da qualche parte (o, meglio ancora, lasciate che sia GitHub Actions a ricordarlo — ci arriviamo).
+
+A questo punto il database esiste ma è vuoto. Serve lo schema. Ho preparato un {% repo_url "seo-schema.sql" "file di schema" %} per la preparazione iniziale con tutte le tabelle, gli indici e i vincoli di unicità, eccetera. Lo applico con:
+
+```bash
+wrangler d1 execute unfantasticodatabase-seo --remote --file=seo-schema.sql
+```
+
+La flag `--remote` è importante: senza, `wrangler` prova a eseguire il SQL su un database D1 locale (che non esiste). Con `--remote` colpisce direttamente il server Cloudflare.
+
+Output:
+
+```
+🌀 Executing on remote database unfantasticodatabase-seo (XXXXXXXX-...):
+🚣 Executed 17 queries in 4.45ms
+```
+
+Per adesso non entriamo nel dettaglio del modello dati, lo faremo poi.
+
+### I token: ogni servizio il suo
+
+Qui arriva l'unica parte che, per mia scelta, ho deciso di non fare via CLI, limitando quel tipo di _grant_ a `wrangler`, ovvero la creazione dei token di autenticazione. Ne servono due, con ambiti di accesso separati ({% xlink "https://en.wikipedia.org/wiki/Principle_of_least_privilege" "principio del privilegio minimo"  %}, che non fa mai male):
+
+* **R2 API Token.** Si crea da Dashboard → R2 → Manage R2 API Tokens. Va configurato con permessi di Object Read & Write, limitato al nostro bucket `unfantasticobucke-seo`. Il token produce una coppia Access Key ID + Secret Access Key, identica a quella di AWS IAM. `boto3` (o chi per essa) la userà per autenticare le chiamate S3.
+
+* **D1 API Token.** Si crea da Dashboard → Profile → API Tokens → Create Custom Token, con permesso Account → D1 → Edit. Questo token va in `Authorization: Bearer <token>` nelle chiamate HTTP all'API REST di D1.
+
+Perché due token separati? Perché R2 usa l'autenticazione S3 (basata su firma HMAC), mentre D1 usa l'API REST di Cloudflare (basata su Bearer token). Sono due meccanismi diversi e, soprattutto, due superfici di attacco diverse. Se uno dei due token venisse compromesso, l'altro servizio resterebbe isolato.
+
+### I secrets su GitHub
+
+Nella {% post_link /devops/seo-automatico-jekyll/ "prima parte" role="prerequisite" context="provides-context" target="internal" %} abbiamo già visto come GitHub Actions gestisce le credenziali sensibili tramite **Secrets**. Si configurano in Settings → Secrets and variables → Actions e sono accessibili nel workflow con la sintassi `{% raw %}${{ secrets.NOME_SECRET }}{% endraw %}`. Se avete dubbi sul meccanismo, recuperate quel paragrafo prima di procedere.
+
+Per il blocco 2, i secrets da configurare per la parte di infrastruttura sono questi:
+
+- `CLOUDFLARE_ACCOUNT_ID` — il vostro Account ID Cloudflare (lo trovate nella dashboard in alto a destra, o con `wrangler whoami`)
+- `CLOUDFLARE_R2_ENDPOINT` — l'endpoint S3 del bucket: `https://<ACCOUNT_ID>.r2.cloudflarestorage.com`
+- `CLOUDFLARE_R2_ACCESS_KEY_ID` — l'Access Key ID del token R2 (step precedente)
+- `CLOUDFLARE_R2_SECRET_ACCESS_KEY` — la Secret Access Key del token R2
+- `CLOUDFLARE_R2_SEO_BUCKET` — il nome del bucket: `gabrielebaldassarre-seo`
+- `CLOUDFLARE_D1_API_TOKEN` — il token API D1
+- `CLOUDFLARE_D1_DATABASE_ID` — l'UUID del database D1
+
+Alcuni di questi probabilmente li avete già configurati per il blocco 1. Controllate che siano tutti presenti prima di lanciare il workflow.
+
+Con questo, l'infrastruttura è pronta. Abbiamo un bucket R2 che farà da data lake, un database D1 che ospiterà i dati strutturati, e tutti i token necessari perché GitHub Actions possa parlare con entrambi. Ora possiamo passare alla ciccia vera.
+
+---
+
+## Step 2: arricchire la pipeline SEO principale
+
+La prima modifica è stata alla  {% repo_url ".github/workflows/seo-pipeline.yml" "pipeline principale" %}, quella di supporto autoriale. Nella precedente versione, gli strumenti che erano in grado di produrre output strutturato, ad esempio {% xlink "https://pagespeed.web.dev/" "PageSpeed Insights" %} e {% xlink "https://developer.chrome.com/docs/lighthouse?hl=it" "Lighthouse"  %}, lo facevano sottoforma di **GitHub Artifacts** JSON. Dopo un mese, ruotavano via, spesso prima che potessi consultarli e con l'impossibilità di fare una analisi storica.
+
+Il primo passo è stato far persistere questi file su **R2**, su cui copio i resoconti in JSON (mentre gli HTML, pensati per ispezione manuale, restano come artifact. Continuerò a non guardarli mai).
+
+Il path include il timestamp ISO 8601 — ogni run è una snapshot immutabile. I GitHub Artifacts restano come cache a breve termine (30 giorni), la fonte di verità diventa R2.
+
+In più, anche in questa fase c'è una componente di **job di change tracking** che, a ogni deploy, calcola il `git diff` dei post modificati e lo salva sia su R2 (archivio raw) sia su D1 in una tabella `post_history` strutturata: commit hash, data, messaggio, tipo di modifica (`created`/`modified`/`deleted`), righe aggiunte e rimosse. Un diario delle modifiche insomma: ci sarà molto utile quando introdurremo l'**ontologia della SEO**  — l'ontologia semantica del blog che collegherà concetti, tag, keyword trends e modifiche ai contenuti. Ma questa è roba per il blocco 3.
 
 ---
 
@@ -75,8 +176,7 @@ Ho integrato **Google Trends** tramite {% xlink "https://serpapi.com/" "serpapi"
 
 1. **Categorie del blog** — "DevOps", "Fisica", "Reti Sociali", "Home Assistant", "Meccanica" (fisse, 5)
 2. **Top-10 tag per frequenza** — calcolati dinamicamente da tutti i frontmatter dei post
-3. **Termini del glossario** — da `_data/glossary.yml` (15 termini tecnici)
-4. **Rising queries** — le query in crescita che Google Trends associa a ogni keyword seed (scoperta automatica!)
+3. **Rising queries** — le query in crescita che Google Trends associa a ogni keyword seed (scoperta automatica!)
 
 Il seed set è di circa 25-30 keyword per run. Per ognuna, salvo l'interesse nel tempo (90 giorni), la distribuzione geografica (Italia) e le query correlate in crescita. Queste ultime sono il vero oro: ogni settimana scopro cosa sta cercando la gente _adesso_, e posso decidere se scriverne.
 
@@ -120,6 +220,147 @@ dim_posts            → SCD Type 2: storico delle modifiche a titoli, tag e cat
 fct_seo_metrics      → KPI SEO giornalieri (performance, accessibility, LCP, CLS, etc.)
 fct_post_activity    → velocità e magnitudine delle modifiche per post
 fct_keyword_performance → copertura e trend delle keyword
+```
+
+Ecco il modello ER completo di ciò che vive su D1 — le tabelle raw (a sinistra) e i modelli analytics che dbt genera (a destra):
+
+```mermaid
+erDiagram
+    posts ||--o{ seo_snapshots : "post_urn"
+    posts ||--o{ post_history : "post_urn"
+    posts ||--o{ dim_posts : "urn ← dbt SCD2"
+    post_history ||--o{ fct_post_activity : "dbt window"
+    seo_snapshots ||--o{ fct_seo_metrics : "dbt pivot"
+    keyword_trends ||--o{ fct_keyword_performance : "keyword"
+    search_console_data ||--o{ alerts : "url match"
+
+    posts {
+        text urn PK "urn:cat:slug"
+        text title
+        text category
+        text slug
+        text tags "JSON array"
+        text file_path
+        text first_seen_at
+        text last_modified_at
+    }
+
+    seo_snapshots {
+        int id PK
+        text post_urn FK
+        text url
+        text checked_at
+        text source "pagespeed|lighthouse"
+        text category "performance|accessibility|seo|best-practices"
+        text metric_name "score|lcp|tbt|cls|fcp|tti|speed_index"
+        real metric_value
+        text device "mobile|desktop"
+    }
+
+    post_history {
+        int id PK
+        text post_urn FK
+        text commit_hash
+        text commit_date
+        text commit_message
+        text change_type "created|modified|deleted"
+        int lines_added
+        int lines_removed
+        int diff_size
+        text raw_diff
+        text changed_at
+    }
+
+    keyword_trends {
+        int id PK
+        text keyword UK
+        text fetched_at UK
+        text interest_over_time "JSON timeseries"
+        text interest_by_region "JSON"
+        text related_rising "JSON top-5"
+        text related_top "JSON top-5"
+    }
+
+    search_console_data {
+        int id PK
+        text query "nullable"
+        text page "nullable"
+        text data_date UK
+        text fetched_at
+        int clicks
+        int impressions
+        real ctr
+        real position
+        text device UK "desktop|mobile|tablet"
+        text country UK "ita|eng|..."
+    }
+
+    alerts {
+        int id PK
+        text url
+        text metric
+        real current_value
+        real threshold_value
+        text comparison "lt|gt"
+        text fired_at
+        int acknowledged "0|1"
+    }
+
+    dim_posts {
+        text urn PK
+        text title
+        text category
+        text slug
+        text tags
+        text file_path
+        text first_seen_at
+        text last_modified_at
+        text valid_from
+        text valid_to
+        boolean is_current
+    }
+
+    fct_seo_metrics {
+        text post_urn
+        text url
+        date check_date
+        text source
+        text device
+        real performance_score
+        real accessibility_score
+        real seo_score
+        real best_practices_score
+        real lcp_ms
+        real tbt_ms
+        real cls
+        real fcp_ms
+        boolean flag_perf_critical
+        boolean flag_a11y_warning
+        boolean flag_lcp_slow
+    }
+
+    fct_post_activity {
+        text post_urn
+        text commit_hash
+        text commit_date
+        text commit_message
+        text change_type
+        int lines_added
+        int lines_removed
+        int change_magnitude
+        int changes_last_7d "window 7g"
+        int cumulative_magnitude
+        text changed_at
+    }
+
+    fct_keyword_performance {
+        text keyword
+        text fetched_at
+        int data_points
+        boolean has_trend_data
+        boolean has_rising_queries
+        boolean has_top_queries
+    }
 ```
 
 Il **dim_posts** è la parte più elegante: usa una **Slowly Changing Dimension di Tipo 2**, il che significa che ogni modifica a un post (titolo, categoria, tag) crea una nuova riga con `valid_from`/`valid_to`, e la riga corrente ha `is_current = TRUE`. Questo permette di ricostruire lo stato del blog _in qualsiasi momento nel passato_ e di correlare i cambiamenti nei contenuti con i trend SEO. Seontology, dicevamo.

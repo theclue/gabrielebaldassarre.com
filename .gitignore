@@ -42,6 +42,13 @@ cache/
 
 assets/libs/
 
+.build_config
+
+# autotools artifacts
+autom4te.cache/
+config.log
+config.status
+
 node_modules/
 
 /vendor

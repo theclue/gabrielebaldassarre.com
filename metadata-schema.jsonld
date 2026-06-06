@@ -314,6 +314,90 @@
       "name": "Cognitive Overload Reduction",
       "description": "Image placement strategy: avoid clustering multiple images without intervening text, as this breaks the scanning flow and increases extraneous cognitive load (Sweller 1988). In blog context: limit consecutive images to 1, enforce text separation. Applied by the /annotate-post agent as a warning-level placement rule.",
       "inDefinedTermSet": { "@id": "https://gabrielebaldassarre.com/metadata-schema.jsonld" }
+    },
+    {
+      "@type": "DefinedTerm",
+      "termCode": "3d_model",
+      "name": "3D Model Asset",
+      "description": "A 3D-printable model associated with a blog post. The source file lives in _cad/<slug>/<slug>.scad; compiled outputs (STL, 3MF) and preview renders (PNG) are generated locally via make cad and committed to assets/3d/<slug>/. The model is broadcast to Thingiverse via the broadcast-thingiverse workflow.",
+      "inDefinedTermSet": { "@id": "https://gabrielebaldassarre.com/metadata-schema.jsonld" }
+    },
+    {
+      "@type": "DefinedTerm",
+      "termCode": "scad_file",
+      "name": "OpenSCAD Source File",
+      "description": "Parametric 3D model source file in OpenSCAD format. Conforms to the cad-author agent instructions: structured header with license, Customizer-compatible parameter blocks, geometry helpers section, one module per physical piece, assembly module with explode parameter, and Italian-language parameter descriptions.",
+      "inDefinedTermSet": { "@id": "https://gabrielebaldassarre.com/metadata-schema.jsonld" }
+    },
+    {
+      "@type": "DefinedTerm",
+      "termCode": "stl_export",
+      "name": "STL Mesh Export",
+      "description": "Triangulated mesh exported from OpenSCAD for 3D printing. Generated locally by the CAD build pipeline at commit time; the STL is a deterministic output of the .scad source and is committed alongside it for reproducibility.",
+      "inDefinedTermSet": { "@id": "https://gabrielebaldassarre.com/metadata-schema.jsonld" }
+    },
+    {
+      "@type": "DefinedTerm",
+      "termCode": "3mf_export",
+      "name": "3MF Model Export",
+      "description": "3D Manufacturing Format export from OpenSCAD. Contains mesh geometry plus metadata (units, materials). Preferred over STL for modern slicers. Generated locally by the CAD build pipeline alongside the STL.",
+      "inDefinedTermSet": { "@id": "https://gabrielebaldassarre.com/metadata-schema.jsonld" }
+    },
+    {
+      "@type": "DefinedTerm",
+      "termCode": "color_scheme",
+      "name": "Preview Color Scheme",
+      "description": "Colour mapping applied to the OpenSCAD preview render. Values: blueprint (dark blue background, cyan wireframe — default), monochrome (greyscale), render (OpenSCAD native colours from assembly comments), rainbow (posterised debug view where each face has a distinct colour). Applied by _scripts/cad/preview.py via ImageMagick post-processing.",
+      "inDefinedTermSet": { "@id": "https://gabrielebaldassarre.com/metadata-schema.jsonld" }
+    },
+    {
+      "@type": "DefinedTerm",
+      "termCode": "isometric_exploded_view",
+      "name": "Isometric Exploded View",
+      "description": "A technical-rendering convention where the model is shown from an isometric camera angle (55° azimuth, 25° elevation) with parts separated along their natural assembly axis by a parametric distance. The explode parameter (0–1) is injected by the build script; individual modules respond by translating parts proportionally. Used as the default preview view for social broadcasting and model cards.",
+      "inDefinedTermSet": { "@id": "https://gabrielebaldassarre.com/metadata-schema.jsonld" }
+    },
+    {
+      "@type": "DefinedTerm",
+      "termCode": "thingiverse_broadcast",
+      "name": "Thingiverse Broadcast Pipeline",
+      "description": "A GitHub Actions workflow that publishes 3D models to Thingiverse. Triggered by git diff on _cad/<slug>/ files or associated post frontmatter. Uses upsert semantics: creates a new thing on first run (with LLM-generated English description), updates files and metadata on subsequent runs (preserving the existing description). Marked as sent via thingiverse.sent: true in the post frontmatter through a work branch, following the same pattern as broadcast-social. Models are tagged gabrielebaldassarre-blog for discovery.",
+      "inDefinedTermSet": { "@id": "https://gabrielebaldassarre.com/metadata-schema.jsonld" }
+    },
+    {
+      "@type": "DefinedTerm",
+      "termCode": "blueprint_rendering",
+      "name": "Blueprint Rendering Style",
+      "description": "A technical line-art rendering convention for 3D model previews. Uses OpenSCAD --preview mode (OpenCSG edges, no filled surfaces) with DeepOcean colour scheme, post-processed through ImageMagick to the blog's blueprint palette: Tech Dark Blue (#002082) background, Luminous (#3057E1) and Original Blue (#4A6DE5) lines, Blue Cream (#CED8F7) highlights. Produces a classic engineering blueprint aesthetic suitable for hero images and technical documentation.",
+      "inDefinedTermSet": { "@id": "https://gabrielebaldassarre.com/metadata-schema.jsonld" }
+    },
+    {
+      "@type": "DefinedTerm",
+      "termCode": "orthographic_projection",
+      "name": "Orthographic Projection Sheet",
+      "description": "Three standard engineering views (top, front, side) of a 3D model, rendered as separate PNG images. Designed for Cloudinary compositing into keynote/cinematic hero images. Each view uses a fixed orthographic camera angle exported from OpenSCAD. The three images form a technical-drawing triptych that communicates the object's geometry at a glance.",
+      "inDefinedTermSet": { "@id": "https://gabrielebaldassarre.com/metadata-schema.jsonld" }
+    },
+    {
+      "@type": "DefinedTerm",
+      "termCode": "asset_card_3d",
+      "name": "3D Asset Download Card",
+      "description": "A UI component (_layouts/asset-3d.html) displayed after the article content. Shows the isometric blueprint preview, print specifications (material, nozzle, layer height, infill, dimensions), download links to Thingiverse/Printables (or direct STL/3MF), and a link to the OpenSCAD source on GitHub. Semantic links use Schema.org sameAs (Thingiverse/Printables), encoding (STL/3MF), and codeRepository (GitHub).",
+      "inDefinedTermSet": { "@id": "https://gabrielebaldassarre.com/metadata-schema.jsonld" }
+    },
+    {
+      "@type": "DefinedTerm",
+      "termCode": "thingiverse_download",
+      "name": "Thingiverse Model Link",
+      "description": "A semantic link from a blog post to its corresponding Thingiverse thing. Uses Schema.org sameAs to assert identity equivalence between the post's 3D model description and the Thingiverse listing. The Thingiverse page serves as the primary download source (STL + SCAD + 3MF), with the blog providing the authoritative tutorial context. Defined in the 3d_model.downloads.thingiverse frontmatter block.",
+      "inDefinedTermSet": { "@id": "https://gabrielebaldassarre.com/metadata-schema.jsonld" }
+    },
+    {
+      "@type": "DefinedTerm",
+      "termCode": "printables_download",
+      "name": "Printables Model Link",
+      "description": "A semantic link from a blog post to its corresponding Printables.com model. Uses Schema.org sameAs to assert identity equivalence. Printables serves as a secondary distribution platform for 3D models documented on the blog. Defined in the 3d_model.downloads.printables frontmatter block.",
+      "inDefinedTermSet": { "@id": "https://gabrielebaldassarre.com/metadata-schema.jsonld" }
     }
   ]
 }
