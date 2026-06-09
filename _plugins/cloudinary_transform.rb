@@ -72,13 +72,14 @@ module Jekyll
       # Transforms (distortion + background)
       transform_name = header['transform'].to_s
       intensity      = header['intensity'].to_s
+      gravity        = header['gravity'].to_s.empty? ? 'auto' : header['gravity'].to_s
       has_transform = TRANSFORM_PRESETS[transform_name] && TRANSFORM_PRESETS[transform_name][intensity]
       if has_transform
         parts << has_transform
         parts << (CROP_BY_INTENSITY[intensity] || CROP_BY_INTENSITY['medium'])
         parts << "c_fill,g_auto,w_#{width},h_#{height},f_auto,q_auto"
       else
-        parts << "c_fill,g_auto,w_#{width},h_#{height},f_auto,q_auto"
+        parts << "c_fill,g_#{gravity},w_#{width},h_#{height},f_auto,q_auto"
       end
 
       # Overlay image (left side, sized to fit within canvas height, anchored centre-left)
@@ -131,13 +132,14 @@ module Jekyll
       # Transforms (distortion + background)
       transform_name = config_h['transform'].to_s
       intensity      = config_h['intensity'].to_s
+      gravity        = config_h['gravity'].to_s.empty? ? 'auto' : config_h['gravity'].to_s
       has_transform = TRANSFORM_PRESETS[transform_name] && TRANSFORM_PRESETS[transform_name][intensity]
       if has_transform
         parts << has_transform
         parts << (CROP_BY_INTENSITY[intensity] || CROP_BY_INTENSITY['medium'])
         parts << "c_fill,g_auto,w_#{width},h_#{height},f_auto,q_auto"
       else
-        parts << "c_fill,g_auto,w_#{width},h_#{height},f_auto,q_auto"
+        parts << "c_fill,g_#{gravity},w_#{width},h_#{height},f_auto,q_auto"
       end
 
       # Caption

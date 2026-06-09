@@ -374,6 +374,7 @@ def cloudinary_social_url(master_path, social_config, post_title, channel_type):
     # Transform preset
     transform_name = config.get('transform', '')
     intensity = config.get('intensity', 'medium')
+    gravity = config.get('gravity', 'auto')
     # Safe crop after distortion (percentage-based, anchored top-left)
     CROP_BY_INTENSITY = {
         'low':    'c_crop,g_north_west,x_0.01,y_0.12,w_0.93,h_0.52',
@@ -406,7 +407,7 @@ def cloudinary_social_url(master_path, social_config, post_title, channel_type):
         parts.append(safe_crop)
         parts.append(f"c_fill,g_auto,w_{width},h_{height},f_auto,q_auto")
     else:
-        parts.append(f"c_fill,g_auto,w_{width},h_{height},f_auto,q_auto")
+        parts.append(f"c_fill,g_{gravity},w_{width},h_{height},f_auto,q_auto")
 
     # Caption text resolution
     caption_text = None

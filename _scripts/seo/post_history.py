@@ -14,7 +14,7 @@ from datetime import datetime, timezone
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 from _scripts.seo import r2, d1
-from _scripts.seo.posts import post_urn
+from _scripts.seo.posts import post_urn, sync_posts
 
 
 def _changed_posts() -> list[str]:
@@ -72,6 +72,10 @@ def _already_processed(post_urn: str, commit_hash: str) -> bool:
 
 
 def main() -> int:
+    # Ensure all post URNs exist in the `posts` table before inserting
+    # into `post_history` (foreign key constraint).
+    sync_posts()
+
     posts = _changed_posts()
     print(f"Changed posts: {len(posts)}")
     if not posts:

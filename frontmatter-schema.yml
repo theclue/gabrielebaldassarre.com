@@ -39,6 +39,7 @@ header:
   logo:             boolean|string?              # true = site_logo, "custom.png" = logo custom, false/nil = nessuno
   caption:          string?                      # Testo alt per hero (solo attributo alt="")
   overlay:          string?                      # Overlay foreground image (es. assets/overlays/<slug>.png). Collocato a sinistra, sopra il letterbox, mai sopra caption. Usato per modelli 3D o elementi compositivi.
+  gravity:          "auto"|"north"|"center"|"face"|"auto:subject"?  # Cloudinary crop gravity (default: auto)
   transform:        "keystone"|"cinematic"?      # Template di trasformazione visiva
   intensity:        "low"|"medium"|"high"?       # Intensità della trasformazione (default: medium)
 

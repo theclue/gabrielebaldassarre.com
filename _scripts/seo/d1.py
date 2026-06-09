@@ -40,7 +40,14 @@ def execute(sql: str, params: list | None = None) -> list[dict]:
         body["params"] = params
 
     r = httpx.post(f"{_base()}/query", headers=_headers(), json=body, timeout=30)
-    r.raise_for_status()
+    if not r.is_success:
+        # Surface the D1 error message, not just the HTTP status
+        try:
+            err = r.json()
+            detail = err.get("errors", [{}])[0].get("message", r.text)
+        except Exception:
+            detail = r.text[:500]
+        raise RuntimeError(f"D1 query failed (HTTP {r.status_code}): {detail}")
     data = r.json()
     _check(data, "query")
 
