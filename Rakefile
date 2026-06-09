@@ -7,16 +7,15 @@ DRAFTS = File.join(SOURCE, "_drafts")
 CONFIG = File.join(SOURCE, "_config.yml")
 
 ## ── New post ──────────────────────────────────────────────────────────────────
-# Usage: rake post title="My Title" category="DevOps" [date="2026-05-26"]
+# Usage: rake post["My Title","DevOps","my-slug"]
+# slug is kebab-case (a-z, 0-9, -). Derived from title if not explicit.
 desc "Create a new post in _posts/<category>/"
-task :post do
-  title    = ENV["title"] || abort("Missing title= argument")
-  category = ENV["category"] || abort("Missing category= argument")
-  subtitle = ENV["subtitle"]
-  subtitle = nil if subtitle && subtitle.strip.empty?
+task :post, [:title, :category, :slug] do |t, args|
+  title    = args[:title]    || abort("Missing title argument. Usage: rake post['Title','Category','slug']")
+  category = args[:category] || abort("Missing category argument")
+  slug     = args[:slug]     || abort("Missing slug argument (kebab-case)")
 
-  slug = title.downcase.strip.gsub(" ", "-").gsub(/[^\w-]/, "")
-  date = (ENV["date"] ? Time.parse(ENV["date"]) : Time.now).strftime("%Y-%m-%d")
+  date = ENV["date"] ? Time.parse(ENV["date"]).strftime("%Y-%m-%d") : Time.now.strftime("%Y-%m-%d")
 
   dir = File.join(POSTS, category.downcase.strip.gsub(" ", "-"))
   filename = File.join(dir, "#{date}-#{slug}.md")
@@ -32,7 +31,6 @@ task :post do
     f.puts "---"
     f.puts "category: #{category}"
     f.puts "title: \"#{title}\""
-    f.puts "subtitle: \"#{subtitle}\"" if subtitle
     f.puts "excerpt: \"\""
     f.puts "master: /assets/images/posts/#{slug}.png"
     f.puts "image_meta:"
@@ -51,11 +49,13 @@ task :post do
 end
 
 ## ── New draft ─────────────────────────────────────────────────────────────────
-# Usage: rake draft title="My Draft"
+# Usage: rake draft["My Draft","DevOps","my-draft-slug"]
 desc "Create a new draft in _drafts/"
-task :draft do
-  title    = ENV["title"] || abort("Missing title= argument")
-  slug = title.downcase.strip.gsub(" ", "-").gsub(/[^\w-]/, "")
+task :draft, [:title, :category, :slug] do |t, args|
+  title    = args[:title]    || abort("Missing title argument. Usage: rake draft['Title','Category','slug']")
+  category = args[:category] || abort("Missing category argument")
+  slug     = args[:slug]     || abort("Missing slug argument (kebab-case)")
+
   filename = File.join(DRAFTS, "#{slug}.md")
 
   if File.exist?(filename)
@@ -65,21 +65,36 @@ task :draft do
   puts "Creating draft: #{filename}"
   File.open(filename, "w") do |f|
     f.puts "---"
-    f.puts "layout: post"
+    f.puts "category: #{category}"
     f.puts "title: \"#{title}\""
-    f.puts "category: "
+    f.puts "excerpt: \"\""
+    f.puts "master: /assets/images/posts/#{slug}.png"
+    f.puts "image_meta:"
+    f.puts "  role: illustration"
+    f.puts "  context: ambient"
+    f.puts "  caption: \"\""
+    f.puts "header:"
+    f.puts "  overlay_filter: 0.5"
+    f.puts "broadcast:"
+    f.puts "  channels: [linkedin,mastodon]"
+    f.puts "  sent: false"
+    f.puts "intended_audience: practitioner"
+    f.puts "proficiency_level: intermediate"
     f.puts "---"
   end
 end
 
 ## ── Publish draft ─────────────────────────────────────────────────────────────
-# Usage: rake publish draft="_drafts/my-draft.md" category="Home Assistant"
+# Usage: rake publish["_drafts/my-draft.md"]
+# Category is read from the draft frontmatter (already set at creation time).
 desc "Publish a draft to _posts/<category>/"
-task :publish do
-  draft    = ENV["draft"] || abort("Missing draft= argument")
-  category = ENV["category"] || abort("Missing category= argument")
-
+task :publish, [:draft] do |t, args|
+  draft = args[:draft] || abort("Missing draft argument. Usage: rake publish['_drafts/my-draft.md']")
   abort "#{draft} not found." unless File.exist?(draft)
+
+  content = File.read(draft)
+  category = content.match(/^category:\s*(.+)$/)&.captures&.first&.strip
+  abort "Draft has no category in frontmatter." unless category
 
   base = File.basename(draft, ".md")
   date = Time.now.strftime("%Y-%m-%d")
@@ -91,12 +106,7 @@ task :publish do
 
   abort "#{dest} already exists." if File.exist?(dest)
 
-  content = File.read(draft)
-  updated = content.sub(/^---\n.*?^---/m) do |fm|
-    fm.sub(/^category:.*$/, "category: #{category}")
-  end
-
-  File.write(dest, updated)
+  File.write(dest, content)
   File.delete(draft)
   puts "Published: #{dest}"
 end
@@ -138,13 +148,13 @@ end
 
 ## ── New Rmd post ────────────────────────────────────────────────────────────────
 
-# Usage: rake new_rmd["Reti Smallworld - Analisi Quantitativa","Reti Sociali"]
+# Usage: rake new_rmd["Reti Smallworld - Analisi Quantitativa","Reti Sociali","reti-smallworld-analisi-quantitativa"]
 desc "Create a new .Rmd post from template"
-task :new_rmd, [:title, :category] do |t, args|
-  title    = args[:title] || abort("Missing title argument. Usage: rake new_rmd['Title','Category']")
+task :new_rmd, [:title, :category, :slug] do |t, args|
+  title    = args[:title]    || abort("Missing title argument. Usage: rake new_rmd['Title','Category','slug']")
   category = args[:category] || abort("Missing category argument")
+  slug     = args[:slug]     || abort("Missing slug argument (kebab-case)")
 
-  slug = title.downcase.strip.gsub(" ", "-").gsub(/[^\w-]/, "")
   date = ENV["date"] ? Time.parse(ENV["date"]).strftime("%Y-%m-%d") : Time.now.strftime("%Y-%m-%d")
 
   dir = File.join(POSTS, category.downcase.strip.gsub(" ", "-"))
@@ -166,11 +176,13 @@ end
 
 ## ── New Rmd draft ───────────────────────────────────────────────────────────────
 
-# Usage: rake new_rmd_draft["Analisi Reti"]
+# Usage: rake new_rmd_draft["Analisi Reti","Reti Sociali","analisi-reti"]
 desc "Create a new .Rmd draft in _drafts/"
-task :new_rmd_draft, [:title] do |t, args|
-  title = args[:title] || abort("Missing title argument")
-  slug = title.downcase.strip.gsub(" ", "-").gsub(/[^\w-]/, "")
+task :new_rmd_draft, [:title, :category, :slug] do |t, args|
+  title    = args[:title]    || abort("Missing title argument. Usage: rake new_rmd_draft['Title','Category','slug']")
+  category = args[:category] || abort("Missing category argument")
+  slug     = args[:slug]     || abort("Missing slug argument (kebab-case)")
+
   filename = File.join(DRAFTS, "#{slug}.Rmd")
 
   abort "#{filename} already exists." if File.exist?(filename)
@@ -180,7 +192,7 @@ task :new_rmd_draft, [:title] do |t, args|
 
   content = File.read(template)
   content = content.sub(/^title:.*/, "title: \"#{title}\"")
-  content = content.sub(/^category:.*/, "category: ")
+  content = content.sub(/^category:.*/, "category: \"#{category}\"")
   content = content.sub(/^tags:.*/, "tags: []")
 
   File.write(filename, content)
@@ -200,7 +212,6 @@ task :new_3d, [:title, :slug] do |t, args|
 
   cad_dir  = File.join(SOURCE, "_cad", slug)
   scad_file = File.join(cad_dir, "#{slug}.scad")
-  readme    = File.join(cad_dir, "README.md")
 
   abort "#{cad_dir} already exists." if Dir.exist?(cad_dir)
 
@@ -269,24 +280,8 @@ task :new_3d, [:title, :slug] do |t, args|
     f.puts "}"
   end
 
-  # ── README ───────────────────────────────────────────────────────
-  File.open(readme, "w") do |f|
-    f.puts "# #{title}"
-    f.puts ""
-    f.puts "https://gabrielebaldassarre.com"
-    f.puts ""
-    f.puts "## Description"
-    f.puts ""
-    f.puts "_TBD_"
-    f.puts ""
-    f.puts "## License"
-    f.puts ""
-    f.puts "MIT License — see #{slug}.scad header"
-  end
-
   puts "Created: #{cad_dir}/"
   puts "  #{slug}.scad"
-  puts "  README.md"
   puts ""
   puts "Next: make cad CAD_ARGS=\"--slug #{slug}\""
 end

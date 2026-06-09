@@ -110,7 +110,7 @@ it: &DEFAULT_IT
   work                       : "Cosa faccio"
   home                       : "Home"
   toggle_theme               : "Attiva/disattiva tema scuro"
-  footer_no_tracking         : "Nessun cookie, nessun tracker, nessuna raccolta dati."
+  footer_no_tracking         : "Nessun cookie, nessun tracker, nessuna raccolta dati"
   footer_license             : "Contenuti sotto"
   difficulty_accessible       : "Accessibile"
   difficulty_intermediate     : "Intermedio"

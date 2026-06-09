@@ -956,8 +956,9 @@ header .entry-meta {
 
 .intro-photo {
   display: flex;
-  align-items: flex-start;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
 }
 
 .intro-photo img {
@@ -967,11 +968,16 @@ header .entry-meta {
   height: auto;
 }
 
+.intro-kofi {
+  display: flex;
+  justify-content: center;
+}
+
 /* --- Footer --- */
 
 .footer-wrapper {
-  margin-block-start: var(--space-3xl);
-  padding-block: var(--space-xl);
+  margin-block-start: var(--space-xl);
+  padding-block: var(--space-md);
   border-top: 1px solid var(--color-border);
   text-align: center;
   color: var(--color-text-subtle);

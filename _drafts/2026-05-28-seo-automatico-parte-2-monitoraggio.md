@@ -3,7 +3,11 @@ layout: post
 title: "SEO per squattrinati: il monitoraggio"
 category: DevOps
 excerpt: "Seconda parte della pipeline SEO con strumenti gratuiti e automatici: un data lake su Cloudflare R2 e D1, Google Trends e Search Console, dbt per l'ETL e un report mensile automatizzato, il tutto eseguito tramite GitHub Actions. Gratis."
-master: /assets/images/posts/.png
+master: /assets/images/posts/seo-monitoraggio.png
+image_meta:
+  role: illustration
+  context: ambient
+  caption: "Cruscotto di monitoraggio dati con dashboard analitica"
 header:
   overlay_filter: 0.5
 tags: [SEO, Jekyll, GitHub Actions, Cloudflare, dbt, Google Trends, Search Console, sqlite, datawarehousing]
@@ -26,6 +30,241 @@ broadcast:
     color: white
     transform: keystone
     intensity: low
+intended_audience: practitioner
+proficiency_level: advanced
+difficulty_declared:
+  conceptual: 3
+  technical: 4
+  mathematical: 0
+difficulty_computed:
+  semantic:
+    concept_count: 22
+    concept_density: 0.7
+    jargon_ratio: 5.1
+    definition_coverage: 0.35
+    external_knowledge_demand: 9
+    prerequisite_depth: 2.2
+    math_density: 0.0
+    code_density: 3.6
+    blocking_prerequisite_count: 6
+knowledge_prerequisites:
+  - concept: seo
+    label: SEO
+    url: https://it.wikipedia.org/wiki/Ottimizzazione_per_i_motori_di_ricerca
+    sameAs: https://www.wikidata.org/wiki/Q180711
+    importance: required
+    depth: 2
+  - concept: github-actions
+    label: GitHub Actions
+    url: https://docs.github.com/en/actions
+    importance: required
+    depth: 2
+  - concept: cloudflare-r2
+    label: Cloudflare R2
+    url: https://developers.cloudflare.com/r2/
+    importance: required
+    depth: 2
+  - concept: cloudflare-d1
+    label: Cloudflare D1
+    url: https://developers.cloudflare.com/d1/
+    importance: required
+    depth: 2
+  - concept: dbt
+    label: dbt (data build tool)
+    url: https://www.getdbt.com/
+    importance: required
+    depth: 3
+  - concept: etl
+    label: ETL (Extract, Transform, Load)
+    url: https://it.wikipedia.org/wiki/Extract,_transform,_load
+    importance: required
+    sameAs: https://www.wikidata.org/wiki/Q1276130
+    depth: 2
+  - concept: jekyll
+    label: Jekyll
+    url: https://jekyllrb.com/
+    sameAs: https://www.wikidata.org/wiki/Q17095317
+    importance: recommended
+    depth: 2
+  - concept: data-lake
+    label: Data Lake
+    url: https://it.wikipedia.org/wiki/Data_lake
+    sameAs: https://www.wikidata.org/wiki/Q20707560
+    importance: recommended
+    depth: 3
+  - concept: data-warehouse
+    label: Data Warehouse
+    url: https://it.wikipedia.org/wiki/Data_warehouse
+    sameAs: https://www.wikidata.org/wiki/Q193351
+    importance: recommended
+    depth: 3
+  - concept: sqlite
+    label: SQLite
+    url: https://www.sqlite.org/
+    sameAs: https://www.wikidata.org/wiki/Q319417
+    importance: recommended
+    depth: 2
+  - concept: google-trends
+    label: Google Trends
+    url: https://trends.google.com/
+    sameAs: https://www.wikidata.org/wiki/Q847115
+    importance: recommended
+    depth: 2
+  - concept: google-search-console
+    label: Google Search Console
+    url: https://search.google.com/search-console
+    sameAs: https://www.wikidata.org/wiki/Q328216
+    importance: recommended
+    depth: 2
+  - concept: serpapi
+    label: SerpApi
+    url: https://serpapi.com/
+    importance: recommended
+    depth: 2
+  - concept: api-rest
+    label: API REST
+    url: https://it.wikipedia.org/wiki/Representational_state_transfer
+    sameAs: https://www.wikidata.org/wiki/Q749568
+    importance: recommended
+    depth: 2
+  - concept: amazon-s3
+    label: Amazon S3
+    url: https://aws.amazon.com/s3/
+    sameAs: https://www.wikidata.org/wiki/Q2593067
+    importance: recommended
+    depth: 2
+  - concept: pagespeed-insights
+    label: PageSpeed Insights
+    url: https://pagespeed.web.dev/
+    importance: recommended
+    depth: 2
+  - concept: lighthouse
+    label: Lighthouse
+    url: https://developer.chrome.com/docs/lighthouse
+    importance: recommended
+    depth: 2
+  - concept: ci-cd
+    label: CI/CD
+    url: https://it.wikipedia.org/wiki/Continuous_integration
+    sameAs: https://www.wikidata.org/wiki/Q965769
+    importance: recommended
+    depth: 3
+  - concept: scd-type-2
+    label: Slowly Changing Dimension Type 2
+    url: https://en.wikipedia.org/wiki/Slowly_changing_dimension
+    importance: recommended
+    depth: 4
+  - concept: change-data-capture
+    label: Change Data Capture
+    url: https://en.wikipedia.org/wiki/Change_data_capture
+    importance: recommended
+    depth: 3
+  - concept: core-web-vitals
+    label: Core Web Vitals
+    url: https://web.dev/vitals/
+    importance: recommended
+    depth: 2
+  - concept: llm
+    label: Large Language Model
+    url: https://it.wikipedia.org/wiki/Grande_modello_linguistico
+    sameAs: https://www.wikidata.org/wiki/Q115305900
+    importance: recommended
+    depth: 2
+  - concept: data-mart
+    label: Data Mart
+    url: https://it.wikipedia.org/wiki/Data_mart
+    sameAs: https://www.wikidata.org/wiki/Q1061166
+    importance: recommended
+    depth: 3
+  - concept: dwh-schema
+    label: Schema dimensionale (dim/fact)
+    url: https://en.wikipedia.org/wiki/Dimensional_modeling
+    sameAs: https://www.wikidata.org/wiki/Q3432172
+    importance: recommended
+    depth: 3
+  - concept: cloudflare-pages
+    label: Cloudflare Pages
+    url: https://pages.cloudflare.com/
+    importance: recommended
+    depth: 2
+  - concept: python
+    label: Python
+    url: https://www.python.org/
+    sameAs: https://www.wikidata.org/wiki/Q28865
+    importance: recommended
+    depth: 1
+  - concept: ctr
+    label: Click-Through Rate
+    url: https://it.wikipedia.org/wiki/Click-through_rate
+    sameAs: https://www.wikidata.org/wiki/Q1100934
+    importance: recommended
+    depth: 2
+  - concept: indexnow
+    label: IndexNow
+    url: https://www.indexnow.org/
+    importance: recommended
+    depth: 2
+  - concept: sql
+    label: SQL
+    url: https://it.wikipedia.org/wiki/Structured_Query_Language
+    sameAs: https://www.wikidata.org/wiki/Q47607
+    importance: helpful
+    depth: 2
+  - concept: wrangler
+    label: Wrangler (Cloudflare CLI)
+    url: https://developers.cloudflare.com/workers/wrangler/
+    importance: helpful
+    depth: 2
+  - concept: terraform
+    label: Terraform
+    url: https://www.terraform.io/
+    sameAs: https://www.wikidata.org/wiki/Q28957072
+    importance: helpful
+    depth: 3
+  - concept: hmac
+    label: HMAC
+    url: https://it.wikipedia.org/wiki/HMAC
+    sameAs: https://www.wikidata.org/wiki/Q1669397
+    importance: helpful
+    depth: 3
+  - concept: boto3
+    label: boto3 (AWS SDK for Python)
+    url: https://boto3.amazonaws.com/v1/documentation/api/latest/index.html
+    importance: helpful
+    depth: 2
+  - concept: bearer-token
+    label: Bearer token
+    url: https://it.wikipedia.org/wiki/Bearer_token
+    importance: helpful
+    depth: 2
+  - concept: iso-8601
+    label: ISO 8601
+    url: https://it.wikipedia.org/wiki/ISO_8601
+    sameAs: https://www.wikidata.org/wiki/Q50101
+    importance: helpful
+    depth: 1
+  - concept: ontologia-computazionale
+    label: Ontologia (informatica)
+    url: https://it.wikipedia.org/wiki/Ontologia_(informatica)
+    sameAs: https://www.wikidata.org/wiki/Q324254
+    importance: helpful
+    depth: 4
+  - concept: object-storage
+    label: Object Storage
+    url: https://it.wikipedia.org/wiki/Object_storage
+    importance: helpful
+    depth: 1
+  - concept: least-privilege
+    label: Principio del privilegio minimo
+    url: https://it.wikipedia.org/wiki/Principio_del_privilegio_minimo
+    sameAs: https://www.wikidata.org/wiki/Q1083272
+    importance: helpful
+    depth: 2
+  - concept: npm
+    label: npm
+    url: https://www.npmjs.com/
+    importance: helpful
+    depth: 1
 ---
 
 Nella {% post_link /devops/seo-automatico-jekyll/ "prima parte" role="prerequisite" context="provides-context" target="internal" %} abbiamo costruito il **blocco 1** della pipeline SEO: il supporto all'autorialità. A ogni deploy, un workflow Github andava ad analizzare in ottica SEO i post nuovi o modificati tramite (individuati mediante `git diff`) e per ognuno di essi interrogava Lighthouse, PageSpeed Insights e IndexNow, segnalando potenziali problemi e fornendo indicazioni. Funziona. Ma è un'istantanea. Un controllo puntuale, una tantum. Un supporto alla fase di autorialità, appunto.
@@ -38,9 +277,11 @@ Così è nato il **blocco 2**: il monitoraggio SEO, appunto. In _free tier_, tan
 
 --
 
+<!-- image_placeholder: role="diagram" context="architecture" caption="Architettura del blocco 2: flusso dati da Google Trends, Search Console, PageSpeed e Lighthouse attraverso R2 (data lake) e dbt fino a D1 (DWH), con generazione di report mensile e alert" -->
+
 ## Architettura: da zero a data lake in tre mosse
 
-Il blocco 2 non è collegato al blocco 1, che scattava andando a fare le pulci ai post nuovi e modificati. È un **workflow indipendente** di buon, vecchio ETL, schedulato ogni lunedì alle 8:00 del mattino che:
+Il blocco 2 non è collegato al blocco 1, che scattava andando a fare le pulci ai post nuovi e modificati. È un **workflow indipendente** di buon, vecchio {% xlink "https://it.wikipedia.org/wiki/Extract,_transform,_load" "ETL" role="definition" context="provides-context" target="external-authoritative" %}, schedulato ogni lunedì alle 8:00 del mattino che:
 
 1. **Raccoglie** dati dal mondo esterno (Google Trends, Search Console)
 2. **Consolida** i dati già prodotti dal blocco 1 (PageSpeed, Lighthouse) in un archivio permanente
@@ -88,6 +329,8 @@ Creare un bucket è una riga:
 wrangler r2 bucket create unfantasticobucket-seo --location weur
 ```
 
+<!-- image_placeholder: role="screenshot" context="step" caption="Creazione del bucket R2 con wrangler CLI e verifica con wrangler r2 bucket list" -->
+
 Fine. Il bucket esiste. Non servono configurazioni aggiuntive, policy IAM o rete: R2 è _always-on_ e accessibile via internet in HTTP. Il location hint `weur` (Western Europe) mette il bucket fisicamente vicino al resto dell'infrastruttura Cloudflare, riducendo la latenza delle operazioni di ETL che vedremo dopo.
 
 Con `wrangler r2 bucket list` potete verificare che sia stato creato correttamente. Tutto a posto? Ok, continuiamo.
@@ -107,9 +350,11 @@ Output:
 database_id: XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
 ```
 
+<!-- image_placeholder: role="screenshot" context="step" caption="Creazione del database D1 con wrangler CLI e applicazione dello schema SQL iniziale" -->
+
 Il `database_id` è l'UUID che useremo per tutte le chiamate API successive. Salvatevelo da qualche parte (o, meglio ancora, lasciate che sia GitHub Actions a ricordarlo — ci arriviamo).
 
-A questo punto il database esiste ma è vuoto. Serve lo schema. Ho preparato un {% repo_url "seo-schema.sql" "file di schema" %} per la preparazione iniziale con tutte le tabelle, gli indici e i vincoli di unicità, eccetera. Lo applico con:
+A questo punto il database esiste ma è vuoto. Serve lo schema. Ho preparato un {% repo_url "seo-schema.sql" "file di schema" role="source" context="enables-step" %} per la preparazione iniziale con tutte le tabelle, gli indici e i vincoli di unicità, eccetera. Lo applico con:
 
 ```bash
 wrangler d1 execute unfantasticodatabase-seo --remote --file=seo-schema.sql
@@ -128,7 +373,7 @@ Per adesso non entriamo nel dettaglio del modello dati, lo faremo poi.
 
 ### I token: ogni servizio il suo
 
-Qui arriva l'unica parte che, per mia scelta, ho deciso di non fare via CLI, limitando quel tipo di _grant_ a `wrangler`, ovvero la creazione dei token di autenticazione. Ne servono due, con ambiti di accesso separati ({% xlink "https://en.wikipedia.org/wiki/Principle_of_least_privilege" "principio del privilegio minimo"  %}, che non fa mai male):
+Qui arriva l'unica parte che, per mia scelta, ho deciso di non fare via CLI, limitando quel tipo di _grant_ a `wrangler`, ovvero la creazione dei token di autenticazione. Ne servono due, con ambiti di accesso separati ({% xlink "https://en.wikipedia.org/wiki/Principle_of_least_privilege" "principio del privilegio minimo" role="definition" context="provides-context" target="external-authoritative" %}, che non fa mai male):
 
 * **R2 API Token.** Si crea da Dashboard → R2 → Manage R2 API Tokens. Va configurato con permessi di Object Read & Write, limitato al nostro bucket `unfantasticobucke-seo`. Il token produce una coppia Access Key ID + Secret Access Key, identica a quella di AWS IAM. `boto3` (o chi per essa) la userà per autenticare le chiamate S3.
 
@@ -152,13 +397,15 @@ Per il blocco 2, i secrets da configurare per la parte di infrastruttura sono qu
 
 Alcuni di questi probabilmente li avete già configurati per il blocco 1. Controllate che siano tutti presenti prima di lanciare il workflow.
 
+<!-- image_placeholder: role="screenshot" context="reference" caption="Schermata Settings > Secrets and variables > Actions di GitHub con i sette secrets Cloudflare configurati" -->
+
 Con questo, l'infrastruttura è pronta. Abbiamo un bucket R2 che farà da data lake, un database D1 che ospiterà i dati strutturati, e tutti i token necessari perché GitHub Actions possa parlare con entrambi. Ora possiamo passare alla ciccia vera.
 
 ---
 
 ## Step 2: arricchire la pipeline SEO principale
 
-La prima modifica è stata alla  {% repo_url ".github/workflows/seo-pipeline.yml" "pipeline principale" %}, quella di supporto autoriale. Nella precedente versione, gli strumenti che erano in grado di produrre output strutturato, ad esempio {% xlink "https://pagespeed.web.dev/" "PageSpeed Insights" %} e {% xlink "https://developer.chrome.com/docs/lighthouse?hl=it" "Lighthouse"  %}, lo facevano sottoforma di **GitHub Artifacts** JSON. Dopo un mese, ruotavano via, spesso prima che potessi consultarli e con l'impossibilità di fare una analisi storica.
+La prima modifica è stata alla  {% repo_url ".github/workflows/seo-pipeline.yml" "pipeline principale" role="source" context="enables-step" %}, quella di supporto autoriale. Nella precedente versione, gli strumenti che erano in grado di produrre output strutturato, ad esempio {% xlink "https://pagespeed.web.dev/" "PageSpeed Insights" role="tool" context="enables-step" target="external-authoritative" %} e {% xlink "https://developer.chrome.com/docs/lighthouse?hl=it" "Lighthouse" role="tool" context="enables-step" target="external-authoritative" %}, lo facevano sottoforma di **GitHub Artifacts** JSON. Dopo un mese, ruotavano via, spesso prima che potessi consultarli e con l'impossibilità di fare una analisi storica.
 
 Il primo passo è stato far persistere questi file su **R2**, su cui copio i resoconti in JSON (mentre gli HTML, pensati per ispezione manuale, restano come artifact. Continuerò a non guardarli mai).
 
@@ -172,15 +419,17 @@ In più, anche in questa fase c'è una componente di **job di change tracking** 
 
 Il blocco 1 mi dice _come sto_. Il blocco 2 mi dice _cosa dovrei scrivere_.
 
-Ho integrato **Google Trends** tramite {% xlink "https://serpapi.com/" "serpapi" role="tool" context="enables-step" target="external-commercial" %} (100 chiamate/mese gratis, per un weekly bastano e avanzano). Le keyword da monitorare non le ho scelte io: le estrae automaticamente il sistema:
+Ho integrato **Google Trends** tramite {% xlink "https://serpapi.com/" "serpapi" role="tool" context="enables-step" target="external-commercial" %} (100 chiamate/mese gratis, per un blog bastano...per poco, ma bastano). Le keyword da monitorare non le ho scelte io: le estrae automaticamente il sistema:
 
-1. **Categorie del blog** — "DevOps", "Fisica", "Reti Sociali", "Home Assistant", "Meccanica" (fisse, 5)
-2. **Top-10 tag per frequenza** — calcolati dinamicamente da tutti i frontmatter dei post
-3. **Rising queries** — le query in crescita che Google Trends associa a ogni keyword seed (scoperta automatica!)
+1. **Categorie del blog** — "DevOps", "Fisica", "Reti Sociali", "Home Assistant", "3d Printing"...sono scritte li sopra.
+2. **Top-10 tag per frequenza** — calcolati dinamicamente raccogliendo i metadati dai frontmatter dei post
+3. **Rising queries** — le query in crescita che Google Trends associa a ogni keyword seed.
 
-Il seed set è di circa 25-30 keyword per run. Per ognuna, salvo l'interesse nel tempo (90 giorni), la distribuzione geografica (Italia) e le query correlate in crescita. Queste ultime sono il vero oro: ogni settimana scopro cosa sta cercando la gente _adesso_, e posso decidere se scriverne.
+Il seed set è di circa 25-30 keyword per run. Per ognuna, salvo l'interesse nel tempo (90 giorni), la distribuzione geografica (Italia) e le query correlate in crescita. Queste ultime sono il vero regalod della pipeline: ogni settimana scopro cosa sta cercando la gente _adesso_, e posso decidere se scriverne.
 
 I dati finiscono su R2 (raw) e su D1 (`keyword_trends`) per le query analitiche.
+
+<!-- image_placeholder: role="chart" context="result" caption="Esempio di serie temporale dell'interesse per una keyword su Google Trends: andamento a 90 giorni con picco stagionale e rising queries correlate" -->
 
 ---
 
@@ -194,32 +443,40 @@ Se Google Trends ti dice cosa cercano, **Search Console** ti dice come ti trovan
 
 Anche questi dati vanno su R2 (raw) e D1 (`search_console_data`). La tabella ha colonne per `query`, `page`, `clicks`, `impressions`, `ctr`, `position`, `device`, `country` — abbastanza per fare analisi di coverage e identificare i contenuti che performano meglio (o peggio) del previsto.
 
+<!-- image_placeholder: role="screenshot" context="result" caption="Esempio di report Google Search Console: tabella query con click, impression, CTR e posizione media per le top 10 keyword" -->
+
 ---
 
 ## dbt: dal data lake al data warehouse
 
-Fin qui abbiamo **dati grezzi** in R2 e D1. Ma dati grezzi non sono informazione. Servono **trasformazioni**: pulizia, deduplicazione, aggregazione, modellazione dimensionale.
+Fin qui abbiamo **dati grezzi** in R2 e D1. Ma da qui a creare un {% xlink "https://it.wikipedia.org/wiki/Data_warehouse" "DWH" role="definition" context="provides-context" target="external-authoritative" %} ce ne corre. Servono **trasformazioni**: pulizia, deduplicazione, aggregazione, modellazione dimensionale, indici...
 
-Per questo ho scelto {% xlink "https://www.getdbt.com/" "dbt" role="tool" context="enables-step" target="external-authoritative" %} (data build tool). dbt è lo standard de facto per la trasformazione dati in ambienti analitici: scrivi modelli SQL, dichiari le dipendenze tra di essi, e dbt li esegue nell'ordine giusto, con test di qualità e contratti di schema. Non è un orchestratore — è un compilatore intelligente.
+Per questo ho scelto {% xlink "https://www.getdbt.com/" "dbt" role="tool" context="enables-step" target="external-authoritative" %} (data build tool). dbt è lo standard de facto per la trasformazione a riga di comando di dati in ambienti analitici. È totalmente dichiarativo: scrivi modelli SQL, dichiari le dipendenze tra di essi, e dbt li esegue nell'ordine giusto, con test di qualità e contratti di schema. Non è un orchestratore — è più un _resolver_.
+
+Ora, non intendo trasformare questo articolo in tutorial su dbt (ci torneremo), ma diamo comunque un'occhio alla catena di trasformazione del dato.
 
 Il progetto dbt (`_dbt/`) è strutturato in due layer:
+
+<!-- image_placeholder: role="diagram" context="architecture" caption="Pipeline di trasformazione dbt: layer staging (pulizia e normalizzazione) e layer analytics (modelli dimensionali), con flusso R2 → staging → analytics → D1" -->
 
 ### Staging (pulizia e normalizzazione)
 
 ```
-stg_seo_snapshots   → deduplica i JSON di PageSpeed/Lighthouse
-stg_post_history    → arricchisce i git diff con metriche derivate
-stg_keyword_trends  → normalizza i dati Trends
-stg_search_console  → pulisce e tipizza i dati GSC
+stg_seo_snapshots   → deduplica i JSON di PageSpeed/Lighthouse - elimina i duplicati e trasforma le strutture in oggetti tabellari (che possono essere salvati in un database)
+stg_post_history    → funge da livello base di _change data capture_: usa `git diff` per estarre i post che sono stati aggiunti o modificati e in che modo
+stg_keyword_trends  → normalizza i dati di Google Trends
+stg_search_console  → deduplica e normalizza i dati di Google Search Console
 ```
 
 ### Analytics (modelli dimensionali)
 
+Un livello di astrazione del dato in cui è più facile condurre analisi e interrogazioni. Pur molto semplice, è in tutto e per tutto un DWH in miniatura:
+
 ```
-dim_posts            → SCD Type 2: storico delle modifiche a titoli, tag e categoria
-fct_seo_metrics      → KPI SEO giornalieri (performance, accessibility, LCP, CLS, etc.)
-fct_post_activity    → velocità e magnitudine delle modifiche per post
-fct_keyword_performance → copertura e trend delle keyword
+dim_posts            → Dimension SCD Type 2: storico delle modifiche a titoli, tag e categoria, mantenendo lo storico e le evoluzioni jdi tutti i cambiamenti
+fct_seo_metrics      → Fatti SEO (performance, accessibility, LCP, CLS, etc.)
+fct_post_activity    → Fatti autoriali (aggiunte, modifiche dei post, cambiamenti nei tag, ecc.)
+fct_keyword_performance → Fatti esogeni: copertura e trend delle keyword in ascesa, evidenze di possibili nicchie di contenuto da presidiare con nuovi articoli, ecc.
 ```
 
 Ecco il modello ER completo di ciò che vive su D1 — le tabelle raw (a sinistra) e i modelli analytics che dbt genera (a destra):
@@ -363,9 +620,9 @@ erDiagram
     }
 ```
 
-Il **dim_posts** è la parte più elegante: usa una **Slowly Changing Dimension di Tipo 2**, il che significa che ogni modifica a un post (titolo, categoria, tag) crea una nuova riga con `valid_from`/`valid_to`, e la riga corrente ha `is_current = TRUE`. Questo permette di ricostruire lo stato del blog _in qualsiasi momento nel passato_ e di correlare i cambiamenti nei contenuti con i trend SEO. Seontology, dicevamo.
+Il **dim_posts** è la parte più elegante: usa una **Slowly Changing Dimension di Tipo 2**, il che significa che ogni modifica a un post (titolo, categoria, tag) crea una nuova riga con `valid_from`/`valid_to`, e la riga corrente ha `is_current = TRUE`. Questo permette di ricostruire lo stato del blog _in qualsiasi momento nel passato_ e di correlare i cambiamenti nei contenuti con i trend SEO.
 
-dbt compila i modelli in SQLite (il dialetto di D1), valida i contratti di schema (tipi, vincoli, test `unique`/`not_null`/`relationships`) e un adapter Python (`dbt_runner.py`) applica il SQL compilato a D1 via HTTP API. Niente database locale, niente DuckDB, niente complicazioni: il SQL è SQLite, D1 è SQLite.
+dbt compila i modelli in SQLite (il dialetto SQL compreso da Cloudflare D1), valida la struttura dei dati (tipi, vincoli, test `unique`/`not_null`/`relationships`) e un adapter Python (`dbt_runner.py`) applica il SQL compilato a D1 via HTTP API.
 
 ---
 
@@ -381,9 +638,11 @@ Un sistema di monitoring senza alert è un sistema di monitoring inutile. Le sog
 | LCP mobile | > 4 secondi | Alert |
 | CLS | > 0.25 | Alert |
 
-Gli alert vengono registrati nella tabella D1 `alerts` e salvati come artifact JSON del workflow, accessibile dalla pagina dell'azione su GitHub. Niente issue automatiche, niente spam sulla codebase: il report è un artifact, non un disturbo. Se voglio approfondire, apro l'ultimo workflow run e leggo.
+Gli alert vengono registrati nella tabella D1 `alerts` e salvati come artifact JSON del workflow, accessibile dalla pagina dell'azione su GitHub. 
 
-Per il futuro (blocco 3), l'idea è che questi alert vengano consumati da un agente LLM che propone — e applica — le correzioni automaticamente. Ma non anticipiamo.
+<!-- image_placeholder: role="screenshot" context="result" caption="Tabella degli alert su D1: URL, metrica, valore corrente vs soglia di allarme e stato di acknowledgment" -->
+
+Per il futuro (blocco 3), l'idea è che questi alert vengano consumati da un agente LLM che propone — e applica — le correzioni (quasi) automaticamente. Ma non anticipiamo.
 
 ---
 
@@ -396,7 +655,9 @@ Se il workflow cade di lunedì, e quel lunedì è il primo del mese, parte la ge
 - **Alert del mese**: tabella con URL, metrica, valore vs soglia
 - **Search Console top queries**: cosa ha performato meglio in termini di click e CTR
 
-Il report viene salvato come artifact del workflow. Niente GitHub Issues, niente PR: la codebase resta pulita, il report è un output della pipeline, come un log di build. Lo apro quando voglio, lo ignoro quando non mi serve.
+Il report viene salvato come artifact del workflow. Lo apro quando sento che il contenuto sta perdendo un po' di slancio, lo ignoro quando voglio concentrarmi sulla scrittura.
+
+<!-- image_placeholder: role="screenshot" context="result" caption="Estratto del report mensile Markdown: Site Health Overview con medie per categoria, alert table e top queries Search Console" -->
 
 ---
 
@@ -411,19 +672,39 @@ Zero. Ecco il conto:
 - **Google Search Console API**: gratuita, limiti giornalieri generosissimi.
 - **Google Trends**: gratuito (tramite serpapi, che fa da proxy).
 
-Non sto pagando un centesimo per tutto questo. Il free tier è la mia religione.
+Quindi ETL, DWH e reportistica SEO gratis? Beh...ehm...sì.
 
+<!-- image_placeholder: role="chart" context="comparison" caption="Confronto costi mensili: free tier Cloudflare (R2 + D1) vs equivalenti AWS S3 + RDS, Azure Blob + SQL Database, GCP Cloud Storage + Cloud SQL per le stesse operazioni" -->
+
+## Ma alla fine...cosa abbiamo creato?
+
+È, come detto, un DWH in miniatura che assolve due scopi ben precisi, con il minor numero minimo di tabelle (si, sono un fan dello _Small Data_): monitorare ciò che accade e fornirmi spunti per nuovi articoli.
+
+Questo è immediatamente chiaro guardando i tre piccoli _data mart_ che lo compongono:
+
+1. La componente **Google Search Console** mi aiuta a capire come è posizionato il mio contenuto sui motori di ricerca e quanto è rilevante nelle ricerche degli utenti.
+2. La componente **Post History** tiene traccia della dinamica dei contenuti. Con essa posso cercare le eventuali cause di una modifica all'esposizione misurata da Search Console: sono state causate dalla pubblicazione di un nuovo articolo? Dall'aggiunta di un paragrafo, nuovi metadati o un aggiornamento della _tag-soup_ di un articolo esistente? Dalla variazione di autorità dei link che puntano o sono puntati da un mio post sui social?
+3. La parte di **Google Trends** chiude il cerchio: mi aiuta a capire se una variazione di performance di un mio contenuto è stata magari causata non da un mio intervento sul contenuto stesso, ma da una variabile esogena, come una stagionalità, una keyword per la quale si è perso interesse, una nicchia che ho colpito. Mi suggerisce, inoltre, keyword affini che stanno crescendo o per cui è previsto un picco...una buona idea per un nuovo articolo!
+
+Ci tengo a far notare che, come dice anche il footer, **questo sito non deposita alcun cookie**. Di nessun genere. Men che meno quelli di profilazione.
+
+Non traccio le visite degli utenti con nessun sistema, non c'è Google Analytics o un altro tracker di nessun genere, qui dentro. Gli unici dati che ho sono i log degli accessi del web server, anonimizzati e con IP mascherati.
+
+Quindi, tutta la mia intelligence è basata su fenomeni esterni o comunque misurati esternamente, che hanno un _riflesso_ indiretto su ciò che accade al mio sito. Avrebbe potuto essere una grossa limitazione alla raccolta dei dati, ma è stata una mia precisa scelta etica. E, devo dire, che alla prova dei fatti, le poche tabelle descritte sopra in realtà si sono rilevate perfettamente adeguate ai fini di questo blog. Beccati questo {% xlink "https://www.seozoom.it/remarketing-retargeting/" "remarketing" role="deepening" context="offers-alternative" target="external-commercial" %}¹!
+
+¹ Ovviamente, la vita è _moooolto_ più complicata di così. Possiamo allora più realisticamente dire che è adeguato è che per le finalità divulgative di questo blog, a scopo non di lucro, scritto per il piacede di scrivere e che se proprio vogliamo trovargli degli obiettivi di marketing questi sono aumentare il _citation rate_ dei miei articoli e l'aumento della mia base social.
 ---
 
 ## Prossimi passi: il blocco 3
 
-Ora che ho i dati (blocco 1) e il monitoraggio (blocco 2), il passo finale è **l'applicazione automatica delle migliorie**. L'idea:
+Ora che ho i dati (blocco 1) e il monitoraggio (blocco 2), il passo finale è **l'applicazione automatica delle migliorie**. L'idea è quella di un agente LLM cher agisce come un professore a scuola:
 
-1. Un agente LLM analizza i report SEO e gli alert
-2. Propone modifiche ai post (es. "il titolo è troppo lungo per Google", "manca l'alt text su questa immagine", "questa keyword sta crescendo, scrivici un articolo")
-3. Le modifiche vengono applicate in una pull request su GitHub
-4. Il blocco 2 monitora l'effetto delle modifiche e chiude il ciclo di feedback
+1. Analizza i report SEO e gli alert
+2. Propone modifiche ai post, sia tecniche ("il titolo è troppo lungo per Google")  che lessicografiche (es. "questo post non è abbastanza accessibile, ha troppi prerequisiti tecnici che hai dato per scontato", "questa keyword sta crescendo, scrivici un articolo")
+3. Invia segnalazioni che aprono delle issue e/o le modifiche vengono applicate in una pull request su GitHub. Io passo e valuto se fare merge o respingerle.
 
-Ma per oggi va bene così. Il cruscotto è acceso. I numeri arrivano. La macchina gira.
+Il blocco 2, intanto, monitora l'effetto delle eventuali modifiche e chiude il ciclo di feedback sul lungo termine.
 
-Nel frattempo, tutto il codice è su {% xlink "https://github.com/theclue/gabrielebaldassarre.com" "GitHub" role="source" context="supports-claim" target="external-community" %}, nella directory `_scripts/seo/` e `_dbt/`. Sentitevi liberi di saccheggiarlo.
+Ma per oggi va bene così. I numeri arrivano. La macchina gira. Il dado (o il dato?) è tratto.
+
+Nel frattempo, tutto il codice che non abbiamo potuto vedere direttamente qui è su {% xlink "https://github.com/theclue/gabrielebaldassarre.com" "GitHub" role="source" context="supports-claim" target="external-community" %}, nella directory `_scripts/seo/` e `_dbt/` ed è molto commentato. Sentitevi liberi di saccheggiarlo.

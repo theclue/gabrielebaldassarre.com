@@ -13,6 +13,11 @@ broadcast:
 header:
   overlay_filter: 0.5
 tags: [SEO, Jekyll, GitHub Actions, CI/CD, DevOps, webperf, LLM, PageSpeed, GEO]
+series:
+  id: "seo-automatico"
+  title: "SEO automatico"
+  part: 1
+  total_parts: 4
 intended_audience: practitioner
 proficiency_level: intermediate
 knowledge_prerequisites:
@@ -335,7 +340,6 @@ Nel mio caso, ad esempio, che uso una CDN per le immagini, durante il build gli 
 
 I report HTML e JSON sono salvati come workflow artifact con timestamp e commit hash nel nome (`assertions-20260516-164500-a1b2c3d.json`), da dove li recupero per un'ispezione ad oggi manuale. Sono incredibilmente ricchi di informazioni. Forse anche troppe, per un umano... se capite dove voglio arrivare.
 
-<!-- TODO: inserire screenshot del log del workflow con i risultati dei 4 check -->
 
 #### Gestire secrets e API key
 
