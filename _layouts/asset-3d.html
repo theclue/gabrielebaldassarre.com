@@ -1,171 +1,120 @@
 ---
 layout: post
 ---
-<article class="hentry" itemscope itemtype="https://schema.org/BlogPosting">
-  {%- if page.master %}
-    {%- assign overlay = page.master | cloudinary_hero: page.header %}
-  {%- elsif page.header.overlay_image %}
-    {%- assign overlay = page.header.overlay_image | cloudinary_hero: page.header %}
-  {%- endif %}
-  {% if overlay %}
-  <div class="featured-image main-header-image">
-    <img src="{{ overlay }}"
-         alt="{% if page.image_meta.role == 'decorative' %}{% elsif page.image_meta.caption %}{{ page.image_meta.caption }}{% else %}{{ page.header.overlay_alt | default: page.title | strip_html }}{% endif %}"
-         loading="eager"
-         decoding="async"
-         fetchpriority="high">
+
+{{ content }}
+
+{%- assign model = page["3d_model"] -%}
+{%- if model -%}
+<!-- 3D Model Asset Card -->
+<hr>
+<section class="asset-card asset-card--3d" itemscope itemtype="https://schema.org/3DModel">
+
+  {%- if model.previews.isometric -%}
+  <div class="asset-card__preview">
+    <img src="{{ model.previews.isometric | relative_url }}"
+         alt="Isometric preview of {{ page.title | escape }}"
+         itemprop="thumbnailUrl"
+         loading="lazy"
+         decoding="async">
   </div>
-  {% endif %}
+  {%- endif -%}
 
-  {% include breadcrumbs.html %}
+  <div class="asset-card__details">
 
-  {% if page.title %}<meta itemprop="headline" content="{{ page.title | markdownify | strip_html | strip_newlines | escape_once }}">{% endif %}
-  {% if page.excerpt %}<meta itemprop="description" content="{{ page.excerpt | markdownify | strip_html | strip_newlines | escape_once }}">{% endif %}
-  {% if page.date %}<meta itemprop="datePublished" content="{{ page.date | date_to_xmlschema }}">{% endif %}
-  {% if page.last_modified_at %}<meta itemprop="dateModified" content="{{ page.last_modified_at | date_to_xmlschema }}">{% endif %}
+    <h2 class="asset-card__title">{{ page.title | escape }} &mdash; Download</h2>
 
-  <header>
-    <h1 class="entry-title" itemprop="name">
-      {{ page.title | markdownify | remove: "<p>" | remove: "</p>" }}
-    </h1>
-    {% if page.subtitle %}
-    <p class="entry-subtitle">{{ page.subtitle }}</p>
-    {% endif %}
-
-    {% include page_meta.html %}
-  </header>
-
-  <hr>
-
-  <div class="entry-content" itemprop="articleBody">
-    {{ content }}
-  </div>
-
-  {% include series_nav.html %}
-
-  {% include series_index.html %}
-
-  {% if page.tags and page.tags.size > 0 %}
-  <hr>
-  <nav class="inline-tags" aria-label="Tags">
-    {% for tag in page.tags %}
-      <a href="{{ '/tags/#' | append: tag | relative_url }}">#{{ tag }}</a>
-    {% endfor %}
-  </nav>
-  {% endif %}
-
-  {%- assign model = page.3d_model -%}
-  {%- if model -%}
-  <!-- 3D Model Asset Card -->
-  <hr>
-  <section class="asset-card asset-card--3d" itemscope itemtype="https://schema.org/3DModel">
-
-    {%- if model.previews.isometric.path -%}
-    <div class="asset-card__preview">
-      <img src="{{ model.previews.isometric.path | relative_url }}"
-           alt="Isometric preview of {{ page.title | escape }}"
-           itemprop="thumbnailUrl"
-           loading="lazy"
-           decoding="async">
-    </div>
+    {%- if model.designed_for -%}
+    <p class="asset-card__description" itemprop="description">{{ model.designed_for }}</p>
     {%- endif -%}
 
-    <div class="asset-card__details">
-
-      <h2 class="asset-card__title">{{ page.title | escape }} &mdash; Download</h2>
-
-      {%- if model.designed_for -%}
-      <p class="asset-card__description" itemprop="description">{{ model.designed_for }}</p>
+    {%- if model.print_settings or model.material or model.dimensions -%}
+    <dl class="asset-card__specs">
+      {%- if model.material -%}
+      <dt>Materiale consigliato</dt>
+      <dd>{{ model.material }}</dd>
       {%- endif -%}
 
-      {%- if model.print_settings or model.material or model.dimensions -%}
-      <dl class="asset-card__specs">
-        {%- if model.material -%}
-        <dt>Materiale consigliato</dt>
-        <dd>{{ model.material }}</dd>
-        {%- endif -%}
-
-        {%- if model.dimensions.width -%}
-        <dt>Dimensioni</dt>
-        <dd>{{ model.dimensions.width }} &times; {{ model.dimensions.depth }} &times; {{ model.dimensions.height }} mm</dd>
-        {%- endif -%}
-
-        {%- if model.print_settings.nozzle -%}
-        <dt>Stampante</dt>
-        <dd>Nozzle {{ model.print_settings.nozzle }} mm, layer {{ model.print_settings.layer_height | default: 0.2 }} mm, infill {{ model.print_settings.infill | default: "15% gyroid" }}{% if model.print_settings.supports %}, supporti richiesti{% endif %}</dd>
-        {%- endif -%}
-
-        {%- if model.license -%}
-        <dt>Licenza</dt>
-        <dd>{{ model.license }}</dd>
-        {%- endif -%}
-      </dl>
+      {%- if model.dimensions.width -%}
+      <dt>Dimensioni</dt>
+      <dd>{{ model.dimensions.width }} &times; {{ model.dimensions.depth }} &times; {{ model.dimensions.height }} mm</dd>
       {%- endif -%}
 
-      <div class="asset-card__actions">
-        {%- if model.downloads.thingiverse.url -%}
-        <a href="{{ model.downloads.thingiverse.url }}"
-           class="asset-card__button asset-card__button--thingiverse"
-           rel="external noopener"
-           target="_blank"
-           itemprop="sameAs">
-          {% include icon.html name="printer-3d" %}
-          Thingiverse
-          {% include icon.html name="open-in-new" %}
-        </a>
-        {%- endif -%}
-
-        {%- if model.downloads.printables.url -%}
-        <a href="{{ model.downloads.printables.url }}"
-           class="asset-card__button asset-card__button--printables"
-           rel="external noopener"
-           target="_blank"
-           itemprop="sameAs">
-          {% include icon.html name="printer-3d" %}
-          Printables
-          {% include icon.html name="open-in-new" %}
-        </a>
-        {%- endif -%}
-
-        {%- unless model.downloads.thingiverse.url or model.downloads.printables.url -%}
-        {%- if model.exports.stl -%}
-        <a href="{{ model.exports.stl | relative_url }}"
-           class="asset-card__button asset-card__button--download"
-           download
-           itemprop="encoding"
-           itemscope itemtype="https://schema.org/MediaObject">
-          {% include icon.html name="download" %}
-          <span itemprop="encodingFormat">model/stl</span>
-        </a>
-        {%- endif -%}
-        {%- if model.exports.3mf -%}
-        <a href="{{ model.exports.3mf | relative_url }}"
-           class="asset-card__button asset-card__button--download"
-           download
-           itemprop="encoding"
-           itemscope itemtype="https://schema.org/MediaObject">
-          {% include icon.html name="download" %}
-          <span itemprop="encodingFormat">model/3mf</span>
-        </a>
-        {%- endif -%}
-        {%- endunless -%}
-      </div>
-
-      {%- if model.sources.scad -%}
-      <p class="asset-card__source">
-        {% include icon.html name="github" %}
-        Sorgente OpenSCAD:
-        <a href="https://github.com/theclue/gabrielebaldassarre.com/blob/main/{{ model.sources.scad }}"
-           rel="external noopener"
-           target="_blank"
-           itemprop="codeRepository">
-          {{ model.sources.scad | split: "/" | last }}
-          {% include icon.html name="open-in-new" %}
-        </a>
-      </p>
+      {%- if model.print_settings.nozzle -%}
+      <dt>Stampante</dt>
+      <dd>Nozzle {{ model.print_settings.nozzle }} mm, layer {{ model.print_settings.layer_height | default: 0.2 }} mm, infill {{ model.print_settings.infill | default: "15% gyroid" }}{% if model.print_settings.supports %}, supporti richiesti{% endif %}</dd>
       {%- endif -%}
 
+      {%- if model.license -%}
+      <dt>Licenza</dt>
+      <dd>{{ model.license }}</dd>
+      {%- endif -%}
+    </dl>
+    {%- endif -%}
+
+    <div class="asset-card__actions">
+      {%- if model.downloads.thingiverse.url -%}
+      <a href="{{ model.downloads.thingiverse.url }}"
+         class="asset-card__button asset-card__button--thingiverse"
+         rel="external noopener"
+         target="_blank"
+         itemprop="sameAs">
+        {% include icon.html name="printer-3d" %}
+        Thingiverse
+        {% include icon.html name="open-in-new" %}
+      </a>
+      {%- endif -%}
+
+      {%- if model.downloads.printables.url -%}
+      <a href="{{ model.downloads.printables.url }}"
+         class="asset-card__button asset-card__button--printables"
+         rel="external noopener"
+         target="_blank"
+         itemprop="sameAs">
+        {% include icon.html name="printer-3d" %}
+        Printables
+        {% include icon.html name="open-in-new" %}
+      </a>
+      {%- endif -%}
+
+      {%- unless model.downloads.thingiverse.url or model.downloads.printables.url -%}
+      {%- if model.exports.stl -%}
+      <a href="{{ model.exports.stl | relative_url }}"
+         class="asset-card__button asset-card__button--download"
+         download
+         itemprop="encoding"
+         itemscope itemtype="https://schema.org/MediaObject">
+        {% include icon.html name="download" %}
+        <span itemprop="encodingFormat">model/stl</span>
+      </a>
+      {%- endif -%}
+      {%- if model.exports["3mf"] -%}
+      <a href="{{ model.exports["3mf"] | relative_url }}"
+         class="asset-card__button asset-card__button--download"
+         download
+         itemprop="encoding"
+         itemscope itemtype="https://schema.org/MediaObject">
+        {% include icon.html name="download" %}
+        <span itemprop="encodingFormat">model/3mf</span>
+      </a>
+      {%- endif -%}
+      {%- endunless -%}
     </div>
-  </section>
-  {%- endif -%}
-</article>
+
+    {%- if model.sources.scad -%}
+    <p class="asset-card__source">
+      {% include icon.html name="github" %}
+      Sorgente OpenSCAD:
+      <a href="https://github.com/theclue/gabrielebaldassarre.com/blob/main/{{ model.sources.scad }}"
+         rel="external noopener"
+         target="_blank"
+         itemprop="codeRepository">
+        {{ model.sources.scad | split: "/" | last }}
+        {% include icon.html name="open-in-new" %}
+      </a>
+    </p>
+    {%- endif -%}
+
+  </div>
+</section>
+{%- endif -%}

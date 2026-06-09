@@ -27,6 +27,18 @@
     {
       "name": "🔌 Plugins",
       "path": "_plugins"
+    },
+    {
+      "name": "📐 CAD",
+      "path": "_cad"
+    },
+    {
+      "name": "🔧 Scripts",
+      "path": "_scripts"
+    },
+    {
+      "name": "🐋 Containers",
+      "path": "containers"
     }
   ],
   "settings": {
@@ -40,6 +52,10 @@
     "devstock.unsplashApiKey": "",
     "devstock.imageSize": "large",
     "devstock.downloadPath": "assets/images",
-    "devstock.triggerPattern": "{/unsplash}"
+    "devstock.triggerPattern": "{/unsplash}",
+    "files.associations": {
+      "*.scad": "openscad"
+    }
   }
+}
 }

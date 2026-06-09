@@ -25,7 +25,7 @@ title: Tags Archive
             <ul>
                 {% for post in site.tags[this_word] %}
                     {% if post.title != null %}
-                        <li class="entry-title"><a href="{{ site.url }}{{ post.url }}" title="{{ post.title }}">{{ post.title }}{% if post.subtitle %}: {{post.subtitle}}{% endif %}</a> 
+                        <li class="entry-title{% if post.path contains '_drafts/' or post.date > site.time %} post-preview-unpublished{% endif %}">{% include post_status.html post=post %}<a href="{{ site.url }}{{ post.url }}" title="{{ post.title }}">{{ post.title }}{% if post.subtitle %}: {{post.subtitle}}{% endif %}</a> 
                         <br> 
                              <div class="post-byline">
                                 {% if post.venue %}<i>{{ post.venue }}</i> <br>{% endif %}

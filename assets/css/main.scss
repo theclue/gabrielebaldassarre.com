@@ -735,6 +735,14 @@ kbd {
 
 .entry-content img { border-radius: var(--radius-md); }
 
+/* Optional width constraints for body images (controlled via {% cloudinary ... width="N" %}) */
+@media (min-width: 48em) {
+  .entry-content .img-width-75 { max-width: 75%; margin-inline: auto; }
+  .entry-content .img-width-66 { max-width: 66%; margin-inline: auto; }
+  .entry-content .img-width-50 { max-width: 50%; margin-inline: auto; }
+  .entry-content .img-width-33 { max-width: 33%; margin-inline: auto; }
+}
+
 [data-theme="dark"] .entry-content img[src$=".svg"] {
   background-color: #fff;
   border-radius: var(--radius-md);
@@ -1189,8 +1197,168 @@ figure.highlight pre {
 }
 
 /* ---------------------------------------------------------------------------
-   10. PRINT
-   --------------------------------------------------------------------------- */
+   10. POST STATUS INDICATORS (draft / future, dev mode only)
+    --------------------------------------------------------------------------- */
+
+.icon-status {
+  height: .85em;
+  width: .85em;
+  opacity: .6;
+  margin: 0 .2em .1em 0;
+  vertical-align: middle;
+  color: var(--color-text-muted);
+}
+
+.post-status {
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+}
+
+.post-preview-unpublished {
+  font-style: italic;
+}
+
+/* ---------------------------------------------------------------------------
+   11. 3D ASSET DOWNLOAD CARD (_layouts/asset-3d.html)
+    --------------------------------------------------------------------------- */
+
+.asset-card {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-md);
+  padding: var(--space-lg);
+  margin-block: var(--space-xl);
+  background-color: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+}
+
+.asset-card__preview {
+  width: 260px;
+  flex-shrink: 0;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background-color: var(--color-bg-subtle);
+}
+
+.asset-card__preview img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.asset-card__details {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.asset-card__title {
+  font-size: var(--fs-400);
+  font-weight: 700;
+  margin: 0;
+  color: var(--color-text);
+}
+
+.asset-card__description {
+  color: var(--color-text-muted);
+  font-size: var(--fs-200);
+  margin: 0;
+}
+
+.asset-card__specs {
+  margin: 0;
+  font-size: var(--fs-200);
+  color: var(--color-text-muted);
+}
+
+.asset-card__specs dt {
+  font-weight: 600;
+  color: var(--color-text);
+  margin-top: var(--space-2xs);
+}
+
+.asset-card__specs dd {
+  margin-left: 0;
+  margin-bottom: var(--space-2xs);
+}
+
+.asset-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  margin-top: var(--space-xs);
+}
+
+.asset-card__button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  padding: var(--space-2xs) var(--space-sm);
+  font-size: var(--fs-200);
+  font-weight: 600;
+  text-decoration: none;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  transition: all var(--dur-fast) var(--ease-out);
+}
+
+.asset-card__button:hover {
+  background-color: var(--color-bg-subtle);
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.asset-card__button--thingiverse {
+  border-color: #248bfb;
+  color: #248bfb;
+}
+
+.asset-card__button--thingiverse:hover {
+  background-color: #248bfb;
+  color: #fff;
+}
+
+.asset-card__button--printables {
+  border-color: #fa6831;
+  color: #fa6831;
+}
+
+.asset-card__button--printables:hover {
+  background-color: #fa6831;
+  color: #fff;
+}
+
+.asset-card__button--download {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.asset-card__button--download:hover {
+  background-color: var(--color-accent);
+  color: #fff;
+}
+
+.asset-card__source {
+  margin: 0;
+  font-size: var(--fs-200);
+  color: var(--color-text-muted);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2xs);
+}
+
+.asset-card__source a {
+  color: var(--color-link);
+  font-weight: 500;
+}
+
+/* ---------------------------------------------------------------------------
+   12. PRINT
+    --------------------------------------------------------------------------- */
 
 @media print {
   .site-header, .footer-wrapper, .pagination, .navigation-bar, .theme-toggle,

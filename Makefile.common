@@ -1,4 +1,4 @@
-.PHONY: help build build-knitr build-seo build-cad knitr dev site seo cad
+.PHONY: help build build-knitr build-seo build-cad knitr dev site seo cad cad-png
 .DEFAULT_GOAL := help
 
 ROOT_DIR := $(abspath $(patsubst %/,%,$(dir $(abspath $(firstword $(MAKEFILE_LIST))))))
@@ -14,7 +14,6 @@ LOCALE_LANG := it-IT
 CONFIG_FILE := $(ROOT_DIR)/.build_config
 -include $(CONFIG_FILE)
 
-# Default to Docker when configure hasn't been run
 HAS_KNITR       ?= 0
 HAS_OPENSCAD    ?= 0
 HAS_IMAGEMAGICK ?= 0
@@ -22,7 +21,14 @@ RSCRIPT_BIN     ?= Rscript
 OPENSCAD_BIN    ?= openscad
 PYTHON3_BIN     ?= python3
 
-# ── Build targets ──────────────────────────────────────────────────────────
+# ── Blog-presentation rendering defaults (overridable) ─────────────────
+# These are NOT CAD parameters — they control the post-processing pipeline
+# for blueprint lineart previews.  CAD parameters (explode_distance, etc.)
+# live in each .scad file's Customizer panel.
+BLUEPRINT_COLOR_SCHEME ?= blueprint
+BLUEPRINT_EXPLODE_DIST ?= 25
+
+# ── Docker images ──────────────────────────────────────────────────────
 
 build:
 	@docker build --tag gabrielebaldassarre/blog:$(JEKYLL_VERSION) --tag gabrielebaldassarre/blog:latest \
@@ -50,65 +56,71 @@ _site: build
 
 site: _site
 
-# ── knitr (Rmd → md + SVG figures) ─────────────────────────────────────────
+# ── knitr — dependency-driven: only rebuilds .md if .Rmd changed ─────
 
-knitr:
+# Pattern rule: any .md from corresponding .Rmd
+%.md: %.Rmd
 ifeq ($(HAS_KNITR),1)
-	@echo "🧶 knitr (native)..."
-	@cd $(ROOT_DIR) && $(RSCRIPT_BIN) R/build_blog.R
+	@echo "🧶 knitr $< → $@"
+	@cd $(ROOT_DIR) && $(RSCRIPT_BIN) R/build_one.R "$<" "$@"
 else
-	@echo "🐋 knitr (Docker)..."
+	@echo "🐋 knitr $< → $@"
 	@docker build --tag $(KNITR_IMAGE) containers/knitr/ > /dev/null 2>&1
-	@docker run --rm -v $(ROOT_DIR):/srv/jekyll \
-		-w /srv/jekyll \
+	@docker run --rm -v $(ROOT_DIR):/srv/jekyll -w /srv/jekyll \
 		-e TZ=Europe/Rome \
-		$(KNITR_IMAGE) Rscript R/build_blog.R
+		$(KNITR_IMAGE) Rscript R/build_one.R "$<" "$@"
 endif
 
-# ── CAD (scad → STL + 3MF + PNG) ───────────────────────────────────────────
+_Knitr_RMDS := $(wildcard _drafts/*.Rmd _posts/**/*.Rmd)
+_Knitr_MDS  := $(_Knitr_RMDS:.Rmd=.md)
 
-cad:
-ifeq ($(HAS_OPENSCAD),1)
-	@echo "🔧 OpenSCAD (native) — using _scripts/cad/build.py..."
-	@cd $(ROOT_DIR) && $(PYTHON3_BIN) _scripts/cad/build.py $(CAD_ARGS)
-else
-	@echo "🐋 OpenSCAD (Docker)..."
-	@docker build --tag $(CAD_IMAGE) containers/openscad/ > /dev/null 2>&1
-	@docker run --rm -v $(ROOT_DIR):/workspace \
-		-e WORKSPACE=/workspace \
-		$(CAD_IMAGE) _scripts/cad/build.py $(CAD_ARGS)
-endif
+knitr: $(_Knitr_MDS)
+	@echo "✅ knitr: done"
 
-# Pattern rules: single-file STL/3MF export (bypasses Python orchestrator)
-# Usage:  make assets/3d/cable-grommet-60mm/cable-grommet-60mm.stl
-#         make assets/3d/cable-grommet-60mm/cable-grommet-60mm.3mf
-assets/3d/%/%.stl: _cad/%/%.scad
+# ── CAD — dependency-driven STL/3MF + always-rebuild PNG ──────────────
+
+# Pattern rules: single % matches slug/filename (compatible with GNU Make 3.81)
+assets/3d/%.stl: _cad/%.scad
 	@mkdir -p $(dir $@)
+	@echo "📦 STL (print) → $@"
 ifeq ($(HAS_OPENSCAD),1)
-	@echo "📦 STL (native) → $@"
-	@$(OPENSCAD_BIN) -o $@ $<
+	@$(OPENSCAD_BIN) -o "$@" -D mode=\"print\" "$<"
 else
-	@echo "📦 STL (Docker) → $@"
-	@docker build --tag $(CAD_IMAGE) containers/openscad/ > /dev/null 2>&1
-	@docker run --rm -v $(ROOT_DIR):/workspace \
-		-e WORKSPACE=/workspace \
-		$(CAD_IMAGE) -c "import subprocess; subprocess.run(['openscad', '-o', '/workspace/$@', '/workspace/$<'], check=True)"
+	@docker run --rm -v $(ROOT_DIR):/workspace $(CAD_IMAGE) \
+		openscad -o "/workspace/$@" -D mode=\"print\" "/workspace/$<"
 endif
 
-assets/3d/%/%.3mf: _cad/%/%.scad
+assets/3d/%.3mf: _cad/%.scad
 	@mkdir -p $(dir $@)
+	@echo "📦 3MF (print) → $@"
 ifeq ($(HAS_OPENSCAD),1)
-	@echo "📦 3MF (native) → $@"
-	@$(OPENSCAD_BIN) -o $@ --export-format 3mf $<
+	@$(OPENSCAD_BIN) -o "$@" --export-format 3mf -D mode=\"print\" "$<"
 else
-	@echo "📦 3MF (Docker) → $@"
+	@docker run --rm -v $(ROOT_DIR):/workspace $(CAD_IMAGE) \
+		openscad -o "/workspace/$@" --export-format 3mf -D mode=\"print\" "/workspace/$<"
+endif
+
+# Discover all SCAD → STL/3MF targets
+_CAD_SCADS := $(wildcard _cad/*/*.scad)
+_CAD_STLS  := $(patsubst _cad/%.scad, assets/3d/%.stl, $(_CAD_SCADS))
+_CAD_3MFS  := $(patsubst _cad/%.scad, assets/3d/%.3mf, $(_CAD_SCADS))
+
+# PNG — always rebuild (OpenCSG preview is <1s per view, caching not worth it)
+cad-png:
+ifeq ($(HAS_OPENSCAD),1)
+	@echo "🖼️  Rendering blueprints..."
+	@cd $(ROOT_DIR) && $(PYTHON3_BIN) _scripts/cad/build.py --png-only
+else
 	@docker build --tag $(CAD_IMAGE) containers/openscad/ > /dev/null 2>&1
 	@docker run --rm -v $(ROOT_DIR):/workspace \
 		-e WORKSPACE=/workspace \
-		$(CAD_IMAGE) -c "import subprocess; subprocess.run(['openscad', '-o', '/workspace/$@', '--export-format', '3mf', '/workspace/$<'], check=True)"
+		$(CAD_IMAGE) _scripts/cad/build.py --png-only
 endif
 
-# ── Development server ──────────────────────────────────────────────────────
+# Aggregate: STL + 3MF (dependency-driven) + PNG (always)
+cad: $(_CAD_STLS) $(_CAD_3MFS) cad-png
+
+# ── Development server ─────────────────────────────────────────────────
 
 dev: build
 	@docker run --rm -v $(ROOT_DIR):/srv/jekyll -p 35729:35729 -p 4000:4000 \
@@ -116,9 +128,9 @@ dev: build
 		-e LANG=$(LOCALE).UTF-8 \
 		-e LANGUAGE=$(LOCALE):$(LOCALE_ISO) \
 		-e LC_ALL=$(LOCALE).UTF-8 \
-		-it gabrielebaldassarre/blog:$(JEKYLL_VERSION)
+		gabrielebaldassarre/blog:$(JEKYLL_VERSION) sh -c "bundle exec jekyll serve --host 0.0.0.0 --drafts --future"
 
-# ── SEO monitor ─────────────────────────────────────────────────────────────
+# ── SEO monitor ────────────────────────────────────────────────────────
 
 seo: build-seo
 	@docker run --rm -v $(ROOT_DIR):/workspace \

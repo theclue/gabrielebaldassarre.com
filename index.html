@@ -57,7 +57,10 @@ header:
 {% endunless %}
 
 {% for post in paginator.posts %}
-<article>
+{%- assign is_draft = false -%}{%- assign is_future = false -%}
+{%- if post.path contains '_drafts/' -%}{%- assign is_draft = true -%}{%- endif -%}
+{%- if post.date > site.time -%}{%- assign is_future = true -%}{%- endif -%}
+<article{% if is_draft or is_future %} class="post-preview-unpublished"{% endif %}>
   {%- if post.master %}
     {%- assign card_img = post.master | cloudinary_card: post.header %}
   {%- elsif post.header.overlay_image %}
@@ -76,6 +79,7 @@ header:
 
   <header>
     <h2 class="entry-title">
+      {% include post_status.html post=post %}
       <a href="{{ post.url | relative_url }}"
          rel="bookmark"
          title="{{ post.title | markdownify | strip_html }}"

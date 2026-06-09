@@ -130,17 +130,10 @@ task :knit, [:file] do |t, args|
   md = rmd.sub(/\.Rmd$/i, ".md")
   puts "Knitting: #{rmd} → #{md}"
 
-  # Run build_one.R inside the knitr Docker container
   sh "docker run --rm -v #{Dir.pwd}:/srv/jekyll -w /srv/jekyll " \
      "-e TZ=Europe/Rome " \
      "gabrielebaldassarre/knitr:latest " \
      "Rscript R/build_one.R '#{rmd}' '#{md}'"
-end
-
-# Usage: rake knit_all
-desc "Knit all .Rmd files (builds Docker image if needed)"
-task :knit_all do
-  sh "make knitr"
 end
 
 ## ── New Rmd post ────────────────────────────────────────────────────────────────
@@ -196,3 +189,104 @@ end
 
 desc "Build the site"
 task default: :build
+
+## ── New 3D Asset ────────────────────────────────────────────────────────────────
+
+# Usage: rake new_3d["Cable Grommet","customizable-cable-grommet"]
+desc "Create a new 3D asset project under _cad/ from the archetype template"
+task :new_3d, [:title, :slug] do |t, args|
+  title = args[:title] || abort("Missing title argument. Usage: rake new_3d['Title','slug']")
+  slug  = args[:slug]  || abort("Missing slug argument (kebab-case)")
+
+  cad_dir  = File.join(SOURCE, "_cad", slug)
+  scad_file = File.join(cad_dir, "#{slug}.scad")
+  readme    = File.join(cad_dir, "README.md")
+
+  abort "#{cad_dir} already exists." if Dir.exist?(cad_dir)
+
+  FileUtils.mkdir_p(cad_dir)
+
+  # ── .scad from archetype ─────────────────────────────────────────
+  puts "Creating SCAD project: #{scad_file}"
+  File.open(scad_file, "w") do |f|
+    f.puts "// ============================================================================="
+    f.puts "// #{title}"
+    f.puts "// ============================================================================="
+    f.puts "// Author  : Gabriele Baldassarre"
+    f.puts "// Website : https://gabrielebaldassarre.com"
+    f.puts "// Source  : https://github.com/theclue/gabrielebaldassarre.com/_cad/#{slug}/#{slug}.scad"
+    f.puts "//"
+    f.puts "// License : MIT License"
+    f.puts "// Copyright (c) #{Time.now.year} Gabriele Baldassarre"
+    f.puts "//"
+    f.puts "// Permission is hereby granted, free of charge, to any person obtaining a copy"
+    f.puts "// of this design and associated documentation files, to deal in the design"
+    f.puts "// without restriction, including without limitation the rights to use, copy,"
+    f.puts "// modify, merge, publish, distribute, sublicense, and/or sell copies of the"
+    f.puts "// design, and to permit persons to whom the design is furnished to do so,"
+    f.puts "// subject to the following conditions:"
+    f.puts "//"
+    f.puts "// The above copyright notice and this permission notice shall be included in"
+    f.puts "// all copies or substantial portions of the design."
+    f.puts "// ============================================================================="
+    f.puts ""
+    f.puts "// ─── See .opencode/agents/cad-author.md for conventions ──────────────────"
+    f.puts ""
+    f.puts "/* [Parameters] */"
+    f.puts ""
+    f.puts "// Main dimension (mm)"
+    f.puts "size = 50; // [10:1:200]"
+    f.puts ""
+    f.puts "/* [Quality] */"
+    f.puts '$fn = 128;'
+    f.puts ""
+    f.puts "// ─── Geometry helpers ────────────────────────────────────────────────"
+    f.puts ""
+    f.puts "// ─── Modules ─────────────────────────────────────────────────────────"
+    f.puts ""
+    f.puts "module main_part() {"
+    f.puts "    cube([size, size, size], center = true);"
+    f.puts "}"
+    f.puts ""
+    f.puts "// ─── Assembly ────────────────────────────────────────────────────────"
+    f.puts ""
+    f.puts "module assembly(explode = 0, explode_distance = 25) {"
+    f.puts "    main_part();"
+    f.puts "}"
+    f.puts ""
+    f.puts "// ─── Export ───────────────────────────────────────────────────────────"
+    f.puts ""
+    f.puts "/* [View] */"
+    f.puts ""
+    f.puts 'mode = "print"; // [assembly:Assembly, exploded:Exploded, print:Print layout]'
+    f.puts ""
+    f.puts "if (mode == \"assembly\") {"
+    f.puts "    assembly(explode = 0);"
+    f.puts "} else if (mode == \"exploded\") {"
+    f.puts "    assembly(explode = 1);"
+    f.puts "} else if (mode == \"print\") {"
+    f.puts "    main_part();"
+    f.puts "}"
+  end
+
+  # ── README ───────────────────────────────────────────────────────
+  File.open(readme, "w") do |f|
+    f.puts "# #{title}"
+    f.puts ""
+    f.puts "https://gabrielebaldassarre.com"
+    f.puts ""
+    f.puts "## Description"
+    f.puts ""
+    f.puts "_TBD_"
+    f.puts ""
+    f.puts "## License"
+    f.puts ""
+    f.puts "MIT License — see #{slug}.scad header"
+  end
+
+  puts "Created: #{cad_dir}/"
+  puts "  #{slug}.scad"
+  puts "  README.md"
+  puts ""
+  puts "Next: make cad CAD_ARGS=\"--slug #{slug}\""
+end

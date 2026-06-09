@@ -54,6 +54,7 @@ module Jekyll
         @compare_with = extract_attr(rest, 'compare_with')
         @representative = extract_attr(rest, 'representativeOfPage')
         @long_desc  = extract_attr(rest, 'long_description')
+        @width      = extract_attr(rest, 'width')
       end
     end
 
@@ -110,10 +111,14 @@ module Jekyll
       return img_tag if @role == 'decorative'
 
       # Figure attributes
+      fig_classes = []
+      fig_classes << 'align-center' << 'ambient-image' if @context == 'ambient'
+      fig_classes << "img-width-#{@width}" if @width && @width.match?(/\A\d+\z/)
+      
       fig_attrs = []
       fig_attrs << %(id="step-#{@step.to_i}-image") if @step && @context == 'step'
       fig_attrs << %(data-compare-with="#{@compare_with}") if @compare_with
-      fig_attrs << 'class="align-center ambient-image"' if @context == 'ambient'
+      fig_attrs << %(class="#{fig_classes.join(' ')}") unless fig_classes.empty?
       fig_attrs_str = fig_attrs.empty? ? '' : " #{fig_attrs.join(' ')}"
 
       # Caption

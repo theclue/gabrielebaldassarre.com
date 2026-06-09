@@ -2,7 +2,7 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "build",
+      "label": "Compila il sito",
       "type": "shell",
       "command": "make site",
       "group": {
@@ -20,7 +20,7 @@
       "problemMatcher": []
     },
     {
-      "label": "dev",
+      "label": "Avvia il server di sviluppo",
       "type": "shell",
       "command": "make dev",
       "group": {
@@ -39,7 +39,7 @@
       "problemMatcher": []
     },
     {
-      "label": "clean",
+      "label": "Pulisci il sito",
       "type": "shell",
       "command": "make clean",
       "presentation": {
@@ -53,7 +53,7 @@
       "problemMatcher": []
     },
     {
-      "label": "knitr",
+      "label": "Esegui knitr",
       "type": "shell",
       "command": "make knitr",
       "presentation": {
@@ -67,7 +67,7 @@
       "problemMatcher": []
     },
     {
-      "label": "New post",
+      "label": "Nuovo post",
       "type": "shell",
       "command": "rake post title='${input:postTitle}' category='${input:postCategory}'${input:postSubtitle}",
       "presentation": {
@@ -81,7 +81,7 @@
       "problemMatcher": []
     },
     {
-      "label": "New draft",
+      "label": "Nuova bozza",
       "type": "shell",
       "command": "rake draft title='${input:draftTitle}'",
       "presentation": {
@@ -95,21 +95,7 @@
       "problemMatcher": []
     },
     {
-      "label": "Publish draft",
-      "type": "shell",
-      "command": "rake publish draft='${input:pubDraft}' category='${input:pubCategory}'",
-      "presentation": {
-        "echo": true,
-        "reveal": "always",
-        "focus": false,
-        "panel": "shared",
-        "showReuseMessage": false,
-        "clear": true
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "Convert image to Cloudinary",
+      "label": "Converti immagine in Cloudinary",
       "type": "shell",
       "command": "ruby",
       "args": [
@@ -127,7 +113,7 @@
       "problemMatcher": []
     },
     {
-      "label": "Knit current Rmd",
+      "label": "Esegui knitr sull'Rmd corrente",
       "type": "shell",
       "command": "rake",
       "args": ["knit['${relativeFile}']"],
@@ -142,7 +128,7 @@
       "problemMatcher": []
     },
     {
-      "label": "Knit all Rmd",
+      "label": "Esegui knitr su tutti gli Rmd",
       "type": "shell",
       "command": "rake",
       "args": ["knit_all"],
@@ -157,7 +143,7 @@
       "problemMatcher": []
     },
     {
-      "label": "New Rmd post",
+      "label": "Nuovo workbook Rmd",
       "type": "shell",
       "command": "rake",
       "args": ["new_rmd['${input:rmdTitle}','${input:rmdCategory}']"],
@@ -172,10 +158,66 @@
       "problemMatcher": []
     },
     {
-      "label": "New Rmd draft",
+      "label": "Nuovo asset 3D",
       "type": "shell",
       "command": "rake",
-      "args": ["new_rmd_draft['${input:rmdDraftTitle}']"],
+      "args": ["new_3d['${input:cadTitle}','${input:cadSlug}']"],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "CAD: compila singolo asset 3D",
+      "type": "shell",
+      "command": "make assets/3d/${input:cadSlug}/${input:cadSlug}.stl assets/3d/${input:cadSlug}/${input:cadSlug}.3mf",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "CAD: compila asset corrente",
+      "type": "shell",
+      "command": "slug=$(dirname ${relativeFile} | xargs basename); make \"assets/3d/$slug/$slug.stl\" \"assets/3d/$slug/$slug.3mf\"",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "CAD: compila tutto",
+      "type": "shell",
+      "command": "make cad",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Configura sito",
+      "type": "shell",
+      "command": "./configure",
       "presentation": {
         "echo": true,
         "reveal": "always",
@@ -203,7 +245,8 @@
         "DevOps",
         "Fisica",
         "Reti Sociali",
-        "Meccanica"
+        "Meccanica",
+        "3d Printing"
       ]
     },
     {
@@ -219,16 +262,6 @@
       "default": ""
     },
     {
-      "id": "pubDraft",
-      "type": "pickString",
-      "description": "Bozza da pubblicare",
-      "options": [
-        "_drafts/quanto-piccolo-mondo-harry-potter.md",
-        "_drafts/2026-05-18-pipeline-cicd-jekyll-github-actions.md",
-        "_drafts/betweeness-formalismo-matematico.md"
-      ]
-    },
-    {
       "id": "pubCategory",
       "type": "pickString",
       "description": "Categoria di destinazione",
@@ -237,7 +270,8 @@
         "DevOps",
         "Fisica",
         "Reti Sociali",
-        "Meccanica"
+        "Meccanica",
+        "3d Printing"
       ]
     },
     {
@@ -255,13 +289,26 @@
         "DevOps",
         "Fisica",
         "Reti Sociali",
-        "Meccanica"
+        "Meccanica",
+        "3d Printing"
       ]
     },
     {
       "id": "rmdDraftTitle",
       "type": "promptString",
       "description": "Titolo della bozza Rmd",
+      "default": ""
+    },
+    {
+      "id": "cadTitle",
+      "type": "promptString",
+      "description": "Titolo del progetto 3D",
+      "default": ""
+    },
+    {
+      "id": "cadSlug",
+      "type": "promptString",
+      "description": "Slug (kebab-case, cartella sotto _cad/)",
       "default": ""
     }
   ]

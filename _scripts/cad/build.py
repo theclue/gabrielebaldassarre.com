@@ -169,7 +169,7 @@ def _compose_ortho_sheet(front: Path, top: Path, side: Path, isometric: Path, ou
 
 # ─── Build ─────────────────────────────────────────────────────────────
 
-def build_one(slug: str, skip_png: bool = False) -> dict:
+def build_one(slug: str, skip_png: bool = False, png_only: bool = False) -> dict:
     cad_project = CAD_DIR / slug
     scad_file = cad_project / f"{slug}.scad"
 
@@ -192,31 +192,31 @@ def build_one(slug: str, skip_png: bool = False) -> dict:
 
     result = {"slug": slug, "scad": str(scad_file), "errors": []}
 
-    # ── STL (print) ───────────────────────────────────────────────
-    stl_path = out_3d / f"{slug}.stl"
-    print(f"   📦 STL (print) → {stl_path}")
-    r = subprocess.run(
-        ["openscad", "-o", str(stl_path), "-D", "mode=\"print\"", str(scad_file)],
-        capture_output=True, text=True, timeout=300,
-    )
-    if r.returncode != 0:
-        print(f"   ❌ STL failed: {r.stderr[-300:]}")
-        result["errors"].append("stl_failed")
-    else:
-        result["stl"] = str(stl_path)
+    # ── STL + 3MF (skip when called from Makefile pattern rules) ──
+    if not png_only:
+        stl_path = out_3d / f"{slug}.stl"
+        print(f"   📦 STL (print) → {stl_path}")
+        r = subprocess.run(
+            ["openscad", "-o", str(stl_path), "-D", "mode=\"print\"", str(scad_file)],
+            capture_output=True, text=True, timeout=300,
+        )
+        if r.returncode != 0:
+            print(f"   ❌ STL failed: {r.stderr[-300:]}")
+            result["errors"].append("stl_failed")
+        else:
+            result["stl"] = str(stl_path)
 
-    # ── 3MF (print) ───────────────────────────────────────────────
-    mf3_path = out_3d / f"{slug}.3mf"
-    print(f"   📦 3MF (print) → {mf3_path}")
-    r = subprocess.run(
-        ["openscad", "-o", str(mf3_path), "--export-format", "3mf",
-         "-D", "mode=\"print\"", str(scad_file)],
-        capture_output=True, text=True, timeout=300,
-    )
-    if r.returncode != 0:
-        print(f"   ⚠️  3MF failed (non-critical): {r.stderr[-200:]}")
-    else:
-        result["3mf"] = str(mf3_path)
+        mf3_path = out_3d / f"{slug}.3mf"
+        print(f"   📦 3MF (print) → {mf3_path}")
+        r = subprocess.run(
+            ["openscad", "-o", str(mf3_path), "--export-format", "3mf",
+             "-D", "mode=\"print\"", str(scad_file)],
+            capture_output=True, text=True, timeout=300,
+        )
+        if r.returncode != 0:
+            print(f"   ⚠️  3MF failed (non-critical): {r.stderr[-200:]}")
+        else:
+            result["3mf"] = str(mf3_path)
 
     if skip_png:
         return result
@@ -297,6 +297,7 @@ def main():
     parser = argparse.ArgumentParser(description="OpenSCAD build tool")
     parser.add_argument("--slug", help="Build a single slug")
     parser.add_argument("--skip-png", action="store_true", help="Skip preview renders")
+    parser.add_argument("--png-only", action="store_true", help="Only render PNGs (skip STL/3MF — those are handled by Makefile pattern rules)")
     args = parser.parse_args()
 
     slugs = discover_slugs(args.slug)
@@ -310,7 +311,7 @@ def main():
     ok = errors = 0
     for slug in slugs:
         print(f"\n📐 {slug}")
-        res = build_one(slug, skip_png=args.skip_png)
+        res = build_one(slug, skip_png=args.skip_png, png_only=args.png_only)
         if res.get("errors"):
             errors += 1
         else:

@@ -19,7 +19,8 @@ show_nav: true
         {% assign current_year = post_year %}
       {% endif %}
 
-      <li class="entry-title">
+      <li class="entry-title{% if post.path contains '_drafts/' or post.date > site.time %} post-preview-unpublished{% endif %}">
+        {% include post_status.html post=post %}
         <a href="{{ post.url | relative_url }}"
            rel="bookmark"
            title="{{ post.title | markdownify | strip_html }}"

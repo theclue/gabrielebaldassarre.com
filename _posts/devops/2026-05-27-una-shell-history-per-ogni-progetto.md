@@ -38,7 +38,8 @@ tags:
 - produttività
 intended_audience: practitioner
 proficiency_level: intermediate
-mermaid: true
+mermaid:
+  direction: TB
 difficulty_declared:
   conceptual: 1
   technical: 3

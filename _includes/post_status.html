@@ -1,0 +1,19 @@
+{%- comment -%}
+  post_status.html — show icon badge for draft / future posts in dev mode.
+  In production neither condition fires because --drafts and --future
+  are not passed to `jekyll build`, so posts from _drafts/ and future-dated
+  posts are absent from site.posts entirely.
+{%- endcomment -%}
+{%- assign _is_draft = false -%}
+{%- assign _is_future = false -%}
+{%- if include.post.path contains '_drafts/' -%}{%- assign _is_draft = true -%}{%- endif -%}
+{%- if include.post.date > site.time -%}{%- assign _is_future = true -%}{%- endif -%}
+{%- if _is_draft -%}
+  <span class="post-status post-status--draft" title="Bozza — non ancora pubblicata">
+    {%- include icon.html name="pencil" class="icon-status" -%}
+  </span>
+{%- elsif _is_future -%}
+  <span class="post-status post-status--future" title="Programmato — sarà pubblicato il {{ include.post.date | date: '%d/%m/%Y' }}">
+    {%- include icon.html name="calendar-clock" class="icon-status" -%}
+  </span>
+{%- endif -%}

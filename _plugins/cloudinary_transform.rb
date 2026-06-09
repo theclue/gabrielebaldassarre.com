@@ -75,21 +75,33 @@ module Jekyll
       has_transform = TRANSFORM_PRESETS[transform_name] && TRANSFORM_PRESETS[transform_name][intensity]
       if has_transform
         parts << has_transform
-        parts << CROP_BY_INTENSITY[intensity] || CROP_BY_INTENSITY['medium']
+        parts << (CROP_BY_INTENSITY[intensity] || CROP_BY_INTENSITY['medium'])
         parts << "c_fill,g_auto,w_#{width},h_#{height},f_auto,q_auto"
       else
         parts << "c_fill,g_auto,w_#{width},h_#{height},f_auto,q_auto"
       end
 
-      # Overlay image (left side, scaled to fill height with bottom air)
+      # Overlay image (left side, sized to fit within canvas height, anchored centre-left)
       overlay_path = header['overlay']
       if overlay_path
         overlay_full_url = overlay_path.start_with?('http') ? overlay_path : "#{site.config['url']}#{overlay_path}"
-        overlay_h = (height * 0.72).to_i
-        overlay_x = (width * 0.03).to_i
-        overlay_y = (height * 0.06).to_i
-        parts << "l_fetch:#{b64_encode(overlay_full_url)},c_fit,h_#{overlay_h},f_auto,q_auto"
-        parts << "fl_layer_apply,g_south_west,x_#{overlay_x},y_#{overlay_y}"
+
+        # Hero has no caption/letterbox — symmetrical breathing room top+bottom.
+        # `c_fit` downscales the overlay to fit inside (max_w × max_h) preserving
+        # aspect ratio:
+        #   * the 20 % hard cap on width prevents the foreground from dominating
+        #     even for very portrait-shaped sources;
+        #   * the height cap (canvas minus top/bottom margins) lets the overlay
+        #     "lambire" the bottom edge when the source is portrait-shaped,
+        #     while leaving natural air on top when it's landscape-shaped.
+        top_margin    = [(height * 0.06).to_i, 36].max
+        bottom_margin = [(height * 0.06).to_i, 24].max
+        overlay_max_w = (width  * 0.20).to_i      # hard cap: 20 % of canvas width
+        overlay_max_h = height - top_margin - bottom_margin
+        overlay_x     = (width  * 0.02).to_i
+
+        parts << "l_fetch:#{b64_encode(overlay_full_url)},c_fit,w_#{overlay_max_w},h_#{overlay_max_h},f_auto,q_auto"
+        parts << "fl_layer_apply,g_south_west,x_#{overlay_x},y_#{bottom_margin}"
       end
 
       # Logo overlay: raw fetch + transforms inline, placement in fl_layer_apply
@@ -140,14 +152,32 @@ module Jekyll
         parts << 'fl_layer_apply,g_south'
       end
 
-      # Overlay image (left side, scaled to fill height with bottom air)
+      # Overlay image (left side, sized to fit, vertically centred)
       overlay_path = config_h['overlay']
       if overlay_path
         overlay_full_url = overlay_path.start_with?('http') ? overlay_path : "#{site.config['url']}#{overlay_path}"
-        overlay_h = (height * 0.68).to_i
-        overlay_x = (width * 0.03).to_i
-        overlay_y = (height * 0.08).to_i
-        parts << "l_fetch:#{b64_encode(overlay_full_url)},c_fit,h_#{overlay_h},f_auto,q_auto"
+
+        # When a caption is present we drew a 120 px semi-transparent bar at
+        # the bottom; the overlay must "lambire" that bar from above without
+        # ever crossing it.
+        letterbox_h = (caption_text && !caption_text.empty?) ? 120 : 0
+        # Breathing room: ~6 % of canvas height from the top edge, min 36 px.
+        top_margin  = [(height * 0.06).to_i, 36].max
+        # Gap between the overlay bottom edge and the letterbox top edge
+        # (or the canvas bottom if no caption).
+        bottom_gap  = 12
+
+        # `c_fit` downscales preserving aspect ratio inside (max_w × max_h):
+        #   * 20 % hard cap on width → never over-imposing on the canvas;
+        #   * height = (canvas - top_margin - letterbox - gap) → the overlay
+        #     zooms up to that bound when the source is portrait-shaped,
+        #     while leaving natural air on top when it's landscape-shaped.
+        overlay_max_w = (width  * 0.20).to_i
+        overlay_max_h = height - top_margin - letterbox_h - bottom_gap
+        overlay_x     = (width  * 0.02).to_i
+        overlay_y     = letterbox_h + bottom_gap
+
+        parts << "l_fetch:#{b64_encode(overlay_full_url)},c_fit,w_#{overlay_max_w},h_#{overlay_max_h},f_auto,q_auto"
         parts << "fl_layer_apply,g_south_west,x_#{overlay_x},y_#{overlay_y}"
       end
 

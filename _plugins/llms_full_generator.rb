@@ -6,12 +6,23 @@ module Jekyll
     priority :low
 
     def generate(site)
+      # Defer actual generation to :post_write when post.content is available
+      Jekyll::Hooks.register :site, :post_write do |s|
+        write_llms_file(s)
+      end
+    end
+
+    private
+
+    def write_llms_file(site)
       output = String.new
       output << "# Gabriele Baldassarre — Contenuti completi per AI ingestion\n"
       output << "# Generato automaticamente. Ultimo aggiornamento: #{Time.now.utc.iso8601}\n\n"
 
       site.posts.docs.sort_by { |p| -p.date.to_i }.each do |post|
-        title = post.data["title"] || post.name
+        title = post.data["title"] || File.basename(post.path, ".*")
+        next unless title
+
         date  = post.date.strftime("%Y-%m-%d")
         url   = "#{site.config['url']}#{post.url}"
         excerpt = post.data["excerpt"] || ""
@@ -22,7 +33,6 @@ module Jekyll
         output << "url: #{url}\n"
         output << "excerpt: #{excerpt}\n"
 
-        # Static metadata for LLM retrieval context (generator runs before render)
         audience = post.data['intended_audience']
         output << "audience: #{audience}\n" if audience
         proficiency = post.data['proficiency_level']
@@ -39,27 +49,19 @@ module Jekyll
 
         output << "---\n\n"
 
-        # Read the raw source file and strip frontmatter
-        source_path = post.path
-        if File.exist?(source_path)
-          raw = File.read(source_path)
-          # Remove YAML frontmatter (between first two ---)
-          if raw =~ /\A---\s*\n.*?\n---\s*\n/m
-            body_content = raw.sub(/\A---\s*\n.*?\n---\s*\n/m, "")
-            output << body_content
-          else
-            output << post.content
-          end
-        end
-
+        # post.content is the Liquid-rendered output — tags resolved, HTML generated
+        # Strip HTML tags to leave plain text suitable for AI ingestion
+        plain = post.content
+          .gsub(/<[^>]+>/, '')         # strip HTML tags
+          .gsub(/\n{3,}/, "\n\n")      # collapse excessive newlines
+        output << plain
         output << "\n\n"
       end
 
-      # Write the file into _site
-      page = PageWithoutAFile.new(site, __dir__, "", "llms-full.txt")
-      page.content = output
-      page.data["layout"] = nil
-      site.pages << page
+      dest = File.join(site.dest, "llms-full.txt")
+      FileUtils.mkdir_p(File.dirname(dest))
+      File.write(dest, output)
+      site.keep_files << "llms-full.txt" unless site.keep_files.include?("llms-full.txt")
     end
   end
 end
