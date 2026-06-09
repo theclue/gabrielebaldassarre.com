@@ -2,26 +2,35 @@
 layout: asset-3d
 title: 'Introduzione a OpenSCAD: un passacavi da scrivania'
 category: 3D Printing
-excerpt: "Prima parte sulle basi di OpenSCAD attraverso un progetto reale: un passacavo parametrico da scrivania con attacco a baionetta. Impariamo la sintassi, le primitive CSG, le trasformazioni e l'organizzazione del codice."
+excerpt: 'Prima parte sulle basi di OpenSCAD attraverso un progetto reale: un passacavo
+  parametrico da scrivania con attacco a baionetta. Impariamo la sintassi, le primitive
+  CSG, le trasformazioni e l''organizzazione del codice.'
 master: /assets/images/openscad-overlay.png
 image_meta:
   role: screenshot
   context: reference
-  caption: "L'editor di OpenSCAD con la vista di anteprima di un modello"
+  caption: L'editor di OpenSCAD con la vista di anteprima di un modello
 header:
   overlay_filter: 0.5
   transform: keystone
   intensity: medium
-tags: [OpenSCAD, 3D Printing, CAD, modellizzazione parametrica, tutorial, Customizer]
+tags:
+- OpenSCAD
+- 3D Printing
+- CAD
+- modellizzazione parametrica
+- tutorial
+- Customizer
 mermaid:
   direction: LR
 series:
-  id: "passacavi-parametrico-scrivania"
-  title: "Passacavi parametrico da scrivania"
+  id: passacavi-parametrico-scrivania
+  title: Passacavi parametrico da scrivania
   part: 1
   total_parts: 3
 broadcast:
-  channels: [mastodon]
+  channels:
+  - mastodon
   mastodon_image:
     logo: openscad.png
     caption: 'OpenSCAD Tutorial pt.1: Parametric Cable Grommet'
@@ -34,6 +43,7 @@ broadcast:
     color: white
     transform: keystone
     intensity: medium
+  sent: true
 3d_model:
   sources:
     scad: _cad/customizable-cable-grommet/customizable-cable-grommet.scad
@@ -44,12 +54,12 @@ broadcast:
     isometric: /assets/images/3d/customizable-cable-grommet-isometric.png
     ortho: /assets/images/3d/customizable-cable-grommet-ortho.png
     overlay: /assets/overlays/customizable-cable-grommet.png
-  designed_for: "Desk cable management, 60 mm hole"
-  material: "PLA, PETG"
+  designed_for: Desk cable management, 60 mm hole
+  material: PLA, PETG
   print_settings:
     nozzle: 0.4
     layer_height: 0.2
-    infill: "15% gyroid"
+    infill: 15% gyroid
     supports: false
   dimensions:
     width: 76
@@ -58,35 +68,35 @@ broadcast:
 intended_audience: practitioner
 proficiency_level: beginner
 knowledge_prerequisites:
-  - concept: 3d-printing
-    label: "Basi di stampa 3D (slicer, materiali, orientamento)"
-    importance: recommended
-    depth: 1
-    sameAs: "https://www.wikidata.org/wiki/Q229367"
-  - concept: thingiverse-customizer
-    label: "Cos'è il Customizer di Thingiverse"
-    importance: helpful
-    depth: 0
-  - concept: constructive-solid-geometry
-    label: "Geometria Solida Costruttiva (CSG)"
-    importance: helpful
-    depth: 2
-    sameAS: "https://www.wikidata.org/wiki/Q1128371"
-    url: "https://it.wikipedia.org/wiki/Geometria_solida_costruttiva"
-  - concept: coordinate-system-3d
-    label: "Sistema di coordinate cartesiane 3D (assi X, Y, Z)"
-    importance: helpful
-    depth: 0
-  - concept: parametric-design
-    label: "Progettazione parametrica"
-    importance: recommended
-    depth: 1
-    sameAs: "https://www.wikidata.org/wiki/Q18386598"
-  - concept: functional-programming
-    label: "Concetti base di programmazione funzionale (immutabilità, trasparenza referenziale)"
-    importance: helpful
-    depth: 2
-    sameAs: "https://www.wikidata.org/wiki/Q193076"
+- concept: 3d-printing
+  label: Basi di stampa 3D (slicer, materiali, orientamento)
+  importance: recommended
+  depth: 1
+  sameAs: https://www.wikidata.org/wiki/Q229367
+- concept: thingiverse-customizer
+  label: Cos'è il Customizer di Thingiverse
+  importance: helpful
+  depth: 0
+- concept: constructive-solid-geometry
+  label: Geometria Solida Costruttiva (CSG)
+  importance: helpful
+  depth: 2
+  sameAS: https://www.wikidata.org/wiki/Q1128371
+  url: https://it.wikipedia.org/wiki/Geometria_solida_costruttiva
+- concept: coordinate-system-3d
+  label: Sistema di coordinate cartesiane 3D (assi X, Y, Z)
+  importance: helpful
+  depth: 0
+- concept: parametric-design
+  label: Progettazione parametrica
+  importance: recommended
+  depth: 1
+  sameAs: https://www.wikidata.org/wiki/Q18386598
+- concept: functional-programming
+  label: Concetti base di programmazione funzionale (immutabilità, trasparenza referenziale)
+  importance: helpful
+  depth: 2
+  sameAs: https://www.wikidata.org/wiki/Q193076
 difficulty_declared:
   conceptual: 2
   technical: 3
@@ -102,6 +112,7 @@ difficulty_computed:
     math_density: 0.1
     code_density: 0.35
     blocking_prerequisite_count: 0
+
 ---
 
 Se avete mai usato il Customizer di Thingiverse, conoscete già il principio: un modello 3D non è un oggetto statico, ma un insieme di parametri che potete regolare con degli slider per adattarlo alle vostre esigenze. Quello che il Customizer fa dietro le quinte è eseguire un programma scritto in **OpenSCAD**, un linguaggio di programmazione per la modellazione solida che descrive la geometria invece di disegnarla.
