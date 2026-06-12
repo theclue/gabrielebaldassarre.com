@@ -228,8 +228,8 @@ module Jekyll
       CloudinaryTransform.hero_url(full_url, header || {}, site, @context)
     end
 
-    # Liquid filter: post.master | cloudinary_card: post.header, 600, 340
-    def cloudinary_card(image_path, header = {}, width = 600, height = 340)
+    # Liquid filter: post.master | cloudinary_card: post.header, 1200, 680
+    def cloudinary_card(image_path, header = {}, width = 1200, height = 680)
       return image_path if CloudinaryTransform.dev_bypass?
 
       site = @context.registers[:site]
