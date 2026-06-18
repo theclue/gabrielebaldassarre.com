@@ -1,15 +1,15 @@
 ---
 layout: asset-3d
-title: "Mode system, rendering ed esportazione"
+title: "OpenSCAD: Mode system, rendering ed esportazione"
 category: 3D Printing
-excerpt: "Terza parte del tutorial OpenSCAD: il sistema di modalità archetipico (assembly, exploded, print), il rendering blueprint, l'esportazione STL/3MF per la stampa e la geometria dell'apertura parabolica del tappo."
+excerpt: "Terza parte del tutorial OpenSCAD sul passacavi per la scrivania: il sistema di visualizzazione (assembly, exploded, print), il rendering blueprint, l'esportazione STL/3MF per la stampa e la geometria dell'apertura parabolica del tappo."
 master: /assets/images/3d/customizable-cable-grommet-ortho.png
 header:
   overlay_filter: 0.5
   transform: cinematic
   intensity: medium
   overlay: /assets/overlays/customizable-cable-grommet.png
-tags: [OpenSCAD, 3D Printing, CAD, parametric, tutorial, rendering, esportazione, STL, 3MF]
+tags: [OpenSCAD, 3D Printing, CAD, design parametrico, tutorial, rendering, STL, 3MF]
 series:
   id: "passacavo-parametrico-scrivania"
   title: "Passacavo parametrico da scrivania"

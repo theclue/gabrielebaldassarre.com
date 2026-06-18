@@ -115,7 +115,7 @@
     {
       "label": "Esegui knitr sull'Rmd corrente",
       "type": "shell",
-      "command": "rake",
+      "command": "noglob rake",
       "args": ["knit['${relativeFile}']"],
       "presentation": {
         "echo": true,
@@ -145,7 +145,7 @@
     {
       "label": "Nuovo workbook Rmd",
       "type": "shell",
-      "command": "rake",
+      "command": "noglob rake",
       "args": ["new_rmd['${input:rmdTitle}','${input:rmdCategory}']"],
       "presentation": {
         "echo": true,
@@ -160,7 +160,7 @@
     {
       "label": "Nuovo asset 3D",
       "type": "shell",
-      "command": "rake",
+      "command": "noglob rake",
       "args": ["new_3d['${input:cadTitle}','${input:cadSlug}']"],
       "presentation": {
         "echo": true,
