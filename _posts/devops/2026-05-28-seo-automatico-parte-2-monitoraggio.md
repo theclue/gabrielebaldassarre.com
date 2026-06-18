@@ -1,33 +1,47 @@
 ---
 layout: post
-title: "Monitoraggio del SEO: organizziamo i dati"
+title: 'Monitoraggio del SEO: organizziamo i dati'
 category: DevOps
-excerpt: "Seconda parte della pipeline SEO con strumenti gratuiti e automatici: un data lake su Cloudflare R2 e D1, Google Trends e Search Console, dbt per l'ETL e un report mensile automatizzato, il tutto eseguito tramite GitHub Actions. Gratis."
+excerpt: 'Seconda parte della pipeline SEO con strumenti gratuiti e automatici: un
+  data lake su Cloudflare R2 e D1, Google Trends e Search Console, dbt per l''ETL
+  e un report mensile automatizzato, il tutto eseguito tramite GitHub Actions. Gratis.'
 mermaid: true
 master: /assets/images/seo-automatico-monitoraggio-overlay.png
 image_meta:
   role: illustration
   context: ambient
   gravity: north
-  caption: "Cruscotto di monitoraggio dati con dashboard analitica"
+  caption: Cruscotto di monitoraggio dati con dashboard analitica
 header:
   overlay_filter: 0.5
-tags: [SEO, Jekyll, GitHub Actions, Cloudflare, dbt, Google Trends, Search Console, sqlite, datawarehousing]
+tags:
+- SEO
+- Jekyll
+- GitHub Actions
+- Cloudflare
+- dbt
+- Google Trends
+- Search Console
+- sqlite
+- datawarehousing
 series:
-  id: "seo-automatico"
-  title: "SEO automatico"
+  id: seo-automatico
+  title: SEO automatico
   part: 2
   total_parts: 4
 broadcast:
-  channels: [linkedin, mastodon]
+  channels:
+  - linkedin
+  - mastodon
   linkedin_image:
     logo: true
-    caption: "Monitoraggio SEO gratuito pt.2: Organizziamo i dati"
+    caption: 'Monitoraggio SEO gratuito pt.2: Organizziamo i dati'
     color: white
   mastodon_image:
     logo: true
-    caption: "SEO Monitoring in free-tier: Collecting and organizing the data"
+    caption: 'SEO Monitoring in free-tier: Collecting and organizing the data'
     color: white
+  sent: true
 intended_audience: practitioner
 proficiency_level: advanced
 difficulty_declared:
@@ -46,223 +60,224 @@ difficulty_computed:
     code_density: 3.6
     blocking_prerequisite_count: 6
 knowledge_prerequisites:
-  - concept: seo
-    label: SEO
-    url: https://it.wikipedia.org/wiki/Ottimizzazione_per_i_motori_di_ricerca
-    sameAs: https://www.wikidata.org/wiki/Q180711
-    importance: required
-    depth: 2
-  - concept: github-actions
-    label: GitHub Actions
-    url: https://docs.github.com/en/actions
-    importance: required
-    depth: 2
-  - concept: cloudflare-r2
-    label: Cloudflare R2
-    url: https://developers.cloudflare.com/r2/
-    importance: required
-    depth: 2
-  - concept: cloudflare-d1
-    label: Cloudflare D1
-    url: https://developers.cloudflare.com/d1/
-    importance: required
-    depth: 2
-  - concept: dbt
-    label: dbt (data build tool)
-    url: https://www.getdbt.com/
-    importance: required
-    depth: 3
-  - concept: etl
-    label: ETL (Extract, Transform, Load)
-    url: https://it.wikipedia.org/wiki/Extract,_transform,_load
-    importance: required
-    sameAs: https://www.wikidata.org/wiki/Q1276130
-    depth: 2
-  - concept: jekyll
-    label: Jekyll
-    url: https://jekyllrb.com/
-    sameAs: https://www.wikidata.org/wiki/Q17095317
-    importance: recommended
-    depth: 2
-  - concept: data-lake
-    label: Data Lake
-    url: https://it.wikipedia.org/wiki/Data_lake
-    sameAs: https://www.wikidata.org/wiki/Q20707560
-    importance: recommended
-    depth: 3
-  - concept: data-warehouse
-    label: Data Warehouse
-    url: https://it.wikipedia.org/wiki/Data_warehouse
-    sameAs: https://www.wikidata.org/wiki/Q193351
-    importance: recommended
-    depth: 3
-  - concept: sqlite
-    label: SQLite
-    url: https://www.sqlite.org/
-    sameAs: https://www.wikidata.org/wiki/Q319417
-    importance: recommended
-    depth: 2
-  - concept: google-trends
-    label: Google Trends
-    url: https://trends.google.com/
-    sameAs: https://www.wikidata.org/wiki/Q847115
-    importance: recommended
-    depth: 2
-  - concept: google-search-console
-    label: Google Search Console
-    url: https://search.google.com/search-console
-    sameAs: https://www.wikidata.org/wiki/Q328216
-    importance: recommended
-    depth: 2
-  - concept: serpapi
-    label: SerpApi
-    url: https://serpapi.com/
-    importance: recommended
-    depth: 2
-  - concept: api-rest
-    label: API REST
-    url: https://it.wikipedia.org/wiki/Representational_state_transfer
-    sameAs: https://www.wikidata.org/wiki/Q749568
-    importance: recommended
-    depth: 2
-  - concept: amazon-s3
-    label: Amazon S3
-    url: https://aws.amazon.com/s3/
-    sameAs: https://www.wikidata.org/wiki/Q2593067
-    importance: recommended
-    depth: 2
-  - concept: pagespeed-insights
-    label: PageSpeed Insights
-    url: https://pagespeed.web.dev/
-    importance: recommended
-    depth: 2
-  - concept: lighthouse
-    label: Lighthouse
-    url: https://developer.chrome.com/docs/lighthouse
-    importance: recommended
-    depth: 2
-  - concept: ci-cd
-    label: CI/CD
-    url: https://it.wikipedia.org/wiki/Continuous_integration
-    sameAs: https://www.wikidata.org/wiki/Q965769
-    importance: recommended
-    depth: 3
-  - concept: scd-type-2
-    label: Slowly Changing Dimension Type 2
-    url: https://en.wikipedia.org/wiki/Slowly_changing_dimension
-    importance: recommended
-    depth: 4
-  - concept: change-data-capture
-    label: Change Data Capture
-    url: https://en.wikipedia.org/wiki/Change_data_capture
-    importance: recommended
-    depth: 3
-  - concept: core-web-vitals
-    label: Core Web Vitals
-    url: https://web.dev/vitals/
-    importance: recommended
-    depth: 2
-  - concept: llm
-    label: Large Language Model
-    url: https://it.wikipedia.org/wiki/Grande_modello_linguistico
-    sameAs: https://www.wikidata.org/wiki/Q115305900
-    importance: recommended
-    depth: 2
-  - concept: data-mart
-    label: Data Mart
-    url: https://it.wikipedia.org/wiki/Data_mart
-    sameAs: https://www.wikidata.org/wiki/Q1061166
-    importance: recommended
-    depth: 3
-  - concept: dwh-schema
-    label: Schema dimensionale (dim/fact)
-    url: https://en.wikipedia.org/wiki/Dimensional_modeling
-    sameAs: https://www.wikidata.org/wiki/Q3432172
-    importance: recommended
-    depth: 3
-  - concept: cloudflare-pages
-    label: Cloudflare Pages
-    url: https://pages.cloudflare.com/
-    importance: recommended
-    depth: 2
-  - concept: python
-    label: Python
-    url: https://www.python.org/
-    sameAs: https://www.wikidata.org/wiki/Q28865
-    importance: recommended
-    depth: 1
-  - concept: ctr
-    label: Click-Through Rate
-    url: https://it.wikipedia.org/wiki/Click-through_rate
-    sameAs: https://www.wikidata.org/wiki/Q1100934
-    importance: recommended
-    depth: 2
-  - concept: indexnow
-    label: IndexNow
-    url: https://www.indexnow.org/
-    importance: recommended
-    depth: 2
-  - concept: sql
-    label: SQL
-    url: https://it.wikipedia.org/wiki/Structured_Query_Language
-    sameAs: https://www.wikidata.org/wiki/Q47607
-    importance: helpful
-    depth: 2
-  - concept: wrangler
-    label: Wrangler (Cloudflare CLI)
-    url: https://developers.cloudflare.com/workers/wrangler/
-    importance: helpful
-    depth: 2
-  - concept: terraform
-    label: Terraform
-    url: https://www.terraform.io/
-    sameAs: https://www.wikidata.org/wiki/Q28957072
-    importance: helpful
-    depth: 3
-  - concept: hmac
-    label: HMAC
-    url: https://it.wikipedia.org/wiki/HMAC
-    sameAs: https://www.wikidata.org/wiki/Q1669397
-    importance: helpful
-    depth: 3
-  - concept: boto3
-    label: boto3 (AWS SDK for Python)
-    url: https://boto3.amazonaws.com/v1/documentation/api/latest/index.html
-    importance: helpful
-    depth: 2
-  - concept: bearer-token
-    label: Bearer token
-    url: https://it.wikipedia.org/wiki/Bearer_token
-    importance: helpful
-    depth: 2
-  - concept: iso-8601
-    label: ISO 8601
-    url: https://it.wikipedia.org/wiki/ISO_8601
-    sameAs: https://www.wikidata.org/wiki/Q50101
-    importance: helpful
-    depth: 1
-  - concept: ontologia-computazionale
-    label: Ontologia (informatica)
-    url: https://it.wikipedia.org/wiki/Ontologia_(informatica)
-    sameAs: https://www.wikidata.org/wiki/Q324254
-    importance: helpful
-    depth: 4
-  - concept: object-storage
-    label: Object Storage
-    url: https://it.wikipedia.org/wiki/Object_storage
-    importance: helpful
-    depth: 1
-  - concept: least-privilege
-    label: Principio del privilegio minimo
-    url: https://it.wikipedia.org/wiki/Principio_del_privilegio_minimo
-    sameAs: https://www.wikidata.org/wiki/Q1083272
-    importance: helpful
-    depth: 2
-  - concept: npm
-    label: npm
-    url: https://www.npmjs.com/
-    importance: helpful
-    depth: 1
+- concept: seo
+  label: SEO
+  url: https://it.wikipedia.org/wiki/Ottimizzazione_per_i_motori_di_ricerca
+  sameAs: https://www.wikidata.org/wiki/Q180711
+  importance: required
+  depth: 2
+- concept: github-actions
+  label: GitHub Actions
+  url: https://docs.github.com/en/actions
+  importance: required
+  depth: 2
+- concept: cloudflare-r2
+  label: Cloudflare R2
+  url: https://developers.cloudflare.com/r2/
+  importance: required
+  depth: 2
+- concept: cloudflare-d1
+  label: Cloudflare D1
+  url: https://developers.cloudflare.com/d1/
+  importance: required
+  depth: 2
+- concept: dbt
+  label: dbt (data build tool)
+  url: https://www.getdbt.com/
+  importance: required
+  depth: 3
+- concept: etl
+  label: ETL (Extract, Transform, Load)
+  url: https://it.wikipedia.org/wiki/Extract,_transform,_load
+  importance: required
+  sameAs: https://www.wikidata.org/wiki/Q1276130
+  depth: 2
+- concept: jekyll
+  label: Jekyll
+  url: https://jekyllrb.com/
+  sameAs: https://www.wikidata.org/wiki/Q17095317
+  importance: recommended
+  depth: 2
+- concept: data-lake
+  label: Data Lake
+  url: https://it.wikipedia.org/wiki/Data_lake
+  sameAs: https://www.wikidata.org/wiki/Q20707560
+  importance: recommended
+  depth: 3
+- concept: data-warehouse
+  label: Data Warehouse
+  url: https://it.wikipedia.org/wiki/Data_warehouse
+  sameAs: https://www.wikidata.org/wiki/Q193351
+  importance: recommended
+  depth: 3
+- concept: sqlite
+  label: SQLite
+  url: https://www.sqlite.org/
+  sameAs: https://www.wikidata.org/wiki/Q319417
+  importance: recommended
+  depth: 2
+- concept: google-trends
+  label: Google Trends
+  url: https://trends.google.com/
+  sameAs: https://www.wikidata.org/wiki/Q847115
+  importance: recommended
+  depth: 2
+- concept: google-search-console
+  label: Google Search Console
+  url: https://search.google.com/search-console
+  sameAs: https://www.wikidata.org/wiki/Q328216
+  importance: recommended
+  depth: 2
+- concept: serpapi
+  label: SerpApi
+  url: https://serpapi.com/
+  importance: recommended
+  depth: 2
+- concept: api-rest
+  label: API REST
+  url: https://it.wikipedia.org/wiki/Representational_state_transfer
+  sameAs: https://www.wikidata.org/wiki/Q749568
+  importance: recommended
+  depth: 2
+- concept: amazon-s3
+  label: Amazon S3
+  url: https://aws.amazon.com/s3/
+  sameAs: https://www.wikidata.org/wiki/Q2593067
+  importance: recommended
+  depth: 2
+- concept: pagespeed-insights
+  label: PageSpeed Insights
+  url: https://pagespeed.web.dev/
+  importance: recommended
+  depth: 2
+- concept: lighthouse
+  label: Lighthouse
+  url: https://developer.chrome.com/docs/lighthouse
+  importance: recommended
+  depth: 2
+- concept: ci-cd
+  label: CI/CD
+  url: https://it.wikipedia.org/wiki/Continuous_integration
+  sameAs: https://www.wikidata.org/wiki/Q965769
+  importance: recommended
+  depth: 3
+- concept: scd-type-2
+  label: Slowly Changing Dimension Type 2
+  url: https://en.wikipedia.org/wiki/Slowly_changing_dimension
+  importance: recommended
+  depth: 4
+- concept: change-data-capture
+  label: Change Data Capture
+  url: https://en.wikipedia.org/wiki/Change_data_capture
+  importance: recommended
+  depth: 3
+- concept: core-web-vitals
+  label: Core Web Vitals
+  url: https://web.dev/vitals/
+  importance: recommended
+  depth: 2
+- concept: llm
+  label: Large Language Model
+  url: https://it.wikipedia.org/wiki/Grande_modello_linguistico
+  sameAs: https://www.wikidata.org/wiki/Q115305900
+  importance: recommended
+  depth: 2
+- concept: data-mart
+  label: Data Mart
+  url: https://it.wikipedia.org/wiki/Data_mart
+  sameAs: https://www.wikidata.org/wiki/Q1061166
+  importance: recommended
+  depth: 3
+- concept: dwh-schema
+  label: Schema dimensionale (dim/fact)
+  url: https://en.wikipedia.org/wiki/Dimensional_modeling
+  sameAs: https://www.wikidata.org/wiki/Q3432172
+  importance: recommended
+  depth: 3
+- concept: cloudflare-pages
+  label: Cloudflare Pages
+  url: https://pages.cloudflare.com/
+  importance: recommended
+  depth: 2
+- concept: python
+  label: Python
+  url: https://www.python.org/
+  sameAs: https://www.wikidata.org/wiki/Q28865
+  importance: recommended
+  depth: 1
+- concept: ctr
+  label: Click-Through Rate
+  url: https://it.wikipedia.org/wiki/Click-through_rate
+  sameAs: https://www.wikidata.org/wiki/Q1100934
+  importance: recommended
+  depth: 2
+- concept: indexnow
+  label: IndexNow
+  url: https://www.indexnow.org/
+  importance: recommended
+  depth: 2
+- concept: sql
+  label: SQL
+  url: https://it.wikipedia.org/wiki/Structured_Query_Language
+  sameAs: https://www.wikidata.org/wiki/Q47607
+  importance: helpful
+  depth: 2
+- concept: wrangler
+  label: Wrangler (Cloudflare CLI)
+  url: https://developers.cloudflare.com/workers/wrangler/
+  importance: helpful
+  depth: 2
+- concept: terraform
+  label: Terraform
+  url: https://www.terraform.io/
+  sameAs: https://www.wikidata.org/wiki/Q28957072
+  importance: helpful
+  depth: 3
+- concept: hmac
+  label: HMAC
+  url: https://it.wikipedia.org/wiki/HMAC
+  sameAs: https://www.wikidata.org/wiki/Q1669397
+  importance: helpful
+  depth: 3
+- concept: boto3
+  label: boto3 (AWS SDK for Python)
+  url: https://boto3.amazonaws.com/v1/documentation/api/latest/index.html
+  importance: helpful
+  depth: 2
+- concept: bearer-token
+  label: Bearer token
+  url: https://it.wikipedia.org/wiki/Bearer_token
+  importance: helpful
+  depth: 2
+- concept: iso-8601
+  label: ISO 8601
+  url: https://it.wikipedia.org/wiki/ISO_8601
+  sameAs: https://www.wikidata.org/wiki/Q50101
+  importance: helpful
+  depth: 1
+- concept: ontologia-computazionale
+  label: Ontologia (informatica)
+  url: https://it.wikipedia.org/wiki/Ontologia_(informatica)
+  sameAs: https://www.wikidata.org/wiki/Q324254
+  importance: helpful
+  depth: 4
+- concept: object-storage
+  label: Object Storage
+  url: https://it.wikipedia.org/wiki/Object_storage
+  importance: helpful
+  depth: 1
+- concept: least-privilege
+  label: Principio del privilegio minimo
+  url: https://it.wikipedia.org/wiki/Principio_del_privilegio_minimo
+  sameAs: https://www.wikidata.org/wiki/Q1083272
+  importance: helpful
+  depth: 2
+- concept: npm
+  label: npm
+  url: https://www.npmjs.com/
+  importance: helpful
+  depth: 1
+
 ---
 
 Nella {% post_link /devops/seo-automatico-jekyll/ "prima parte" role="prerequisite" context="provides-context" target="internal" %} abbiamo costruito il **blocco 1** della pipeline SEO: il supporto all'autorialità. A ogni deploy, un workflow Github andava ad analizzare in ottica SEO i post nuovi o modificati tramite (individuati mediante `git diff`) e per ognuno di essi interrogava Lighthouse, PageSpeed Insights e IndexNow, segnalando potenziali problemi e fornendo indicazioni. Funziona. Ma è un'istantanea. Un controllo puntuale, una tantum.
