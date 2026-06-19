@@ -1,24 +1,33 @@
 ---
 layout: asset-3d
-title: "Passacavi da scrivania: geometrie interne e innesto a baionetta"
+title: 'Passacavi da scrivania: geometrie interne e innesto a baionetta'
 category: 3D Printing
-excerpt: "Seconda parte del tutorial OpenSCAD: analizziamo la geometria dell'innesto del passacavo parametrico. Vedremo i pattern iterativi, la gestione delle tolleranze e le scelte progettuali  affinché il nostro oggetto sia effettivamente stampabile."
+excerpt: 'Seconda parte del tutorial OpenSCAD: analizziamo la geometria dell''innesto
+  del passacavo parametrico. Vedremo i pattern iterativi, la gestione delle tolleranze
+  e le scelte progettuali  affinché il nostro oggetto sia effettivamente stampabile.'
 master: /assets/images/3d/customizable-cable-grommet-ortho.png
 header:
   overlay_filter: 0.5
   transform: keystone
   intensity: high
-tags: [OpenSCAD, 3D Printing, CAD, modellizzazione parametrica, incastri stampabili]
+tags:
+- OpenSCAD
+- 3D Printing
+- CAD
+- modellizzazione parametrica
+- incastri stampabili
 series:
-  id: "passacavi-parametrico-scrivania"
-  title: "Passacavi parametrico da scrivania"
+  id: passacavi-parametrico-scrivania
+  title: Passacavi parametrico da scrivania
   part: 2
   total_parts: 3
 broadcast:
-  channels: [linkedin, mastodon]
+  channels:
+  - linkedin
+  - mastodon
   linkedin_image:
     logo: openscad.png
-    caption: "OpenSCAD Tutorial: Gli innesti a baionetta"
+    caption: 'OpenSCAD Tutorial: Gli innesti a baionetta'
     color: white
     transform: keystone
     intensity: high
@@ -28,6 +37,7 @@ broadcast:
     color: white
     transform: keystone
     intensity: high
+  sent: true
 3d_model:
   sources:
     scad: _cad/customizable-cable-grommet/customizable-cable-grommet.scad
@@ -38,12 +48,12 @@ broadcast:
     isometric: /assets/images/3d/customizable-cable-grommet-isometric.png
     ortho: /assets/images/3d/customizable-cable-grommet-ortho.png
     overlay: /assets/overlays/customizable-cable-grommet.png
-  designed_for: "Desk cable management, 60 mm hole"
-  material: "PLA, PETG"
+  designed_for: Desk cable management, 60 mm hole
+  material: PLA, PETG
   print_settings:
     nozzle: 0.4
     layer_height: 0.2
-    infill: "15% gyroid"
+    infill: 15% gyroid
     supports: false
   dimensions:
     width: 76
@@ -52,131 +62,131 @@ broadcast:
 intended_audience: practitioner
 proficiency_level: intermediate
 knowledge_prerequisites:
-  - concept: openscad
-    label: "OpenSCAD"
-    url: "https://openscad.org/"
-    sameAs: "https://www.wikidata.org/wiki/Q3353120"
-    importance: required
-    depth: 2
-  - concept: stampa-3d-fdm
-    label: "Stampa 3D FDM"
-    url: "https://it.wikipedia.org/wiki/Stampa_3D"
-    sameAs: "https://www.wikidata.org/wiki/Q229367"
-    importance: recommended
-    depth: 2
-  - concept: filettatura
-    label: "Filettatura"
-    url: "https://it.wikipedia.org/wiki/Filettatura"
-    sameAs: "https://www.wikidata.org/wiki/Q749400"
-    importance: recommended
-    depth: 1
-  - concept: csg
-    label: "CSG (Constructive Solid Geometry)"
-    url: "https://en.wikipedia.org/wiki/Constructive_solid_geometry"
-    sameAs: "https://www.wikidata.org/wiki/Q1128371"
-    importance: recommended
-    depth: 3
-  - concept: supporti-di-stampa
-    label: "Supporti di stampa 3D"
-    importance: recommended
-    depth: 1
-  - concept: tolleranze-meccaniche
-    label: "Tolleranze meccaniche"
-    importance: recommended
-    depth: 2
-  - concept: orientamento-di-stampa
-    label: "Orientamento di stampa 3D"
-    importance: recommended
-    depth: 2
-  - concept: geometria-non-manifold
-    label: "Geometria non-manifold"
-    url: "https://en.wikipedia.org/wiki/Manifold"
-    importance: helpful
-    depth: 3
-  - concept: stl
-    label: "STL (formato di file)"
-    url: "https://it.wikipedia.org/wiki/STL_(formato_di_file)"
-    sameAs: "https://www.wikidata.org/wiki/Q1238229"
-    importance: helpful
-    depth: 1
-  - concept: 3mf
-    label: "3MF (3D Manufacturing Format)"
-    url: "https://en.wikipedia.org/wiki/3D_Manufacturing_Format"
-    sameAs: "https://www.wikidata.org/wiki/Q15029253"
-    importance: helpful
-    depth: 2
-  - concept: cad-parametrico
-    label: "CAD parametrico"
-    url: "https://it.wikipedia.org/wiki/Computer-aided_design"
-    importance: helpful
-    depth: 2
-  - concept: pla
-    label: "PLA (acido polilattico)"
-    url: "https://it.wikipedia.org/wiki/Acido_polilattico"
-    sameAs: "https://www.wikidata.org/wiki/Q413769"
-    importance: helpful
-    depth: 1
-  - concept: petg
-    label: "PETG"
-    url: "https://en.wikipedia.org/wiki/Polyethylene_terephthalate#Glycol-modified_PET"
-    importance: helpful
-    depth: 2
-  - concept: innesto-a-baionetta
-    label: "Innesto a baionetta"
-    url: "https://it.wikipedia.org/wiki/Innesto_a_baionetta"
-    importance: helpful
-    depth: 2
-  - concept: aritmetica-virgola-mobile
-    label: "Aritmetica a virgola mobile"
-    url: "https://it.wikipedia.org/wiki/Numero_in_virgola_mobile"
-    sameAs: "https://www.wikidata.org/wiki/Q47296719"
-    importance: helpful
-    depth: 2
-  - concept: pattern-eps
-    label: "Pattern epsilon (eps)"
-    importance: helpful
-    depth: 2
-  - concept: for-openscad
-    label: "Ciclo for in OpenSCAD"
-    importance: helpful
-    depth: 2
-  - concept: intersection-for
-    label: "intersection_for in OpenSCAD"
-    importance: helpful
-    depth: 3
-  - concept: slot-a-l
-    label: "Slot a L (innesto a baionetta)"
-    importance: helpful
-    depth: 2
-  - concept: pin-radiale
-    label: "Pin radiale"
-    importance: helpful
-    depth: 1
-  - concept: unione-implicita-openscad
-    label: "Unione implicita in OpenSCAD"
-    importance: helpful
-    depth: 2
-  - concept: delaminazione
-    label: "Delaminazione (stampa 3D)"
-    importance: helpful
-    depth: 2
-  - concept: sovra-estrusione
-    label: "Sovra-estrusione"
-    importance: helpful
-    depth: 2
-  - concept: ugello
-    label: "Ugello (stampa 3D)"
-    importance: helpful
-    depth: 1
-  - concept: infill
-    label: "Infill (riempimento)"
-    importance: helpful
-    depth: 1
-  - concept: gyroid
-    label: "Gyroid"
-    url: "https://en.wikipedia.org/wiki/Gyroid"
-    importance: helpful
-    depth: 2
+- concept: openscad
+  label: OpenSCAD
+  url: https://openscad.org/
+  sameAs: https://www.wikidata.org/wiki/Q3353120
+  importance: required
+  depth: 2
+- concept: stampa-3d-fdm
+  label: Stampa 3D FDM
+  url: https://it.wikipedia.org/wiki/Stampa_3D
+  sameAs: https://www.wikidata.org/wiki/Q229367
+  importance: recommended
+  depth: 2
+- concept: filettatura
+  label: Filettatura
+  url: https://it.wikipedia.org/wiki/Filettatura
+  sameAs: https://www.wikidata.org/wiki/Q749400
+  importance: recommended
+  depth: 1
+- concept: csg
+  label: CSG (Constructive Solid Geometry)
+  url: https://en.wikipedia.org/wiki/Constructive_solid_geometry
+  sameAs: https://www.wikidata.org/wiki/Q1128371
+  importance: recommended
+  depth: 3
+- concept: supporti-di-stampa
+  label: Supporti di stampa 3D
+  importance: recommended
+  depth: 1
+- concept: tolleranze-meccaniche
+  label: Tolleranze meccaniche
+  importance: recommended
+  depth: 2
+- concept: orientamento-di-stampa
+  label: Orientamento di stampa 3D
+  importance: recommended
+  depth: 2
+- concept: geometria-non-manifold
+  label: Geometria non-manifold
+  url: https://en.wikipedia.org/wiki/Manifold
+  importance: helpful
+  depth: 3
+- concept: stl
+  label: STL (formato di file)
+  url: https://it.wikipedia.org/wiki/STL_(formato_di_file)
+  sameAs: https://www.wikidata.org/wiki/Q1238229
+  importance: helpful
+  depth: 1
+- concept: 3mf
+  label: 3MF (3D Manufacturing Format)
+  url: https://en.wikipedia.org/wiki/3D_Manufacturing_Format
+  sameAs: https://www.wikidata.org/wiki/Q15029253
+  importance: helpful
+  depth: 2
+- concept: cad-parametrico
+  label: CAD parametrico
+  url: https://it.wikipedia.org/wiki/Computer-aided_design
+  importance: helpful
+  depth: 2
+- concept: pla
+  label: PLA (acido polilattico)
+  url: https://it.wikipedia.org/wiki/Acido_polilattico
+  sameAs: https://www.wikidata.org/wiki/Q413769
+  importance: helpful
+  depth: 1
+- concept: petg
+  label: PETG
+  url: https://en.wikipedia.org/wiki/Polyethylene_terephthalate#Glycol-modified_PET
+  importance: helpful
+  depth: 2
+- concept: innesto-a-baionetta
+  label: Innesto a baionetta
+  url: https://it.wikipedia.org/wiki/Innesto_a_baionetta
+  importance: helpful
+  depth: 2
+- concept: aritmetica-virgola-mobile
+  label: Aritmetica a virgola mobile
+  url: https://it.wikipedia.org/wiki/Numero_in_virgola_mobile
+  sameAs: https://www.wikidata.org/wiki/Q47296719
+  importance: helpful
+  depth: 2
+- concept: pattern-eps
+  label: Pattern epsilon (eps)
+  importance: helpful
+  depth: 2
+- concept: for-openscad
+  label: Ciclo for in OpenSCAD
+  importance: helpful
+  depth: 2
+- concept: intersection-for
+  label: intersection_for in OpenSCAD
+  importance: helpful
+  depth: 3
+- concept: slot-a-l
+  label: Slot a L (innesto a baionetta)
+  importance: helpful
+  depth: 2
+- concept: pin-radiale
+  label: Pin radiale
+  importance: helpful
+  depth: 1
+- concept: unione-implicita-openscad
+  label: Unione implicita in OpenSCAD
+  importance: helpful
+  depth: 2
+- concept: delaminazione
+  label: Delaminazione (stampa 3D)
+  importance: helpful
+  depth: 2
+- concept: sovra-estrusione
+  label: Sovra-estrusione
+  importance: helpful
+  depth: 2
+- concept: ugello
+  label: Ugello (stampa 3D)
+  importance: helpful
+  depth: 1
+- concept: infill
+  label: Infill (riempimento)
+  importance: helpful
+  depth: 1
+- concept: gyroid
+  label: Gyroid
+  url: https://en.wikipedia.org/wiki/Gyroid
+  importance: helpful
+  depth: 2
 difficulty_declared:
   conceptual: 3
   technical: 4
@@ -195,7 +205,8 @@ difficulty_computed:
 image_meta:
   role: illustration
   context: ambient
-  caption: "Vista ortografica del passacavo parametrico con innesto a baionetta"
+  caption: Vista ortografica del passacavo parametrico con innesto a baionetta
+
 ---
 
 Nella {% post_link /3d-printing/openscad-tutorial-parte-1/ "prima parte" role="prerequisite" context="provides-context" target="internal" %} abbiamo visto la struttura generale del codice e le operazioni fondamentali di OpenSCAD. Ora scendiamo nel dettaglio del componente più interessante del passacavo, e che ci consentirà di scendere più nel dettaglio dei pattern geometrici più utilizzati nella progettazione: **l'innesto a baionetta**.
