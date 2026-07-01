@@ -441,7 +441,7 @@ jobs:
 
       - name: Cache npm global (@lhci/cli) 📦
         if: steps.find.outputs.no_urls != 'true'
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             ~/.npm
