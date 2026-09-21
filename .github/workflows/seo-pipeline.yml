@@ -435,9 +435,9 @@ jobs:
 
       - name: Setup Node.js 🟩
         if: steps.find.outputs.no_urls != 'true'
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
-          node-version: '20'
+          node-version: '24'
 
       - name: Cache npm global (@lhci/cli) 📦
         if: steps.find.outputs.no_urls != 'true'
@@ -571,9 +571,9 @@ jobs:
           fetch-depth: 2
 
       - name: Setup Python 🐍
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
-          python-version: '3.12'
+          python-version: '3.14'
           cache: 'pip'
           cache-dependency-path: requirements-seo.txt
 
