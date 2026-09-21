@@ -2,7 +2,7 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Compila il sito",
+      "label": "🏗️ Compila il sito",
       "type": "shell",
       "command": "make site",
       "group": {
@@ -20,7 +20,7 @@
       "problemMatcher": []
     },
     {
-      "label": "Avvia il server di sviluppo",
+      "label": "▶️ Avvia il server di sviluppo",
       "type": "shell",
       "command": "make dev",
       "group": {
@@ -39,7 +39,7 @@
       "problemMatcher": []
     },
     {
-      "label": "Pulisci il sito",
+      "label": "🧹 Pulisci il sito",
       "type": "shell",
       "command": "make clean",
       "presentation": {
@@ -53,7 +53,7 @@
       "problemMatcher": []
     },
     {
-      "label": "Esegui knitr",
+      "label": "📔 Esegui knitr",
       "type": "shell",
       "command": "make knitr",
       "presentation": {
@@ -67,7 +67,7 @@
       "problemMatcher": []
     },
     {
-      "label": "Nuovo post",
+      "label": "📝 Nuovo post",
       "type": "shell",
       "command": "rake post title='${input:postTitle}' category='${input:postCategory}'${input:postSubtitle}",
       "presentation": {
@@ -81,7 +81,7 @@
       "problemMatcher": []
     },
     {
-      "label": "Nuova bozza",
+      "label": "✏️ Nuova bozza",
       "type": "shell",
       "command": "rake draft title='${input:draftTitle}'",
       "presentation": {
@@ -95,7 +95,7 @@
       "problemMatcher": []
     },
     {
-      "label": "Converti immagine in Cloudinary",
+      "label": "🖼️ Converti immagine in Cloudinary",
       "type": "shell",
       "command": "ruby",
       "args": [
@@ -113,7 +113,7 @@
       "problemMatcher": []
     },
     {
-      "label": "Esegui knitr sull'Rmd corrente",
+      "label": "📔 Esegui knitr sull'Rmd corrente",
       "type": "shell",
       "command": "noglob rake",
       "args": ["knit['${relativeFile}']"],
@@ -128,7 +128,7 @@
       "problemMatcher": []
     },
     {
-      "label": "Esegui knitr su tutti gli Rmd",
+      "label": "📚 Esegui knitr su tutti gli Rmd",
       "type": "shell",
       "command": "rake",
       "args": ["knit_all"],
@@ -143,7 +143,7 @@
       "problemMatcher": []
     },
     {
-      "label": "Nuovo workbook Rmd",
+      "label": "✨ Nuovo workbook Rmd",
       "type": "shell",
       "command": "noglob rake",
       "args": ["new_rmd['${input:rmdTitle}','${input:rmdCategory}']"],
@@ -158,7 +158,7 @@
       "problemMatcher": []
     },
     {
-      "label": "Nuovo asset 3D",
+      "label": "✨ Nuovo asset 3D",
       "type": "shell",
       "command": "noglob rake",
       "args": ["new_3d['${input:cadTitle}','${input:cadSlug}']"],
@@ -173,7 +173,7 @@
       "problemMatcher": []
     },
     {
-      "label": "CAD: compila singolo asset 3D",
+      "label": "📐 CAD: compila singolo asset 3D",
       "type": "shell",
       "command": "make assets/3d/${input:cadSlug}/${input:cadSlug}.stl assets/3d/${input:cadSlug}/${input:cadSlug}.3mf",
       "presentation": {
@@ -187,7 +187,7 @@
       "problemMatcher": []
     },
     {
-      "label": "CAD: compila asset corrente",
+      "label": "📐 CAD: compila asset corrente",
       "type": "shell",
       "command": "slug=$(dirname ${relativeFile} | xargs basename); make \"assets/3d/$slug/$slug.stl\" \"assets/3d/$slug/$slug.3mf\"",
       "presentation": {
@@ -201,7 +201,7 @@
       "problemMatcher": []
     },
     {
-      "label": "CAD: compila tutto",
+      "label": "📐 CAD: compila tutto",
       "type": "shell",
       "command": "make cad",
       "presentation": {
@@ -215,7 +215,7 @@
       "problemMatcher": []
     },
     {
-      "label": "Configura sito",
+      "label": "⚙️ Configura sito",
       "type": "shell",
       "command": "./configure",
       "presentation": {

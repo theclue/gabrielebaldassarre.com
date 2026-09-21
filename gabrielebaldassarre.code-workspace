@@ -33,6 +33,10 @@
       "path": "_cad"
     },
     {
+      "name": "🪵 Billy Bookcase",
+      "path": "_cad/parametric-billy-bookcase"
+    },
+    {
       "name": "🔧 Scripts",
       "path": "_scripts"
     },
@@ -57,5 +61,4 @@
       "*.scad": "openscad"
     }
   }
-}
 }
