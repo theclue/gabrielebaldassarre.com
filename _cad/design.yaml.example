@@ -1,0 +1,59 @@
+# Copy this file to _cad/<slug>/design.yaml.
+# No README.md is permitted in an asset directory: post frontmatter `3d_model:` remains the publication metadata source.
+# This contract is consumed by the cad-pipeline roster.
+
+# Stable kebab-case asset identifier, matching the directory and publication slug.
+slug: example-parametric-asset
+
+requirements:
+  # User-visible behavior the model must provide.
+  functional_requirements: []
+  # Named dimensions whose values are critical to fit or operation.
+  critical_dimensions: {}
+  # Physical, geometric, material, or process constraints.
+  constraints: []
+  # Working assumptions made before all requirements are known.
+  assumptions: []
+  # Questions or missing facts that still need resolution.
+  unknowns: []
+  # Verifiable conditions for accepting the finished asset.
+  acceptance_criteria: []
+
+parameters:
+  # Public Customizer-facing parameters. Keep names, types, and defaults explicit.
+  public:
+    # - name: width
+    #   type: number
+    #   unit: mm
+    #   default: 100
+    #   min: 10
+    #   max: 300
+    #   customizer: true
+    #   label: Width
+  # Values calculated from public parameters.
+  derived: []
+  # Relationships that must remain true as parameters change.
+  invariants: []
+  # Fixed values used by the authoring plan.
+  constants: {}
+
+feature_plan:
+  # Physical-piece modules to implement in the .scad file.
+  modules: []
+  # Coordinate-system description, origin, axes, and orientation.
+  coordinate_system: ""
+  # Ordered modeling operations (primitive, transform, boolean, extrusion, etc.).
+  ops: []
+  # Parameter values or expressions assigned to each module.
+  module_parameter_map: {}
+
+manufacturing:
+  # Supported profiles: fdm or woodworking.
+  profile: fdm
+  # Printer/build envelope or woodworking stock limits.
+  build_volume: {}
+  # Inventory file used for material and tool availability.
+  inventory_ref: inventory.yaml
+
+# Written by validators; leave empty in the design authored by the planner.
+validation_results: {}

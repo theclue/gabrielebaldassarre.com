@@ -13,6 +13,7 @@ associato: il tutorial corrispondente va creato successivamente con
 ## Architettura
 
 1. **Interpretazione** della descrizione utente (derivazione slug e titolo)
+> Per progetti complessi è disponibile la pipeline multi-agente canonica `cad-orchestrator` (requirements → plan → author → validate → geometry → manufacturability → release).
 2. **Chiamata** al Rake task `new_3d` per creare lo scheletro `.scad`
 3. **Popolamento** del `.scad` con parametri, moduli e geometria iniziale
 4. **Restituzione** di recap e specifiche per il rendering
