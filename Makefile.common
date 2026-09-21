@@ -127,9 +127,9 @@ assets/images/diagrams/%.svg: R/diagrams/%.R
 	@mkdir -p $(dir $@)
 	@echo "📊 diagram $< → $@"
 ifeq ($(HAS_KNITR),1)
-	@cd $(ROOT_DIR) && $(RSCRIPT_BIN) $<
+	@cd $(ROOT_DIR) && $(RSCRIPT_BIN) $< || { echo "⚠️  rigenerazione $@ fallita: uso output committed"; test -f "$@"; }
 else
-	@docker run --rm -v $(ROOT_DIR):/srv/jekyll -w /srv/jekyll $(KNITR_IMAGE) Rscript $<
+	@docker run --rm -v $(ROOT_DIR):/srv/jekyll -w /srv/jekyll $(KNITR_IMAGE) Rscript $< || { echo "⚠️  rigenerazione $@ fallita: uso output committed"; test -f "$@"; }
 endif
 
 _DIAGRAM_RS   := $(wildcard R/diagrams/*.R)

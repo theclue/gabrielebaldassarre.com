@@ -97,7 +97,8 @@ jobs:
 
             while read -r img; do
               [ -z "$img" ] && continue
-              local_img="${img#/}"  # Rimuovi / iniziale
+              img_path="${img%%[?#]*}"   # rimuovi query-string/fragment prima del test esistenza
+              local_img="${img_path#/}"  # Rimuovi / iniziale
               if [ ! -f "$local_img" ]; then
                 echo "  ❌ IMMAGINE MANCANTE: ${img}"
                 HAS_ERRORS=1
