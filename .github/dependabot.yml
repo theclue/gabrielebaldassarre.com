@@ -1,28 +1,8 @@
+# Version updates are handled by Renovate (see /renovate.json).
+# Dependabot security updates and alerts remain enabled via
+# Settings -> Security & quality -> Advanced Security.
+# This file is intentionally kept with an empty updates list (official
+# way to retire version updates while preserving the config for future
+# security-updates grouping rules).
 version: 2
-updates:
-  - package-ecosystem: "bundler"
-    directory: "/"
-    schedule:
-      interval: "monthly"
-    open-pull-requests-limit: 5
-    labels:
-      - "dependencies"
-      - "ruby"
-
-  - package-ecosystem: "github-actions"
-    directory: "/"
-    schedule:
-      interval: "monthly"
-    open-pull-requests-limit: 5
-    labels:
-      - "dependencies"
-      - "github-actions"
-
-  - package-ecosystem: "docker"
-    directory: "/"
-    schedule:
-      interval: "monthly"
-    open-pull-requests-limit: 3
-    labels:
-      - "dependencies"
-      - "docker"
+updates: []

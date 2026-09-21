@@ -1,6 +1,45 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:recommended"
-  ]
+    "config:recommended",
+    ":semanticCommits",
+    ":semanticCommitScope(deps)",
+    ":dependencyDashboard",
+    "schedule:monthly"
+  ],
+  "timezone": "Europe/Rome",
+  "prHourlyLimit": 1,
+  "labels": ["dependencies"],
+  "packageRules": [
+    {
+      "description": "Batch minor/patch/pin/digest updates into one PR and automerge once checks pass",
+      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
+      "groupName": "all non-major dependencies",
+      "groupSlug": "all-minor-patch",
+      "automerge": true,
+      "platformAutomerge": false
+    },
+    {
+      "description": "Majors stay as separate, manually reviewed PRs",
+      "matchUpdateTypes": ["major"],
+      "addLabels": ["major"]
+    },
+    {
+      "description": "Keep Gemfile.lock transitive gems fresh (replaces the old Dependabot bundler churn)",
+      "matchManagers": ["bundler"],
+      "lockFileMaintenance": { "enabled": true, "automerge": true, "schedule": ["* 0-3 1 * *"] }
+    },
+    {
+      "description": "Group GitHub Actions updates into a single PR",
+      "matchManagers": ["github-actions"],
+      "groupName": "github actions",
+      "labels": ["dependencies", "github-actions"]
+    },
+    {
+      "description": "Label Dockerfile updates for filtering",
+      "matchManagers": ["dockerfile"],
+      "labels": ["dependencies", "docker"]
+    }
+  ],
+  "ignorePaths": ["containers/**"]
 }
