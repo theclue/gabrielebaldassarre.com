@@ -3,14 +3,14 @@
 // toe-kick and crown, optional back panel (nailed or slide-in into a groove),
 // variable number of inner shelves.  The h/l/w dims are of the finished unit.
 //
-// Axes (woodworkers-lib):  dim = [ l (X, width) , w (Y, depth) , h (Z, height) ]
+// Axes (woodworkers-lib):  dim = l (X width), w (Y depth), h (Z height)
 //   l -> width   (X)
 //   w -> depth   (Y)
 //   h -> height  (Z)
 //
 // The cutlist is extracted from the OpenSCAD ECHO log:
 //   - woodworkers-lib:   "plane (left):  18 x 280 x 1900"  (readable on screen)
-//   - BOM cutplanner:    {"name":..,"length":..,"width":..,"thickness":..}
+//   - BOM cutplanner:    name/length/width/thickness JSON record per piece
 //     compatible with github.com/uberbruns/cutplanner (serve/write-bom).
 //
 // Author  : Gabriele Baldassarre
@@ -20,7 +20,7 @@
 //           full text in woodworkers/LICENSE.  The combined file is
 //           distributed under the GPL-3.0 terms.
 
-/* [Final dimensions (unit)] */
+/* [Final dimensions - unit] */
 // Final width - l, X axis (mm)
 width_l  = 800;   // [300:10:1200]
 // Final depth - w, Y axis (mm)
@@ -62,7 +62,7 @@ center_shelf = "no";  // [yes:Additional centered shelf, no:No]
 // Back panel presence
 has_back = "yes";      // [yes:With back panel, no:Without back]
 // Back panel fixing type
-back_style = "nailed";  // [nailed:Nailed on back, slot:Slide-in groove]
+back_style = "nailed";  // [nailed:Nailed on back, slot:Slide in groove]
 // Groove depth per side (slide-in only) (mm)
 groove_depth = 8;     // [4:1:15]
 // Back panel setback from the rear (slide-in only) (mm)
@@ -84,13 +84,13 @@ shelf_hole_inset = 37;  // [20:1:100]
 
 /* [View] */
 // Render mode
-mode = "assembly";  // [assembly:Assembled, exploded:Exploded, print:Solid (STL/3MF)]
+mode = "assembly";  // [assembly:Assembled, exploded:Exploded, print:Solid STL3MF]
 
 /* [Quality] */
-$fn = 32; // [6:2:128]
+quality_fn = 32; // [6:2:128]
 
 /* [Hidden] */
-
+$fn = quality_fn;
 // --- Embedded woodworkers library to make this project compatible with the Thingiverse Customizer  --
 // Copy of woodworkers-lib std.scad (fxdave, GPL-3.0):
 // https://github.com/fxdave/woodworkers-lib
