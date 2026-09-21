@@ -92,25 +92,7 @@ module assembly(explode = 0, explode_distance = 25) { ... }
 mode = "print"; // [assembly:Assembly, exploded:Exploded, print:Print layout]
 ```
 
-**Regole (da cad-author.md):**
-
-1. **Header** — Titolo, licenza, autore, data. Sempre `MIT License`.
-2. **Customizer** — `/* [Group] */` per raggruppare parametri. Ogni
-   parametro ha `// [min:step:max]` e descrizione in italiano.
-3. **$fn** — Default 128. Ridurre a 64 per preview veloci, aumentare
-   a 256 per curve fini.
-4. **Geometry helpers** — Variabili derivate, tolleranze. Mai magic numbers.
-5. **Modules** — Un `module` per pezzo fisico. PascalCase. Ognuno
-   indipendentemente esportabile.
-6. **Assembly** — `module assembly(explode=0, explode_distance=25)`.
-   `explode` è 0–1 fattore di interpolazione.
-7. **Colori** — Commenti `// color("Name")` nell'assembly:
-   `DimGray` (strutturale), `SteelBlue` (secondario),
-   `SandyBrown` (trasparente/desk), `DarkOliveGreen` (accessori)
-8. **Niente dipendenze esterne** — No `use <>`, no `include <>` assoluti.
-9. **Parametri in italiano**, variabili in inglese.
-10. **NO README.md** — Non creare README. I metadati vivono nel
-    frontmatter `3d_model:` del post associato.
+Applica integralmente le 12 regole + sezione Customizer di `.opencode/agents/cad-author.md` (fonte unica; non duplicare qui).
 
 **Linee guida per la geometria iniziale:**
 - Inizia con la forma primaria che cattura l'80% del design
@@ -155,7 +137,13 @@ Al termine, restituisci:
 5. Creare il tutorial con `/create_post` referenziando l'asset:
    `/create_post "Tutorial su <title>: ..."` — includerà il blocco
    `3d_model:` con `sources.scad: _cad/<slug>/<slug>.scad`
-6. Caricare su Printables/Thingiverse e aggiornare `3d_model.downloads`
+6. Creare/aggiornare il fork `<slug>-thingiverse.scad` (inglese,
+   ASCII-only — convenzione dual-file in `.opencode/agents/cad-author.md`
+   §Thingiverse Customizer Compatibility) e, prima di allegarlo, eseguire
+   la guardia:
+   `_scripts/cad/customizer_compat_check.sh _cad/<slug>/<slug>-thingiverse.scad`
+   (deve uscire 0)
+7. Caricare su Printables/Thingiverse e aggiornare `3d_model.downloads`
 
 ### Prompt Midjourney (master blueprint preview)
 /imagine prompt: <prompt per generare un'immagine stilizzata del modello 3D finito, stile blueprint/technical drawing, --ar 16:9 --style raw>
