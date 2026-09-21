@@ -191,8 +191,8 @@ For exmaple 4 legs:
 */
 module leg(dim, legHeight, l=0,r=0,f=0,B=0,ll=0,rr=0,ff=0,BB=0, thick=thick) {
     translate([
-        if(r!=0 || rr != 0) dim[0] else 0,
-        if(B!=0 || BB != 0) dim[1] else 0,
+        (r!=0 || rr != 0) ? dim[0] : 0,
+        (B!=0 || BB != 0) ? dim[1] : 0,
         0
     ])
     translate([
@@ -218,11 +218,11 @@ function __size_with_abs_text(size,l,r,t,b,f,B) = str(
     size[0],
     size[0] >= size[2] ? __abs_text(f,B) : "",
     size[0] >= size[1] ? __abs_text(t,b) : "",
-    " ",chr(215)," ",
+    " ","x"," ",
     size[1],
     size[1] >= size[2] ? __abs_text(l,r) : "",
     size[1] >= size[0] ? __abs_text(t,b) : "",
-    " ",chr(215)," ",
+    " ","x"," ",
     size[2],
     size[2] >= size[0] ? __abs_text(f,B) : "",
     size[2] >= size[1] ? __abs_text(l,r) : ""
@@ -261,42 +261,34 @@ module __rectangle(length, width, radius) {
     }
 }
 
-function __planeFront(dim, l,r,t,b, ll,rr,tt,bb, thick) = let(
-    coords = __planeCoords([dim[0], dim[2]], l,r,b,t, ll,rr,bb,tt, thick)
-)[
-    [coords[0][0], thick, coords[0][1]],
-    [coords[1][0], 0, coords[1][1]],
-    coords[2]
+function __planeFront(dim, l,r,t,b, ll,rr,tt,bb, thick) = [
+    [dim[0] + l*thick + r*thick + ll + rr, thick, dim[2] + b*thick + t*thick + bb + tt],
+    [-l*thick - ll, 0, -b*thick - bb],
+    str(dim[0] + l*thick + r*thick + ll + rr, "x", dim[2] + b*thick + t*thick + bb + tt, "x", thick)
 ];
-function __planeLeft(dim, f,B,t,b, ff,BB,tt,bb, thick) = let(
-    coords = __planeCoords([dim[1], dim[2]], f,B,b,t, ff,BB,bb,tt, thick)
-)[
-    [thick, coords[0][0], coords[0][1]],
-    [0, coords[1][0], coords[1][1]],
-    coords[2]
+function __planeLeft(dim, f,B,t,b, ff,BB,tt,bb, thick) = [
+    [thick, dim[1] + f*thick + B*thick + ff + BB, dim[2] + b*thick + t*thick + bb + tt],
+    [0, -f*thick - ff, -b*thick - bb],
+    str(dim[1] + f*thick + B*thick + ff + BB, "x", dim[2] + b*thick + t*thick + bb + tt, "x", thick)
 ];
-function __planeBottom(dim, l,r,f,B, ll,rr,ff,BB, thick) = let(
-    coords = __planeCoords([dim[0], dim[1]], l,r,f,B, ll,rr,ff,BB, thick)
-)[
-    [coords[0][0], coords[0][1], thick],
-    [coords[1][0], coords[1][1], 0],
-    coords[2]
+function __planeBottom(dim, l,r,f,B, ll,rr,ff,BB, thick) = [
+    [dim[0] + l*thick + r*thick + ll + rr, dim[1] + f*thick + B*thick + ff + BB, thick],
+    [-l*thick - ll, -f*thick - ff, 0],
+    str(dim[0] + l*thick + r*thick + ll + rr, "x", dim[1] + f*thick + B*thick + ff + BB, "x", thick)
 ];
 
 
-function __planeCoords(dim, x1, x2, y1, y2, xx1, xx2, yy1, yy2, thick) = let(
-    size= [
+function __planeCoords(dim, x1, x2, y1, y2, xx1, xx2, yy1, yy2, thick) = [
+    [
         dim[0] + x1*thick + x2*thick + xx1 + xx2,
         dim[1] + y1*thick + y2*thick + yy1 + yy2
     ],
-    placement=[
+    [
         -x1*thick - xx1,
         -y1*thick - yy1
-    ]
-)[
-    size,
-    placement,
-    str(size[0],"x",size[1],"x",thick)
+    ],
+    str(dim[0] + x1*thick + x2*thick + xx1 + xx2, "x",
+        dim[1] + y1*thick + y2*thick + yy1 + yy2, "x", thick)
 ];
 // --- End of woodworkers library ---
 
@@ -323,10 +315,10 @@ has_top_rail = (has_back != "yes") || back_style == "nailed";
 // Total shelves (with center_shelf one fixed shelf is added at the center)
 total_shelves = (center_shelf == "yes") ? shelf_count + 1 : shelf_count;
 
-assert(interior_top > (total_shelves + 1) * TH,
-       "Insufficient height: reduce shelves/toe-kick/crown or increase h.");
-assert(width_l  > 2 * TH, "Insufficient width relative to the thickness.");
-assert(depth_w  > 2 * TH, "Insufficient depth relative to the thickness.");
+if (!(interior_top > (total_shelves + 1) * TH))
+    echo("ASSERT-FAILED: Insufficient height: reduce shelves/toe-kick/crown or increase h.");
+if (!(width_l  > 2 * TH)) echo("ASSERT-FAILED: Insufficient width relative to the thickness.");
+if (!(depth_w  > 2 * TH)) echo("ASSERT-FAILED: Insufficient depth relative to the thickness.");
 
 // Slide-in: front face of the back (carcass-local Y), where the shelves stop
 back_front_y = depth_w - back_offset - back_thickness;   // used for slide-in only
@@ -340,8 +332,7 @@ shelf_bb = ((has_back == "yes") && back_style == "slot") ? (back_front_y - carca
 // (lo = top face of the panel below, hi = bottom face of the panel above)
 function even_positions(lo, hi, k) =
     k <= 0 ? [] :
-    let(gap = (hi - lo - k * TH) / (k + 1))
-    [ for (i = [1 : 1 : k]) lo + i * gap + (i - 1) * TH ];
+    [ for (i = [1 : 1 : k]) lo + i * ((hi - lo - k * TH) / (k + 1)) + (i - 1) * TH ];
 
 // Center of the inner opening (top face of carcass bottom <-> bottom face of crown)
 center_z       = (TH + interior_top) / 2;
@@ -488,14 +479,14 @@ module Bookcase(explode = 0) {
 
     translate([0, 0, toekick_height]) {
         // Sides (one piece down to the floor) + carcass bottom + shelves
-        color("#c69c6d") CarcassBody();
-        color("#b5905c") TopRail();
+        color([0.776, 0.612, 0.427]) CarcassBody();
+        color([0.710, 0.565, 0.361]) TopRail();
         translate([0, 0, -explode * exp * 0.6])
-            color("#a8794f") ToeKick();
+            color([0.659, 0.475, 0.310]) ToeKick();
         translate([0, explode * exp * 0.8, 0])
-            color("#7a5230") Back();
+            color([0.478, 0.322, 0.188]) Back();
         translate([0, 0, explode * exp])
-            color("#b98c5a") TopPanel();
+            color([0.725, 0.549, 0.353]) TopPanel();
     }
 }
 
