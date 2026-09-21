@@ -95,6 +95,10 @@ def discover_slugs(select: str | None = None) -> list[str]:
     slugs = set()
     for scad in CAD_DIR.rglob("*.scad"):
         slug = scad.parent.name
+        # Only the canonical _cad/<slug>/<slug>.scad is a build target;
+        # skip vendored libraries and auxiliary includes (e.g. woodworkers/std.scad).
+        if scad.name != f"{slug}.scad":
+            continue
         if select and slug != select:
             continue
         slugs.add(slug)

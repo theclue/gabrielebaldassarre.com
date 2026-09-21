@@ -1,0 +1,15 @@
+# Fogli disponibili per cutplanner (github.com/uberbruns/cutplanner).
+# Uso:  cutplanner serve parametric-billy-bookcase.scad inventory.yaml --kerf 3
+# Il packer assegna ogni pannello al foglio più piccolo che lo contiene,
+# abbinando lo spessore.
+inventory:
+  - type: Truciolare/MP 18mm (struttura)
+    dimensions:
+      length: 2500
+      width: 1250
+      thickness: 18
+  - type: MDF 6mm (fondo)
+    dimensions:
+      length: 2440
+      width: 1220
+      thickness: 6
