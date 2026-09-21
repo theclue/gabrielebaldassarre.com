@@ -1,4 +1,4 @@
-FROM ubuntu:24.04
+FROM ubuntu:26.04
 
 LABEL authors="Gabriele Baldassarre" \
       description="OpenSCAD build container for CAD model compilation (STL, 3MF, PNG)" \
