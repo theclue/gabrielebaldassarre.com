@@ -30,13 +30,13 @@ Questa caratteristica, dimostrata empiricamente con l'esperimento di Milgram, su
 
 Più precisamente, il __diametro__ della rete è, sì, proporzionale al numero di nodi, ma cresce su scala solo logaritmica rispetto al numero di nodi \\( n \\). Questo comporta che al crescere del numero di nodi di una rete, il diametro cresce, ma più lentamente.
 
-Qui è racchiusa l'essenza dei  _sei gradi di separazione_. E' una caratteristica che non è di esclusivo appannaggio delle reti sociali, ma è stata riscontrata anche in reti di informazioni, reti tecnologiche e persino reti biologiche. Oltre ai succitati sei gradi dell'esperimento di Milgram (scesi, sembrerebbe, a 4.7 dall'avvento di Facebook), diametri contenuti il propozione alle dimensioni della rete si hanno nel World Wide Web (stimato in circa 19), nelle connesisoni neuronali e in molte altre circostanze.
+Qui è racchiusa l'essenza dei  _sei gradi di separazione_. E' una caratteristica che non è di esclusivo appannaggio delle reti sociali, ma è stata riscontrata anche in reti di informazioni, reti tecnologiche e persino reti biologiche. Oltre ai succitati sei gradi dell'esperimento di Milgram (scesi, sembrerebbe, a 4.7 dall'avvento di Facebook), diametri contenuti in proporzione alle dimensioni della rete si hanno nel World Wide Web (stimato in circa 19), nelle connessioni neuronali e in molte altre circostanze.
 
 ### Gli amici dei miei amici sono miei amici
 
 Così come il DNA è costruito da una sequenza di quattro basi elementari (adenina, guanina,...) così anche le reti sociali hanno le loro "basi". Queste basi sono le differenti combinazioni di collegamenti possibili tra __tre__ nodi della rete, scelti casualmente.
 
-Il motivo per cui l'elemento più atomico di organizzazione delle comunità sociali sia il triangolo è ancora oggetto di studi e non vi ci addentreremo in questa sete. Fatto sta, che, come una catena di DNA è descritta da una lunga sequenza di basi, una rete sociale può essere descritta da una lunga _sequenza di triangoli_. Questi triangoli prendono il nome di _triadi_ o, più spesso, di __clique__ (in italiano orribilmente traducibile con 'cricca'). E queste _clique_ non sono, tipicamente, oggetti statici; le relazioni evolvono nel tempo e la struttura della rete con esso. Con essa, quindi, cambiano le clique.
+Il motivo per cui l'elemento più atomico di organizzazione delle comunità sociali sia il triangolo è ancora oggetto di studi e non vi ci addentreremo in questa sede. Fatto sta, che, come una catena di DNA è descritta da una lunga sequenza di basi, una rete sociale può essere descritta da una lunga _sequenza di triangoli_. Questi triangoli prendono il nome di _triadi_ o, più spesso, di __clique__ (in italiano orribilmente traducibile con 'cricca'). E queste _clique_ non sono, tipicamente, oggetti statici; le relazioni evolvono nel tempo e la struttura della rete con esso. Con essa, quindi, cambiano le clique.
 
 {% figure caption:"Una serie di clique, o triadi. In effetti, diverse possono essere le configurazioni con cui si presenta una triade aperta o chiusa. Tra questi esempi, l'unica caratterizzata da una certa instabilità è quella di sinistra che non a caso prende il nome di _triade proibita (forbidden triad)_: la probabilità che evolva, presto o tardi, in una delle due configurazioni più a destra è molto alta." %}
 ![Triadi in equilibrio e proibite](/assets/images/triadi.svg)
@@ -60,7 +60,7 @@ Una rete _scale-free_ munita, come detto, di _hubs_ presenterà, invece, una dis
 ![Bell-shape & Power Law](/assets/images/powerlaw.gif)
 {% endfigure %}
 
-Solo una puntualizzazione sul nome: queste reti si chiamano __scale-free__ perché la pendenza della retta caratteristica del modello di regressione costruito sulla distribuzione della centralità è _invariante alla scala_,  cioè non varia al variare del numero dei nodi. Solo, tuttavia, questa grandezza presenta questa caratteristica, mentre tipicamente le altre grandezze caratteristiche (strutturali, come la centralitò, o attributi legati ai nodi) sono genericamente _non invarianti_.
+Solo una puntualizzazione sul nome: queste reti si chiamano __scale-free__ perché la pendenza della retta caratteristica del modello di regressione costruito sulla distribuzione della centralità è _invariante alla scala_,  cioè non varia al variare del numero dei nodi. Solo, tuttavia, questa grandezza presenta questa caratteristica, mentre tipicamente le altre grandezze caratteristiche (strutturali, come la centralità, o attributi legati ai nodi) sono genericamente _non invarianti_.
 
 
 ## L'importanza delle community locali
@@ -87,10 +87,10 @@ Ebbene, molte reti sociali e per la verità _tutte_ quelle che sembrano organizz
 
 Al contrario, reti tipicamente disassortative sul numero di gradi sono quelle biologiche, come le reti individuate tra le proteine di una cellula.
 
-La risposta alla domanda, comunque, è affermativa: i nodi con alta degree tenderanno a connettersi ai vicini più prossimi con alta degree, di fatto contribuendo al loro prestigio (e facilitandone le comunicazioni). Sembra poco, ma è la definizione di comunità per come la percepiscono gli esseri umani: comportamento _assortativo_ verso i membri della propria community, e quindi tante connessioni e _cluster_ molto stretti di individui con un fitto reticolo di connessioni che li tengono insieme, e comportamento _disassortativo_ verso i membri delle altre community, raggiunti da sporadici connessioni che fungono da "ponte" tra le diverse community costituenti la rete.
+La risposta alla domanda, comunque, è affermativa: i nodi con alta degree tenderanno a connettersi ai vicini più prossimi con alta degree, di fatto contribuendo al loro prestigio (e facilitandone le comunicazioni). Sembra poco, ma è la definizione di comunità per come la percepiscono gli esseri umani: comportamento _assortativo_ verso i membri della propria community, e quindi tante connessioni e _cluster_ molto stretti di individui con un fitto reticolo di connessioni che li tengono insieme, e comportamento _disassortativo_ verso i membri delle altre community, raggiunti da sporadiche connessioni che fungono da "ponte" tra le diverse community costituenti la rete.
 
 Non solo: se la rete è abbastanza fitta (e si può determinare anche numericamente quanto), questo fenomeno causa l'emergere di una community in genere di gran lunga più grande delle altre e di cui fanno parte la maggior parte dei nodi della rete: il cosiddetto __giant component__. Lo studieremo nel dettaglio in futuro.
 
 Oltre a fornirci il modello matematico con cui analizzare una _rete fatta di comunità_ questa scoperta è fenomenale: ci fa capire come siano gli sporadici legami tra community diverse a essere essenziali per veicolare un messaggio, diffondere una notizia, capire in quanto tempo si diffonderà un virus ecc. nella totalità della rete. I (molti) legami presenti tra gli individui di una stessa community contribuiranno certamente alla _velocità_ con cui il messaggio si distribuisce all'interno della community stessa, ma sono inutili affinché il segnale travalichi i confini della community locale per "infettare" la rete nella sua interezza.
 
-E' quello che si intende _forza dei legami deboli_, e merita che se ne parli in un articolo dedicato.
+È quello che si intende _forza dei legami deboli_, e merita che se ne parli in un articolo dedicato.

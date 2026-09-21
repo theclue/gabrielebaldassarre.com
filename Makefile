@@ -12,6 +12,7 @@ help:
 	@echo "  site         Build the site into _site/"
 	@echo "  knitr        Convert .Rmd → .md (dependency-driven)"
 	@echo "  cad          Compile .scad → .stl, .3mf, .png"
+	@echo "  diagrams     Render R/diagrams/*.R → assets/images/diagrams/*.svg"
 	@echo "  seo          Run SEO monitor pipeline"
 	@echo "  dev          Start local Jekyll dev server"
 	@echo "  clean        Remove _site/ output"

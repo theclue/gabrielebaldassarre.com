@@ -1,7 +1,7 @@
 ---
 category: Fisica
 title: Che cos'è l'elettronvolt
-excerpt: In questo breve articolo ci concentreremo sull'elettronvolt, una delle unità di misura più utilizzate in fisica delle particelle e ai cui i fisici sono così affezionati da usarlo per misurare praticamente tutto.
+excerpt: In questo breve articolo ci concentreremo sull'elettronvolt, una delle unità di misura più utilizzate in fisica delle particelle e a cui i fisici sono così affezionati da usarlo per misurare praticamente tutto.
 header:
   overlay_image: /assets/images/elettronvolt-overlay.jpg
   teaser: /assets/images/elettronvolt-teaser.jpg
@@ -14,9 +14,9 @@ Poiché il lavoro del campo elettromagnetico è dato dal prodotto del potenziale
 
 $$ 1V = \frac{1J}{1C} \Rightarrow 1eV = \frac{1J}{1C}(1,602\times10^{-19}C) = \boxed{1{,}602\times10^{-19}\,\text{J}} $$
 
-Ricordando come 1 J sia il lavoro compiuto da una forza per spostare una massa di 1kg per un metro (o in alternativa di sollevare a 1m di altezza una massa di poco più di 100gr soggetta alla gravità terrestre), ne consegue che un elettronvolt sia una quantità di energia molto piccola. Per questo motivo, spesso si utilizza uno dei suoi multipli come il megaelettronvolt (MeV) o il gigaelettronvolt (GeV), soprattutto quando si utilizzà l'elettronvolt come unità di misura per la massa.
+Ricordando come 1 J sia il lavoro compiuto da una forza per spostare una massa di 1kg per un metro (o in alternativa di sollevare a 1m di altezza una massa di poco più di 100gr soggetta alla gravità terrestre), ne consegue che un elettronvolt sia una quantità di energia molto piccola. Per questo motivo, spesso si utilizza uno dei suoi multipli come il megaelettronvolt (MeV) o il gigaelettronvolt (GeV), soprattutto quando si utilizza l'elettronvolt come unità di misura per la massa.
 
-Ciò che, infatti, genera più spesso confusione nell'uso dell'elettronvolt è il fatto che, soprattutto in fisica delle alte energia, questo sia utilizzato anche come unità di misura per la massa. Ricorderete, infatti, che quando fu scoperto il Bosone di Higgs, i ricercatori dichiararono di averlo "trovato" all'incirca dove si aspettavano che fosse, ovvero avente una massa di circa $$ 125 GeV/c^2 $$. Cosa significa questo?
+Ciò che, infatti, genera più spesso confusione nell'uso dell'elettronvolt è il fatto che, soprattutto in fisica delle alte energie, questo sia utilizzato anche come unità di misura per la massa. Ricorderete, infatti, che quando fu scoperto il Bosone di Higgs, i ricercatori dichiararono di averlo "trovato" all'incirca dove si aspettavano che fosse, ovvero avente una massa di circa $$ 125 GeV/c^2 $$. Cosa significa questo?
 
 Per rispondere alla domanda, vediamo la definizione dimensionale dell'energia:
 
@@ -28,8 +28,7 @@ $$ [J] = \frac{[kg][m]}{[s]} $$
 
 che è la dimensione della [quantità di moto]({% post_url fisica/2021-05-08-quantita-moto %}). Quindi, dividendo l'energia espressa in eV per _c_, quello che otteniamo è effettivamente una quantità di moto espressa in _eV/c_.
 
-Andando ora a dividere l'espressione ancora una volta per la velocità. Nell'equazione dimensionale rimane solo la misura della _m_
-massa. Quindi, per misurare la massa si può usare come unità di misura $$ eV/c^2 $$.
+Andando ora a dividere l'espressione ancora una volta per la velocità, nell'equazione dimensionale rimane solo la misura della massa _m_. Quindi, per misurare la massa si può usare come unità di misura $$ eV/c^2 $$.
 
 Ma perché proprio _c_?
 
@@ -43,6 +42,6 @@ Ad esempio, la massa dell'elettrone:
 
 $$ m_e = 9,109 \times 10^{-31} kg = \frac{9,109 \times 10^{-31}}{1,78 \times 10^{-36}} = 0,511 \times 10^6 eV/c^2 = 0,511 MeV/c^2 $$
 
-Per creare un elettrone è quindi necessario spendere $$ 0,511 MeV $$ di energia, o, in altri termini, l'annichilimento dell'elettrone provoca l'emissione di $$ 0,511 MeV $$ di energia).
+Per creare un elettrone è quindi necessario spendere $$ 0,511 MeV $$ di energia, o, in altri termini, l'annichilimento dell'elettrone provoca l'emissione di $$ 0,511 MeV $$ di energia.
 
-C'è da dire, infine, che soprattutto in fisica teorica, per semplificare la notazione (e i calcoli) i fisici usano un sistema di riferimento in cui la velocità della luce del vuoto _c_ è adimensionale e pari a 1. In questi sistemi, chiaramente, l'unità di misura della massa diventa semplicemente l'eV. Quando anche la costante di Plank ridotta _ħ_ è adimensionale e pari ad uno, anche spazio e tempo sono esprimibili con l'inverso dell'energia, cioè $$ eV^{-1} $$, e quindi l'elettronvolt, in questi sistemi, può esprimere anche distanze e intervalli di tempo.
+C'è da dire, infine, che soprattutto in fisica teorica, per semplificare la notazione (e i calcoli) i fisici usano un sistema di riferimento in cui la velocità della luce del vuoto _c_ è adimensionale e pari a 1. In questi sistemi, chiaramente, l'unità di misura della massa diventa semplicemente l'eV. Quando anche la costante di Planck ridotta _ħ_ è adimensionale e pari ad uno, anche spazio e tempo sono esprimibili con l'inverso dell'energia, cioè $$ eV^{-1} $$, e quindi l'elettronvolt, in questi sistemi, può esprimere anche distanze e intervalli di tempo.

@@ -1,4 +1,4 @@
-.PHONY: help build build-knitr build-seo build-cad knitr dev site seo cad cad-png
+.PHONY: help build build-knitr build-seo build-cad knitr dev site seo cad cad-png diagrams
 .DEFAULT_GOAL := help
 
 ROOT_DIR := $(abspath $(patsubst %/,%,$(dir $(abspath $(firstword $(MAKEFILE_LIST))))))
@@ -45,7 +45,7 @@ build-seo:
 build-cad:
 	@docker build --tag $(CAD_IMAGE) containers/openscad/
 
-_site: build
+_site: build diagrams
 	@docker run --rm -v $(ROOT_DIR):/srv/jekyll \
 		-e JEKYLL_ENV=production \
 		-e CLOUDINARY_CLOUD_NAME \
@@ -120,9 +120,27 @@ endif
 # Aggregate: STL + 3MF (dependency-driven) + PNG (always)
 cad: $(_CAD_STLS) $(_CAD_3MFS) cad-png
 
+# ── Diagrams — dependency-driven SVG from R scripts ────────────────────
+
+# Pattern rule: diagram SVG from its R script
+assets/images/diagrams/%.svg: R/diagrams/%.R
+	@mkdir -p $(dir $@)
+	@echo "📊 diagram $< → $@"
+ifeq ($(HAS_KNITR),1)
+	@cd $(ROOT_DIR) && $(RSCRIPT_BIN) $<
+else
+	@docker run --rm -v $(ROOT_DIR):/srv/jekyll -w /srv/jekyll $(KNITR_IMAGE) Rscript $<
+endif
+
+_DIAGRAM_RS   := $(wildcard R/diagrams/*.R)
+_DIAGRAM_SVGS := $(patsubst R/diagrams/%.R, assets/images/diagrams/%.svg, $(_DIAGRAM_RS))
+
+diagrams: $(_DIAGRAM_SVGS)
+	@echo "✅ diagrams: done"
+
 # ── Development server ─────────────────────────────────────────────────
 
-dev: build
+dev: build diagrams
 	@docker run --rm -v $(ROOT_DIR):/srv/jekyll -p 35729:35729 -p 4000:4000 \
 		-e JEKYLL_ENV=development \
 		-e LANG=$(LOCALE).UTF-8 \

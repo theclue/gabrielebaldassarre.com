@@ -30,13 +30,13 @@ par(mar=c(4, 4, 2, 1),
 
 
 ```
-Le legge di potenza altri non è che una funzione matematica con un andamento esponenziale caratterizzato da un parametro che può essere sia negativo che positivo e che nella sua forma più generale si esprime come
+La legge di potenza altro non è che una funzione matematica con un andamento esponenziale caratterizzato da un parametro che può essere sia negativo che positivo e che nella sua forma più generale si esprime come
 
 $$ f(x) = ax^k $$
 
 e di per sé non ha niente di speciale.
 
-Diventa, però, interessante quando descrive una _distribuzione di probabilità_, ovvero la probabilità del verificarsi degli eventi misurati sull'ascissa. In questo frangente, si può osservare che tantissimi fenomeni fisici, dalla dimensione delle città a quella dei crateri da impatto, dalla magnitudine dei terremoti all'attenuazione acustiva, seguono qusto andamento.
+Diventa, però, interessante quando descrive una _distribuzione di probabilità_, ovvero la probabilità del verificarsi degli eventi misurati sull'ascissa. In questo frangente, si può osservare che tantissimi fenomeni fisici, dalla dimensione delle città a quella dei crateri da impatto, dalla magnitudine dei terremoti all'attenuazione acustica, seguono questo andamento.
 
 Ma prima di addentrarci nello studio della legge di potenza, facciamo alcuni esempi chiarificatori di come si presentano, spesso, le grandezze in natura.
 
@@ -44,7 +44,7 @@ Ma prima di addentrarci nello studio della legge di potenza, facciamo alcuni ese
 
 Il modo più "naturale" in cui ci aspettiamo di misurare una grandezza è una distribuzione _centrale_, dove la maggior parte delle osservazioni si concentrano attorno a un valore tipico, il _valore medio_, e decadono molto velocemente in modo simmetrico ai due estremi. Molte distribuzioni, sia presenti in natura che costruite dall'uomo, hanno queste caratteristiche, che possono essere descritte, con un livello più o meno accettabile di approssimazione, con tutta una famiglia di modelli statistici, come la [distribuzione gaussiana](https://it.wikipedia.org/wiki/Distribuzione_normale), la [distribuzione binomiale](https://it.wikipedia.org/wiki/Distribuzione_binomiale) e la [quella di Poisson](https://it.wikipedia.org/wiki/Distribuzione_di_Poisson) che, dati una serie di parametri, è in grado di _spiegare_ e _descrivere_ la popolazione.
 
-Non è detto, però, che le osservazioni si distribuiscano in modo simmetrico attorno ad un valore tipico. Alcune grandezze, infatti, si esprimono in popolazioni in cui si ha la maggioranza delle osservazioni su valori _bassi_ delle ascisse, ma presentano anche diverse osservazioni molto a destra, in una lunga _coda_ , con osservazioni che possono raggiungere valori della ascissa molto grandi, anche di diversi ordini di granzezza più grandi della media. Quello più sotto ne è un tipico esempio.
+Non è detto, però, che le osservazioni si distribuiscano in modo simmetrico attorno ad un valore tipico. Alcune grandezze, infatti, si esprimono in popolazioni in cui si ha la maggioranza delle osservazioni su valori _bassi_ delle ascisse, ma presentano anche diverse osservazioni molto a destra, in una lunga _coda_ , con osservazioni che possono raggiungere valori della ascissa molto grandi, anche di diversi ordini di grandezza più grandi della media. Quello più sotto ne è un tipico esempio.
 
 ```{r mobydick, fig.asp = .6, fig.alt="Esempio di distribuzione secondo Zipf", fig.cap="Questi grafici mostrano le varie parole contenute nel Moby Dick di Herman Melville. In ascissa sono rappresentate le frequenze con cui una parola occorre nel testo. In ordinata, invece, il numero di parole che occorrono con una specifica frequenza. Sebbene la maggior parte delle parole abbiamo un numero di occorrenze molto basso, ce ne sono alcune che incorrono molto più frequentemente nel testo, causando la lunga coda a destra che, in un ripido decadimento, caratterizza la distribuzione, Il plot di destra mostra gli stessi dati ma su una scala logaritmica su entrambi gli assi, in modo da evidenziare meglio l'andamento esponenziale di tale decadimento. Il linguista George Kingsley Zipf ha potuto verificare, negli anni Trenta del Novecento, che la maggior parte della produzione letteraria occidentale segue questa distribuzione."}
 data("moby", package="poweRlaw")
@@ -69,7 +69,7 @@ plot(moby.bins$mids,
 
 ```
 
-Il grafico in scala _log-log_, mostra chiaramente un andamento assimilabile a quello di una retta per buona parte del suo dominio. Non lo è, apparentemente, nella parte più a destra, dove, però, vige più che altro un elevato errore di campionamento (come dicevamo, sono pochissime le parole ad avere un numero di occorrenze così elevato).
+Il grafico in scala _log-log_ mostra chiaramente un andamento assimilabile a quello di una retta per buona parte del suo dominio. Non lo è, apparentemente, nella parte più a destra, dove, però, vige più che altro un elevato errore di campionamento (come dicevamo, sono pochissime le parole ad avere un numero di occorrenze così elevato).
 
 Passiamo ora dalle frequenze alle probabilità e quindi al differenziale. Se definiamo come \\( p(x)dx \\) la frazione di parole con un numero di occorrenze compreso tra \\( x \\) e \\( x + dx \\) e ci troviamo in un andamento più o meno rettilineo come quello appena evidenziato, allora la funzione, su scala logaritmica, può essere descritta come
 
@@ -89,7 +89,7 @@ D'altra parte, per ciò che concerne in nostri scopi, poter affermare che una re
 Per questo motivo, ora che sappiamo quali sono le sue caratteristiche, resta da capire come studiarla.
 
 ## Individuare una distribuzione _power law_
-Innanzitutto una premessa, che facciamo riprendendo l'esempio di prima: dire che __la r-esima parola più ricorrente in Moby Dick viene usata n volte__ è esattamente la stessa cosa di dire che __esistono r parole che occorrono con una frequenza pari almenoa n__ (per capirci, _r_ sta per _rank_).
+Innanzitutto una premessa, che facciamo riprendendo l'esempio di prima: dire che __la r-esima parola più ricorrente in Moby Dick viene usata n volte__ è esattamente la stessa cosa di dire che __esistono r parole che occorrono con una frequenza pari almeno a n__ (per capirci, _r_ sta per _rank_).
 
 Intanto, questo ci consente di pensare alla legge di potenza come a una funzione di __distribuzione cumulativa di probabilità__, e questo è utile a prescindere.
 
@@ -97,7 +97,7 @@ Ma, tornando all'interpretazione; il modo più semplice per individuare una powe
 
 L'istogramma è stato costruito affinché l'ampiezza delle "barre" (o, più propriamente, _bin_ o meglio ancora _intervalli_) fosse costante; il grafico che ne è risultato è decisamente ben definito nella parte sinistra, dove si concentrano la maggior parte delle osservazioni, ma molto confuso sulla _coda_ di destra, dove ogni intervallo dell'istogramma ha pochi elementi e perciò le piccole fluttuazioni nel numero di componenti nel gruppo causa un grande scostamento sul grafico su scala logaritmica. Il problema è serio: andando a costruire su quel campione un modello di regressione per stimare il modulo di \\( \alpha \\), il rumore statistico sulla coda interverrà negativamente su di esso, introducendo una forte sottostima nel coefficiente.
 
-Un modo più accurato consiste allora nel _variare la dimensione degli intervalli dell'isogramma con uno schema costante e normalizzare i risultati_, in modo da ottenere un conteggio _per unità di grandezza di x_. Questa operazione si chiama _non-linear binning_.
+Un modo più accurato consiste allora nel _variare la dimensione degli intervalli dell'istogramma con uno schema costante e normalizzare i risultati_, in modo da ottenere un conteggio _per unità di grandezza di x_. Questa operazione si chiama _non-linear binning_.
 
 La logica più comune di binning è quella su base logaritmica, creando una sequenza di intervalli di dimensione esponenzialmente crescente ad es. \\( 2^0=1, 2^1=2, 2^2=4, 2^3=8,...\\)
 In questo modo, gli intervalli a destra otterranno un maggior numero di campioni, abbattendo il rumore statistico. Applichiamo questa trasformazione ai dati di Moby Dick:
@@ -167,17 +167,17 @@ La stima di \\( x_{min} \\) può essere fatta in modo visivo, dal grafico della 
 
 L'idea alla base è piuttosto semplice: scegliamo un valore \\( \hat{x} \\) tale che renda le distribuzioni di probabilità e la migliore _power law_ applicabile (con un dato \\( \alpha \\)) il più simile possibile per valori sopra \\( \hat{x} \\). Se il valore di \\( \hat x_{min} \\) è superiore del valore vero di \\( x_{min} \\), questo implica scartare un maggior numero di osservazioni (sotto \\( x_{min} \\)) e, quindi, ottenere, una distribuzione di probabilità più scadente, per via delle fluttuazioni statistiche. D'altra parte, se il valore di \\( \hat{x} \\) è inferiore al valore vero di \\( x_{min} \\), le distribuzioni di probabilità divergeranno per la sostanziale differenza tra i dati e il modello stesso. Il valore migliore di \\( x_{min} \\) giace all'interno di questo intervallo.
 
-La migliore misura per quantificare la distanza tra due distribuzioni di probabilità, per dati che palesemente non seguono la distribuzione nornale, è la statistica KS (o Kolmogorof-Smirnov), ovvero la massima distanza tra le CDF dei dati e il modello:
+La migliore misura per quantificare la distanza tra due distribuzioni di probabilità, per dati che palesemente non seguono la distribuzione normale, è la statistica KS (o Kolmogorov-Smirnov), ovvero la massima distanza tra le CDF dei dati e il modello:
 
 $$ D = \max_{x \ge x_{min}} \left\lvert S(x) - P(x) \right\rvert $$
 
 con \\( S(x) \\) che rappresenta la CDF delle osservazioni per valori che siano almeno \\( x_{min} \\) e \\( P(x) \\) la CDF del modello _power law_ che rappresenta la miglior stima possibile. La stima \\( \hat{x} \\) di \\( x_{min} \\) è quella che minimizza \\( D \\).
 
-Una volta individuato un soddisfacente \\( x_{min} \\), è possibile stimare un adeguato \\( \alpha \\). Per farlo, l'approccio migliore è utilizzare il [metodo della massima verosmiglianza](https://it.wikipedia.org/wiki/Metodo_della_massima_verosimiglianza) (MLE), posto che vi sia un adeguato numero di osservazioni con \\( x \ge x_{min} \\). LA MLE per il caso continuo è la seguente (quella per il caso discreto è molto più complessa e non verrà trattata in questa sede):
+Una volta individuato un soddisfacente \\( x_{min} \\), è possibile stimare un adeguato \\( \alpha \\). Per farlo, l'approccio migliore è utilizzare il [metodo della massima verosimiglianza](https://it.wikipedia.org/wiki/Metodo_della_massima_verosimiglianza) (MLE), posto che vi sia un adeguato numero di osservazioni con \\( x \ge x_{min} \\). La MLE per il caso continuo è la seguente (quella per il caso discreto è molto più complessa e non verrà trattata in questa sede):
 
 $$ \hat{\alpha} = 1 + n\left[\sum_{i=1}^n \ln\frac{x_i}{x_{min}}\right] \tag{MLE} $$
 
-Dove \\( \hat{\alpha} \\) è il valore stimato per \\( \alpha \\), normalmente non noto, individuato da una popolazione di \\( n \\) osservazioni \\( x_i \\) con \\( i = 1, 2, \dots, n \\), tutti tale che \\( x_i \ge x_{min} \\).
+Dove \\( \hat{\alpha} \\) è il valore stimato per \\( \alpha \\), normalmente non noto, individuato da una popolazione di \\( n \\) osservazioni \\( x_i \\) con \\( i = 1, 2, \dots, n \\), tutti tali che \\( x_i \ge x_{min} \\).
 
 Naturalmente, la robustezza di tali stimatori va anche essa valutata con un opportuno test per l'ipotesi, ma per essa vi chiedo di attendere il secondo articolo sull'argomento che ho in lavorazione, che riporterà degli esempi pratici in R e che toccherà anche questi temi ulteriori.
 
@@ -219,7 +219,7 @@ italian.ln$setXmin(estimate_xmin(italian.ln))
 italian.ln$setPars(estimate_pars(italian.ln))
 ```
 
-Così, per essere originale, ho ben pensato di studiare il dataset dei communi italiani, messo a disposizione dall'ISTAT a valle dell'ultimo censimento nazionale. Si tratta di un dataset di `r nrow(italian.towns) ` comuni italiani con una popolazione compresa tra `r min(italian.towns$PopResidente)` e `r max(italian.towns$PopResidente)` abitanti.
+Così, per essere originale, ho ben pensato di studiare il dataset dei comuni italiani, messo a disposizione dall'ISTAT a valle dell'ultimo censimento nazionale. Si tratta di un dataset di `r nrow(italian.towns) ` comuni italiani con una popolazione compresa tra `r min(italian.towns$PopResidente)` e `r max(italian.towns$PopResidente)` abitanti.
 
 Il valore del più piccolo comune d'Italia,  (`r min(italian.towns$PopResidente)`, si tratta del comune di `r italian.towns[which(italian.towns$PopResidente == min(italian.towns$PopResidente)),]$Comune `, in provincia di `r italian.towns[which(italian.towns$PopResidente == min(italian.towns$PopResidente)),]$Provincia `) mi ha fatto subito sospettare che la parte sinistra della distribuzione avesse un comportamento singolare (difficile pensare che ci siano più comuni di `r min(italian.towns$PopResidente)` abitanti rispetto agli altri).
 

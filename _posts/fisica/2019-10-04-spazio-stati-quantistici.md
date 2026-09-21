@@ -29,7 +29,7 @@ Come detto, la teoria degli insiemi non è adatta per descrivere lo spazio degli
 
 In un sistema quantistico, lo spazio degli stati è, piuttosto, descritto come uno _spazio vettoriale_ e la logica combinatoria tra i componenti di tale spazio è diversa dalla logica classica.
 
-Non voglio scegliere nel dettaglio di cosa sia un _vettore_, do per scontato che lo sappiate già. È, però, importante segnalare che la nostra definizione di vettore va intesa in senso astratto. Non parliamo cioè, di vettori nello spazio _reale_ (con le loro componenti _{x, y, z, \\}_ per capirci), ma di oggetti matematici astratti, di dimensione $$ n $$ (anche infinita).
+Non voglio scendere nel dettaglio di cosa sia un _vettore_, do per scontato che lo sappiate già. È, però, importante segnalare che la nostra definizione di vettore va intesa in senso astratto. Non parliamo cioè, di vettori nello spazio _reale_ (con le loro componenti $$ \{x, y, z, \dots\} $$, per capirci), ma di oggetti matematici astratti, di dimensione $$ n $$ (anche infinita).
 
 Di conseguenza, con spazio vettoriale intendiamo una _collezione di oggetti matematici astratti_ costruiti in modo tale che le relazioni tra di essi modellino in modo adeguato le relazioni tra i componenti di un sistema quantistico.
 
@@ -110,7 +110,7 @@ Prodotto interno
 ----------------
 Il prodotto interno è l'operazione analoga al prodotto scalare, ma avviene tra un bra e un ket. Se, quindi, il prodotto scalare è tra vettori _reali_, il prodotto interno è tra vettori _complessi_, pertanto può esserne visto come una generalizzazione.
 
-In pratica, il prodotto interno è il prodotto di un vettore per il duale (il complesso coniugato) dell'altro vettore. Si indica con una notazione "a sandwitch":
+In pratica, il prodotto interno è il prodotto di un vettore per il duale (il complesso coniugato) dell'altro vettore. Si indica con una notazione "a sandwich":
 
 $$ \langle B \vert A \rangle $$
 
@@ -142,10 +142,10 @@ $$ \begin{pmatrix} \alpha^*_1 & \alpha^*_2 \end{pmatrix} \begin{pmatrix} \alpha_
 
 non solo è reale, ma è anche positivo ed è il quadrato della lunghezza del vettore. Possiamo generalizzare e dire che vettori complessi hanno lunghezza reale.
 
-Per finire una nota sull'ortogonalità: due vettori complessi sono ortogonali se il loro prodotto interno à zero.
+Per finire una nota sull'ortogonalità: due vettori complessi sono ortogonali se il loro prodotto interno è zero.
 
 $$ \langle A \vert B \rangle = 0 $$
 
 L'ortogonalità si mantiene nello spazio duale.
 
-In analogia con gli spazi reali, il massimo numero di vettori mutualmente ortogonali definisce la dimensionalità dello spazio (e la dimensione delle sue basi ortonormali, che vedremo nel prossimo articolo).
+In analogia con gli spazi reali, il massimo numero di vettori mutuamente ortogonali definisce la dimensionalità dello spazio (e la dimensione delle sue basi ortonormali, che vedremo nel prossimo articolo).

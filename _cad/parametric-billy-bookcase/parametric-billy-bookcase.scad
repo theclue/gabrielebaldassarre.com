@@ -91,10 +91,9 @@ $fn = 32;
 
 /* [Hidden] */
 
-// ─── Libreria woodworkers incorporata (il Customizer non supporta use<>) ──
-// Copia verbatim di std.scad di woodworkers-lib (fxdave, GPL-3.0):
-// https://github.com/fxdave/woodworkers-lib — NON modificare qui:
-// eventuali fix vanno riportati a monte.
+// ─── Libreria woodworkers incorporata per rendere questo progetto compatibile al Customizer di Thingiverse  ──
+// Copia di std.scad di woodworkers-lib (fxdave, GPL-3.0):
+// https://github.com/fxdave/woodworkers-lib
 thick=18;
 rounding=2;
 
@@ -536,7 +535,7 @@ for (p = bom)
              ",\"width\":",    min(p[1], p[2]),
              ",\"thickness\":", p[3], "}"));
 
-// ─── Ferramenta (conteggio BOM) ─────────────────────────
+// ─── Ferramenta (conteggio BOM) - WIP ─────────────────────────
 _pins  = 4 * len(shelf_positions);
 _nails = (has_back && back_style == "nailed") ? ceil(2 * (width_l + carcass_h) / 100) : 0;
 hardware = [

@@ -10,7 +10,7 @@ header:
 
 Abbiamo detto che un esperimento in un sistema quantistico, il cui stato è modellabile con un vettore dotato di modulo,  direzione e verso, la misurazione di una grandezza, per esempio la componente dello spin lungo una certa direzione $$ \sigma $$ , ci restituirà, ostinatamente, solo valori di +1 o -1, peraltro in modo imprevedibile.
 
-A parte che abbiamo irrimediabilmente perduto il determinismo delle meccanica classica, il vettore di stato di $$ \sigma $$ deve essere un vettore ben strano.
+A parte che abbiamo irrimediabilmente perduto il determinismo della meccanica classica, il vettore di stato di $$ \sigma $$ deve essere un vettore ben strano.
 
 In realtà non è il vettore a essere strano, è il _sistema_ (tanto per cambiare) a esserlo. In particolare, un sistema quantistico può trovarsi contemporaneamente in una __sovrapposizione di stati__ (_"un po' testa e un po' croce"_). Ma di questo ci occuperemo più avanti.
 
@@ -50,11 +50,11 @@ Adesso vi chiedo un po' di elasticità logica.
 
 Fino ad ora abbiamo detto che qualcuno o qualcosa aveva preparato per noi il sistema (costruito da un singolo spin) in uno stato ben preciso, lo stato _up_, senza però dirci in quale stato lo aveva lasciato. La misura, perfettamente priva di ambiguità, della componente $$ \sigma_z $$ ci ha consentito di conoscere tale stato, che esperimenti successivi hanno confermato. Misurare ripetutamente $$ \sigma_z = +1 $$, dopotutto, è sufficiente per affermare che lo stato dello spin sia _up_.
 
-D'altra parte, anche una misura dela componente generica $$ \sigma_\theta $$ ottenuta con l'apparato ruotato di un angolo $$ \theta $$ ci ha fornito una misura (+1 o -1) perfettamente non ambigua, confermata da misure successive.
+D'altra parte, anche una misura della componente generica $$ \sigma_\theta $$ ottenuta con l'apparato ruotato di un angolo $$ \theta $$ ci ha fornito una misura (+1 o -1) perfettamente non ambigua, confermata da misure successive.
 
 Ma insomma, abbiamo _forzato_ il sistema ad assumere una certa configurazione (stato) o ci siamo limitati a _misurare_ una grandezza?
 
-La domanda è mal posta: poiché una misura, come abbiamo già detto, infuenza il sistema, l'una implica l'altra. Anzi, in un sistema quantistico, __misurare__ una grandezza e __preparare__ il sistema sono esattamente la stessa cosa.
+La domanda è mal posta: poiché una misura, come abbiamo già detto, influenza il sistema, l'una implica l'altra. Anzi, in un sistema quantistico, __misurare__ una grandezza e __preparare__ il sistema sono esattamente la stessa cosa.
 
 Meglio essere più chiari con un esempio.
 

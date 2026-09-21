@@ -8,7 +8,7 @@ header:
   overlay_filter: 0.5
 ---
 
-Molto banalmente, per __sistema fisico__ si intende un sistema chiuso, nel senso che non interagisce con l'esterno, in cui le cui caratteristiche interne (ovvero il suo __stato__) sono predicibili con esattezza. Supponendo di avere a disposizione tutte le informazioni e la conoscenza necessari per calcolare suddetto stato, questo è _deterministico_ e _predicibile con assoluta esattezza_ e senza ambiguità.
+Molto banalmente, per __sistema fisico__ si intende un sistema chiuso, nel senso che non interagisce con l'esterno, in cui le caratteristiche interne (ovvero il suo __stato__) sono predicibili con esattezza. Supponendo di avere a disposizione tutte le informazioni e la conoscenza necessari per calcolare suddetto stato, questo è _deterministico_ e _predicibile con assoluta esattezza_ e senza ambiguità.
 
 Tutti gli stati possibili di un sistema (sia esso classico o quantistico) formano una astrazione matematica chiamata __spazio degli stati__. La differenza tra un sistema classico e uno quantistico sta proprio nella natura di tale spazio.
 
@@ -21,15 +21,15 @@ Supponiamo di voler modellare come sistema il lancio di una moneta (un classico,
 
 Ad ogni lancio, otterremo solo uno dei due possibili stati, senza alcuna ambiguità. Non importa quanti lanci effettuiamo: otterremo sempre testa _oppure_ croce. E mai _un po' testa e un po' croce_.
 
-In un sistema classico, lo stato è sempre univocabilmente specificato. Non solo: in un sistema classico, se conosciamo lo stato conosciamo __tutto__ del sistema, incluso il risultato della misurazione (nel caso del lancio della moneta, l'esito della misurazione/esperimento è banale: coincide con la rappresentazione dello stato interno).
+In un sistema classico, lo stato è sempre univocamente specificato. Non solo: in un sistema classico, se conosciamo lo stato conosciamo __tutto__ del sistema, incluso il risultato della misurazione (nel caso del lancio della moneta, l'esito della misurazione/esperimento è banale: coincide con la rappresentazione dello stato interno).
 
-E il determinismo? Il lancio della moneta non è il tipico esempio di processo aleatorio? In particolare, quello che ha eguale probabilità di presentare in uscita ognumo dei due risultati possibili?
+E il determinismo? Il lancio della moneta non è il tipico esempio di processo aleatorio? In particolare, quello che ha eguale probabilità di presentare in uscita ognuno dei due risultati possibili?
 
 Beh, sì. Ma solo se si considera la moneta utilizzando un modello astratto, semplificato, della realtà.
 
 Se avessimo a disposizione, prima del lancio, tutte le informazioni sul momento della moneta, le forze a cui è soggetta, l'angolo con cui è stata lanciata, la pressione atmosferica che agisce su di essa (sto volutamente esagerando) e in linea generale tutto ciò che serve per modellare la traiettoria della moneta nello spazio, il risultato sarà un processo __assolutamente deterministico__. Esattamente come prevede la fisica classica.
 
-Lo spazio degli stati di un sistema classico è, matematicamente iscrivibile a un __insieme__. Tale insieme può avere un numero finito (per esempio, il lancio della moneta o il lancio di un dado) o infinito di membri (per esempio, la posizione di una particella in una retta), purché sia un insieme numerabile.
+Lo spazio degli stati di un sistema classico è, matematicamente, ascrivibile a un __insieme__. Tale insieme può avere un numero finito (per esempio, il lancio della moneta o il lancio di un dado) o infinito di membri (per esempio, la posizione di una particella in una retta), purché sia un insieme numerabile.
 
 In quanto insieme, valgono su di esso le regole dell'insiemistica (unione e intersezione) e la logica booleana per individuare dei sottoinsiemi mediante proposizioni.
 
@@ -41,7 +41,7 @@ E un'altra la proposizione "tutti i numeri maggiori o uguali a tre"
 
 $$ M = \{3,4,5,6\} $$
 
-Per la logica combinatoria, anche la seguenti proposizioni sono valide:
+Per la logica combinatoria, anche le seguenti proposizioni sono valide:
 
 $$ P \cap M = \{4, 6\} $$
 
@@ -58,13 +58,13 @@ Nessuna delle due. Non esistono sistemi "classici" e sistemi "quantistici" nel n
 
 In effetti, il comportamento di un sistema quantistico è così controintuitivo che la gente è portata a dire che la meccanica quantistica è "illogica" oppure che _"gli elettroni si comportano in modo strano"_.
 
-Gli elettroni non si comportano in modo strano. Gli elettroni fanno quello che gli elettroni fanno e, per tutto il XX Secolo, i fisici sperimentali hanno lavorate per dimostre, e ci sono riusciti, che è esattamente così che si comportano. La realtà è inequivocabilmente quantistica.
+Gli elettroni non si comportano in modo strano. Gli elettroni fanno quello che gli elettroni fanno e, per tutto il XX Secolo, i fisici sperimentali hanno lavorato per dimostrare, e ci sono riusciti, che è esattamente così che si comportano. La realtà è inequivocabilmente quantistica.
 
 Molto banalmente, per noi che siamo troppo grandi e abbiamo sensi troppo lenti per essere sensibili agli effetti quantistici, la realtà che percepiamo può essere descritta, perfettamente, dalla fisica newtoniana. In altre parole, la fisica classica è una __approssimazione__ della fisica quantistica. O ancora, per sistemi grandi e lenti come quelli con cui siamo abituati a interagire (gattini, tostapane, manuali di Dungeons&Dragons e montagne), gli effetti quantistici della realtà sono trascurabili e la fisica classica può tranquillamente essere adoperata.
 
 Se, invece, vogliamo studiare sistemi microscopici, che non a caso sono definiti _sistemi a scala quantistica_, come il moto di una molecola o le caratteristiche di un elettrone, gli effetti quantistici non sono più trascurabili e le leggi di Newton (di Coulomb, di Maxwell, ecc. ecc.) non bastano più.
 
-Il problema è che i nostri sensi, e con essi il nostro cervello, non sono "ingegnerizzati" per comprendere i fenomeni a scala quantistica. Ecco perché ci sembra tutto così incomprensibile. E non è una questione di preparazione: il cervello di Feynmann non è in grado di comprendere la meccanica quantistica meglio di uno studente delle superiori.
+Il problema è che i nostri sensi, e con essi il nostro cervello, non sono "ingegnerizzati" per comprendere i fenomeni a scala quantistica. Ecco perché ci sembra tutto così incomprensibile. E non è una questione di preparazione: il cervello di Feynman non è in grado di comprendere la meccanica quantistica meglio di uno studente delle superiori.
 
 Quello che, però, può fare chi è preparato è __visualizzare i fenomeni quantistici attraverso una opportuna astrazione matematica__.
 

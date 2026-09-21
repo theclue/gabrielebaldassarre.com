@@ -28,7 +28,7 @@ Un'altra proposizione potrebbe essere _"Tutti i risultati maggiori di tre"_:
 
 $$ T = {4, 5, 6} $$
 
-![Stati possibili nel lancio del dado: risultati maggiori di tre](/assets/img/dado_insieme_tre.svg)
+![Stati possibili nel lancio del dado: risultati maggiori di tre](/assets/images/dado_insieme_tre.svg)
 
 Logica classica
 ---------------
@@ -43,7 +43,7 @@ Allo stesso modo valgono le operazioni di __OR__, di __NOT__ e tutte le possibil
 
 $$ P \cap T  = T \cap P $$
 
-Nella logica classica, non è importante l'ordine con cui sono valutare le proposizioni. La tabella di verità dell'espressione risultante sarà sempre definita in modo non ambiguo.
+Nella logica classica, non è importante l'ordine con cui sono valutate le proposizioni. La tabella di verità dell'espressione risultante sarà sempre definita in modo non ambiguo.
 
 Logica quantistica
 ------------------
@@ -52,7 +52,7 @@ Quanto detto non è, invece, sempre vero in un sistema quantistico e questo per 
 
 $$ \sigma_z = 1 \implies NOT(\sigma_z) = -1 $$
 
-Per ciò che concerne gli operatori binari la questione è più complessa. Supponiamo di codificare due proposizioni booleane attraverso due grandezze quantistiche che, come sappiamo, possono assumere solo due valori e supponiamo che tali proposizione siano vere quando le grandezze assumono valore positivo:
+Per ciò che concerne gli operatori binari la questione è più complessa. Supponiamo di codificare due proposizioni booleane attraverso due grandezze quantistiche che, come sappiamo, possono assumere solo due valori e supponiamo che tali proposizioni siano vere quando le grandezze assumono valore positivo:
 
 $$ A: \sigma_z = 1 $$
 

@@ -19,7 +19,7 @@ Ma prima di cominciare, ci serve qualche nozione iniziale.
 Partiamo da Newton
 ------------------
 
-Supponiamo di avere un sistema in cui un punto materiale si muove, rispetto ad esso, di moto rettilineo uniforme. In questo sistema, più specificatamente chiamato __sistema di riferimento inerziale__ vale la legge di Netwon che ne regola il movimento:
+Supponiamo di avere un sistema in cui un punto materiale si muove, rispetto ad esso, di moto rettilineo uniforme. In questo sistema, più specificatamente chiamato __sistema di riferimento inerziale__ vale la legge di Newton che ne regola il movimento:
 
 $$ ma = F$$
 
@@ -35,13 +35,13 @@ che ci consentono di esprimere l'equazione di Newton in forma esplicitamente dif
 
 $$ \ddot{x}(t) = \frac{1}{m}F(x, \dot{x}, t) $$
 
-Il __principio di determinismo__ che regola la meccanica classica ci consene di scrivere che, assegnata una forza _F_, ogni soluzione dell'equzione di Newton è univocamente individuata dalle condizioni iniziali del sistema.
+Il __principio di determinismo__ che regola la meccanica classica ci consente di scrivere che, assegnata una forza _F_, ogni soluzione dell'equazione di Newton è univocamente individuata dalle condizioni iniziali del sistema.
 
 $$ x(0) = x_0, \dot{x} = v_0 $$
 
 ovvero la posizione e la velocità iniziale a $$ t_0 $$.
 
-Il motivo per cui Newton ritenne che il moto fosse determinato dalla posizione e dalla velocità iniziali è dovuto al fatto che l'equazione fosse descrivibile mediante sviluppo in serie e, pertanto, come soluzione di certe equazioni differenziali con particolari scelte dei dati iniziali (per i quali è anche possibile estrarre il relativo {% post_link meccanica/2019-10-31-spazio-degli-stati "ritratto" %})). È il teorema di Cauchy-Kowalewska, ma avrò pietà e non lo approfondiremo in questa sede. Piuttosto,c ominciamo a parlare di energia.
+Il motivo per cui Newton ritenne che il moto fosse determinato dalla posizione e dalla velocità iniziali è dovuto al fatto che l'equazione fosse descrivibile mediante sviluppo in serie e, pertanto, come soluzione di certe equazioni differenziali con particolari scelte dei dati iniziali (per i quali è anche possibile estrarre il relativo {% post_link meccanica/2019-10-31-spazio-degli-stati "ritratto" %}). È il teorema di Cauchy-Kowalewska, ma avrò pietà e non lo approfondiremo in questa sede. Piuttosto, cominciamo a parlare di energia.
 
 Il teorema dell'energia
 -----------------------
@@ -58,7 +58,7 @@ $$  \frac{d}{dt}\frac{1}{2}m(v v) = 2v m\frac{dv}{dt} = ma \Rightarrow $$
 
 $$ \dot{T} = F v \tag{*}$$
 
-La detivata $$ \dot{T} $$ dell'energia rappresenta la __potenza della forza__ mentre la forma integrale
+La derivata $$ \dot{T} $$ dell'energia rappresenta la __potenza della forza__ mentre la forma integrale
 
 $$ T(t_1) - T(t_0) = \int_{t_0}^{t_1} Fv dt \tag{**} $$
 
@@ -71,7 +71,7 @@ Quindi, come volevasi dimostrare, le due forme _(*)_ e _(**)_, ovvero le forme d
 
 Ovviamente stiamo assumendo che (come avviene nella stragrande maggioranza dei casi) la massa _m_ sia costante; per la legge di Newton, la forza impressa sul corpo ne farà variare solo la velocità.
 
-Supponiamo che sul corpo agisca una __forza posizionale__; non, quindi, una generica forza  $$ F(x, v, t) $$, ma una forza che dipende solo dalla posizione nello spazio in cui è applicata $$ F = F(x) $$. Poiché la foza permea, con la sua distribuzione, tutto lo spazio genera, appunto, un __campo vettoriale di forze__ (ovvero una legge che assegna una forza meccanica ad ogni punto dello spazio).
+Supponiamo che sul corpo agisca una __forza posizionale__; non, quindi, una generica forza  $$ F(x, v, t) $$, ma una forza che dipende solo dalla posizione nello spazio in cui è applicata $$ F = F(x) $$. Poiché la forza permea, con la sua distribuzione, tutto lo spazio genera, appunto, un __campo vettoriale di forze__ (ovvero una legge che assegna una forza meccanica ad ogni punto dello spazio).
 
 In questa circostanza, l'integrale in _(**)_ dipende solo dalla traiettoria seguita dal punto materiale nell'intervallo di tempo $$ t_0, t_1 $$; chiamiamo questa traiettoria $$ \gamma $$.
 
@@ -83,7 +83,7 @@ Se il campo di forze oltre a essere posizionale è __conservativo__, si dice che
 
 $$ F = -gradV \Rightarrow F_x = -\frac{dV}{dx}, F_y = -\frac{dV}{dy}, F_z = -\frac{dV}{dz} $$
 
-La funzione _V_ è chiamata __energia potenziale__ e il campo è definito conservativo perché in queste condizioni vale la __legge di conservazione dell'energia__ (o Teorema dell'Energia) che dice che, chiamata __energia__ la quntità
+La funzione _V_ è chiamata __energia potenziale__ e il campo è definito conservativo perché in queste condizioni vale la __legge di conservazione dell'energia__ (o Teorema dell'Energia) che dice che, chiamata __energia__ la quantità
 
 $$ E = T + V $$
 
@@ -108,7 +108,7 @@ Per come è formulato, il Teorema dell'Energia vale per forze che variano nello 
 Le costanti di moto
 -------------------
 
-L'energia, essendo una quantità dinamica, è una funzione definita nello [spazio degli stati]({% post_url meccanica/2019-10-31-spazio-degli-stati %}) $$ E = E(x, v) $$ e, poiché, in ogni punto dello spazio degli stati passa un unico vettore (originato dalle condizioni iniziali $$ x_0, v_0) che è soluzione dell'equazione di Newton, allora si può esplicitare la dipendenza
+L'energia, essendo una quantità dinamica, è una funzione definita nello [spazio degli stati]({% post_url meccanica/2019-10-31-spazio-degli-stati %}) $$ E = E(x, v) $$ e, poiché, in ogni punto dello spazio degli stati passa un unico vettore (originato dalle condizioni iniziali $$ x_0, v_0 $$) che è soluzione dell'equazione di Newton, allora si può esplicitare la dipendenza
 
 $$ E(t) = E(x(t), v(t)) $$
 
@@ -118,7 +118,7 @@ $$ \dot{E} = \frac{dT}{dv}a + \frac{dV}{dx}v = mva - Fv = v(ma - F) = 0 $$
 
 (il valore della precedente è zero perché ci muoviamo nel luogo delle soluzioni dell'equazione di Newton)
 
-Le variabili dinamiche che godo di questa proprietà di invarianza rispetto a un movimento (in un sistema inerziale) sono dette __costanti di moto__. L'energia _E_, che mantiene inalterato il proprio valore lungo qualsiasi movimento $$ x = x(t) $$ che sono soluzioni dell'equazione di Newton è, evidentemente, una di esse.
+Le variabili dinamiche che godono di questa proprietà di invarianza rispetto a un movimento (in un sistema inerziale) sono dette __costanti di moto__. L'energia _E_, che mantiene inalterato il proprio valore lungo qualsiasi movimento $$ x = x(t) $$ che è soluzione dell'equazione di Newton è, evidentemente, una di esse.
 
 Costanti di moto e ritratti in fase
 -----------------------------------

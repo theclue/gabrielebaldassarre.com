@@ -8,7 +8,7 @@ header:
   overlay_filter: 0.5
 ---
 
-Agli albori della meccanica quantistica, agli inizi del XX secolo, Planck contribuì con una importante osservazione relativa alla [radiazione di corpo nero](https://it.wikipedia.org/wiki/Corpo_nero), ovvero di un oggetto reale che, a temperatura $$ T $$, assorbe tutta la radiazione elettromagnetica incidente senza rifletterla (da cui, appunto, _nero_). Esso, secondo l'interpretazione classica e per via della conservazione dell'energia, re-irradia tutta l'energia  assorbita e, secondo Planck, lo fa in uno spettro di emissione quantizzato. In particolare, la radiazione emessa ha energia $$ h\nu $$., con $$ h = 6,626 \cdot 10^{-34} J \cdot s $$ la costante di Planck e $$ \nu $$ la frequenza della radiazione emessa.
+Agli albori della meccanica quantistica, agli inizi del XX secolo, Planck contribuì con una importante osservazione relativa alla [radiazione di corpo nero](https://it.wikipedia.org/wiki/Corpo_nero), ovvero di un oggetto reale che, a temperatura $$ T $$, assorbe tutta la radiazione elettromagnetica incidente senza rifletterla (da cui, appunto, _nero_). Esso, secondo l'interpretazione classica e per via della conservazione dell'energia, re-irradia tutta l'energia  assorbita e, secondo Planck, lo fa in uno spettro di emissione quantizzato. In particolare, la radiazione emessa ha energia $$ h\nu $$, con $$ h = 6,626 \cdot 10^{-34} J \cdot s $$ la costante di Planck e $$ \nu $$ la frequenza della radiazione emessa.
 
 Einstein partì da queste considerazioni per spiegare un fenomeno già noto all'epoca (siamo nel 1905) relativo all'assorbimento di una radiazione elettromagnetica di frequenza $$ \nu $$ da parte di un campione metallico con conseguente emissione di elettroni. L'effetto fotoelettrico, appunto.
 
@@ -59,9 +59,9 @@ In definitiva, nella radiazione elettromagnetica, l'energia non è distribuita u
 
 Aumentando l'intensità della radiazione elettromagnetica, ovvero il __numero__ di fotoni con la stessa lunghezza d'onda che vanno a incidere sul metallo non andrà ad aumentare l'energia cinetica degli elettroni emessi, ma il loro numero.
 
-Se l'energia posseduta dai fotoni non è sufficiente per vincere il lavoro di estrazione, nessun elettrone è emesso dal metallo e l'effetto fotoelettrico non è osservato, indipendentemente da quanto intensta è la radiazione che lo ha illuminato.
+Se l'energia posseduta dai fotoni non è sufficiente per vincere il lavoro di estrazione, nessun elettrone è emesso dal metallo e l'effetto fotoelettrico non è osservato, indipendentemente da quanto intensa è la radiazione che lo ha illuminato.
 
-Questo fenomeno, condermato sperimentalmente, contraddice apertamente quanto previsto dalla fisica classica attravero le equazioni di Maxwell, secondo cui l'intera onda interagisce nel suo complesso con tutti gli elettroni del metallo.
+Questo fenomeno, confermato sperimentalmente, contraddice apertamente quanto previsto dalla fisica classica attraverso le equazioni di Maxwell, secondo cui l'intera onda interagisce nel suo complesso con tutti gli elettroni del metallo.
 
 Questa diretta conseguenza della quantizzazione dell'energia, per cui fotoni ed elettroni interagiscono uno per uno, portò  Einstein a vincere il suo unico premio Nobel nel 1921.
 

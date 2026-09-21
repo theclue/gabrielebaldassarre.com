@@ -17,9 +17,9 @@ Vediamo bene cosa questo comporti nella pratica.
 Esperimenti quantistici
 -----------------------
 
-Intanto diciamo che effettuare un esperimento quantistico significa misurare, con uno strumento opportuno, una particolare grandezza di un sistema (su scala) quantistica.
+Intanto diciamo che effettuare un esperimento quantistico significa misurare, con uno strumento opportuno, una particolare grandezza di un sistema su scala quantistica.
 
-Abbiamo giù detto che, quando si misura una grandezza quantistica, dobbiamo considerare l'apparato di misurazione come parte integrante del sistema, un qualcosa in grado di influenzarlo. Non ci interessa, per ora, come questo apparato sia fisicamente realizzato, quindi concettuializziamolo come una _black box_ dotata di una finestrella dalla quale è possibile leggere i risultati e di una sonda per misurare il valore della grandezza da osservare. Questo apparato, inoltre, ha un'orientazione nello spazio: un lato è chiaramente indicato come "Alto", come gli scatoloni dei mobili Ikea.
+Abbiamo già detto che, quando si misura una grandezza quantistica, dobbiamo considerare l'apparato di misurazione come parte integrante del sistema, un qualcosa in grado di influenzarlo. Non ci interessa, per ora, come questo apparato sia fisicamente realizzato, quindi concettualizziamolo come una _black box_ dotata di una finestrella dalla quale è possibile leggere i risultati e di una sonda per misurare il valore della grandezza da osservare. Questo apparato, inoltre, ha un'orientazione nello spazio: un lato è chiaramente indicato come "Alto", come gli scatoloni dei mobili Ikea.
 
 Riprendiamo l'esempio del sistema della moneta, che può assumere i due soli valori misurati "Testa" o "Croce" e supponiamo che sia una grandezza quantistica. Supponiamo di chiamarla __spin__ e indichiamola con la dicitura $$\sigma_z$$. Invece che "Testa" o "Croce", i risultati possibili per questa grandezza sono +1 e -1, corrispondenti rispettivamente agli stati _"up"_ e _"down"_.
 
@@ -37,13 +37,13 @@ Per essere sicuri, resettiamo l'apparato di misura e rieseguiamo le misure più 
 
 E questa è già una prima, grande, scoperta: nei sistemi quantistici, i risultati degli esperimenti ripetuti sono confermati. La meccanica quantistica, insomma, è strana, ma non è _così_ strana.
 
-Adesso, facciamo qualcosa di veramente inaspettato: ruotiamo di 180° l'apparato ed eseguiamo la misurazione. Il risultato che otteniamo è -1 e tale risultato è, come prima, tale misura è confermata rieseguendo gli esperimenti.
+Adesso, facciamo qualcosa di veramente inaspettato: ruotiamo di 180° l'apparato ed eseguiamo la misurazione. Il risultato che otteniamo è -1 e, come prima, tale misura è confermata rieseguendo gli esperimenti.
 
 ![Apparato di misurazione: up](/assets/images/apparato_spin_down.svg?style=centerme)
 
-E questa è la seconda grande scoperta: c'è, nello stato delle grandezze quantistiche, un qualche tipo di concetto di __direzionalità__. E, quale strumento migliore abbiamo a disposizione per descrivere, in un modello, la direzionalità se non tramite i __vettori__?.
+E questa è la seconda grande scoperta: c'è, nello stato delle grandezze quantistiche, un qualche tipo di concetto di __direzionalità__. E, quale strumento migliore abbiamo a disposizione per descrivere, in un modello, la direzionalità se non tramite i __vettori__?
 
-Se, infatti, lo stato dello spin fosse rappresentato da un vettore con modulo unitario e che, nel caso specifico, punta verso l'alto (da cui, beh, _up__), non c'è nulla di imprevedibile nei risultati +1 e -1, in base a come è ruotato l'apparato. Newton è salvo.
+Se, infatti, lo stato dello spin fosse rappresentato da un vettore con modulo unitario e che, nel caso specifico, punta verso l'alto (da cui, beh, _up_), non c'è nulla di imprevedibile nei risultati +1 e -1, in base a come è ruotato l'apparato. Newton è salvo.
 
 Ma cosa succede se ruotiamo l'apparato di lato ed effettuiamo la misurazione? In base alla meccanica classica, dovremmo avere come risultato 0 (la componente sull'asse x del vettore _up_ è zero). E invece...
 

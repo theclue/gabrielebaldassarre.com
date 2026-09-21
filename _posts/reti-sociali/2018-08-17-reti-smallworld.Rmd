@@ -1,6 +1,6 @@
 ---
 title: "Le caratteristiche di un mondo sorprendentemente piccolo"
-excerpt: In questo articolo introdurremo concettualmente le reti _small-world_ e il modello Watts-Strogatz creato per studiare i fenomeni sociali che fanno si che gli esseri umani siano tra loro separati dai famosi sei gradi di separazione.
+excerpt: In questo articolo introdurremo concettualmente le reti _small-world_ e il modello Watts-Strogatz creato per studiare i fenomeni sociali che fanno sì che gli esseri umani siano tra loro separati dai famosi sei gradi di separazione.
 category: "Reti Sociali"
 header:
   overlay_filter: 0.5
@@ -94,7 +94,7 @@ Per costruire un solido modello scientifico sono necessari due ingredienti: un'i
 
 Per ciò che concerne l'ipotesi, la possiamo costruire a partire da una definizione in termini probabilistici di ciò che abbiamo appena detto. Una possibile, che calza a pennello potrebbe essere:
 
-_"Una rete small-world è un grafo in cui la maggior parte dei nodi __non__ sono connessi tra di loro, ma le connessioni di un nodo qualsiasi della rete hanno elevata probabilità di essere anche connessi tra di loro e tutti i nodi siano, da qualunque punto, raggiungibile con un relativamente ridotto numero di passaggi."_
+_"Una rete small-world è un grafo in cui la maggior parte dei nodi __non__ sono connessi tra di loro, ma le connessioni di un nodo qualsiasi della rete hanno elevata probabilità di essere anche connessi tra di loro e tutti i nodi siano, da qualunque punto, raggiungibili con un relativamente ridotto numero di passaggi."_
 
 Per quanto riguarda l'ordine, questo comporta semplificare il problema.
 
@@ -203,10 +203,10 @@ Ma il suo più grande limite è quello di costruire strutture in cui tutti i nod
 
 Come se non bastasse, nella realtà è facile accorgersi che nelle reti _small-world_ ci sono praticamente sempre dei nodi privilegiati, chiamati _hub_, che catalizzano l'attenzione (sono più popolari, ecc.) e sono caratterizzati da un numero molto consistente di connessioni - molto più alto del valor medio. Per questi, anche la distribuzione di Poisson non è realistica.
 
-In queste reti la [distribuzione del grado]({% post_url generated/2018-07-02-importanza-individui-rete-centralita %}) (_degree distribution_) è, piuttosto, assimilabile a una [legge di potenza]({% post_url 2018-08-12-legge-potenza-powerlaw %}). Modelli più recenti di descrizione delle reti, come il modello [Barabási–Albert](https://en.wikipedia.org/wiki/Barabási–Albert_model) tengono conto di questo comportamento asimmetrico dei nodi.
+In queste reti la distribuzione del grado (_degree distribution_) è, piuttosto, assimilabile a una [legge di potenza]({% post_url 2018-08-12-legge-potenza-powerlaw %}). Modelli più recenti di descrizione delle reti, come il modello [Barabási–Albert](https://en.wikipedia.org/wiki/Barabási–Albert_model) tengono conto di questo comportamento asimmetrico dei nodi.
 
-D'altra parte, né il modello Erdős-Renyi né il modello Barabási–Albert simulano correttamente, al contrario del modello Watts-Strogatz, la coesione locale. Nessuno di essi, in definitiva, può considerarsi un modello reliastico per descrivere la struttura di una rete sociale, ma solo una approssimazione.
+D'altra parte, né il modello Erdős-Renyi né il modello Barabási–Albert simulano correttamente, al contrario del modello Watts-Strogatz, la coesione locale. Nessuno di essi, in definitiva, può considerarsi un modello realistico per descrivere la struttura di una rete sociale, ma solo una approssimazione.
 
-{% figure caption:"La rete individuata dagli aeroporti e dalle rotte degli aerei è un'altra rete _small-world_ molto studiata, ma che bene mette in evidenza i limiti del modello Watts-Strogatz sull'incapacità di distinguere i nodi per impportanza. È evidente, infatti, come al Chicago International Airport confluiscano centinaia se non migliaia di rotte da molti altri scali e questo ne fa innegabilmente un _hub_, di gran lunga più importante dei molti scali regionali dissemninati in tutti gli Stati Uniti. Questa caratteristica delle reti _small-world_ è molto importante; basti pensare alle ripercussioni che si avrebbe sull'intero traffico aereo se un _hub_ dovesse essere non operativo, di gran lunga più serie di ciò che si avrebbe con uno scalo minore. Non a caso si dice che le reti _small-world_ sono molto vulnerabili ad attacchi mirati." %}
+{% figure caption:"La rete individuata dagli aeroporti e dalle rotte degli aerei è un'altra rete _small-world_ molto studiata, ma che bene mette in evidenza i limiti del modello Watts-Strogatz sull'incapacità di distinguere i nodi per importanza. È evidente, infatti, come al Chicago International Airport confluiscano centinaia se non migliaia di rotte da molti altri scali e questo ne fa innegabilmente un _hub_, di gran lunga più importante dei molti scali regionali disseminati in tutti gli Stati Uniti. Questa caratteristica delle reti _small-world_ è molto importante; basti pensare alle ripercussioni che si avrebbe sull'intero traffico aereo se un _hub_ dovesse essere non operativo, di gran lunga più serie di ciò che si avrebbe con uno scalo minore. Non a caso si dice che le reti _small-world_ sono molto vulnerabili ad attacchi mirati." %}
 ![Chicago Airport](/assets/images/chicago-airport.jpg)
 {% endfigure %}

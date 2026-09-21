@@ -12,7 +12,7 @@ header:
 
 Lo studio degli autovettori e dei corrispondenti autovalori è un qualcosa in cui ci siamo cimentati probabilmente tutti almeno una volta nella vita. In pochi, tuttavia, sanno che questo strumento è di importanza vitale sia per la Social Network Analysis che per la Fisica Quantistica. Nel primo caso, per via di tutto ciò che concerne la centralità.
 
-Senza la pretesa di fornire una trattazione rigorosa sull'argomento come se dovessimo preparare un esame di algebra lineare, qui ci concentreremo sull'intuizione dei concetti fondamentali così da avere tutti le conoscenze necessarie per utilizzarli in ambito di analisi delle reti sociali.
+Senza la pretesa di fornire una trattazione rigorosa sull'argomento come se dovessimo preparare un esame di algebra lineare, qui ci concentreremo sull'intuizione dei concetti fondamentali così da avere tutte le conoscenze necessarie per utilizzarli in ambito di analisi delle reti sociali.
 
 ## Autovettori e autovalori: una definizione informale
 
@@ -60,11 +60,11 @@ Innanzitutto verifichiamo una proprietà molto interessante delle matrici diagon
 
 Supponendo di voler calcolare \\( \vec{b} = A\vec{a} \\) dati:
 
-$$ \vec{a} = \begin{pmatrix} 1 \\ 3 \end{pmatrix}  A = \begin{bmatrix} 3 & 0 \\ 0 & -2 \end{bmatrix} $$
+$$ \vec{a} = \begin{pmatrix} 1 \\ 3 \end{pmatrix},\quad  A = \begin{bmatrix} 3 & 0 \\ 0 & -2 \end{bmatrix} $$
 
 Avremo:
 
-$$ \vec{b} = \begin{pmatrix} 1 \\ 3 \end{pmatrix} \begin{bmatrix} 3 & 0 \\ 0 & -2 \end{bmatrix} = \begin{pmatrix} 3 \\ -6 \end{pmatrix}  $$
+$$ \vec{b} = \begin{bmatrix} 3 & 0 \\ 0 & -2 \end{bmatrix}\begin{pmatrix} 1 \\ 3 \end{pmatrix} = \begin{pmatrix} 3 \\ -6 \end{pmatrix}  $$
 
 ovvero le componenti \\(b_x = 3 \\) e \\(b_y = -6 \\) sono le proiezioni sugli assi \\( (x, y) \\) del vettore \\( \vec{b} \\) con un modulo pari alle proiezioni del vettore di partenza \\( \vec{a} \\) moltiplicati, come abbiamo già detto, per i coefficienti sulla diagonale \\( A \\).
 
@@ -124,7 +124,7 @@ che, come si può vedere, è una matrice che presenta sulla diagonale principale
 
 Per finire, andando a indicare con \\( V \\) la matrice degli autovettori utilizzati precedentemente, otterremo l'equazione fondamentale per la diagonalizzazione di una matrice:
 
-$$ \boxed{ VA = V\Lambda } $$
+$$ \boxed{ AV = V\Lambda } $$
 
 In altri termini, __la matrice degli autovalori \\( \Lambda \\) sarà la rappresentazione diagonale della matrice \\( A \\) in un sistema di riferimento individuato dagli autovettori di \\( A \\)__, o come si dice più propriamente _nell'autospazio di \\( A \\)_.
 
@@ -144,7 +144,7 @@ $$ \begin{matrix} \lambda_1 = 17.59 \\ \lambda_2 = -1.62 \\ \lambda_3 = 0.035 \e
 
 $$ V = \begin{pmatrix} -0.18 & 0.26 & -0.64 \\ -0.12 & -0.68 & -0.19 \\ -0.97 & -0.68 & 0.74 \end{pmatrix} $$
 
-$$ V^-1 = \begin{pmatrix} -0.81 & 0.47 & -0.93 \\ 1.04 & -0.86 & -0.08 \\ -0.80 & -0.60 & 0.22 \end{pmatrix} $$
+$$ V^{-1} = \begin{pmatrix} -0.81 & 0.47 & -0.93 \\ 1.04 & -0.86 & -0.08 \\ -0.80 & -0.60 & 0.22 \end{pmatrix} $$
 
 Notiamo subito che \\( \lambda_3 \\) è molto più piccolo in modulo degli altri due autovalori. Questo significa che il suo contributo all'informazione contenuta in \\( A \\) è molto ridotto, rispetto agli altri due.
 
@@ -152,9 +152,9 @@ Decidiamo allora di _scartarlo_ e di scartare anche l'autovettore corrispondente
 
 $$ \Lambda = \begin{pmatrix} 17.5 & 0 \\ 0 & -1.6 \end{pmatrix} $$
 
-$$ V = \begin{pmatrix} -0.18 & 0.26 4 \\ -0.12 & -0.68  \\ -0.97 & -0.68  \end{pmatrix} $$
+$$ V = \begin{pmatrix} -0.18 & 0.26 \\ -0.12 & -0.68  \\ -0.97 & -0.68  \end{pmatrix} $$
 
-$$ V^-1 = \begin{pmatrix} -0.81 & 0.47 & -0.93 \\ 1.04 & -0.86 & -0.08  \end{pmatrix} $$
+$$ V^{-1} = \begin{pmatrix} -0.81 & 0.47 & -0.93 \\ 1.04 & -0.86 & -0.08  \end{pmatrix} $$
 
 
 Ora, dalla formula della diagonalizzazione abbiamo che
@@ -182,6 +182,6 @@ Per rispondere a questa domanda basta ricordare che noi possiamo __sempre__ espr
 
 Lo vedremo presto su una particolare misura di centralità, chiamata __Eigenvector Centrality__, sulla quale si è molto parlato negli ultimi anni e ancora di più se ne parlerà in futuro.
 
-E' la modalità, infatti, su cui Google ha costruito il suo famigerato algoritmo _PageRank_, per stimare l'autorevolezza e ordinare i link nei risultati del motore di ricerca.
+È la modalità, infatti, su cui Google ha costruito il suo famigerato algoritmo _PageRank_, per stimare l'autorevolezza e ordinare i link nei risultati del motore di ricerca.
 
 Esatto, Google. E parte tutto da qui.
