@@ -69,7 +69,8 @@
     {
       "label": "📝 Nuovo post",
       "type": "shell",
-      "command": "rake post title='${input:postTitle}' category='${input:postCategory}'${input:postSubtitle}",
+      "command": "noglob rake",
+      "args": ["post['${input:postTitle}','${input:postCategory}','${input:postSlug}']"],
       "presentation": {
         "echo": true,
         "reveal": "always",
@@ -83,7 +84,8 @@
     {
       "label": "✏️ Nuova bozza",
       "type": "shell",
-      "command": "rake draft title='${input:draftTitle}'",
+      "command": "noglob rake",
+      "args": ["draft['${input:draftTitle}','${input:postCategory}','${input:draftSlug}']"],
       "presentation": {
         "echo": true,
         "reveal": "always",
@@ -146,7 +148,7 @@
       "label": "✨ Nuovo workbook Rmd",
       "type": "shell",
       "command": "noglob rake",
-      "args": ["new_rmd['${input:rmdTitle}','${input:rmdCategory}']"],
+      "args": ["new_rmd['${input:rmdTitle}','${input:rmdCategory}','${input:rmdSlug}']"],
       "presentation": {
         "echo": true,
         "reveal": "always",
@@ -250,15 +252,21 @@
       ]
     },
     {
-      "id": "postSubtitle",
+      "id": "postSlug",
       "type": "promptString",
-      "description": "Sottotitolo (lascia vuoto per omettere)",
+      "description": "Slug (kebab-case, nome file del post sotto _posts/)",
       "default": ""
     },
     {
       "id": "draftTitle",
       "type": "promptString",
       "description": "Titolo della bozza",
+      "default": ""
+    },
+    {
+      "id": "draftSlug",
+      "type": "promptString",
+      "description": "Slug (kebab-case, nome file della bozza sotto _drafts/)",
       "default": ""
     },
     {
@@ -292,6 +300,12 @@
         "Meccanica",
         "3d Printing"
       ]
+    },
+    {
+      "id": "rmdSlug",
+      "type": "promptString",
+      "description": "Slug (kebab-case, nome file del workbook sotto _posts/)",
+      "default": ""
     },
     {
       "id": "rmdDraftTitle",
