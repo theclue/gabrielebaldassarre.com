@@ -1,0 +1,49 @@
+contesto:
+  finalita: "Corpus di riferimento per il reverse engineering bottom-up dei contenuti, in vista di un futuro avatar LLM."
+  approvazione_editoriale:
+    ambito: "I markdown selezionati in _posts sono approvati come riferimenti editoriali canonici e rappresentativi dello stile; ciò non attesta autorialità umana esclusiva, assenza di AI o coautorialità."
+    dichiarazione_utente: >-
+      tutti gli articoli proposti tranne quello openscad sono rappresentativi del mio stile di scrittura, i markdown in _posts sono approvati
+  revisione_utente_modello_generato: pending
+
+fonti:
+  - id: A01
+    percorso: _posts/reti-sociali/2018-07-13-introduzione-autovettori-autovalori.md
+    rappresentativo_stile: true
+  - id: A02
+    percorso: _posts/reti-sociali/2018-07-29-community-network-model.md
+    rappresentativo_stile: true
+  - id: A03
+    percorso: _posts/reti-sociali/2018-08-12-legge-potenza-powerlaw.md
+    rappresentativo_stile: true
+  - id: A04
+    percorso: _posts/fisica/2019-09-18-logica-quantistica.md
+    rappresentativo_stile: true
+  - id: A05
+    percorso: _posts/fisica/2019-10-04-spazio-stati-quantistici.md
+    rappresentativo_stile: true
+  - id: A06
+    percorso: _posts/fisica/2019-11-06-teorema-energia-cinetica.md
+    rappresentativo_stile: true
+  - id: A07
+    percorso: _posts/meccanica/2019-10-31-spazio-degli-stati.md
+    rappresentativo_stile: true
+  - id: A08
+    percorso: _posts/fisica/2021-05-06-elettronvolt.md
+    rappresentativo_stile: true
+  - id: A09
+    percorso: _posts/home-assistant/2026-05-09-illuminanza-smartworking-home-assistant.md
+    rappresentativo_stile: true
+  - id: A10
+    percorso: _posts/home-assistant/2026-05-10-dashboard-astrometria-parte-1.md
+    rappresentativo_stile: true
+  - id: A11
+    percorso: _posts/devops/2026-05-16-seo-automatico-jekyll.md
+    rappresentativo_stile: true
+  - id: A12
+    percorso: _posts/devops/2026-05-27-una-shell-history-per-ogni-progetto.md
+    rappresentativo_stile: true
+
+esclusioni:
+  - percorso: _posts/3d-printing/2026-06-08-openscad-tutorial-parte-1.md
+    motivo: "Escluso dal corpus perché non rappresentativo secondo la conferma dell'utente."

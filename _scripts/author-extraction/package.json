@@ -1,0 +1,14 @@
+{
+  "name": "author-extraction",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test core.test.mjs native.test.mjs"
+  },
+  "dependencies": {
+    "@opencode/plugin": "2.0.24",
+    "ajv": "8.20.0",
+    "yaml": "2.8.1"
+  }
+}

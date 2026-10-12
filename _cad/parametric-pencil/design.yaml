@@ -1,0 +1,380 @@
+# Parametric pencil contract. User-confirmed dimensions are documented under
+# requirements; parameter limits are provisional authoring bounds, not approved
+# tolerances or manufacturing limits.
+slug: parametric-pencil
+
+requirements:
+  functional_requirements:
+    - "Represent a traditional parametric hexagonal pencil as four separate pieces: one unified wooden barrel with a tapered tip, one lead, one ferrule, and one eraser."
+    - "The overall axial length, measured from the exposed lead point to the rear of the eraser, is 180 mm at the approved default dimensions."
+    - "The wooden barrel has a 7 mm across-flats hexagonal section at the approved default dimensions."
+    - "The lead is represented as a separate piece; the ferrule and eraser are represented as separate pieces."
+    - "Gate A is limited to the approved visual geometry and nominal dimensions recorded here; it does not establish functional fit, retention, tolerance, or manufacturing suitability."
+    - "The exposed lead cone and wooden sharpening cone meet at lead radius and share one radial/axial taper slope. The wooden cone's rear radius is barrel across-flats divided by sqrt(3), and it intersects the hexagonal barrel to form the sharpening-junction contour; it is not a separate projecting lip, and the cone-to-hexagon intersection boundary is visible."
+    - "The ferrule has a hexagonal outer section of 9.6 mm across flats; 9.6 mm is not a circular outside diameter."
+    - "The ferrule has a rear-opening cylindrical blind eraser recess with a plane bottom. Its nominal depth is 4 mm; the separate eraser inserts 4 mm, rests on that bottom, and protrudes 12 mm beyond the ferrule."
+    - "The eraser is a separate solid with 16 mm total axial length (4 mm inserted plus 12 mm protruding); the complete pencil remains 180 mm long."
+  critical_dimensions:
+    total_length_from_lead_point_to_eraser_rear: 180 mm
+    wooden_barrel_across_flats: 7 mm
+    wooden_tip_length_excluding_exposed_lead: 18 mm
+    exposed_lead_length: "Derived: (lead_diameter/2) * wooden_tip_length / (barrel_across_flats/sqrt(3) - lead_diameter/2); 5.9182 mm at defaults"
+    lead_embedded_length: 6 mm
+    lead_diameter: 2 mm
+    lead_bore_diameter: 2.2 mm
+    ferrule_length: 10 mm
+    ferrule_wood_overlap: 4 mm
+    ferrule_outer_across_flats: 9.6 mm
+    ferrule_hex_bore_across_flats_clearance: 0.2 mm
+    eraser_diameter: 5.5 mm
+    eraser_recess_depth_and_insertion: 4 mm
+    eraser_protrusion_beyond_ferrule: 12 mm
+    eraser_total_axial_length: 16 mm
+    proposed_eraser_cavity_diametral_clearance: 0.2 mm
+    proposed_eraser_cavity_diameter: 5.7 mm
+  constraints:
+    - "Use the approved default axial stack: derived exposed lead + wooden tip + derived straight wooden barrel + ferrule length - ferrule/wood overlap + eraser protrusion beyond ferrule = 180 mm."
+    - "The exposed lead cone and wooden sharpening cone meet at radius lead_diameter/2 and have equal radial/axial slope: (lead_diameter/2)/exposed_lead_length = (barrel_across_flats/sqrt(3) - lead_diameter/2)/wooden_tip_length. The wooden cone rear radius is barrel_across_flats/sqrt(3)."
+    - "At the approved defaults, the derived exposed lead length is approximately 5.9182 mm and the derived straight wooden barrel length is approximately 138.0818 mm."
+    - "Treat the wooden barrel and its taper as one piece; the pencil assembly contains exactly four modeled pieces."
+    - "The sharpening cone intersects the hexagonal barrel; show their intersection boundary and do not add a separate projecting lip."
+    - "The ferrule outer cross-section is hexagonal, with 9.6 mm across flats."
+    - "The ferrule's eraser recess opens at the rear, is cylindrical and blind, has a planar bottom, and has 4 mm nominal depth. The eraser insertion depth equals the recess depth; the eraser rests on the bottom."
+    - "The eraser's total axial length is insertion depth + protrusion beyond ferrule = 4 + 12 = 16 mm. Its cavity diameter is eraser diameter + proposed nominal diametral clearance = 5.5 + 0.2 = 5.7 mm."
+    - "The proposed 0.2 mm cavity diametral clearance is a chosen nominal visual default only; it is not a validated tolerance and does not establish a snug or functional fit."
+    - "Do not claim functional retention, validated fit, tolerancing, manufacturability, or printability certification."
+  assumptions:
+    - "Confirmed unchanged by the user: total length 180 mm, wooden barrel AF 7 mm, wooden tip 18 mm, embedded lead 6 mm, lead/bore diameters 2/2.2 mm, ferrule length/wood overlap 10/4 mm, ferrule hex-bore AF clearance 0.2 mm, eraser diameter 5.5 mm, and eraser protrusion 12 mm."
+    - "User-approved change: derive exposed lead length so its cone and the wooden sharpening cone are collinear on the same taper line, meeting at lead radius lead_diameter/2; the wooden cone rear radius remains barrel_across_flats/sqrt(3). At defaults, exposed lead length is approximately 5.9182 mm, replacing the former fixed 2 mm value."
+    - "Approved correction: ferrule outer shape is hexagonal and the prior 9.6 mm value means across flats."
+    - "Approved correction: the 4 mm rear-opening blind recess receives 4 mm of eraser; the eraser rests on the planar bottom and protrudes 12 mm, for 16 mm total axial length."
+    - "Approved correction: the sharpening cone intersects the hexagonal barrel and its intersection boundary is shown; no separate projecting lip is added."
+    - "The exposed lead length is derived as (lead_diameter/2) * wooden_tip_length / (barrel_across_flats/sqrt(3) - lead_diameter/2). The straight wooden length is derived by the approved stack: total_length - exposed_lead_length - wooden_tip_length - ferrule_length + ferrule_wood_overlap - eraser_protrusion; at defaults it is approximately 138.0818 mm. Eraser insertion occurs within the ferrule length and does not add to the pencil's overall length."
+    - "Proposed only: public parameter minimums and maximums below are provisional exploration bounds, not user-approved dimensions, tolerances, or evidence of a viable fit or process."
+    - "The 0.2 mm ferrule hex-bore clearance is an across-flats value. Separately, the 0.2 mm eraser-cavity diametral clearance is a proposed nominal visual value, not an approved tolerance or validated fit."
+    - "No manufacturing profile is asserted because a process, material specification, and process limits were not supplied."
+  unknowns:
+    - "Manufacturing process/profile and any process-specific limits are unresolved and unsupported by the current requirements."
+    - "Materials, validated tolerances, functional retention, and actual fit behavior are unspecified; no such performance is claimed."
+  acceptance_criteria:
+    - "At the approved defaults, the exposed-lead-to-eraser-rear axial stack evaluates to exactly 180 mm: exposed_lead_length + 18 + straight_wooden_barrel_length + 10 - 4 + 12, with exposed_lead_length approximately 5.9182 mm and straight_wooden_barrel_length approximately 138.0818 mm."
+    - "At the approved defaults, the wooden barrel across-flats dimension is 7 mm; the derived exposed lead length is approximately 5.9182 mm and the derived straight wooden barrel length is approximately 138.0818 mm."
+    - "The design contract specifies four pieces: unified wooden barrel/taper, lead, ferrule, and eraser."
+    - "The sharpening cone intersects the hexagonal barrel, with the intersection boundary visible and no separate projecting lip."
+    - "The ferrule is hexagonal outside at 9.6 mm across flats, 10 mm long, and overlaps the wood by 4 mm; its hex-bore AF clearance is 0.2 mm."
+    - "The ferrule has a rear-opening cylindrical blind recess of nominal depth 4 mm and a planar bottom. The eraser inserts 4 mm, rests on that bottom, and has 12 mm protruding beyond the ferrule."
+    - "The eraser's default total axial length is 16 mm and diameter is 5.5 mm; the proposed cavity-diameter default is 5.7 mm (= 5.5 + 0.2 mm nominal diametral clearance)."
+    - "The eraser insertion is within the ferrule; the approved overall pencil length remains 180 mm and the derived straight wooden length is approximately 138.0818 mm after deriving the exposed lead extension."
+    - "The exposed lead cone and wooden cone meet at a 1 mm radius and have the same radial/axial slope at defaults; the wood-cone rear radius is 7/sqrt(3) mm (approximately 4.0415 mm)."
+    - "The 0.2 mm eraser-cavity diametral clearance and its parameter bounds are nominal visual choices only, not validated or approved tolerances; no acceptance result implies functional fit, retention, manufacturability, or printability certification."
+
+parameters:
+  public:
+    - name: total_length
+      type: number
+      unit: mm
+      default: 180
+      min: 160
+      max: 200
+      customizer: true
+      label: Total length (lead point to eraser rear)
+    - name: barrel_across_flats
+      type: number
+      unit: mm
+      default: 7
+      min: 5
+      max: 10
+      customizer: true
+      label: Wooden barrel across flats
+    - name: wooden_tip_length
+      type: number
+      unit: mm
+      default: 18
+      min: 10
+      max: 25
+      customizer: true
+      label: Wooden tip length (excluding exposed lead)
+    - name: lead_embedded_length
+      type: number
+      unit: mm
+      default: 6
+      min: 3
+      max: 12
+      customizer: true
+      label: Lead embedded length
+    - name: lead_diameter
+      type: number
+      unit: mm
+      default: 2
+      min: 1.5
+      max: 2.2
+      customizer: true
+      label: Lead diameter
+    - name: lead_bore_diameter
+      type: number
+      unit: mm
+      default: 2.2
+      min: 2.2
+      max: 3
+      customizer: true
+      label: Wooden lead-bore diameter
+    - name: ferrule_length
+      type: number
+      unit: mm
+      default: 10
+      min: 6
+      max: 16
+      customizer: true
+      label: Ferrule length
+    - name: ferrule_across_flats
+      type: number
+      unit: mm
+      default: 9.6
+      min: 8
+      max: 12
+      customizer: true
+      label: Ferrule outer across flats (provisional bounds)
+    - name: ferrule_wood_overlap
+      type: number
+      unit: mm
+      default: 4
+      min: 1
+      max: 5.9
+      customizer: true
+      label: Ferrule overlap onto wood
+    - name: ferrule_hex_bore_af_clearance
+      type: number
+      unit: mm
+      default: 0.2
+      min: 0.1
+      max: 0.5
+      customizer: true
+      label: Ferrule hex-bore across-flats clearance
+    - name: eraser_recess_depth
+      type: number
+      unit: mm
+      default: 4
+      min: 1
+      max: 5.9
+      customizer: true
+      label: Eraser insertion and blind recess depth (nominal)
+    - name: eraser_protrusion
+      type: number
+      unit: mm
+      default: 12
+      min: 6
+      max: 20
+      customizer: true
+      label: Eraser protrusion beyond ferrule
+    - name: eraser_diameter
+      type: number
+      unit: mm
+      default: 5.5
+      min: 4
+      max: 8
+      customizer: true
+      label: Eraser diameter
+    - name: eraser_cavity_diametral_clearance
+      type: number
+      unit: mm
+      default: 0.2
+      min: 0.1
+      max: 0.5
+      customizer: true
+      label: Eraser cavity diametral clearance (nominal visual default)
+  derived:
+    - name: exposed_lead_length
+      type: number
+      unit: mm
+      expression: "(lead_diameter/2) * wooden_tip_length / (barrel_across_flats/sqrt(3) - lead_diameter/2)"
+      default: 5.9182
+      min: 1.4
+      max: 15.5
+    - name: straight_wooden_barrel_length
+      type: number
+      unit: mm
+      expression: "total_length - exposed_lead_length - wooden_tip_length - ferrule_length + ferrule_wood_overlap - eraser_protrusion"
+      default: 138.0818
+      min: 84
+      max: 183
+    - name: eraser_total_axial_length
+      type: number
+      unit: mm
+      expression: "eraser_recess_depth + eraser_protrusion"
+      default: 16
+      min: 7
+      max: 25.9
+    - name: eraser_cavity_diameter
+      type: number
+      unit: mm
+      expression: "eraser_diameter + eraser_cavity_diametral_clearance"
+      default: 5.7
+      min: 4.1
+      max: 8.5
+    - name: ferrule_hex_bore_across_flats
+      type: number
+      unit: mm
+      expression: "barrel_across_flats + ferrule_hex_bore_af_clearance"
+      default: 7.2
+      min: 5.1
+      max: 10.5
+  invariants:
+    - "exposed_lead_length = (lead_diameter/2) * wooden_tip_length / (barrel_across_flats/sqrt(3) - lead_diameter/2)"
+    - "(lead_diameter/2)/exposed_lead_length = (barrel_across_flats/sqrt(3) - lead_diameter/2)/wooden_tip_length"
+    - "The exposed lead and wooden sharpening cones meet at radius lead_diameter/2; the wooden cone rear radius is barrel_across_flats/sqrt(3)."
+    - "total_length = exposed_lead_length + wooden_tip_length + straight_wooden_barrel_length + ferrule_length - ferrule_wood_overlap + eraser_protrusion"
+    - "straight_wooden_barrel_length > 0"
+    - "lead_bore_diameter >= lead_diameter"
+    - "ferrule_wood_overlap < ferrule_length"
+    - "eraser_recess_depth = eraser insertion depth and eraser_recess_depth < ferrule_length"
+    - "eraser_total_axial_length = eraser_recess_depth + eraser_protrusion"
+    - "eraser_cavity_diameter = eraser_diameter + eraser_cavity_diametral_clearance"
+    - "ferrule_hex_bore_across_flats = barrel_across_flats + ferrule_hex_bore_af_clearance"
+    - "The 0.2 mm default eraser-cavity diametral clearance is nominal only; it is not a tolerance or a functional-fit guarantee."
+  constants: {}
+
+feature_plan:
+  modules:
+    - name: lead_component
+      purpose: "Create the separate lead as an exposed pointed cone followed by its embedded cylindrical segment."
+      output: "One lead solid spanning z0=0 through z1+lead_embedded_length."
+      traces:
+        - "requirements.functional_requirements[1]: the overall measurement starts at the exposed lead point."
+        - "requirements.functional_requirements[5] and requirements.constraints[1]: exposed_lead_length is derived so the lead cone runs from radius 0 at z0 to radius lead_diameter/2 at z1 on the common taper line."
+        - "requirements.critical_dimensions: exposed_lead_length, lead_embedded_length, lead_diameter."
+        - "requirements.constraints[3]: lead is one of exactly four modeled pieces."
+    - name: wooden_body_component
+      purpose: "Create one unified wooden piece by intersecting a circular conical sharpening envelope with continuous hexagonal stock, unioning it to the straight hexagonal barrel, and subtracting the axial lead bore."
+      output: "One wooden solid spanning z1=exposed_lead_length through the rear of the straight barrel."
+      traces:
+        - "requirements.functional_requirements[0]: unified wooden barrel with tapered tip."
+        - "requirements.functional_requirements[5]: the cone/hex intersection forms the visible sharpening-junction contour without an independent lip."
+        - "requirements.critical_dimensions: wooden_barrel_across_flats, wooden_tip_length_excluding_exposed_lead, lead_bore_diameter."
+        - "requirements.constraints[1-4]: the wooden taper runs from radius lead_diameter/2 at z1 to barrel_across_flats/sqrt(3) at z2 with the same slope as the exposed lead, straight wood is approximately 138.081774 mm at defaults, taper/barrel are one piece, and the conical envelope intersects hexagonal stock."
+    - name: ferrule_component
+      purpose: "Create the separate regular-hexagonal ferrule, subtract its front wood-receiving hex through-bore, and subtract its distinct rear-opening cylindrical blind eraser recess with a planar bottom."
+      output: "One ferrule solid of length ferrule_length and outer AF ferrule_across_flats, overlapping the wood by ferrule_wood_overlap and retaining the blind recess bottom."
+      traces:
+        - "requirements.functional_requirements[6]: ferrule exterior is regular hexagonal AF 9.6 mm, not circular OD."
+        - "requirements.functional_requirements[7]: rear-opening cylindrical blind recess is 4 mm deep with a plane bottom."
+        - "requirements.critical_dimensions: ferrule_length, ferrule_wood_overlap, ferrule_outer_across_flats, ferrule_hex_bore_across_flats_clearance, eraser_recess_depth_and_insertion, proposed_eraser_cavity_diameter."
+        - "requirements.constraints[5-8]: hex exterior, AF7.2 front through-bore over the 4 mm wood overlap, rear blind cylindrical recess, and nominal-only cavity clearance."
+    - name: eraser_component
+      purpose: "Create the separate cylindrical eraser at its full solid length, with its front segment inserted into the rear ferrule recess and its rear segment protruding beyond the ferrule."
+      output: "One eraser solid spanning from the recess bottom to the overall rear endpoint."
+      traces:
+        - "requirements.functional_requirements[7-8]: eraser inserts 4 mm, rests on the recess bottom, protrudes 12 mm, and is 16 mm long."
+        - "requirements.critical_dimensions: eraser_diameter, eraser_recess_depth_and_insertion, eraser_protrusion_beyond_ferrule, eraser_total_axial_length."
+        - "requirements.constraints[6-8]: insertion/recess equality, 16 mm solid length, and nominal-only 5.7 mm cavity diameter."
+        - "requirements.constraints[3]: eraser is one of exactly four modeled pieces."
+    - name: pencil_assembly
+      purpose: "Place the four component solids on the common +Z axis without unioning distinct pieces."
+      output: "Four-component pencil assembly with the approved point-to-rear axial stack."
+      traces:
+        - "requirements.functional_requirements[0-8]."
+        - "requirements.constraints[0-9]: approved axial stack, co-linear taper, four-piece scope, geometry, and non-claims."
+        - "requirements.acceptance_criteria[0-9]."
+  coordinate_system: |-
+    Use millimetres. Set the global origin at the exposed lead point, z0=0, on the pencil centerline. +Z runs axially toward the eraser rear; +X and +Y span each cross-section. All component and cutting primitives are coaxial with +Z. Give the barrel, sharpening-stock prism, ferrule exterior, and ferrule hex bore one common regular-hex orientation. For every regular-hex prism, map across flats AF to OpenSCAD $fn=6 circumradius AF/sqrt(3). Use an explicit deterministic circular facet count (module-local $fn=96) for the lead cone/cylinder, sharpening cone envelope, lead bore, eraser recess, and eraser so undefined global mesh resolution cannot change the intended circular/conical shape; this is tessellation control, not a dimensional parameter. Axial stations are: z1=exposed_lead_length; z2=z1+wooden_tip_length; z3=z2+straight_wooden_barrel_length; z4=z3-ferrule_wood_overlap; z5=z4+ferrule_length; z_recess_bottom=z5-eraser_recess_depth; z6=z5+eraser_protrusion=total_length. The eraser spans z_recess_bottom..z6, so its length is eraser_recess_depth+eraser_protrusion. At approved defaults z0=0, z1≈5.918226, z2≈23.918226, z3=162, z4=158, z_recess_bottom=164, z5=168, and z6=180 mm. Thus the ferrule occupies z=158..168, its front through-bore occupies z=158..162, its rear blind socket occupies z=164..168, and the eraser occupies z=164..180.
+  symmetries:
+    - "Lead, circular bore/recess, and eraser features are rotationally symmetric about +Z, represented with explicit $fn=96 tessellation."
+    - "Barrel stock, ferrule exterior, and ferrule main bore have sixfold rotational symmetry about +Z and share one hex orientation."
+    - "No independent lip, crimp, corrugation, chamfer, adhesive feature, or asymmetric retention feature is planned."
+  ops:
+    - order: 1
+      module: lead_component
+      operation: additive
+      plan: "Derive exposed_lead_length=(lead_diameter/2)*wooden_tip_length/(barrel_across_flats/sqrt(3)-lead_diameter/2), approximately 5.918226 mm at defaults; do not replace it with an independent or fixed length. With explicit $fn=96, create a right circular cone from radius 0 at z0 to radius lead_diameter/2 at z1; union a coaxial cylinder of diameter lead_diameter from z1 through z1+lead_embedded_length. Keep the result as the separate lead component."
+    - order: 2
+      module: wooden_body_component
+      operation: additive_intersection
+      plan: "Create continuous regular-hexagonal wooden stock of AF barrel_across_flats over z1..z3. Create an explicit-$fn=96 circular conical envelope over z1..z2, from radius lead_diameter/2 at the shared lead/wood interface z1 to radius barrel_across_flats/sqrt(3) at z2. This radial increase over wooden_tip_length has the same radial/axial slope as the lead cone's increase from radius 0 to lead_diameter/2 over exposed_lead_length, so both cones lie on one conical line. Intersect the wooden envelope with the hex stock to form the sharpened region: the outside remains circular/conical where the cone is inside the stock and is clipped near the rear by the hex flats, producing the visible cone/hex transition contour rather than a hexagonal cone or added lip. Union the intersected region with straight hex stock over z2..z3, where straight_wooden_barrel_length is derived from the total-length equation and is approximately 138.081774 mm at defaults. Use only routine axial epsilon for robust union; epsilon must not become visible geometry or move a station."
+    - order: 3
+      module: wooden_body_component
+      operation: subtractive
+      plan: "With explicit $fn=96, subtract a coaxial cylindrical bore of diameter lead_bore_diameter from z1 through z1+lead_embedded_length. Extend the cutter only by routine epsilon at terminating faces; add no retention geometry or end treatment."
+    - order: 4
+      module: ferrule_component
+      operation: additive
+      plan: "Create a regular-hexagonal prism over z4..z5 with across flats ferrule_across_flats (9.6 mm at defaults), aligned with the wooden barrel. Never reinterpret this value as a circular outside diameter."
+    - order: 5
+      module: ferrule_component
+      operation: subtractive
+      plan: "Subtract the regular-hexagonal wood-receiving bore from the ferrule front through the full ferrule_wood_overlap depth z4..z3 (158..162 mm at defaults), using ferrule_hex_bore_across_flats=barrel_across_flats+ferrule_hex_bore_af_clearance, AF7.2 at defaults, and the common hex orientation. Treat it as a through-cut of the front overlap wall, terminating before z_recess_bottom so the rear eraser socket retains its blind planar bottom. Use only routine epsilon at cutter endpoints; add no crimp or retention feature."
+    - order: 6
+      module: ferrule_component
+      operation: subtractive
+      plan: "With explicit $fn=96, subtract a coaxial rear-opening cylindrical recess of diameter eraser_cavity_diameter from z_recess_bottom to just beyond z5. Keep its front face planar and perpendicular to +Z, leaving a flat blind bottom at z_recess_bottom. Default diameter is 5.7 mm = eraser_diameter 5.5 mm + nominal diametral clearance 0.2 mm; encode no snug-fit, retention, chamfer, or manufacturing claim."
+    - order: 7
+      module: eraser_component
+      operation: additive
+      plan: "With explicit $fn=96, create one coaxial cylinder of diameter eraser_diameter over z_recess_bottom..z6. Its first eraser_recess_depth (4 mm default) lies inside the recess and its remaining eraser_protrusion (12 mm default) lies behind z5, giving eraser_total_axial_length 16 mm and placing its front face against the planar recess bottom."
+    - order: 8
+      module: pencil_assembly
+      operation: assembly
+      plan: "Emit lead, unified wood, ferrule, and eraser as four separately identifiable solids at their derived stations. Do not union distinct components. Do not introduce an independent sharpening lip, ferrule crimp, adhesive, chamfer, fillet, cap, collar, or any other unapproved feature."
+  module_parameter_map:
+    lead_component:
+      exposed_lead_length: "Derived, never independent: (lead_diameter/2)*wooden_tip_length/(barrel_across_flats/sqrt(3)-lead_diameter/2). Sets cone height and z1≈5.918226 mm at defaults; traces to requirements.critical_dimensions.exposed_lead_length and requirements.constraints[1]."
+      lead_embedded_length: "Sets cylindrical segment length after z1; traces to requirements.critical_dimensions.lead_embedded_length."
+      lead_diameter: "Sets the lead-cone shared-interface radius lead_diameter/2 and embedded cylinder diameter; traces to requirements.critical_dimensions.lead_diameter."
+    wooden_body_component:
+      exposed_lead_length: "Derived parameter setting the shared lead/wood station z1≈5.918226 mm; together with lead_diameter it fixes the front-cone slope and traces to the approved axial stack and requirements.constraints[1]."
+      wooden_tip_length: "Sets z2-z1=18 mm and the wooden conical-envelope length; traces to requirements.critical_dimensions.wooden_tip_length_excluding_exposed_lead."
+      straight_wooden_barrel_length: "Derived by total_length-exposed_lead_length-wooden_tip_length-ferrule_length+ferrule_wood_overlap-eraser_protrusion; sets z3-z2 and equals approximately 138.081774 mm at defaults; traces to parameters.derived[1]."
+      barrel_across_flats: "Sets continuous wooden-stock AF7, straight-barrel AF, and wooden cone-envelope rear radius AF/sqrt(3); traces to requirements.critical_dimensions.wooden_barrel_across_flats and the required cone/hex interaction."
+      lead_diameter: "Sets the wooden cone-envelope front radius lead_diameter/2 at z1 so it shares the lead-cone interface and conical line; traces to requirements.critical_dimensions.lead_diameter and requirements.constraints[1]."
+      lead_bore_diameter: "Sets only the subtractive axial bore diameter; it does not set either external taper radius; traces to requirements.critical_dimensions.lead_bore_diameter."
+      lead_embedded_length: "Sets bore end station z1+lead_embedded_length; traces to requirements.critical_dimensions.lead_embedded_length."
+    ferrule_component:
+      ferrule_length: "Sets z5-z4 and outer ferrule length; traces to requirements.critical_dimensions.ferrule_length."
+      ferrule_wood_overlap: "Sets z4=z3-ferrule_wood_overlap and the front through-hex-bore depth z4..z3, 4 mm at defaults; traces to requirements.critical_dimensions.ferrule_wood_overlap."
+      ferrule_across_flats: "Sets the regular-hexagonal exterior AF, 9.6 mm at defaults; traces to requirements.critical_dimensions.ferrule_outer_across_flats and is never treated as circular OD."
+      barrel_across_flats: "Provides the base AF for the front ferrule hex bore; traces to requirements.critical_dimensions.wooden_barrel_across_flats."
+      ferrule_hex_bore_af_clearance: "Adds once across flats to barrel_across_flats; traces to requirements.critical_dimensions.ferrule_hex_bore_across_flats_clearance and makes no fit claim."
+      ferrule_hex_bore_across_flats: "Sets derived front through-bore AF, default 7.2 mm; traces to parameters.derived[4]."
+      eraser_recess_depth: "Sets z_recess_bottom=z5-eraser_recess_depth and rear blind-cavity depth; traces to requirements.critical_dimensions.eraser_recess_depth_and_insertion."
+      eraser_cavity_diameter: "Sets rear blind cylindrical socket diameter, nominal default 5.7 mm; traces to parameters.derived[3] and the nominal-only requirement."
+    eraser_component:
+      eraser_recess_depth: "Sets inserted segment length and front plane z_recess_bottom; traces to requirements.critical_dimensions.eraser_recess_depth_and_insertion."
+      eraser_protrusion: "Sets z6-z5 and exposed rear segment, default 12 mm; traces to requirements.critical_dimensions.eraser_protrusion_beyond_ferrule."
+      eraser_total_axial_length: "Sets complete solid length z6-z_recess_bottom, default 16 mm; traces to parameters.derived[2]."
+      eraser_diameter: "Sets eraser cylinder diameter; traces to requirements.critical_dimensions.eraser_diameter."
+    pencil_assembly:
+      total_length: "Requires z6=total_length; traces to requirements.critical_dimensions.total_length_from_lead_point_to_eraser_rear."
+      exposed_lead_length: "Derived first term of the approved axial stack, approximately 5.918226 mm at defaults; never an independent constant."
+      wooden_tip_length: "Second term of the approved axial stack."
+      straight_wooden_barrel_length: "Third term of the approved axial stack."
+      ferrule_length: "Fourth positive term of the approved axial stack."
+      ferrule_wood_overlap: "Subtracted overlap term of the approved axial stack."
+      eraser_protrusion: "Final term of the approved axial stack; insertion remains inside the ferrule and adds no overall length."
+  acceptance_trace:
+    - criterion: "requirements.acceptance_criteria[0]"
+      planned_evidence: "Stations require z6 ≈ 5.918226 + 18 + 138.081774 + 10 - 4 + 12 = 180 mm at defaults."
+    - criterion: "requirements.acceptance_criteria[1]"
+      planned_evidence: "wooden_body_component uses AF7; exposed_lead_length derives to approximately 5.918226 mm and straight_wooden_barrel_length derives to approximately 138.081774 mm at defaults."
+    - criterion: "requirements.acceptance_criteria[2]"
+      planned_evidence: "pencil_assembly emits exactly lead, unified wood, ferrule, and eraser without unioning distinct pieces."
+    - criterion: "requirements.acceptance_criteria[3]"
+      planned_evidence: "Wood geometry intersects an explicit circular cone envelope with hex stock, retains the transition contour, and defines no independent lip."
+    - criterion: "requirements.acceptance_criteria[4]"
+      planned_evidence: "Ferrule exterior is a complete AF9.6 regular hex over z=158..168, starts 4 mm before the wood rear, and has an aligned AF7.2 front through-bore over z=158..162 at defaults."
+    - criterion: "requirements.acceptance_criteria[5]"
+      planned_evidence: "Ferrule subtracts a rear-opening nominal-Ø5.7 cylindrical blind socket over z=164..168 with planar bottom; eraser begins on that bottom and reaches the ferrule rear after 4 mm."
+    - criterion: "requirements.acceptance_criteria[6]"
+      planned_evidence: "Eraser uses diameter 5.5 mm and total length 16 mm; recess uses derived diameter 5.7 mm at defaults."
+    - criterion: "requirements.acceptance_criteria[7]"
+      planned_evidence: "Insertion occupies z=164..168 inside the ferrule; only the 12 mm protrusion reaches z6=180 mm, while straight wood derives to approximately 138.081774 mm and its rear remains z3=162 mm."
+    - criterion: "requirements.acceptance_criteria[8]"
+      planned_evidence: "The lead cone spans radius 0 at z0=0 to radius 1 mm at z1≈5.918226; the wooden taper continues from radius 1 mm at z1 to radius 7/sqrt(3) mm at z2≈23.918226 over 18 mm. The slope identity in requirements.constraints[1] verifies that both lie on the same conical line."
+    - criterion: "requirements.acceptance_criteria[9]"
+      planned_evidence: "Cavity mapping labels 0.2 mm as nominal visual diametral clearance only, and no operation introduces extra geometry or makes manufacturer, fit, retention, tolerancing, manufacturability, or printability assertions."
+
+manufacturing:
+  # null is a deliberate non-claim: this template's supported process profiles
+  # do not encode the user's unresolved/unsupported manufacturing intent.
+  profile: null
+  build_volume: {}
+  inventory_ref: inventory.yaml
+
+validation_results: {}

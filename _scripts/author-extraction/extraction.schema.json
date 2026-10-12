@@ -1,0 +1,233 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:gabrielebaldassarre:author-extraction:1",
+  "title": "Author extraction contract v1",
+  "description": "Closed local contract for deterministic article preparation and candidate acceptance.",
+  "$ref": "#/$defs/FinalRecord",
+  "$defs": {
+    "Source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["article_id", "path", "corpus_hash", "file_hash"],
+      "properties": {
+        "article_id": { "type": "string", "enum": ["A01", "A02", "A03", "A04", "A05", "A06", "A07", "A08", "A09", "A10", "A11", "A12"] },
+        "path": { "type": "string", "minLength": 1, "maxLength": 500, "pattern": "\\S" },
+        "corpus_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "file_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      }
+    },
+    "Method": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["prepare_version", "segmentation_version", "measurement_version", "instructions_version", "schema_hash", "instructions_hash"],
+      "properties": {
+        "prepare_version": { "const": "prepare/1" },
+        "segmentation_version": { "const": "raw-blank-lines/1" },
+        "measurement_version": { "const": "raw-body-counts/1" },
+        "instructions_version": { "const": "author-extractor/1" },
+        "schema_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "instructions_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      }
+    },
+    "Measurements": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["scope", "utf8_bytes", "unicode_code_points", "nonblank_lines", "advanced_stylometry"],
+      "properties": {
+        "scope": { "const": "raw_markdown_body" },
+        "utf8_bytes": { "type": "integer", "minimum": 0, "maximum": 262144 },
+        "unicode_code_points": { "type": "integer", "minimum": 0, "maximum": 262144 },
+        "nonblank_lines": { "type": "integer", "minimum": 0, "maximum": 262144 },
+        "advanced_stylometry": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["status", "value", "reason_code"],
+          "properties": {
+            "status": { "const": "not_computed" },
+            "value": { "type": "null" },
+            "reason_code": { "const": "OUT_OF_SCOPE_V1" }
+          }
+        }
+      }
+    },
+    "Passage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["passage_id", "start_cp", "end_cp", "text"],
+      "properties": {
+        "passage_id": { "type": "string", "pattern": "^P[0-9]{4}$" },
+        "start_cp": { "type": "integer", "minimum": 0, "maximum": 262144 },
+        "end_cp": { "type": "integer", "minimum": 0, "maximum": 262144 },
+        "text": { "type": "string", "maxLength": 262144 }
+      }
+    },
+    "Prepared": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "source", "method", "input_hash", "body", "passages", "measurements"],
+      "properties": {
+        "schema_version": { "const": "author-extraction/1" },
+        "source": { "$ref": "#/$defs/Source" },
+        "method": { "$ref": "#/$defs/Method" },
+        "input_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "body": { "type": "string", "maxLength": 262144 },
+        "passages": { "type": "array", "maxItems": 512, "items": { "$ref": "#/$defs/Passage" } },
+        "measurements": { "$ref": "#/$defs/Measurements" }
+      }
+    },
+    "CoverageEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "note"],
+      "properties": {
+        "status": { "type": "string", "enum": ["observed", "not_observed"] },
+        "note": { "type": "string", "minLength": 1, "maxLength": 500, "pattern": "\\S" }
+      }
+    },
+    "Coverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rhetorical", "epistemic", "semantic", "decisional"],
+      "properties": {
+        "rhetorical": { "$ref": "#/$defs/CoverageEntry" },
+        "epistemic": { "$ref": "#/$defs/CoverageEntry" },
+        "semantic": { "$ref": "#/$defs/CoverageEntry" },
+        "decisional": { "$ref": "#/$defs/CoverageEntry" }
+      }
+    },
+    "Evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["article_id", "passage_id", "quote"],
+      "properties": {
+        "article_id": { "type": "string", "enum": ["A01", "A02", "A03", "A04", "A05", "A06", "A07", "A08", "A09", "A10", "A11", "A12"] },
+        "passage_id": { "type": "string", "pattern": "^P[0-9]{4}$" },
+        "quote": { "type": "string", "minLength": 1, "maxLength": 2000, "pattern": "\\S" }
+      }
+    },
+    "RhetoricalObservation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["dimension", "attribute", "interpretation", "context", "status", "inference_kind", "evidence", "move", "function"],
+      "properties": {
+        "dimension": { "const": "rhetorical" },
+        "attribute": { "type": "string", "minLength": 1, "maxLength": 200, "pattern": "\\S" },
+        "interpretation": { "type": "string", "minLength": 1, "maxLength": 2000, "pattern": "\\S" },
+        "context": { "type": "string", "minLength": 1, "maxLength": 1000, "pattern": "\\S" },
+        "status": { "const": "candidate" },
+        "inference_kind": { "type": "string", "enum": ["explicit", "inferred"] },
+        "evidence": { "type": "array", "minItems": 1, "maxItems": 4, "items": { "$ref": "#/$defs/Evidence" } },
+        "move": { "type": "string", "minLength": 1, "maxLength": 1000, "pattern": "\\S" },
+        "function": { "type": "string", "minLength": 1, "maxLength": 1000, "pattern": "\\S" }
+      }
+    },
+    "EpistemicObservation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["dimension", "attribute", "interpretation", "context", "status", "inference_kind", "evidence", "claim", "basis", "qualification"],
+      "properties": {
+        "dimension": { "const": "epistemic" },
+        "attribute": { "type": "string", "minLength": 1, "maxLength": 200, "pattern": "\\S" },
+        "interpretation": { "type": "string", "minLength": 1, "maxLength": 2000, "pattern": "\\S" },
+        "context": { "type": "string", "minLength": 1, "maxLength": 1000, "pattern": "\\S" },
+        "status": { "const": "candidate" },
+        "inference_kind": { "type": "string", "enum": ["explicit", "inferred"] },
+        "evidence": { "type": "array", "minItems": 1, "maxItems": 4, "items": { "$ref": "#/$defs/Evidence" } },
+        "claim": { "type": "string", "minLength": 1, "maxLength": 1000, "pattern": "\\S" },
+        "basis": { "type": ["string", "null"], "minLength": 1, "maxLength": 1000, "pattern": "\\S" },
+        "qualification": { "type": ["string", "null"], "minLength": 1, "maxLength": 1000, "pattern": "\\S" }
+      }
+    },
+    "SemanticObservation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["dimension", "attribute", "interpretation", "context", "status", "inference_kind", "evidence", "subject", "relation", "object", "claim_nature"],
+      "properties": {
+        "dimension": { "const": "semantic" },
+        "attribute": { "type": "string", "minLength": 1, "maxLength": 200, "pattern": "\\S" },
+        "interpretation": { "type": "string", "minLength": 1, "maxLength": 2000, "pattern": "\\S" },
+        "context": { "type": "string", "minLength": 1, "maxLength": 1000, "pattern": "\\S" },
+        "status": { "const": "candidate" },
+        "inference_kind": { "type": "string", "enum": ["explicit", "inferred"] },
+        "evidence": { "type": "array", "minItems": 1, "maxItems": 4, "items": { "$ref": "#/$defs/Evidence" } },
+        "subject": { "type": "string", "minLength": 1, "maxLength": 1000, "pattern": "\\S" },
+        "relation": { "type": "string", "minLength": 1, "maxLength": 1000, "pattern": "\\S" },
+        "object": { "type": "string", "minLength": 1, "maxLength": 1000, "pattern": "\\S" },
+        "claim_nature": { "type": "string", "enum": ["definition", "causal", "procedural", "comparative", "descriptive", "other"] }
+      }
+    },
+    "DecisionalObservation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["dimension", "attribute", "interpretation", "context", "status", "inference_kind", "evidence", "choice", "rationale", "tradeoff", "condition"],
+      "properties": {
+        "dimension": { "const": "decisional" },
+        "attribute": { "type": "string", "minLength": 1, "maxLength": 200, "pattern": "\\S" },
+        "interpretation": { "type": "string", "minLength": 1, "maxLength": 2000, "pattern": "\\S" },
+        "context": { "type": "string", "minLength": 1, "maxLength": 1000, "pattern": "\\S" },
+        "status": { "const": "candidate" },
+        "inference_kind": { "type": "string", "enum": ["explicit", "inferred"] },
+        "evidence": { "type": "array", "minItems": 1, "maxItems": 4, "items": { "$ref": "#/$defs/Evidence" } },
+        "choice": { "type": "string", "minLength": 1, "maxLength": 1000, "pattern": "\\S" },
+        "rationale": { "type": "string", "minLength": 1, "maxLength": 1000, "pattern": "\\S" },
+        "tradeoff": { "type": ["string", "null"], "minLength": 1, "maxLength": 1000, "pattern": "\\S" },
+        "condition": { "type": ["string", "null"], "minLength": 1, "maxLength": 1000, "pattern": "\\S" }
+      }
+    },
+    "Observation": {
+      "oneOf": [
+        { "$ref": "#/$defs/RhetoricalObservation" },
+        { "$ref": "#/$defs/EpistemicObservation" },
+        { "$ref": "#/$defs/SemanticObservation" },
+        { "$ref": "#/$defs/DecisionalObservation" }
+      ]
+    },
+    "Candidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["coverage", "observations"],
+      "properties": {
+        "coverage": { "$ref": "#/$defs/Coverage" },
+        "observations": { "type": "array", "minItems": 1, "maxItems": 12, "items": { "$ref": "#/$defs/Observation" } }
+      }
+    },
+    "FinalRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "source", "method", "measurements", "coverage", "observations"],
+      "properties": {
+        "schema_version": { "const": "author-extraction/1" },
+        "source": { "$ref": "#/$defs/Source" },
+        "method": { "$ref": "#/$defs/Method" },
+        "measurements": { "$ref": "#/$defs/Measurements" },
+        "coverage": { "$ref": "#/$defs/Coverage" },
+        "observations": { "type": "array", "minItems": 1, "maxItems": 12, "items": { "$ref": "#/$defs/Observation" } }
+      }
+    },
+    "AcceptanceEnvelope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "canonical_json"],
+      "properties": {
+        "status": { "const": "accepted" },
+        "canonical_json": { "type": "string", "minLength": 1, "maxLength": 1048576 }
+      }
+    },
+    "PrepareInput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["article_id"],
+      "properties": { "article_id": { "type": "string", "enum": ["A01", "A02", "A03", "A04", "A05", "A06", "A07", "A08", "A09", "A10", "A11", "A12"] } }
+    },
+    "SubmitInput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["article_id", "input_hash", "candidate_json"],
+      "properties": {
+        "article_id": { "type": "string", "enum": ["A01", "A02", "A03", "A04", "A05", "A06", "A07", "A08", "A09", "A10", "A11", "A12"] },
+        "input_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "candidate_json": { "type": "string", "minLength": 1, "maxLength": 65536 }
+      }
+    }
+  }
+}

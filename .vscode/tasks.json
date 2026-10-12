@@ -68,9 +68,9 @@
     },
     {
       "label": "📝 Nuovo post",
-      "type": "shell",
-      "command": "noglob rake",
-      "args": ["post['${input:postTitle}','${input:postCategory}','${input:postSlug}']"],
+      "type": "process",
+      "command": "rake",
+      "args": ["post[${input:postTitle},${input:postCategory},${input:postSlug}]"],
       "presentation": {
         "echo": true,
         "reveal": "always",
@@ -83,9 +83,9 @@
     },
     {
       "label": "✏️ Nuova bozza",
-      "type": "shell",
-      "command": "noglob rake",
-      "args": ["draft['${input:draftTitle}','${input:postCategory}','${input:draftSlug}']"],
+      "type": "process",
+      "command": "rake",
+      "args": ["draft[${input:draftTitle},${input:postCategory},${input:draftSlug}]"],
       "presentation": {
         "echo": true,
         "reveal": "always",
@@ -116,9 +116,9 @@
     },
     {
       "label": "📔 Esegui knitr sull'Rmd corrente",
-      "type": "shell",
-      "command": "noglob rake",
-      "args": ["knit['${relativeFile}']"],
+      "type": "process",
+      "command": "rake",
+      "args": ["knit[${relativeFile}]"],
       "presentation": {
         "echo": true,
         "reveal": "always",
@@ -146,9 +146,9 @@
     },
     {
       "label": "✨ Nuovo workbook Rmd",
-      "type": "shell",
-      "command": "noglob rake",
-      "args": ["new_rmd['${input:rmdTitle}','${input:rmdCategory}','${input:rmdSlug}']"],
+      "type": "process",
+      "command": "rake",
+      "args": ["new_rmd[${input:rmdTitle},${input:rmdCategory},${input:rmdSlug}]"],
       "presentation": {
         "echo": true,
         "reveal": "always",
@@ -161,9 +161,9 @@
     },
     {
       "label": "✨ Nuovo asset 3D",
-      "type": "shell",
-      "command": "noglob rake",
-      "args": ["new_3d['${input:cadTitle}','${input:cadSlug}']"],
+      "type": "process",
+      "command": "rake",
+      "args": ["new_3d[${input:cadTitle},${input:cadSlug}]"],
       "presentation": {
         "echo": true,
         "reveal": "always",

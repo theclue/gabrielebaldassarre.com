@@ -1,0 +1,50 @@
+{
+  "worktree": {
+    "setup": "./configure",
+    "terminals": [
+      { "name": "Autore", "command": "zsh -l" }
+    ]
+  },
+  "scripts": {
+    "dev": {
+      "type": "service",
+      "command": "make dev",
+      "port": 4000
+    },
+    "site": {
+      "command": "make site"
+    },
+    "clean": {
+      "command": "make clean"
+    },
+    "knitr": {
+      "command": "make knitr"
+    },
+    "diagrams": {
+      "command": "make diagrams"
+    },
+    "cad": {
+      "command": "make cad"
+    },
+    "cad-png": {
+      "command": "make cad-png"
+    },
+    "docker-build": {
+      "command": "make build build-knitr build-cad"
+    },
+    "configure": {
+      "command": "./configure"
+    }
+  },
+  "metadataGeneration": {
+    "branchName": {
+      "instructions": "Use the format <type>/<slug>, lowercase kebab-case, no dates. Types: post for articles in _posts/ or _drafts/, cad for 3D models in _cad/, site for layout, styles, build or config changes, fix for bug fixes. When the change belongs to one post or model, reuse its slug (for example post/openscad-tutorial-parte-2)."
+    },
+    "commitMessage": {
+      "instructions": "Use Conventional Commits in English, imperative mood, max 72 characters: <type>(<scope>): <summary>. Types: post (article content), cad (3D model sources or exports), site (layout, styles, build, Makefile, Rakefile, configuration), fix, chore, deps. Use the post or model slug as scope when the change touches only one of them; omit the scope otherwise."
+    },
+    "pullRequest": {
+      "instructions": "Write the title and the body in Italian. The body has two parts: 'Cosa cambia' with 2 to 4 sentences describing the article or model changes, and 'Checklist' with these checkbox items: all images referenced by master, overlay_image, cloudinary tags or markdown image links exist under assets/images/; make site completes without errors; for .Rmd files, make knitr was run and the regenerated .md is included in the commit; front matter has title, excerpt (max 160 characters), category and tags. Do not add other sections."
+    }
+  }
+}

@@ -1,0 +1,775 @@
+requirements:
+  status: "gate_a_presets_approved"
+  scope:
+    target: "customizable-cable-grommet.scad"
+    change: "Parametric optional connector openings and conservative hardware envelopes on the cap only"
+    preserve:
+      - "Keep source language English and preserve the MIT license notice."
+      - "Preserve all non-fruit legacy public parameter names, labels, ranges, defaults, modes, and assembly(gap=0)."
+      - "With fruit_count=0, cap geometry must be identical to the original master."
+      - "top_part(), bottom_part(), snap, bayonet, and existing parabolic cutout remain geometrically identical."
+    exclusions:
+      - "Do not model flange hardware, connector bodies, screws, cables, nuts, tools, or external-space/accessibility envelopes as solids."
+      - "Do not add adapters, separate parts, recesses, countersinks, counterbores, threads, or implicit clearances."
+      - "No Thingiverse work, technical drawings, publication, commit, STL export, or render is authorized by this contract."
+      - "Applicable test artifacts may use project stl/ and renders/ paths only when specifically authorized for the inspector; Gate A is not export/render authorization."
+      - "Feature plan is owned by cad-planner and must match the approved contract; requirements architect does not author it."
+
+  evidence:
+    user_approved:
+      - "User explicitly approved the revised per-type preset UX, editable profiles, layout, clearances, and test plan with 'Confermo preset e piano'."
+      - "fruit_count defaults to 0; slot types default to USB-A and USB-C and expose USB-A, USB-C, RJ45."
+      - "Each type selects its editable positive dimensional profile. Editing a profile changes all active instances of that same type; the two slot types remain independently selectable."
+      - "Pair V semantics remain approved: local-X flange/screw lines open toward the +Y cutout; centers lie on the solid -Y side; inclinations are -a/2 and +a/2. fruit_v_angle=30 means ±15 degrees."
+      - "Single mount lies on the -Y axis at orientation 0; pair centers are left/right symmetric."
+      - "Opening body clearance is 0.2 mm per side; screw clearance is 0.2 mm diametral. Neither is a manufacturing tolerance."
+      - "The RJ45 body, flange, and front-plane-to-rear depth are user-measured; its pitch is derived from the measured 4 mm body-edge-to-nearest-hole-tangent distance and assumed nominal M3 diameter 3 mm. Actual hole diameter was not measured."
+      - "USB-A and USB-C profile seeds are user-authorized best-effort estimates, not standards, universal dimensions, or datasheet measurements."
+      - "Flange and body are non-solid conservative envelopes. No hardware fit, strength, cable routing, or manufacturability is claimed."
+    source_scad:
+      - "Master source declares MIT license in its header."
+      - "Existing mode values are assembly, exploded, top, bottom, cap, and print."
+      - "assembly(gap=0) is the existing assembled entry point."
+      - "parabolic_cut_2d() opens toward +Y; its vertex is at cap center."
+      - "cap_disc_h defaults to 3.0 mm; cap_part() has a bottom-open shell and solid cap disc."
+      - "The cap top chamfer is a cylinder/frustum h=0.8, d1=cap_disc_od, d2=cap_disc_od-1.8, positioned at z=cap_disc_h-0.01; the actual planar top face is smaller than cap_disc_od."
+      - "The cap bore and bottom collar opening are distinct; assembled body-envelope validation must consider cap skirt/cavity, top/sleeve, and bottom/collar."
+
+    profile_provenance:
+      USB-A:
+        classification: "User-authorized best-effort editable estimate; not a standard, universal fit, or measured/datasheet dimensions."
+        family_reference: "https://newnex.com/usb-panel-mount-cables.php"
+        reference_limit: "Family reference only; it did not establish the numeric seed dimensions."
+      USB-C:
+        classification: "User-authorized best-effort editable estimate; not a standard, universal fit, or measured/datasheet dimensions."
+        family_reference: "https://newnex.com/usb-c-panel-mount-cable.php"
+        reference_limit: "Family reference only; it did not establish the numeric seed dimensions."
+      RJ45:
+        measured_by_user:
+          body_width_mm: 15.70
+          body_height_mm: 13.25
+          flange_width_mm_including_ears: 35.50
+          flange_height_mm: 22.50
+          body_edge_to_nearest_screw_hole_tangent_mm: 4
+          flange_contact_plane_to_rear_depth_mm: 30.50
+        derived_or_assumed:
+          screw_pitch_mm: "15.70 + 2*(4 + 3/2) = 26.70; derived from measured body/tangent gap and assumed nominal screw diameter."
+          nominal_screw_diameter_mm: "3 mm nominal M3 assumption; actual hole diameter was not measured."
+        opening: "Body dimensions are not themselves a measured cutout; opening includes the separate editable body clearance."
+
+  supersession:
+    previous_fruit_contract: "The prior manual per-slot metadata/-1 inputs and SYN-only preset-free test contract are superseded by this approved editable per-type profile contract."
+    feature_plan: "Existing feature_plan is planner-owned and must be revised by cad-planner against this approved contract; this requirements/parameters update does not edit it."
+
+  accepted_design_semantics:
+    count: "0, 1, or 2; default 0; count zero preserves original cap geometry."
+    types: ["USB-A", "USB-C", "RJ45"]
+    type_behavior: "Selecting a type selects that type's public editable profile dimensions; edits are shared by every active instance of that type. Types remain independent by slot."
+    opening: "Final rounded-rectangle cut dimensions are selected body W/H plus twice fruit_body_clearance; type profile corner radius is independently editable."
+    screws: "Two simple through-holes through the cap only, at local X ± profile pitch/2 and local y=0. Hole diameter is nominal profile diameter plus fruit_screw_clearance; pitch is not changed by clearance."
+    flange_envelope: "Centered non-solid envelope; no flange thickness is required. Must fit the actual planar cap top."
+    body_envelope: "Centered non-solid envelope with depth measured from flange contact/front plane to rear. Under-cap depth is max(0, selected depth - effective cap top z); default effective cap top z is 3.79 mm. Do not interpret depth as measured below the cap underside."
+    layout: "Single center [0,-fruit_single_offset], orientation 0. Pair centers [-spacing/2,-fruit_pair_offset] and [+spacing/2,-fruit_pair_offset], orientations -a/2 and +a/2; V opens +Y toward cutout."
+    margins: "Edge, cutout, and between margins default to 1 mm; zero is allowed if nondegenerate and strict collision/separation checks still pass."
+    manufacturing_profile: "undeclared"
+
+  validation_requirements:
+    - "All fruit controls have complete finite defaults; active physical dimensions are positive, while corner radius, clearances, and margins may be zero subject to their explicit bounds. Reject invalid active values with clear diagnostics. No -1/none incomplete active-profile UX remains."
+    - "Count 0 ignores every fruit profile and fruit value; count 1 uses slot 1 only and ignores slot 2, the unselected type profile, and pair-only controls. Validate active types/profiles only."
+    - "No automatic rescaling, repositioning, substitution, or omission. A non-fitting layout fails with a clear fit diagnostic; two-mount presets are not promised to fit a 60 mm hole."
+    - "Count-zero cap and all six legacy modes preserve original geometry. Fruit cutters traverse the full roof/chamfer only when mounts are active."
+    - "Check rotated rectangular footprints/corners for flange seating, effective cutout guard, pair separation, and assembled body/cavity/sleeve/collar corridors; check each hole circle. Do not use a universal circumscribed-circle test that rejects feasible RJ45 single-mount layouts. Planner owns exact formulas and diagnostics."
+    - "Preserve the actual planar cap top and existing cutout, snap, bayonet, top, and bottom geometry. No new epsilon is a tolerance or clearance."
+    - "Checks are conservative envelope validation, not a guarantee of actual hardware fit, strength, or manufacturability."
+
+  acceptance_tests:
+    primary_matrix:
+      declared_case_count: 27
+      count_0_legacy_mode_cases: ["assembly", "exploded", "top", "bottom", "cap", "print"]
+      count_0: "Original-geometry parity in all six legacy modes at hole_dia=60 mm."
+      singles_at_60: ["USB-A", "USB-C", "RJ45"]
+      ordered_pairs_at_60: "All nine ordered type pairs; expect explicit fit rejection where geometry does not fit, never auto-rescale/reposition."
+      ordered_pairs_at_100: "All nine ordered type pairs as intended passing layout verification at hole_dia=100 mm; confirm against planner's exact checks. This is test-only, not a new global default."
+      additional_static_positive_pair_checks_at_90: [["USB-A", "RJ45"], ["USB-C", "RJ45"], ["RJ45", "RJ45"]]
+      pair_layout_mm_degrees: {fruit_pair_offset: 18, fruit_pair_spacing: 42, fruit_v_angle: 30, fruit_edge_margin: 1, fruit_cutout_margin: 1, fruit_between_margin: 1}
+    additional_cases:
+      - "All three count-one profiles pass at the legacy 60 mm hole default."
+      - "Profile selection changes effective cutter dimensions; editing one type profile updates both active same-type instances and not the other type."
+      - "Count 0 ignores invalid fruit profile/layout values; count 1 ignores unselected profile, slot 2, and pair-only controls."
+      - "Negative dimensions, invalid count/type, clearance/radius, screw pattern, margins, rotated edge/cutout/between, and assembled body/collar cases produce deterministic rejection."
+      - "Zero corner radius and zero margins are accepted when nondegenerate and strict geometric checks pass."
+      - "Use strong mesh parity for all six count-zero modes; do not rely only on bounds or volume."
+      - "Historical 122-case SYN evidence/hash 8391f01c... is not fresh evidence for these presets; old SYN fixtures are not presets."
+      - "No export/render unless the inspector separately obtains exact-command approval."
+
+parameters:
+  public:
+    # Legacy public controls copied from the master source; preserve as-is.
+    - {name: hole_dia, type: number, unit: mm, default: 60, min: 40, max: 120, customizer: true, label: "Diameter of the hole in the desk panel (mm)"}
+    - {name: desk_thickness, type: number, unit: mm, default: 25, min: 10, max: 60, customizer: true, label: "Thickness of the desk panel (mm)"}
+    - {name: clearance, type: number, unit: mm, default: 0.4, min: 0.1, max: 1.0, customizer: true, label: "Radial clearance between sleeve outer diameter and hole — increase for looser fit (mm)"}
+    - {name: wall, type: number, unit: mm, default: 3.0, min: 2.0, max: 5.0, customizer: true, label: "Sleeve wall thickness — must be large enough to house the bayonet slots (mm)"}
+    - {name: top_lip_extra, type: number, unit: mm, default: 8, min: 2, max: 20, customizer: true, label: "Radial overhang of the top lip beyond the hole edge (mm)"}
+    - {name: top_lip_h, type: number, unit: mm, default: 3, min: 1, max: 8, customizer: true, label: "Height of the top resting lip (mm)"}
+    - {name: bot_lip_extra, type: number, unit: mm, default: 6, min: 2, max: 20, customizer: true, label: "Radial overhang of the bottom lip beyond the hole edge (mm)"}
+    - {name: bot_lip_h, type: number, unit: mm, default: 3, min: 1, max: 8, customizer: true, label: "Height of the bottom lip (mm)"}
+    - {name: collar_h, type: number, unit: mm, default: 12, min: 8, max: 30, customizer: true, label: "Height of the inner collar — must accommodate the full bayonet travel (mm)"}
+    - {name: collar_wall, type: number, unit: mm, default: 2.4, min: 1.5, max: 4, customizer: true, label: "Wall thickness of the inner collar (mm)"}
+    - {name: bayo_pins, type: integer, unit: count, default: 3, min: 2, max: 6, customizer: true, label: "Number of bayonet pins — 3 pins provide automatic self-centering"}
+    - {name: bayo_pin_w_deg, type: number, unit: degree, default: 14, min: 8, max: 30, customizer: true, label: "Angular width of each pin (degrees)"}
+    - {name: bayo_pin_h, type: number, unit: mm, default: 2.4, min: 1, max: 5, customizer: true, label: "Axial height of each pin (mm)"}
+    - {name: bayo_pin_t, type: number, unit: mm, default: 1.4, min: 0.8, max: 3, customizer: true, label: "Radial protrusion of each pin (mm)"}
+    - {name: bayo_twist_deg, type: number, unit: degree, default: 30, min: 15, max: 60, customizer: true, label: "Twist angle to lock the bottom ring — rotate by this amount after insertion (degrees)"}
+    - {name: bayo_slot_play, type: number, unit: mm, default: 0.4, min: 0.1, max: 1.0, customizer: true, label: "Radial and axial clearance inside the bayonet slots — increase for easier assembly (mm)"}
+    - {name: bayo_drop_extra, type: number, unit: mm, default: 0.5, min: 0.2, max: 1.5, customizer: true, label: "Extra axial drop at the end of bayonet travel for retention snap (mm)"}
+    - {name: cap_disc_h, type: number, unit: mm, default: 3.0, min: 1.5, max: 6, customizer: true, label: "Thickness of the cap top disc — this is also the roof thickness above the hollow internal cavity (set equal to `wall` to keep a uniform shell) (mm)"}
+    - {name: cap_disc_extra, type: number, unit: mm, default: 6, min: 3, max: 15, customizer: true, label: "Radial overhang of the disc beyond the sleeve outer diameter (mm)"}
+    - {name: cap_skirt_clearance, type: number, unit: mm, default: 0.3, min: 0.1, max: 0.8, customizer: true, label: "Radial clearance between cap skirt and sleeve inner wall (mm)"}
+    - {name: cap_snap_depth_from_top, type: number, unit: mm, default: 4, min: 2, max: 10, customizer: true, label: "Distance from the sleeve top edge down to the snap groove (mm)"}
+    - {name: cap_snap_h, type: number, unit: mm, default: 1.0, min: 0.5, max: 2, customizer: true, label: "Axial height of the snap lip (mm)"}
+    - {name: cap_snap_t, type: number, unit: mm, default: 0.5, min: 0.3, max: 1.5, customizer: true, label: "Radial protrusion of the snap lip (mm)"}
+    - {name: cap_snap_chamfer, type: number, unit: mm, default: 0.6, min: 0.3, max: 1.5, customizer: true, label: "Height of the entry chamfer ramp below the snap lip (mm)"}
+    - {name: parab_arc_deg, type: number, unit: degree, default: 50, min: 10, max: 160, customizer: true, label: "Angular span of the parabolic cut at the cap rim (degrees)"}
+    - {name: parab_open_to_edge, type: boolean, unit: none, default: true, min: null, max: null, customizer: true, label: "Extend the cut flush to the outer rim of the cap (overrides edge inset)"}
+    - {name: parab_edge_inset, type: number, unit: mm, default: 4, min: 1, max: 15, customizer: true, label: "Inset from the cap rim when open-to-edge is disabled (mm)"}
+    - {name: parab_corner_radius, type: number, unit: mm, default: 1.2, min: 0, max: 4, customizer: true, label: "Fillet radius applied at the parabola vertex and at the arc junction (mm)"}
+    - {name: parab_segments, type: integer, unit: count, default: 48, min: 16, max: 128, customizer: true, label: "Number of line segments used to approximate the parabola curve"}
+    - {name: mode, type: enum, unit: none, default: exploded, min: null, max: null, customizer: true, label: "Which part(s) to display"}
+    - {name: explode_distance, type: number, unit: mm, default: 25, min: 5, max: 80, customizer: true, label: "Distance between parts in exploded view — also consumed by the build pipeline via post frontmatter `3d_model.explode_distance` (mm)"}
+
+    # Fruit controls use complete, positive editable type profiles; no none/-1 UX.
+    - {name: fruit_count, type: integer, unit: count, default: 0, min: 0, max: 2, customizer: true, label: "Number of optional cap mounts"}
+    - {name: fruit_1_type, type: enum, unit: none, default: "USB-A", min: null, max: null, customizer: true, label: "Mount 1 profile"}
+    - {name: fruit_2_type, type: enum, unit: none, default: "USB-C", min: null, max: null, customizer: true, label: "Mount 2 profile"}
+
+    - {name: fruit_single_offset, type: number, unit: mm, default: 14, min: 0, max: null, customizer: true, label: "Single mount offset from cap center toward -Y"}
+    - {name: fruit_pair_offset, type: number, unit: mm, default: 18, min: 0, max: null, customizer: true, label: "Pair midpoint offset from cap center toward -Y"}
+    - {name: fruit_pair_spacing, type: number, unit: mm, default: 42, min: 0, max: null, customizer: true, label: "Pair center-to-center spacing"}
+    - {name: fruit_v_angle, type: number, unit: degree, default: 30, min: 0, max: 180, customizer: true, label: "Difference in inclination of the two flange/screw lines"}
+    - {name: fruit_edge_margin, type: number, unit: mm, default: 1, min: 0, max: null, customizer: true, label: "Minimum edge margin"}
+    - {name: fruit_cutout_margin, type: number, unit: mm, default: 1, min: 0, max: null, customizer: true, label: "Minimum cutout margin"}
+    - {name: fruit_between_margin, type: number, unit: mm, default: 1, min: 0, max: null, customizer: true, label: "Minimum margin between pair envelopes"}
+    - {name: fruit_body_clearance, type: number, unit: mm, default: 0.2, min: 0, max: null, customizer: true, label: "Body opening clearance per side (not a manufacturing tolerance)"}
+    - {name: fruit_screw_clearance, type: number, unit: mm, default: 0.2, min: 0, max: null, customizer: true, label: "Screw-hole diametral clearance (not a manufacturing tolerance)"}
+
+    - {name: usb_a_body_width, type: number, unit: mm, default: 15, min: 0, max: null, customizer: true, label: "USB-A profile body width"}
+    - {name: usb_a_body_height, type: number, unit: mm, default: 13, min: 0, max: null, customizer: true, label: "USB-A profile body height"}
+    - {name: usb_a_flange_width, type: number, unit: mm, default: 32, min: 0, max: null, customizer: true, label: "USB-A profile flange envelope width"}
+    - {name: usb_a_flange_height, type: number, unit: mm, default: 20, min: 0, max: null, customizer: true, label: "USB-A profile flange envelope height"}
+    - {name: usb_a_screw_pitch, type: number, unit: mm, default: 24, min: 0, max: null, customizer: true, label: "USB-A profile screw center pitch"}
+    - {name: usb_a_screw_nominal_diameter, type: number, unit: mm, default: 3, min: 0, max: null, customizer: true, label: "USB-A profile nominal screw diameter"}
+    - {name: usb_a_depth, type: number, unit: mm, default: 30, min: 0, max: null, customizer: true, label: "USB-A profile flange-front-to-body-rear depth"}
+    - {name: usb_a_opening_corner_radius, type: number, unit: mm, default: 0, min: 0, max: null, customizer: true, label: "USB-A profile final opening corner radius"}
+
+    - {name: usb_c_body_width, type: number, unit: mm, default: 13, min: 0, max: null, customizer: true, label: "USB-C profile body width"}
+    - {name: usb_c_body_height, type: number, unit: mm, default: 11, min: 0, max: null, customizer: true, label: "USB-C profile body height"}
+    - {name: usb_c_flange_width, type: number, unit: mm, default: 30, min: 0, max: null, customizer: true, label: "USB-C profile flange envelope width"}
+    - {name: usb_c_flange_height, type: number, unit: mm, default: 18, min: 0, max: null, customizer: true, label: "USB-C profile flange envelope height"}
+    - {name: usb_c_screw_pitch, type: number, unit: mm, default: 22, min: 0, max: null, customizer: true, label: "USB-C profile screw center pitch"}
+    - {name: usb_c_screw_nominal_diameter, type: number, unit: mm, default: 3, min: 0, max: null, customizer: true, label: "USB-C profile nominal screw diameter"}
+    - {name: usb_c_depth, type: number, unit: mm, default: 25, min: 0, max: null, customizer: true, label: "USB-C profile flange-front-to-body-rear depth"}
+    - {name: usb_c_opening_corner_radius, type: number, unit: mm, default: 0, min: 0, max: null, customizer: true, label: "USB-C profile final opening corner radius"}
+
+    - {name: rj45_body_width, type: number, unit: mm, default: 15.70, min: 0, max: null, customizer: true, label: "RJ45 profile body width (user measured)"}
+    - {name: rj45_body_height, type: number, unit: mm, default: 13.25, min: 0, max: null, customizer: true, label: "RJ45 profile body height (user measured)"}
+    - {name: rj45_flange_width, type: number, unit: mm, default: 35.50, min: 0, max: null, customizer: true, label: "RJ45 profile flange envelope width including ears (user measured)"}
+    - {name: rj45_flange_height, type: number, unit: mm, default: 22.50, min: 0, max: null, customizer: true, label: "RJ45 profile flange envelope height (user measured)"}
+    - {name: rj45_screw_pitch, type: number, unit: mm, default: 26.70, min: 0, max: null, customizer: true, label: "RJ45 profile nominal screw pitch derived from measured tangent gap and assumed nominal M3"}
+    - {name: rj45_screw_nominal_diameter, type: number, unit: mm, default: 3, min: 0, max: null, customizer: true, label: "RJ45 profile nominal M3 screw diameter assumption; actual hole not measured"}
+    - {name: rj45_depth, type: number, unit: mm, default: 30.50, min: 0, max: null, customizer: true, label: "RJ45 profile flange-front-to-body-rear depth (user measured)"}
+    - {name: rj45_opening_corner_radius, type: number, unit: mm, default: 0, min: 0, max: null, customizer: true, label: "RJ45 profile final opening corner radius"}
+
+  derived:
+    effective_opening_width: "selected_body_width + 2*fruit_body_clearance"
+    effective_opening_height: "selected_body_height + 2*fruit_body_clearance"
+    effective_screw_hole_diameter: "selected_screw_nominal_diameter + fruit_screw_clearance"
+    effective_cap_top_z: "cap_disc_h - 0.01 + 0.8; 3.79 mm at legacy cap_disc_h=3.0 mm"
+    body_depth_below_cap_underside: "max(0, selected_profile_depth - effective_cap_top_z); selected depth datum is flange contact/front plane to rear"
+    rj45_nominal_pitch: "15.70 + 2*(4 + 3/2) = 26.70 mm; 4 mm is measured from body edge to nearest-hole tangent and 3 mm is assumed nominal M3 diameter"
+
+  invariants:
+    legacy_modes: ["assembly", "exploded", "top", "bottom", "cap", "print"]
+    fruit_type_values: ["USB-A", "USB-C", "RJ45"]
+    fruit_count: "Integer in [0,2], default 0."
+    profile_values: "All selected active profile dimensions, including body/flange W/H, pitch, nominal diameter, and depth, are finite and >0. Profile opening-corner radius is finite, >=0, and bounded by the effective opening dimensions."
+    profile_edits: "A selected type uses the current values of that type's shared profile group; duplicate active types share edits."
+    layout: "Active single/pair offsets and pair spacing are finite and >0; count-two angle is finite and strictly between 0 and 180 degrees. Pair line orientations are -a/2 and +a/2."
+    margins: "Finite and >=0; zero is permitted subject to nondegenerate geometry and strict collision constraints."
+    clearances: "Finite and >=0; body clearance is per side; screw clearance is diametral. Neither represents a manufacturing tolerance."
+    count_zero: "Ignore fruit inputs and preserve original cap geometry."
+    count_one: "Validate only selected slot-1 profile and single-layout controls; ignore slot 2, the unselected type profile, and pair-only controls."
+    count_two: "Validate both selected profiles and pair layout; reject non-fitting layouts, with no auto-rescaling or relocation."
+    nominal_pitch: "Screw clearance changes hole diameter only, never pitch."
+    no_hardware_claim: "Editable USB estimates are not standards or measured data; passing envelope checks does not prove hardware fit, strength, or manufacturability."
+
+  constants:
+    source_render_constants:
+      "$fa": 2
+      "$fs": 0.4
+    historical_test_evidence: "Prior 122-case SYN result/hash is historical only and not validation of these profiles or presets."
+
+feature_plan_history_superseded:
+  historical_only: true
+  superseded_by: "feature_plan.status=gate_a_presets_approved_ready_for_modeler"
+  status: "gate_a_corrective_approved_validation_pending"
+  corrective_evidence:
+    approval: "User explicitly confirmed the bounded numeric-guard correction; no renewed geometry, layout, parameter, or manufacturing scope is introduced."
+    frozen_source_sha256: "46d60848b7819d3af12e0964919c982bd042b8ac5915aba2d01920bf2cd4c48a"
+    observed_report: "<project>/stl/variant-checks/run-3/report.json"
+    observed_result: "121/122 cases passed. The sole mismatch was boundary-cutout-exact: decimal offset 7.2 was mathematically tangent but the algebraically cancelling runtime expression evaluated slightly negative and was accepted."
+    approved_correction: "Express the same strict conservative guard as positive offset magnitude greater than the summed keepout; add no epsilon, tolerance, public input, or geometry change."
+  scope:
+    target: "customizable-cable-grommet.scad"
+    backend: "OpenSCAD"
+    plan: "Add optional subtractive cap openings for zero, one, or two independently parameterized mounts."
+    preserved_geometry:
+      - "With fruit_count=0, preserve the original cap and all six legacy modes geometrically."
+      - "Do not change top_part(), bottom_part(), snap, bayonet, parabolic_cut_2d(), legacy placement, or assembly(gap=0)."
+    excluded_geometry:
+      - "Do not model flange hardware, connector bodies, screws, nuts, cables, tools, reinforcements, recesses, countersinks, counterbores, threads, adapters, or new parts."
+      - "Flange and body declarations are centered conservative validation envelopes only; they never produce solids."
+
+  coordinate_system: |-
+    Use millimetres. Preserve the source global frame and placement transforms. In the cap-local frame, the origin is the cap-axis point on the underside of the cap disc, z=0; +Z points through the cap roof, +Y is the actual source parabolic-cutout direction, -Y is the solid side, and X is left/right in plan. A single slot has center [0,-fruit_pattern_offset] and rotation 0. A pair has left center [-fruit_pair_spacing/2,-fruit_pattern_offset], right center [+fruit_pair_spacing/2,-fruit_pattern_offset], left rotation -fruit_v_angle/2, and right rotation +fruit_v_angle/2. The two local-X flange/screw lines form the user-approved V opening toward +Y. fruit_v_angle is the difference between those local-X line inclinations; it is not the visual included angle, which is 180-fruit_v_angle.
+
+  source_derived_geometry:
+    - name: cap_surface_top_z
+      expression: "cap_disc_h - 0.01 + 0.8"
+      purpose: "Highest effective planar cap-top elevation created by the existing top chamfer/frustum."
+    - name: cap_flat_top_r
+      expression: "(cap_disc_od - 1.8)/2"
+      purpose: "Radius of the actual planar top seating face, not the nominal cap-disc radius."
+    - name: cap_placement_z
+      expression: "sleeve_h + top_lip_h"
+      purpose: "Global assembled elevation of cap-local z=0."
+    - name: collar_reach_depth
+      expression: "cap_placement_z - collar_h"
+      purpose: "Body depth at which the declared body envelope first reaches the modeled collar corridor."
+    - name: base_passage_r
+      expression: "min(cap_bore_d/2, sleeve_id/2)"
+      purpose: "Conservative circular passage before a body envelope reaches the collar."
+    - name: collar_passage_r
+      expression: "min(cap_bore_d/2, sleeve_id/2, collar_id/2)"
+      purpose: "Conservative passage once a body envelope reaches the collar/bottom passage."
+    - name: parab_guard
+      expression: "max(0, parab_corner_radius)"
+      purpose: "Conservative +Y-source-profile enlargement used instead of pretending assert() can query CSG emptiness."
+
+  modules:
+    - name: fruit_rounded_opening_2d
+      purpose: "Create one generic final W/H/R rounded-rectangle opening centered at the slot-local origin."
+      operation: "subtractive_profile"
+      parameters: ["fruit_i_opening_width", "fruit_i_opening_height", "fruit_i_opening_corner_radius"]
+      traces: ["REQ-MOUNT-TYPES", "REQ-DATA-AND-FIT"]
+    - name: fruit_screw_pattern_2d
+      purpose: "Create exactly two simple round cap-hole profiles centered at local [-fruit_i_screw_pitch/2,0] and [+fruit_i_screw_pitch/2,0]."
+      operation: "subtractive_profile"
+      parameters: ["fruit_i_screw_pitch", "fruit_i_screw_hole_diameter"]
+      traces: ["REQ-FLANGE", "REQ-DATA-AND-FIT"]
+    - name: fruit_cap_cutters
+      purpose: "Union one opening and its two cap holes, then extrude from below local z=0 to above cap_surface_top_z so no roof/chamfer membrane remains."
+      operation: "subtractive"
+      implementation_note: "Use one named internal numerical epsilon only to cross final faces; it is not a public dimension, clearance, tolerance, or visible feature. Cutter dimensions remain exactly the public final dimensions."
+      traces: ["REQ-FLANGE", "REQ-CAP-ONLY"]
+    - name: fruit_slot_transform
+      purpose: "Apply the approved single placement or left/right V placement without automatic movement, rotation, shrinking, substitution, or omission."
+      operation: "transform"
+      parameters: ["fruit_count", "fruit_pattern_offset", "fruit_pair_spacing", "fruit_v_angle"]
+      traces: ["REQ-CAP-COUNT", "REQ-MOUNT-V"]
+    - name: fruit_validation
+      purpose: "Validate only active inputs and conservative numeric envelopes with stable diagnostics before generating active cutters."
+      operation: "validation"
+      implementation_note: "Use numeric assertions; do not represent OpenSCAD assert() as a geometry-emptiness or collision-query facility. Stage evaluation so enum/set/finite and required positivity guards succeed before computing radii, bounds, or other arithmetic from those values."
+      traces: ["REQ-DATA-AND-FIT"]
+    - name: fruit_features
+      purpose: "Dispatch validation and transformed cutters for active slots only."
+      operation: "subtractive_dispatch"
+      traces: ["REQ-CAP-COUNT", "REQ-CAP-ONLY"]
+    - name: cap_part
+      purpose: "Retain the legacy cap CSG and conditionally subtract fruit_features() only when fruit_count is greater than zero."
+      operation: "legacy_plus_conditional_subtraction"
+      acceptance: "The count-zero branch contributes no new CSG child or geometry."
+      traces: ["REQ-CAP-ONLY"]
+
+  parameter_mapping:
+    activation:
+      fruit_count: "0 ignores every fruit input; 1 uses slot 1 and ignores slot 2 plus all pair-only controls; 2 requires both slots and every pair/layout margin input."
+      fruit_i_type: "Non-null metadata enum only: none, USB, USB-C, or RJ45. No type selects dimensions or geometry."
+    layout:
+      fruit_pattern_offset: "Finite and >0 for count 1 or 2; locates the single center or pair midpoint along -Y."
+      fruit_pair_spacing: "Finite and >0 for count 2; left/right center spacing along X."
+      fruit_v_angle: "Finite and 0<a<180 for count 2; local-X line rotations are left -a/2 and right +a/2."
+      fruit_edge_margin: "Finite and >=0 for active layouts; conservative modeled-boundary keepout."
+      fruit_cutout_margin: "Finite and >=0 for active layouts; additional conservative cutout keepout."
+      fruit_between_margin: "Finite and >=0 for count 2; conservative slot-envelope separation."
+    per_slot:
+      flange: "fruit_i_flange_width/height/thickness describe a centered non-solid envelope seated on z=cap_surface_top_z."
+      opening: "fruit_i_opening_width/height/corner_radius are final cutter dimensions with no implicit clearance."
+      screws: "fruit_i_screw_pitch and fruit_i_screw_hole_diameter define two final simple through-hole cutters in the cap."
+      body: "fruit_i_body_width/height/depth describe a centered non-solid envelope from cap-local z=0 toward -Z."
+    sentinel: "-1 is unset. It is invalid for each required active numeric input and ignored completely for inactive inputs."
+
+  conservative_formulas:
+    definitions:
+      rect_r: "rect_r(w,h)=sqrt(w*w+h*h)/2"
+      opening_r_i: "rect_r(opening_width_i,opening_height_i)"
+      flange_r_i: "rect_r(flange_width_i,flange_height_i)"
+      body_r_i: "rect_r(body_width_i,body_height_i)"
+      holes_r_i: "screw_pitch_i/2+screw_hole_diameter_i/2"
+      cutter_r_i: "max(opening_r_i,holes_r_i)"
+      keepout_r_i: "max(flange_r_i,body_r_i,cutter_r_i)"
+      center_r_i: "sqrt(center_x_i*center_x_i+center_y_i*center_y_i)"
+    validity:
+      active_values: "All required active values are finite; flange W/H/T, opening W/H, screw pitch/diameter, body W/H/depth are >0; margins are >=0."
+      corner_radius: "0<=opening_corner_radius_i<=min(opening_width_i,opening_height_i)/2."
+      opening_in_flange: "opening_width_i<=flange_width_i and opening_height_i<=flange_height_i."
+      screws_in_flange: "screw_pitch_i/2+screw_hole_diameter_i/2<flange_width_i/2 and screw_hole_diameter_i/2<flange_height_i/2."
+      screw_separation: "screw_pitch_i>screw_hole_diameter_i and screw_pitch_i/2-screw_hole_diameter_i/2>opening_width_i/2."
+      flat_seat: "center_r_i+flange_r_i+fruit_edge_margin<cap_flat_top_r."
+      cutter_passage: "center_r_i+cutter_r_i+fruit_edge_margin<cap_bore_d/2."
+      cutout_guard: "Because every active center uses center_y_i=-fruit_pattern_offset, require -(center_y_i)>keepout_r_i+parab_guard+fruit_cutout_margin. This is the approved strict algebraic form of the same conservative boundary and contains no epsilon or tolerance."
+      body_passage_before_collar: "If body_depth_i<collar_reach_depth, require center_r_i+body_r_i+fruit_edge_margin<base_passage_r."
+      body_passage_at_collar: "If body_depth_i>=collar_reach_depth, require center_r_i+body_r_i+fruit_edge_margin<collar_passage_r. Apply the collar restriction through the remainder of the modeled bottom passage."
+      pair_separation: "For count 2, fruit_pair_spacing>keepout_r_1+keepout_r_2+fruit_between_margin."
+      strictness: "All containment/separation inequalities remain strict when a requested margin is zero; tangency and coincident cutters are invalid."
+    limits: "The conservative circles may reject a physically possible arrangement. A pass proves only non-intersection of the declared centered envelopes with these modeled circular corridors and guards; it does not prove real hardware fit. IEEE numeric evaluation is not exact arithmetic for universal inputs, so strict comparisons must use the approved cancellation-resistant algebraic form and must not be weakened with an epsilon or tolerance."
+
+  diagnostics:
+    E_FRUIT_COUNT: "fruit_count is not integer 0, 1, or 2."
+    E_FRUIT_ACTIVE_TYPE_NONE: "An active slot has type none."
+    E_FRUIT_TYPE_ENUM: "An active slot type is not one of USB, USB-C, or RJ45."
+    E_FRUIT_UNSET: "A required active numeric input is the -1 sentinel or otherwise unset."
+    E_FRUIT_NONFINITE: "A required active numeric input is not finite."
+    E_FRUIT_NONPOSITIVE: "A required strictly positive active dimension is <=0."
+    E_FRUIT_MARGIN: "A required active margin is negative or non-finite."
+    E_FRUIT_OFFSET: "The active pattern offset is not finite and >0."
+    E_FRUIT_V_ANGLE: "The count-two V angle is not finite and strictly between 0 and 180 degrees."
+    E_FRUIT_RADIUS: "Opening corner radius is outside 0..min(W,H)/2."
+    E_FRUIT_SCREW_PATTERN: "Holes overlap each other, the opening, or the declared flange boundary."
+    E_FRUIT_OPENING_OUTSIDE_FLANGE: "Opening bounding dimensions exceed the flange envelope."
+    E_FRUIT_FLANGE_OUTSIDE_FLAT_TOP: "Flange envelope/margin is not strictly inside the actual planar top face."
+    E_FRUIT_CUTTER_OUTSIDE_BORE: "Opening/hole cutter envelope/margin is not strictly inside the cap bore."
+    E_FRUIT_BODY_CAP_COLLISION: "Body envelope/margin intersects the cap/sleeve passage guard."
+    E_FRUIT_BODY_COLLAR_COLLISION: "A body deep enough to reach the collar exceeds the assembled collar passage guard."
+    E_FRUIT_CUTOUT_KEEP_OUT: "Slot keepout violates the parabola-radius-enlarged +Y cutout guard."
+    E_FRUIT_PAIR_OVERLAP: "Count-two keepout circles do not have the requested strict separation."
+    E_FRUIT_DEGENERATE_TANGENCY: "A nominally zero-margin case creates a forbidden tangency/coincident boundary."
+    E_FRUIT_INVALID_PARABOLA_DOMAIN: "With active fruit features, legacy parabola inputs required by the conservative guard/profile are numerically degenerate."
+
+  symmetries:
+    - "Count 1 is centered on the -Y axis with zero rotation."
+    - "Count 2 centers and local-X line attitudes are mirror-positioned: left rotation -a/2 and right +a/2."
+    - "Type and dimensions remain independent by slot; symmetry never implies identical opening or envelope geometry."
+    - "Each supported screw pattern is symmetric only about its own opening center; asymmetric hardware patterns are outside scope."
+
+  operations:
+    - order: 1
+      module: fruit_validation
+      operation: "validate_active_only"
+      plan: "Resolve activation first so inactive sentinels and invalid inactive values are never evaluated as errors. For active data, stage enum, set/sentinel, finite, and required positivity checks before any dependent arithmetic; only then compute radii/bounds and evaluate profile, seating, cancellation-resistant strict cutout, assembled-passage, and pair guards."
+    - order: 2
+      module: fruit_rounded_opening_2d
+      operation: "construct_profile"
+      plan: "Create the generic final W/H/R profile without deriving any geometry from the USB/USB-C/RJ45 label and without adding clearance."
+    - order: 3
+      module: fruit_screw_pattern_2d
+      operation: "construct_profiles"
+      plan: "Create exactly two final circles at local x=+-pitch/2,y=0."
+    - order: 4
+      module: fruit_cap_cutters
+      operation: "extrude_subtractive"
+      plan: "Extrude the union of opening and hole profiles across local z=0..cap_surface_top_z using only named internal face-crossing epsilon."
+    - order: 5
+      module: fruit_slot_transform
+      operation: "place"
+      plan: "Place one slot at [0,-offset], rotation 0, or two slots at [+-spacing/2,-offset] with approved left/right rotations -a/2,+a/2."
+    - order: 6
+      module: cap_part
+      operation: "conditional_difference"
+      plan: "For fruit_count>0 only, subtract transformed fruit cutters from the cap. Preserve every existing cap operation and the entire count-zero CSG path."
+
+  accepted_synthetic_matrix:
+    classification: "Test fixtures only; never shipped defaults, presets, tolerances, or hardware dimensions."
+    fixtures:
+      SYN-USB: {flange_W_H_T: [8, 6, 2], opening_W_H_R: [4, 2.5, 0.6], screw_pitch: 6, screw_hole_diameter: 1.2, body_W_H_D: [5, 4, 8]}
+      SYN-USBC: {flange_W_H_T: [8, 5, 2], opening_W_H_R: [4, 2, 1], screw_pitch: 6, screw_hole_diameter: 1.2, body_W_H_D: [5, 3, 8]}
+      SYN-RJ45: {flange_W_H_T: [10, 8, 2], opening_W_H_R: [6, 5, 1], screw_pitch: 7.5, screw_hole_diameter: 1.4, body_W_H_D: [7, 6, 8]}
+    layout: {fruit_pattern_offset: 12, fruit_pair_spacing: 14, fruit_v_angle: 30, fruit_edge_margin: 1, fruit_cutout_margin: 1, fruit_between_margin: 1}
+    valid_cases:
+      - "count 0 with every fruit input inactive"
+      - "count 1: SYN-USB"
+      - "count 1: SYN-USBC"
+      - "count 1: SYN-RJ45"
+      - "count 2: SYN-USB / SYN-USB"
+      - "count 2: SYN-USB / SYN-USBC"
+      - "count 2: SYN-USB / SYN-RJ45"
+      - "count 2: SYN-USBC / SYN-USB"
+      - "count 2: SYN-USBC / SYN-USBC"
+      - "count 2: SYN-USBC / SYN-RJ45"
+      - "count 2: SYN-RJ45 / SYN-USB"
+      - "count 2: SYN-RJ45 / SYN-USBC"
+      - "count 2: SYN-RJ45 / SYN-RJ45"
+    static_evidence:
+      source_defaults: {cap_bore_r: 23.5, cap_flat_top_r: 34.9, cap_surface_top_z: 3.79, collar_reach_depth: 18, parab_guard: 1.2}
+      result: "All three count-one fixtures and all nine ordered pairs pass the declared conservative formulas at the approved synthetic layout."
+      tightest_strict_slack_mm:
+        SYN-RJ45_screw_to_opening: 0.05
+        SYN-RJ45_pair_separation: 0.194
+      boundary_note: "SYN-USBC has R=H/2, which is allowed by the non-strict radius bound. The positive slacks are test evidence only and make no hardware claim."
+
+  generated_negative_cases:
+    test_constants_only: {delta_length_mm: 0.1, delta_angle_deg: 1, invalid_label: "INVALID"}
+    test_method:
+      runner: "Use only the user-authorized finite project-local Python-standard-library/JSON helper at <project>/tests/cad_variant_test.py with its finite JSON case input; do not use the global PyYAML min/max Cartesian sweep runner."
+      lifecycle: "The exact files <project>/tests/cad_variant_test.py and <project>/tests/cases.json are throwaway test files and must both be deleted after the corrective finite rerun and report are complete; no helper, dependency, or configuration is installed globally."
+      retained_outputs: "Retain only reports and requested test STL outputs under <project>/stl/variant-checks/."
+      report_fields: "For every finite call record the complete case parameters, expected diagnostic, actual diagnostic, native process exit code, stderr, warnings, status, and full source hash before and after the run."
+      source_integrity: "Require the full pre-run and post-run source hashes to match; the helper is read-only with respect to the master SCAD and design contract."
+    cases:
+      - {input: "fruit_count=-1 or 3", expected: "E_FRUIT_COUNT"}
+      - {input: "active type=none", expected: "E_FRUIT_ACTIVE_TYPE_NONE"}
+      - {input: "active type=INVALID", expected: "E_FRUIT_TYPE_ENUM"}
+      - {input: "each required active numeric set to -1 one at a time", expected: "E_FRUIT_UNSET"}
+      - {input: "each strictly positive active dimension set to 0 one at a time", expected: "E_FRUIT_NONPOSITIVE"}
+      - {input: "required margin=-delta_length_mm", expected: "E_FRUIT_MARGIN"}
+      - {input: "active offset=0", expected: "E_FRUIT_OFFSET"}
+      - {input: "count-two angle in [0,180,-2*delta_angle_deg,180+delta_angle_deg]", expected: "E_FRUIT_V_ANGLE"}
+      - {input: "R=-delta_length_mm or R=min(W,H)/2+delta_length_mm", expected: "E_FRUIT_RADIUS"}
+      - {input: "pitch=hole diameter or pitch=opening width+hole diameter", expected: "E_FRUIT_SCREW_PATTERN"}
+      - {input: "opening width=flange width+delta_length_mm", expected: "E_FRUIT_OPENING_OUTSIDE_FLANGE"}
+      - {input: "center_r+flange_r+edge_margin=cap_flat_top_r", expected: "E_FRUIT_FLANGE_OUTSIDE_FLAT_TOP"}
+      - {input: "center_r+cutter_r+edge_margin=cap_bore_d/2", expected: "E_FRUIT_CUTTER_OUTSIDE_BORE"}
+      - {input: "-(center_y)=keepout_r+parab_guard+cutout_margin", expected: "E_FRUIT_CUTOUT_KEEP_OUT"}
+      - {input: "pair spacing=keepout_r_1+keepout_r_2+between_margin", expected: "E_FRUIT_PAIR_OVERLAP"}
+      - {input: "body depth=collar_reach_depth+delta_length_mm and body fits collar guard", expected: "valid deep-body synthetic control"}
+      - {input: "derive collar_wall for exact body/collar tangency, then add delta_length_mm", expected: "E_FRUIT_BODY_COLLAR_COLLISION"}
+      - {input: "zero R and zero margins with every strict guard still positive", expected: "valid non-degenerate controls"}
+      - {input: "count 0 contains invalid/sentinel fruit data; count 1 contains invalid slot-2/pair-only data", expected: "valid because inactive data are ignored"}
+
+  acceptance:
+    compilation:
+      - "OpenSCAD CLI compiles all six legacy modes at fruit_count=0 and all thirteen valid synthetic cases without fruit diagnostics."
+      - "Every generated invalid case fails with its declared stable diagnostic; no active feature is silently changed or omitted."
+    geometry:
+      - "Opening and both holes fully cross the effective roof through z>cap_surface_top_z and leave no top membrane."
+      - "Flange/body remain validation envelopes and never appear in exported geometry."
+      - "Count-zero top, bottom, cap, assembly, exploded, and print outputs match their independently captured pre-modeler baselines using a strong facet/triangle comparison, not bounds, volume, or rounded vertex multiset alone."
+      - "Inspector reports exact persisted STL path, facet count, bounding box, and shell information. Report volume/watertightness only when the optional geometry backend actually supplies it; shell count alone is not a watertightness claim."
+    non_claims:
+      - "No result proves real connector fit, head/nut/tool access, cable routing, external clearance, strength, tolerancing, printability, or manufacturability."
+
+  corrective_revalidation:
+    source_change_owner: "cad-modeler"
+    scope: "Change only the literal cutout-guard predicate to the approved positive comparison and stage validation arithmetic after successful active-data enum/set/finite/positivity guards. Geometry construction, public parameters, defaults, diagnostics, fixtures, and expected case outcomes remain unchanged."
+    required_run: "cad-validator reruns the same finite 122-case JSON matrix against the new full source hash; all 122 expected outcomes must pass, including decimal boundary-cutout-exact and the existing seven fixed native diagnostic calls."
+    regression_geometry:
+      - "Re-export and strongly compare all six fruit_count=0 legacy-mode STL files against their saved baselines; require exact strong mesh parity."
+      - "Re-export the two previously completed active SYN references and prove their resulting meshes are unchanged under the new source hash."
+      - "Existing four PNG files belong to the old source hash and are not fresh evidence for the corrected hash unless the newly exported active meshes are first proven exactly identical; otherwise new rendering requires the normal inspector approval gate and visual review."
+    report_integrity: "The corrective report must retain complete per-case inputs, expected and actual diagnostics, native exit code, stderr, warnings, status, and full source hash before/after. Saved run-3 evidence remains historical and must not be described as a fresh corrected-source result."
+    completion: "After report completion, delete only <project>/tests/cad_variant_test.py and <project>/tests/cases.json as approved throwaway inputs; retain reports and test STL outputs under <project>/stl/variant-checks/."
+
+  baseline_before_modeler:
+    required: true
+    modes: ["assembly", "exploded", "top", "bottom", "cap", "print"]
+    source: "The unmodified approved master SCAD."
+    destination: "<project>/stl/ with unambiguous baseline filenames per mode."
+    gate: "cad-openscad_inspector must present the exact OpenSCAD CLI export commands with correctly quoted string definitions and report WAITING for explicit bash approval before executing. Gate A does not authorize those exports. The modeler may start only after all six persisted baselines are captured, or after the coordinator reports the baseline step as an explicit blocker."
+    comparison:
+      - "Run cad_inspect.py on each exact persisted STL and use --baseline-stl for its available rounded-vertex-multiset signal."
+      - "Because baseline.identical is not canonical face connectivity or raw-file identity, also require raw STL equality when true or a complete canonical triangle/facet multiset comparison."
+      - "If the stronger comparison is unavailable or differs, report the evidence gap and do not claim count-zero parity."
+
+  verification_sequence:
+    - order: 1
+      owner: "cad-openscad_inspector"
+      action: "After separate bash approval, capture and inspect six persisted pre-modeler baseline STL files."
+    - order: 2
+      owner: "cad-modeler"
+      action: "Implement only this approved OpenSCAD feature plan; do not change requirements/parameters or produce release artifacts."
+    - order: 3
+      owner: "cad-validator"
+      action: "Validate compilation, active/inactive semantics, stable diagnostics, legacy modes, and the finite matrix."
+    - order: 4
+      owner: "cad-openscad_inspector"
+      action: "After separate approval for writes, export exact post-modeler STL files under <project>/stl/, inspect them, and perform baseline comparisons."
+    - order: 5
+      owner: "cad-openscad_inspector"
+      action: "If visual evidence is requested, present the exact absolute cad_render.py command, all correctly quoted --define values, and <project>/renders/ destination; wait for explicit bash approval before rendering."
+    - order: 6
+      owner: "cad-visual_judge"
+      action: "Review produced PNG files read-only; rendering JSON alone is not a visual pass."
+    - order: 7
+      owner: "cad-variant_tester"
+      action: "Run the thirteen valid synthetic cases plus deterministic negative/inactive cases and report expected diagnostic coverage."
+    - order: 8
+      owner: "cad-release_reviewer"
+      action: "Review evidence separately; no publication, commit, drawing, or manufacturing release is implied."
+
+  artifact_policy:
+    stl: "Only persisted under <project>/stl/ after inspector presents exact commands and receives explicit approval."
+    png: "Only produced by cad-openscad_inspector through the verified cad_render.py CLI under <project>/renders/ (variant subdirectories allowed), after exact-command bash approval."
+    cli: "OpenSCAD CLI is the verified baseline. No OpenSCAD MCP tool name or integration is verified, so none may be invented or substituted."
+    current_state: "No STL, PNG, render, export, SCAD edit, asset edit, or commit was produced while persisting this plan."
+
+feature_plan:
+  status: "gate_a_presets_approved_numeric_guard_fix_ready_for_modeler"
+  approval_evidence: "User confirmed the preset contract and plan with 'Confermo preset e piano'."
+  backend: "OpenSCAD"
+  target: "customizable-cable-grommet.scad"
+
+  numeric_guard_corrective_evidence:
+    scope: "Bounded correction inside the approved strict predicates only; no epsilon, tolerance, public parameter, input value, expected diagnostic, layout, profile, cutter, envelope, or physical geometry changes."
+    current_source_sha256: "633a54583aa7c11a9122a2ed56ad3881782c0d22a5e8462ac91ec8ce0b91df38"
+    report: "<project>/stl/variant-checks/presets-run-2/report.json"
+    unchanged_case_input_sha256: "1cba4b32541ca69ef1418734a28d494442002ef536f74003f42fce2c93ca0812"
+    observed: "128/130 cases passed, zero warnings, and all 11 hash/mesh checks passed. The only mismatches are the two mathematically exact strict-boundary fixtures listed below."
+    exact_mismatches:
+      invalid-screw-opening-tangency: "USB-A count-one override pitch=18.6, resolved opening width=15.4 and hole diameter=3.2; mathematical equality pitch=opening+hole must reject with E_FRUIT_SCREW_PATTERN."
+      boundary-flat-top-exact: "Count-one USB-A at hole_dia=58.2, cap_disc_extra=3, offset=10, edge margin=1, flange 48x16; far corner radial distance is exactly 30 and mathematical flat radius is exactly 31, so strict tangency must reject with E_FRUIT_FLANGE_OUTSIDE_FLAT_TOP."
+    historical_note: "Earlier 122-case corrective/SYN evidence belongs to the superseded metadata/manual-profile version and is not current preset validation."
+
+  scope:
+    plan: "Replace the superseded per-slot none/-1/manual-dimension UX with shared editable USB-A, USB-C, and RJ45 profiles resolved by each active slot type."
+    preserve:
+      - "fruit_count defaults to 0; count zero takes the untouched legacy geometry path in all six modes."
+      - "Preserve every non-fruit public control/default, including hole_dia=60, source English/MIT metadata, render quality, top, bottom, snap, bayonet, parabolic cutout, placement, and assembly(gap=0)."
+      - "Do not rescale, relocate, substitute, omit, or automatically enlarge the cap for a non-fitting active selection."
+    exclusions:
+      - "Flange and body profiles are centered conservative envelopes only and produce no solids."
+      - "Do not add hardware solids, adapters, recesses, reinforcement, countersinks, counterbores, threads, asymmetric screw patterns, manufacturing claims, drawings, Fusion work, Thingiverse/site publication, or commits."
+
+  coordinate_system: |-
+    Preserve the source frames. In cap-local coordinates, [0,0,0] is the cap-axis point on the cap-disc underside; +Z passes through the roof, +Y is the existing parabolic-cutout direction, -Y is the solid side, and X is left/right. Count one uses center [0,-fruit_single_offset] and rotation 0. Count two uses left center [-fruit_pair_spacing/2,-fruit_pair_offset], right center [+fruit_pair_spacing/2,-fruit_pair_offset], left rotation -fruit_v_angle/2, and right rotation +fruit_v_angle/2. The local-X flange/screw lines form the approved V opening toward +Y; fruit_v_angle is their inclination difference, not the visual included angle.
+
+  public_parameter_bindings:
+    activation:
+      fruit_count: "0 ignores all fruit inputs; 1 resolves only fruit_1_type and single controls; 2 independently resolves both slot types and pair controls."
+      fruit_1_type: "Enum USB-A/USB-C/RJ45, default USB-A."
+      fruit_2_type: "Enum USB-A/USB-C/RJ45, default USB-C; ignored for count 0/1."
+    layout:
+      fruit_single_offset: "14 mm default; finite and >0 when count=1."
+      fruit_pair_offset: "18 mm default; finite and >0 when count=2."
+      fruit_pair_spacing: "42 mm default; finite and >0 when count=2."
+      fruit_v_angle: "30 degree default; finite and strictly between 0 and 180 when count=2."
+      fruit_edge_margin: "1 mm default; finite and >=0."
+      fruit_cutout_margin: "1 mm default; finite and >=0."
+      fruit_between_margin: "1 mm default; finite and >=0 for count=2."
+      fruit_body_clearance: "0.2 mm per side default; finite and >=0; not a manufacturing tolerance."
+      fruit_screw_clearance: "0.2 mm diametral default; finite and >=0; not a manufacturing tolerance."
+    profile_fields:
+      names: ["body_width", "body_height", "flange_width", "flange_height", "screw_pitch", "screw_nominal_diameter", "depth", "opening_corner_radius"]
+      prefixes: ["usb_a", "usb_c", "rj45"]
+      semantics: "All instances of a selected label resolve the current eight public values under that type prefix. Duplicate active labels share profile edits; there are no per-slot dimensional overrides, none value, -1 sentinel, or public flange thickness."
+    approved_profiles:
+      USB-A: {prefix: "usb_a", body_W_H: [15, 13], flange_W_H: [32, 20], screw_pitch: 24, screw_nominal_diameter: 3, depth: 30, opening_corner_radius: 0, provenance: "User-authorized editable estimate; not measured, datasheet, standard, or universal."}
+      USB-C: {prefix: "usb_c", body_W_H: [13, 11], flange_W_H: [30, 18], screw_pitch: 22, screw_nominal_diameter: 3, depth: 25, opening_corner_radius: 0, provenance: "User-authorized editable estimate; not measured, datasheet, standard, or universal."}
+      RJ45: {prefix: "rj45", body_W_H: [15.70, 13.25], flange_W_H: [35.50, 22.50], screw_pitch: 26.70, screw_nominal_diameter: 3, depth: 30.50, opening_corner_radius: 0, provenance: "Body, flange, tangent gap, and front-plane-to-rear depth are user measurements; pitch is derived from the measured tangent gap and assumed nominal M3 diameter; actual hole was not measured."}
+
+  derived_values:
+    selected_profile: "Resolver functions map each active USB-A/USB-C/RJ45 enum to the corresponding eight public prefix fields; enum selection affects geometry, unlike the superseded metadata-only implementation."
+    opening_width: "selected_body_width + 2*fruit_body_clearance"
+    opening_height: "selected_body_height + 2*fruit_body_clearance"
+    hole_diameter: "selected_screw_nominal_diameter + fruit_screw_clearance; clearance never changes pitch"
+    cap_surface_top_z: "cap_disc_h - 0.01 + 0.8; 3.79 mm at legacy defaults"
+    cap_flat_top_r: "(cap_disc_od - 1.8)/2"
+    body_below_cap: "max(0, selected_depth - cap_surface_top_z); selected depth datum is front/flange-contact plane to body rear"
+    cap_placement_z: "sleeve_h + top_lip_h"
+    collar_reach_depth: "cap_placement_z - collar_h"
+    base_passage_r: "min(cap_bore_d/2, sleeve_id/2)"
+    collar_passage_r: "min(cap_bore_d/2, sleeve_id/2, collar_id/2)"
+    keepout_width: "max(flange_width, body_width, opening_width, screw_pitch + hole_diameter)"
+    keepout_height: "max(flange_height, body_height, opening_height, hole_diameter)"
+    approved_default_cutters:
+      USB-A: {opening_W_H_R: [15.4, 13.4, 0], hole_diameter: 3.2, body_below_cap: 26.21}
+      USB-C: {opening_W_H_R: [13.4, 11.4, 0], hole_diameter: 3.2, body_below_cap: 21.21}
+      RJ45: {opening_W_H_R: [16.1, 13.65, 0], hole_diameter: 3.2, body_below_cap: 26.71}
+
+  modules:
+    - name: fruit_profile_for_type
+      operation: "resolver"
+      purpose: "Return the eight current shared profile values for an active USB-A, USB-C, or RJ45 label without evaluating unselected profiles."
+    - name: fruit_resolved_slot
+      operation: "derived_data"
+      purpose: "Derive final opening, hole diameter, body-below-cap depth, and keepout dimensions for one active slot."
+    - name: fruit_rounded_opening_2d
+      operation: "subtractive_profile"
+      purpose: "Create the final centered rounded rectangle from resolved opening W/H/R."
+    - name: fruit_screw_pattern_2d
+      operation: "subtractive_profile"
+      purpose: "Create exactly two final circular cap holes at local x=+-resolved_pitch/2,y=0."
+    - name: fruit_cap_cutters
+      operation: "subtractive"
+      purpose: "Extrude the resolved opening and holes from below z=0 through the actual cap top/chamfer. Preserve the existing named face-crossing epsilon only as a CSG robustness constant, never a clearance or public dimension."
+    - name: fruit_slot_transform
+      operation: "transform"
+      purpose: "Apply the approved single or pair center/rotation with no adaptive placement."
+    - name: fruit_validation
+      operation: "active_only_validation"
+      purpose: "Stage count/type, finite, positivity, radius, and clearance checks before dependent arithmetic; then run rotated footprint, bore, cutout, assembled-passage, screw-pattern, and SAT guards."
+    - name: fruit_features
+      operation: "conditional_subtractive_dispatch"
+      purpose: "Generate cutters only for active resolved slots."
+    - name: cap_part
+      operation: "legacy_plus_conditional_difference"
+      purpose: "Retain the existing cap CSG and subtract fruit_features only for count 1/2; count 0 contributes no new CSG child."
+
+  validation_formulas:
+    transform_point: "For local [u,v], center [cx,cy], rotation theta: x=cx+u*cos(theta)-v*sin(theta); y=cy+u*sin(theta)+v*cos(theta)."
+    radial_norm: "For finite x,y, let scale=max(abs(x),abs(y)); radial_norm(x,y)=0 when scale=0, otherwise scale*sqrt((x/scale)^2+(y/scale)^2). Use this algebraically equivalent scaled norm in validation to avoid unnecessary intermediate x*x/y*y overflow; it adds no tolerance."
+    staged_inputs:
+      - "Validate fruit_count before branching. Count 0 returns without resolving any fruit type/profile/layout value."
+      - "For active slots validate enum, selected-profile numeric type/finite state, positive W/H/pitch/nominal diameter/depth, nonnegative R/clearances/margins, and active layout before any dependent arithmetic."
+      - "Count 1 ignores slot 2, all unselected profiles, fruit_pair_offset, fruit_pair_spacing, fruit_v_angle, and fruit_between_margin."
+    rounded_opening:
+      bounds: "0<=R<=min(opening_width,opening_height)/2."
+      body_corner_containment: "For every nominal body corner [u,v], let dx=max(abs(u)-(opening_width/2-R),0), dy=max(abs(v)-(opening_height/2-R),0); require dx*dx+dy*dy<=R*R. This conservatively rejects a user-edited radius that cuts the declared rectangular body envelope; it does not prove real body-corner shape or fit."
+    screw_pattern:
+      - "pitch/2+hole_diameter/2<flange_width/2"
+      - "hole_diameter/2<flange_height/2"
+      - "pitch>hole_diameter"
+      - "pitch>opening_width+hole_diameter. This is the approved strict algebraic equivalent of pitch/2-hole_diameter/2>opening_width/2 and avoids the subtract-then-halves cancellation at the exact 18.6=15.4+3.2 fixture."
+    flange_flat_seat: "For each transformed flange corner, require 2*(radial_norm(x,y)+fruit_edge_margin)+clearance+1.8 < hole_dia+2*cap_disc_extra. This is the strict algebraic rearrangement of radial_norm+margin<(cap_disc_od-1.8)/2 using cap_disc_od=hole_dia-clearance+2*cap_disc_extra; it changes no cap geometry. For the exact fixture both sides evaluate to the same IEEE double representation of 64.2, so strict < rejects instead of accepting a +ULP intermediate flat radius."
+    opening_bore: "Transform all four corners of the opening bounding rectangle and require sqrt(x*x+y*y)<cap_bore_d/2 for each; this is conservative for the rounded profile."
+    holes_bore: "Transform each actual hole center and require sqrt(x*x+y*y)+hole_diameter/2<cap_bore_d/2."
+    body_passage:
+      before_collar: "If body_below_cap<collar_reach_depth, transform every body corner and require its radial distance<base_passage_r."
+      at_collar: "If body_below_cap>=collar_reach_depth, transform every body corner and require its radial distance<collar_passage_r through the remainder of the modeled bottom passage."
+    cutout_guard: "Transform all four corners of the centered keepout rectangle. Let footprint_y_max be their maximum global Y; require -(footprint_y_max)>max(0,parab_corner_radius)+fruit_cutout_margin. The positive comparison avoids the prior subtractive-boundary cancellation and uses no numeric epsilon/tolerance."
+    pair_sat: "For count 2, expand each local keepout rectangle by fruit_between_margin/2 on every side. On the local edge-normal axes of both rotated rectangles, compute positive center projection distance and the sum of projected half-extents. Require at least one strict separating axis: abs(delta_center dot axis)>radius_1(axis)+radius_2(axis). The expanded rectangles conservatively imply the requested Euclidean separation."
+    pair_spacing_diagnostic: "For the fixed pair layout with equal center Y, report the minimum over SAT axes having nonzero X projection of (projected_radius_1+projected_radius_2)/abs(axis_x). The requested spacing must be strictly greater than this bound. Report both selected types, the requested spacing, the current bound, and the next 0.1 mm step above it as a suggestion only; never change spacing, margins, profiles, or cap dimensions automatically."
+    layout_console_guidance:
+      scope: "Diagnostics only: retain every existing rejection predicate, default, profile, and geometry. Include the selected mount, active angle, spacing, and offset; do not evaluate ignored single/pair controls or unselected profiles. No automatic adjustment."
+      angle_domain: "Explain 0<fruit_v_angle<180 degrees, the received value, opposite half-angle rotations, and the 30 degree default; the numeric domain alone does not prove a fitting layout."
+      radial_limits: "For a failed radial check report required radius=max(radial_norm(points))+padding and available radius. With the footprint/layout and all other parameters fixed, report the component-only threshold hole_dia+2*(required_radius-available_radius). For pairs also report the strict upper spacing bound min(2*(sqrt((radius-padding)^2-y^2)-side*(x-cx))) over the same points, using side=-1 for the left mount and +1 for the right. If the usable radius is not greater than abs(y), report no positive spacing for that radial check. Bounds are approximate necessary constraints for that component, not a guarantee of overall fit."
+      cutout_limit: "Report the active offset parameter and the strict lower bound max_Y(rotated centered keepout footprint)+parabola_guard+fruit_cutout_margin at the current angle. Changing offset or angle must be followed by all existing cap/bore/pair checks; spacing alone does not fix this cutout constraint."
+    strictness: "Containment and separation remain strict when a public margin/clearance is zero; add no hidden tolerance. Conservative checks may reject a physically feasible arrangement but may not claim false fit."
+
+  diagnostics:
+    E_FRUIT_COUNT: "fruit_count is not integer 0, 1, or 2."
+    E_FRUIT_TYPE_ENUM: "An active slot type is not USB-A, USB-C, or RJ45."
+    E_FRUIT_PROFILE_NONFINITE: "An active selected profile or required active numeric control is not numeric/finite."
+    E_FRUIT_PROFILE_NONPOSITIVE: "An active body/flange dimension, pitch, nominal diameter, or depth is <=0."
+    E_FRUIT_CLEARANCE: "A required active clearance is negative or non-finite."
+    E_FRUIT_LAYOUT: "An active offset/spacing/margin is invalid; report received values, required numeric ranges, and defaults. Offsets/spacing must be >0 and margins >=0; fitting constraints still apply."
+    E_FRUIT_V_ANGLE: "Count-two angle is not finite and strictly between 0 and 180; report its received value, the numeric range, opposite half-angle rotations, and default, without implying that every in-range angle fits."
+    E_FRUIT_OPENING_RADIUS: "Resolved radius is outside its bounds."
+    E_FRUIT_BODY_CORNER_OUTSIDE_OPENING: "Resolved rounded opening cuts the declared nominal rectangular body envelope."
+    E_FRUIT_SCREW_PATTERN: "Resolved holes overlap the opening/each other or exceed the flange envelope."
+    E_FRUIT_FLANGE_OUTSIDE_FLAT_TOP: "Selected profile/layout does not fit the current planar cap top; report layout, required/available radius, the component-only hole-diameter threshold, and the pair-spacing upper bound where applicable."
+    E_FRUIT_OPENING_OUTSIDE_BORE: "Resolved opening does not fit the cap bore; report layout and component-only radial, diameter, and pair-spacing limits."
+    E_FRUIT_HOLE_OUTSIDE_BORE: "A resolved cap hole does not fit the cap bore; report layout and component-only radial, diameter, and pair-spacing limits including hole radius."
+    E_FRUIT_BODY_CAP_COLLISION: "Declared body envelope intersects the cap/sleeve passage; report layout and component-only radial, diameter, and pair-spacing limits."
+    E_FRUIT_BODY_COLLAR_COLLISION: "Declared deep body envelope intersects the assembled collar passage; report layout and component-only radial, diameter, and pair-spacing limits."
+    E_FRUIT_CUTOUT_KEEP_OUT: "Resolved keepout violates the conservative existing-cutout margin; report current angle/offset and the strict minimum active offset for that footprint/angle. Recheck every other constraint after adjustment."
+    E_FRUIT_PAIR_OVERLAP: "Expanded resolved pair footprints have no strict SAT separating axis. Report selected types, current angle/offset, requested spacing, minimum calculated from current parameters, and a suggested spacing strictly above the bound; no automatic adjustment is applied."
+    E_FRUIT_INVALID_PARABOLA_DOMAIN: "Active fruit validation cannot form a valid conservative guard from the current parabola controls."
+
+  symmetries:
+    - "Count one is centered on -Y with rotation 0."
+    - "Count-two centers and attitudes are mirror-positioned, but slot enums and resolved profile dimensions remain independent."
+    - "Each profile uses a symmetric two-hole pattern; asymmetric hardware is outside scope."
+
+  operations:
+    - {order: 1, module: "fruit_validation", operation: "resolve activation and validate primitive active inputs before arithmetic"}
+    - {order: 2, module: "fruit_profile_for_type", operation: "resolve only selected shared type profiles"}
+    - {order: 3, module: "fruit_resolved_slot", operation: "derive final cutter/envelope values and run geometric guards"}
+    - {order: 4, module: "fruit_rounded_opening_2d", operation: "construct final rounded opening profile"}
+    - {order: 5, module: "fruit_screw_pattern_2d", operation: "construct two final circular hole profiles"}
+    - {order: 6, module: "fruit_cap_cutters", operation: "extrude active final profiles through complete roof/chamfer"}
+    - {order: 7, module: "fruit_slot_transform", operation: "place active cutters at approved fixed layout"}
+    - {order: 8, module: "cap_part", operation: "conditionally subtract active cutters while preserving count-zero CSG"}
+
+  static_evidence:
+    singles_at_hole_60:
+      USB-A: {status: "pass", minimum_strict_slack_mm: 1.414, limiting_check: "opening corner to bore"}
+      USB-C: {status: "pass", minimum_strict_slack_mm: 2.692, limiting_check: "opening corner to bore"}
+      RJ45: {status: "pass", minimum_strict_slack_mm: 0.550, limiting_check: "keepout to conservative cutout guard"}
+    ordered_pairs_at_hole_60:
+      status: "all nine expected fit rejection"
+      first_common_failure: "E_FRUIT_FLANGE_OUTSIDE_FLAT_TOP"
+      flange_slack_by_type_mm: {USB-A: -11.68, USB-C: -10.27, RJ45: -13.80}
+      note: "The legacy 60 mm global default remains unchanged; failure is explicit and never triggers resize/reposition."
+    ordered_pairs_at_hole_100:
+      status: "all nine pass the declared static checks"
+      test_only: "hole_dia=100 is a pair test/use note, not a new default, hardware standard, or physical-fit claim."
+      minimum_radial_slack_mm: {USB-A: 5.876, USB-C: 6.832, RJ45: 5.016}
+      cutout_guard_slack_mm: {USB-A: 2.000, USB-C: 3.225, RJ45: 0.339}
+      sat_slack_beyond_margin_mm:
+        USB-A: {USB-A: 4.713, USB-C: 6.079, RJ45: 2.963}
+        USB-C: {USB-A: 6.079, USB-C: 7.079, RJ45: 4.329}
+        RJ45: {USB-A: 2.963, USB-C: 4.329, RJ45: 0.822}
+    boundary_at_hole_90:
+      cases: [["USB-A", "RJ45"], ["USB-C", "RJ45"], ["RJ45", "RJ45"]]
+      status: "static positive boundary representatives only"
+      limiting_evidence: "RJ45 hole-to-bore slack is approximately 0.016 mm; this is not a recommended physical-use clearance or fit claim."
+
+  finite_test_plan:
+    primary_case_count: 27
+    primary:
+      - "Six fruit_count=0 cases at hole_dia=60: assembly, exploded, top, bottom, cap, print; require strong identity to the saved original baselines."
+      - "Three count-one cases at hole_dia=60: USB-A, USB-C, RJ45; all expected valid."
+      - "Nine ordered count-two type pairs at hole_dia=60; all expected E_FRUIT_FLANGE_OUTSIDE_FLAT_TOP with explicit increase-hole/edit-layout guidance."
+      - "Nine ordered count-two type pairs at hole_dia=100; all expected valid."
+    boundary:
+      - "Exactly three additional hole_dia=90 cases: USB-A/RJ45, USB-C/RJ45, RJ45/RJ45; expected valid numeric-boundary coverage, not recommended fit."
+    behavior:
+      - "Verify resolved enum changes final opening/hole mesh dimensions, mixed pairs, duplicate shared-profile use, and that editing one profile updates all same-label active slots only."
+      - "Verify count 0 ignores all fruit values and count 1 ignores slot 2, unselected profiles, and pair-only controls without warnings."
+      - "Inspect active STL geometry for final derived cut dimensions and front-plane depth conversion; a passing envelope test is not a USB/RJ45 physical-fit claim."
+    negative_cases:
+      - "Invalid count/type; nonnumeric, nonfinite, zero/negative selected profile values; negative clearance/margin; invalid offset/spacing/angle."
+      - "Radius out of range or body corner outside rounded opening; screw/opening/flange conflict; rotated flange/opening/hole/body/cutout/collar violations."
+      - "Exact and beyond boundaries for flat top, bore, cutout positive comparison, body passage, and expanded-rectangle SAT; zero R/clearance/margins valid only when every strict guard remains satisfied."
+    runner:
+      helper: "<project>/tests/cad_variant_test.py"
+      cases: "<project>/tests/cases.json"
+      implementation: "User-authorized throwaway project-local Python stdlib/JSON runner; do not use the unsupported global PyYAML Cartesian sweep runner and do not install dependencies or global helpers."
+      output: "<project>/stl/variant-checks/presets-run-1/ and later uniquely named rerun directories; never overwrite saved reports recursively."
+      report: "Record full case parameters/resolved values, expected/actual diagnostic, native exit code, stdout/stderr/warnings, STL path/status, and full source hash before/after."
+      cleanup: "After audit completion, delete only tests/cad_variant_test.py and tests/cases.json; retain approved reports/test STL outputs."
+
+  numeric_guard_corrective_revalidation:
+    source_owner: "cad-modeler"
+    source_change: "Change only the two validation predicates to the approved direct forms and, where needed by those predicates, use the scaled radial norm helper. Source geometry, face-crossing epsilon 0.01, public controls, derived cutter dimensions, module placement, and test inputs remain unchanged."
+    required_matrix: "Run the same 130 cases with unchanged input SHA256 1cba4b32541ca69ef1418734a28d494442002ef536f74003f42fce2c93ca0812; require 130/130 expected outcomes and zero warnings. Do not edit fixture values or expected codes to force a pass."
+    exact_acceptance:
+      - "invalid-screw-opening-tangency returns E_FRUIT_SCREW_PATTERN through pitch>opening_width+hole_diameter evaluating false at exact equality."
+      - "boundary-flat-top-exact returns E_FRUIT_FLANGE_OUTSIDE_FLAT_TOP through the direct-diameter predicate evaluating false at exact equality."
+    regression: "Repeat all 11 source/hash/mesh checks, including six count-zero strong baseline identities and the existing profile-override mesh/hash checks. Count-zero and active valid geometry must remain unchanged because only rejection predicates change."
+    report: "Write a new uniquely named report directory; preserve run-2 as historical evidence and record full source hash before/after, unchanged case-input hash, native results, diagnostics, stderr/warnings, and mesh/hash verdicts."
+
+  baseline_and_hash_guard:
+    pre_modeler_source: "Coordinator must capture and require the full current source hash whose known prefix is 8391f01c before authoring; abort on mismatch."
+    baseline_status: "The six saved original count-zero baseline STL files already exist and need not be regenerated."
+    comparison: "After authoring, export all six count-zero modes and require raw or complete canonical triangle/facet identity to their saved baselines; rounded vertex multiset, bounds, or volume alone is insufficient."
+    historical_evidence: "Old SYN/122-case reports, old active STL files, and old PNG files are historical only and are not preset validation or fresh evidence for the new source hash."
+
+  acceptance:
+    source:
+      - "Self-contained OpenSCAD with no includes; source remains English/MIT and keeps $fa/$fs unchanged."
+      - "No old none/-1 fruit UX, per-slot dimensions, or flange thickness remains public. All 67 architect-owned public definitions are implemented exactly by name and default."
+      - "Count zero does not resolve profiles or introduce a new CSG child and preserves all six baseline meshes."
+    validation:
+      - "Run the repository cad_validate.sh/source validation before the custom finite matrix."
+      - "Every valid case compiles natively without fruit warnings; every invalid case returns its stable expected diagnostic with no invalid dependent arithmetic warnings."
+      - "All primary 27 cases, three declared 90 mm boundary cases, behavior cases, and finite negative cases pass under one unchanged post-authoring source hash."
+    geometry:
+      - "Cutters fully traverse the actual roof/chamfer; only opening and two holes alter active cap geometry."
+      - "Flange/body remain non-solid; transformed corner/circle/SAT and conditional assembled-depth checks match this plan."
+      - "No pass is reported as actual connector compatibility, retention, strength, cable/tool access, tolerance, printability, or manufacturability."
+
+  verification_sequence:
+    - {order: 1, owner: "cad-modeler", action: "Hash-guard the current source, implement only the approved preset/resolver/validation plan, and leave architect-owned YAML keys unchanged."}
+    - {order: 2, owner: "cad-validator", action: "Run source validation and the finite preset matrix with native OpenSCAD results and full hash/report evidence."}
+    - {order: 3, owner: "cad-openscad_inspector", action: "With separately authorized exact export commands, persist and inspect post-authoring STL files, prove six count-zero baseline identities, and measure active resolved cuts."}
+    - {order: 4, owner: "cad-openscad_inspector", action: "For new visual evidence, present the exact absolute cad_render.py command/defines/output path and wait for explicit bash approval before generating PNG files."}
+    - {order: 5, owner: "cad-visual_judge", action: "Review newly generated preset PNG files read-only; old images and render JSON alone are not a fresh visual pass."}
+    - {order: 6, owner: "cad-variant_tester", action: "Review the complete finite report, inactive/shared-profile behavior, diagnostics, and cleanup evidence."}
+    - {order: 7, owner: "cad-release_reviewer", action: "Perform separate Gate C review; no commit, publication, drawing, manufacturing review, or site bundle is implied."}
+
+  artifact_policy:
+    stl: "New artifacts only under <project>/stl/ or <project>/stl/variant-checks/ after the applicable owner/approval gate."
+    png: "New images only under <project>/renders/ via cad-openscad_inspector after exact-command bash approval, then read-only visual judgment."
+    cli: "OpenSCAD CLI is the verified baseline; no OpenSCAD MCP tool is verified or may be invented."
+    current_state: "Original baselines and historical iteration STL/PNG/report artifacts already exist. No new preset source, STL, PNG, render, export, commit, or publication was produced while persisting this feature plan; preset authoring and all new evidence remain pending."

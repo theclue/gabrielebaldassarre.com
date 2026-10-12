@@ -1,9 +1,8 @@
 {
   "folders": [
-    {
-      "name": "⚙️ Root",
+    { "name": "📌 Root", 
       "path": "."
-    },
+     },
     {
       "name": "📝 Posts",
       "path": "_posts"
@@ -31,10 +30,6 @@
     {
       "name": "📐 CAD",
       "path": "_cad"
-    },
-    {
-      "name": "🪵 Billy Bookcase",
-      "path": "_cad/parametric-billy-bookcase"
     },
     {
       "name": "🔧 Scripts",
