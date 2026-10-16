@@ -1,15 +1,11 @@
 # LLM Agent: Deep Semantic Attribute Compilation
-#
-# Questo file contiene le istruzioni per un agente LLM che analizza
-# un articolo del blog e produce:
-#   1. Il blocco `difficulty_computed.semantic` (metriche quantitative)
-#   2. Il blocco `knowledge_prerequisites` (prerequisiti con grounding ontologico)
-#
-# L'agente viene eseguito nella pipeline di authoring. A build time,
-# il plugin difficulty.rb fonde questi dati con le metriche lessicali
-# (Gulpease, etc.) e ricalcola il composito. Il termsdictionary viene
-# popolato automaticamente a build time pescando dai knowledge_prerequisites
-# di tutti i post, deduplicando per campo `concept`.
+
+Questo file contiene le istruzioni per un agente LLM che analizza un articolo del blog e produce:
+
+1. Il blocco `difficulty_computed.semantic` (metriche quantitative)
+2. Il blocco `knowledge_prerequisites` (prerequisiti con grounding ontologico)
+
+L'agente viene eseguito nella pipeline di authoring. A build time, il plugin difficulty.rb fonde questi dati con le metriche lessicali (Gulpease, etc.) e ricalcola il composito. Il termsdictionary viene popolato automaticamente a build time pescando dai knowledge_prerequisites di tutti i post, deduplicando per campo `concept`.
 
 ## Task
 
@@ -178,8 +174,12 @@ Se non esiste una risorsa adeguata, ometti il campo.
 
 ### sameAs (string, optional)
 URL Wikidata del concetto (es. `"https://www.wikidata.org/wiki/Q5731200"`).
-Cerca il Q-item corretto su wikidata.org. Se non esiste un'entità Wikidata
-adeguata, ometti il campo.
+Usa esclusivamente un candidato e le evidenze consegnati dal tool
+`wikidata_oracle` per il concetto registrato in questo run; non cercare o
+indovinare Q-item autonomamente e non selezionare automaticamente per
+somiglianza dell'etichetta. Il mapping deve essere corretto nel contesto
+dell'articolo. Se non esiste evidenza adeguata, ometti il campo. Un valore
+esistente mantenuto invariato è conservato, non certificato.
 
 ### importance (string, required)
 Classifica l'importanza del prerequisito per la fruizione dell'articolo:
@@ -207,6 +207,9 @@ di `prerequisite_depth`:
 - 2 = conoscenza intermedia
 - 3 = conoscenza avanzata
 - 4+ = conoscenza specialistica
+
+Stima questa profondità editoriale in base alla conoscenza richiesta al
+lettore; non derivarla dagli hop del grafo Wikidata.
 
 ## Regole di analisi
 
@@ -244,9 +247,11 @@ Esempio: nell'articolo sulla dashboard astrometrica:
 - "API REST" è `recommended` (serve per capire i sensori REST)
 
 ### 5. sameAs: sii preciso
-Per ogni concetto, verifica su Wikidata che l'entità esista e sia
-corretta. Usa l'URL completo `https://www.wikidata.org/wiki/Q...`.
-Non inventare Q-item.
+Valuta solo candidati con evidenze consegnati per i concept ID del run
+`wikidata_oracle`. Usa l'URL canonico completo `https://www.wikidata.org/wiki/Q...`
+solo se corrisponde esattamente al concetto nel contesto; non inventare Q-item.
+Se manca evidenza sufficiente, astieniti. Non confondere accettazione della
+bozza con certificazione della verità semantica.
 
 ### 6. Coerenza con il termsdictionary
 Il termsdictionary del blog viene popolato automaticamente a build time.

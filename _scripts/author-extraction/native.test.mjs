@@ -1,23 +1,61 @@
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
+import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { join } from 'node:path';
 import { describe, it } from 'node:test';
 import Ajv2020 from 'ajv/dist/2020.js';
 import { createExtractionAdapter } from './native.mjs';
+import { prepareArticle, acceptCandidate, verifyExtractionRecord } from './core.mjs';
 
 const ROOT = '/synthetic/trusted-repository-root';
+const APPROVED_TEMP = '/private/var/folders/qm/5mfn0b0n5ds_d9xpg0l9jqgc0000gp/T/opencode';
 const HASH = 'a'.repeat(64);
+const BODY = 'first quote\n\nsecond passage';
 const PREPARED = Object.freeze({
-  schema_version: 'author-extraction/1',
-  source: { article_id: 'A12', path: '_posts/synthetic.md' },
-  method: { prepare_version: 'prepare/1' },
+  schema_version: 'author-extraction/1.2',
+  source: { article_id: 'A12', path: '_posts/synthetic.md', corpus_hash: 'b'.repeat(64), file_hash: 'c'.repeat(64) },
+  method: {
+    prepare_version: 'prepare/1', segmentation_version: 'raw-blank-lines/1', measurement_version: 'raw-body-counts/1',
+    instructions_version: 'author-extractor/1.2', workflow_version: 'host-session-whole-article/1',
+    schema_hash: 'd'.repeat(64), instructions_hash: 'e'.repeat(64),
+  },
   input_hash: HASH,
-  body: 'offline fixture',
-  passages: [],
-  measurements: { scope: 'raw_markdown_body' },
+  body: BODY,
+  passages: [
+    { passage_id: 'P0001', start_cp: 0, end_cp: 11, text: 'first quote' },
+    { passage_id: 'P0002', start_cp: 13, end_cp: 28, text: 'second passage' },
+  ],
+  measurements: {
+    scope: 'raw_markdown_body', utf8_bytes: 28, unicode_code_points: 28, nonblank_lines: 2,
+    advanced_stylometry: { status: 'not_computed', value: null, reason_code: 'OUT_OF_SCOPE_V1' },
+  },
 });
-const FINAL_JSON = '{"schema_version":"author-extraction/1"}';
 const ALLOWED_CONTEXT = { sessionId: 'session-fixture-1', agent: 'author-extractor' };
-
+const DEFAULT_RECEIPT = {
+  workflow_version: 'host-session-whole-article/1', mode: 'whole_article', session_id: ALLOWED_CONTEXT.sessionId,
+  article_id: 'A12', input_hash: HASH, prepare_returned: true,
+};
+function finalRecord(receipt = DEFAULT_RECEIPT) {
+  return {
+    schema_version: 'author-extraction/1.2', source: PREPARED.source, method: PREPARED.method,
+    measurements: PREPARED.measurements,
+    dimension_presence: {
+      rhetorical: { status: 'observed', observation_count: 1 },
+      epistemic: { status: 'not_observed', observation_count: 0 },
+      semantic: { status: 'not_observed', observation_count: 0 },
+      decisional: { status: 'not_observed', observation_count: 0 },
+    },
+    processing: {
+      mode: 'whole_article', status: 'complete', article_processed: true, passages_available: 2,
+      passages_cited: 1, receipt,
+    },
+    observations: [{
+      id: 'A12::O0001', dimension: 'rhetorical', label: 'synthetic observation',
+      description: 'An observation supported by the first passage.', inference_kind: 'inferred',
+      evidence: [{ article_id: 'A12', passage_id: 'P0001', quote: 'first quote' }], review_status: 'unreviewed',
+    }],
+  };
+}
+const FINAL_JSON = JSON.stringify(finalRecord());
 function failure(code, message = `synthetic ${code}`) {
   const error = new Error(message);
   error.code = code;
@@ -50,9 +88,9 @@ function adapterWith({ prepareArticle = async () => PREPARED, acceptCandidate = 
       calls.prepare.push({ root, articleId });
       return prepareArticle(root, articleId);
     },
-    async acceptCandidate(root, articleId, inputHash, candidateJson) {
-      calls.accept.push({ root, articleId, inputHash, candidateJson });
-      return acceptCandidate(root, articleId, inputHash, candidateJson);
+    async acceptCandidate(root, articleId, inputHash, candidateJson, hostOptions) {
+      calls.accept.push({ root, articleId, inputHash, candidateJson, hostOptions });
+      return acceptCandidate(root, articleId, inputHash, candidateJson, hostOptions);
     },
   };
   return { adapter: createExtractionAdapter(coreApi, ROOT), calls };
@@ -68,27 +106,28 @@ function submitInput(overrides = {}) {
 }
 
 describe('native extraction adapter protocol (injected core; no SDK or agent invocation)', () => {
-  it('keeps the agent Markdown CoverageEntry example aligned with the frozen closed schema', async () => {
+  it('keeps the agent Markdown Candidate example aligned with the frozen observation-only schema', async () => {
     const agentMarkdown = await readFile(new URL('../../.opencode/agents/author-extractor.md', import.meta.url), 'utf8');
-    const marker = 'CoverageEntry schema-shape example only—not an article finding or default status:';
+    const marker = 'Candidate shape example (synthetic, not article data)';
     const markerIndex = agentMarkdown.indexOf(marker);
-    assert.notEqual(markerIndex, -1, 'agent instructions must label the example as schema shape, not a finding/default');
+    assert.notEqual(markerIndex, -1, 'agent instructions must label a synthetic candidate example');
     const fencedExample = agentMarkdown.slice(markerIndex + marker.length).match(/```json\s*([\s\S]*?)\s*```/);
-    assert.ok(fencedExample, 'the labelled example must remain a JSON fenced block');
+    assert.ok(fencedExample, 'the labelled candidate must remain a JSON fenced block');
     const example = JSON.parse(fencedExample[1]);
 
-    const schema = JSON.parse(await readFile(new URL('./extraction.schema.json', import.meta.url), 'utf8'));
+    const schema = JSON.parse(await readFile(new URL('./extraction.v1.2.schema.json', import.meta.url), 'utf8'));
     const ajv = new Ajv2020({ allErrors: true, strict: true });
     const localSchema = { $schema: schema.$schema, $defs: schema.$defs };
-    const validateEntry = ajv.compile({ ...localSchema, $ref: '#/$defs/CoverageEntry' });
-    const validateCoverage = ajv.compile({ ...localSchema, $ref: '#/$defs/Coverage' });
+    const validateCandidate = ajv.compile({ ...localSchema, $ref: '#/$defs/Candidate' });
 
-    assert.equal(validateEntry(example), true, JSON.stringify(validateEntry.errors));
-    assert.equal(validateEntry({ status: example.status, notes: example.note }), false);
-    assert.equal(validateEntry({ ...example, example_extra: 'not allowed' }), false);
-    const coverage = Object.fromEntries(['rhetorical', 'epistemic', 'semantic', 'decisional'].map((dimension) => [dimension, example]));
-    assert.equal(validateCoverage(coverage), true, JSON.stringify(validateCoverage.errors));
-    assert.equal(validateCoverage({ ...coverage, extra_dimension: example }), false);
+    assert.deepEqual(Object.keys(example).sort(), ['observations']);
+    assert.equal(Array.isArray(example.observations), true);
+    assert.equal(example.observations.length, 1);
+    assert.deepEqual(Object.keys(example.observations[0]).sort(), ['description', 'dimension', 'evidence', 'inference_kind', 'label']);
+    assert.equal(validateCandidate(example), true, JSON.stringify(validateCandidate.errors));
+    assert.equal(validateCandidate({ observations: example.observations, coverage: {} }), false);
+    assert.equal(validateCandidate({ observations: [{ ...example.observations[0], id: 'A12::O0001' }] }), false);
+    assert.equal(validateCandidate({ observations: [{ ...example.observations[0], review_status: 'unreviewed' }] }), false);
   });
 
   it('denies any agent other than the authorized extractor', async () => {
@@ -130,10 +169,8 @@ describe('native extraction adapter protocol (injected core; no SDK or agent inv
     await adapter.prepare({ article_id: 'A12' }, ALLOWED_CONTEXT);
     const envelope = await adapter.submit(input, ALLOWED_CONTEXT);
     assert.deepEqual(calls.accept, [{
-      root: ROOT,
-      articleId: 'A12',
-      inputHash: HASH,
-      candidateJson: input.candidate_json,
+      root: ROOT, articleId: 'A12', inputHash: HASH, candidateJson: input.candidate_json,
+      hostOptions: { workflowReceipt: DEFAULT_RECEIPT },
     }]);
     assert.deepEqual(envelope, { status: 'accepted', canonical_json: FINAL_JSON });
     assert.deepEqual(Object.keys(envelope).sort(), ['canonical_json', 'status']);
@@ -169,6 +206,30 @@ describe('native extraction adapter protocol (injected core; no SDK or agent inv
     await rejectionCode(adapter.submit(submitInput(), ALLOWED_CONTEXT), 'PROTOCOL_INVALID');
     await rejectionCode(adapter.prepare({ article_id: 'A12' }, ALLOWED_CONTEXT), 'PROTOCOL_INVALID');
     assert.equal(calls.accept.length, 2);
+  });
+
+  it('validates full v1.2 prepared and final records before sealing', async () => {
+    const invalidPrepare = adapterWith({
+      prepareArticle: async () => ({ ...PREPARED, schema_version: 'author-extraction/1.1' }),
+    });
+    await rejectionCode(invalidPrepare.adapter.prepare({ article_id: 'A12' }, ALLOWED_CONTEXT), 'INTERNAL_ERROR');
+    assert.equal(invalidPrepare.calls.accept.length, 0);
+
+    let attempt = 0;
+    const invalidThenValid = adapterWith({
+      acceptCandidate: async () => {
+        attempt += 1;
+        if (attempt === 1) return JSON.stringify(finalRecord({ ...DEFAULT_RECEIPT, session_id: 'wrong-session' }));
+        return FINAL_JSON;
+      },
+    });
+    await invalidThenValid.adapter.prepare({ article_id: 'A12' }, ALLOWED_CONTEXT);
+    await rejectionCode(invalidThenValid.adapter.submit(submitInput(), ALLOWED_CONTEXT), 'WORKFLOW_RECEIPT_INVALID');
+    assert.deepEqual(await invalidThenValid.adapter.submit(submitInput(), ALLOWED_CONTEXT), {
+      status: 'accepted', canonical_json: FINAL_JSON,
+    });
+    await rejectionCode(invalidThenValid.adapter.submit(submitInput(), ALLOWED_CONTEXT), 'PROTOCOL_INVALID');
+    assert.equal(invalidThenValid.calls.accept.length, 2);
   });
 
   it('serializes concurrent submissions so acceptance seals before a queued submit executes', async () => {
@@ -217,8 +278,16 @@ describe('native extraction adapter protocol (injected core; no SDK or agent inv
     assert.equal(calls.accept.length, 1);
   });
 
+  it('does not expose the retired coverage error as a v1.2 core error', async () => {
+    const { adapter } = adapterWith({
+      acceptCandidate: async () => { throw failure('COVERAGE_INVALID'); },
+    });
+    await adapter.prepare({ article_id: 'A12' }, ALLOWED_CONTEXT);
+    await rejectionCode(adapter.submit(submitInput(), ALLOWED_CONTEXT), 'INTERNAL_ERROR');
+  });
+
   it('rejects an oversized serialized prepared record rather than returning partial data', async () => {
-    const oversized = { ...PREPARED, body: 'x'.repeat(4 * 1024 * 1024) };
+    const oversized = { ...PREPARED, passages: Array.from({ length: 17 }, (_, index) => ({ passage_id: `P${String(index + 1).padStart(4, '0')}`, start_cp: 0, end_cp: 262_144, text: 'x'.repeat(262_144) })) };
     const { adapter, calls } = adapterWith({ prepareArticle: async () => oversized });
     await rejectionCode(adapter.prepare({ article_id: 'A12' }, ALLOWED_CONTEXT), 'LIMIT_EXCEEDED');
     assert.equal(calls.prepare.length, 1);
@@ -229,5 +298,62 @@ describe('native extraction adapter protocol (injected core; no SDK or agent inv
     const { adapter } = adapterWith({ acceptCandidate: async () => 'x'.repeat(1_048_577) });
     await adapter.prepare({ article_id: 'A12' }, ALLOWED_CONTEXT);
     await rejectionCode(adapter.submit(submitInput(), ALLOWED_CONTEXT), 'LIMIT_EXCEEDED');
+  });
+});
+
+describe('v1.2 whole-article processing receipt (native host context)', () => {
+  it('distinguishes host-tracked whole-article processing from passage attention', async (t) => {
+    const body = 'first cited quote\n\nsecond uncited passage\n\nthird uncited passage';
+    const root = await mkdtemp(join(APPROVED_TEMP, 'author-extraction-native-core-'));
+    t.after(() => rm(root, { recursive: true, force: true }));
+    await mkdir(join(root, 'docs'), { recursive: true });
+    await mkdir(join(root, '_scripts/author-extraction'), { recursive: true });
+    await mkdir(join(root, '.opencode/agents'), { recursive: true });
+    await mkdir(join(root, '_posts'), { recursive: true });
+    const articlePath = '_posts/synthetic.md';
+    const corpusSources = Array.from({ length: 12 }, (_, index) => {
+      const articleId = `A${String(index + 1).padStart(2, '0')}`;
+      return `  - id: ${articleId}\n    percorso: ${articleId === 'A12' ? articlePath : `_posts/synthetic/${articleId}.md`}\n    rappresentativo_stile: true`;
+    });
+    const corpus = [
+      'contesto:', '  finalita: Corpus sintetico usato esclusivamente nei test offline.',
+      '  approvazione_editoriale:', '    ambito: Fixture sintetica.', '    dichiarazione_utente: Nessuna affermazione di autorialita.',
+      '  revisione_utente_modello_generato: pending', 'fonti:', ...corpusSources,
+      'esclusioni:', '  - percorso: _posts/excluded.md', '    motivo: Fixture sintetica.', '',
+    ].join('\n');
+    await writeFile(join(root, 'docs/corpus.yaml'), corpus);
+    await writeFile(join(root, '_scripts/author-extraction/extraction.schema.json'), await readFile(new URL('./extraction.schema.json', import.meta.url)));
+    await writeFile(join(root, '_scripts/author-extraction/extraction.v1.2.schema.json'), await readFile(new URL('./extraction.v1.2.schema.json', import.meta.url)));
+    await writeFile(join(root, '.opencode/agents/author-extractor.md'), '# Synthetic author-extractor 1.2 fixture\n');
+    await writeFile(join(root, articlePath), `---\ntitle: Synthetic\n---\n${body}`);
+
+    const adapter = createExtractionAdapter({ prepareArticle, acceptCandidate }, root);
+    const context = { sessionId: 'integration-session-A12', agent: 'author-extractor' };
+    const prepared = await adapter.prepare({ article_id: 'A12' }, context);
+    assert.equal(prepared.schema_version, 'author-extraction/1.2');
+    assert.equal(prepared.passages.length, 3);
+    const candidate = JSON.stringify({ observations: [{
+      dimension: 'rhetorical', label: 'synthetic observation',
+      description: 'One cited passage among three available source passages.', inference_kind: 'inferred',
+      evidence: [{ article_id: 'A12', passage_id: 'P0001', quote: 'first cited quote' }],
+    }] });
+    const accepted = await adapter.submit({ article_id: 'A12', input_hash: prepared.input_hash, candidate_json: candidate }, context);
+    const record = JSON.parse(accepted.canonical_json);
+
+    assert.deepEqual(record.processing, {
+      mode: 'whole_article', status: 'complete', article_processed: true,
+      passages_available: 3, passages_cited: 1,
+      receipt: {
+        workflow_version: 'host-session-whole-article/1', mode: 'whole_article',
+        session_id: context.sessionId, article_id: 'A12', input_hash: prepared.input_hash, prepare_returned: true,
+      },
+    });
+    assert.equal(Object.hasOwn(record.processing, 'passages_processed'), false, 'whole-article completion must not assert per-passage cognitive attention');
+    assert.equal(Object.hasOwn(record.processing, 'passages_failed'), false);
+    const verified = await verifyExtractionRecord(root, accepted.canonical_json);
+    assert.equal(verified.processing_eligible, true);
+    assert.equal(verified.processing_reason, null);
+    assert.match(verified.record_fingerprint, /^[a-f0-9]{64}$/);
+    assert.equal(verified.record.processing.receipt.input_hash, prepared.input_hash);
   });
 });

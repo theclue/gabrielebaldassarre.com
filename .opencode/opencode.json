@@ -4,5 +4,21 @@
     "cad-orchestrator": {
       "mode": "all"
     }
+  },
+  "agents": {
+    "copilot-pipeline-orchestrator": {
+      "permissions": [
+        {
+          "action": "subagent",
+          "effect": "allow",
+          "resource": "author-extractor"
+        },
+        {
+          "action": "subagent",
+          "effect": "allow",
+          "resource": "author-pattern-consolidator"
+        }
+      ]
+    }
   }
 }

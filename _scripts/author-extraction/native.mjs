@@ -1,5 +1,5 @@
 import Ajv2020 from "ajv/dist/2020.js";
-import extractionSchema from "./extraction.schema.json" with { type: "json" };
+import extractionSchema from "./extraction.v1.2.schema.json" with { type: "json" };
 
 const CORE_ERROR_CODES = new Set([
   "CORE_INVALID_ARGUMENT",
@@ -12,9 +12,12 @@ const CORE_ERROR_CODES = new Set([
   "CANDIDATE_JSON_INVALID",
   "CANDIDATE_SCHEMA_INVALID",
   "NO_OBSERVATIONS",
-  "COVERAGE_INVALID",
   "EVIDENCE_INVALID",
   "FINAL_SCHEMA_INVALID",
+  "RECORD_JSON_INVALID",
+  "RECORD_SCHEMA_INVALID",
+  "RECORD_DERIVED_INVALID",
+  "WORKFLOW_RECEIPT_INVALID",
   "INTERNAL_ERROR",
 ]);
 const NATIVE_ERROR_CODES = new Set([
@@ -38,6 +41,18 @@ const validateSubmitInput = ajv.compile({
   ...localSchema,
   $ref: "#/$defs/SubmitInput",
 });
+const validatePreparedRecord = ajv.compile({
+  ...localSchema,
+  $ref: "#/$defs/Prepared",
+});
+const validateFinalRecord = ajv.compile({
+  ...localSchema,
+  $ref: "#/$defs/FinalRecord",
+});
+const validateAcceptanceEnvelope = ajv.compile({
+  ...localSchema,
+  $ref: "#/$defs/AcceptanceEnvelope",
+});
 function failure(code, message) {
   const error = new Error(message);
   error.code = code;
@@ -55,7 +70,8 @@ function checkContext(context) {
   }
   if (
     typeof context.sessionId !== "string" ||
-    context.sessionId.length === 0
+    context.sessionId.trim().length === 0 ||
+    context.sessionId.length > 256
   ) {
     throw protocol("A valid host session ID is required.");
   }
@@ -181,8 +197,7 @@ function bindSignal(state, signal) {
 
 function validPrepared(prepared, articleId) {
   if (
-    !prepared || typeof prepared !== "object" || Array.isArray(prepared) ||
-    !prepared.source || typeof prepared.source !== "object" || Array.isArray(prepared.source) ||
+    !validatePreparedRecord(prepared) ||
     prepared.source.article_id !== articleId ||
     !/^[a-f0-9]{64}$/.test(prepared.input_hash)
   ) {
@@ -191,9 +206,52 @@ function validPrepared(prepared, articleId) {
   safelySerialize(prepared, 4 * 1024 * 1024, "The prepared record exceeds its size limit.");
 }
 
-function validCoreJson(canonicalJson) {
+function validCoreJson(canonicalJson, { sessionId, articleId, inputHash, prepared }) {
   if (typeof canonicalJson !== "string") {
     throw failure("INTERNAL_ERROR", "The extraction core returned an invalid accepted record.");
+  }
+  if (Buffer.byteLength(canonicalJson, "utf8") > 1024 * 1024) {
+    throw failure("LIMIT_EXCEEDED", "The acceptance envelope exceeds its size limit.");
+  }
+  let record;
+  try {
+    record = JSON.parse(canonicalJson);
+  } catch {
+    throw failure("RECORD_JSON_INVALID", "The extraction core returned invalid record JSON.");
+  }
+  if (!validateFinalRecord(record)) {
+    throw failure("RECORD_SCHEMA_INVALID", "The extraction core returned a record that does not match the v1.2 schema.");
+  }
+  const expectedReceipt = {
+    workflow_version: "host-session-whole-article/1",
+    mode: "whole_article",
+    session_id: sessionId,
+    article_id: articleId,
+    input_hash: inputHash,
+    prepare_returned: true,
+  };
+  const receipt = record.processing.receipt;
+  if (
+    !receipt ||
+    receipt.workflow_version !== expectedReceipt.workflow_version ||
+    receipt.mode !== expectedReceipt.mode ||
+    receipt.session_id !== expectedReceipt.session_id ||
+    receipt.article_id !== expectedReceipt.article_id ||
+    receipt.input_hash !== expectedReceipt.input_hash ||
+    receipt.prepare_returned !== expectedReceipt.prepare_returned ||
+    record.source.article_id !== articleId ||
+    record.processing.mode !== "whole_article" ||
+    record.processing.status !== "complete" ||
+    record.processing.article_processed !== true ||
+    record.processing.passages_available !== prepared.passages.length
+  ) {
+    throw failure("WORKFLOW_RECEIPT_INVALID", "The accepted record does not match the host-tracked whole-article session.");
+  }
+  const citedPassages = new Set(
+    record.observations.flatMap((observation) => observation.evidence.map((evidence) => evidence.passage_id)),
+  ).size;
+  if (record.processing.passages_cited !== citedPassages) {
+    throw failure("RECORD_DERIVED_INVALID", "The accepted record has inconsistent cited-passage counts.");
   }
   const envelope = { status: "accepted", canonical_json: canonicalJson };
   const serialized = safelySerialize(
@@ -201,6 +259,9 @@ function validCoreJson(canonicalJson) {
     1024 * 1024,
     "The acceptance envelope exceeds its size limit.",
   );
+  if (!validateAcceptanceEnvelope(envelope)) {
+    throw failure("INTERNAL_ERROR", "The extraction core returned an invalid acceptance envelope.");
+  }
   return envelope;
 }
 
@@ -233,7 +294,6 @@ export function createExtractionAdapter(coreApi, repoRoot) {
         if (state.articleId !== null && state.articleId !== input.article_id) {
           throw protocol("An extraction session may prepare only one article.");
         }
-        if (state.articleId === null) state.articleId = input.article_id;
 
         const prepared = await coreCall(() => coreApi.prepareArticle(repoRoot, input.article_id));
         active(state);
@@ -241,7 +301,9 @@ export function createExtractionAdapter(coreApi, repoRoot) {
         if (state.inputHash !== null && state.inputHash !== prepared.input_hash) {
           throw failure("INPUT_CHANGED", "The prepared source changed during this extraction session.");
         }
+        state.articleId ??= input.article_id;
         state.inputHash ??= prepared.input_hash;
+        state.prepared = prepared;
         return prepared;
       });
     },
@@ -269,16 +331,30 @@ export function createExtractionAdapter(coreApi, repoRoot) {
           throw protocol("The submitted article and input hash must match the prepared record.");
         }
 
+        const workflowReceipt = {
+          workflow_version: "host-session-whole-article/1",
+          mode: "whole_article",
+          session_id: sessionId,
+          article_id: state.articleId,
+          input_hash: state.inputHash,
+          prepare_returned: true,
+        };
         const canonicalJson = await coreCall(() =>
           coreApi.acceptCandidate(
             repoRoot,
             state.articleId,
             state.inputHash,
             input.candidate_json,
+            { workflowReceipt },
           ),
         );
         active(state);
-        const envelope = validCoreJson(canonicalJson);
+        const envelope = validCoreJson(canonicalJson, {
+          sessionId,
+          articleId: state.articleId,
+          inputHash: state.inputHash,
+          prepared: state.prepared,
+        });
         state.status = "sealed";
         clearSignals(state);
         return envelope;

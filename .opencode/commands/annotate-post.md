@@ -43,22 +43,74 @@ If the post has no series indicators, skip this step entirely.
 
 1. The user provides a post path (e.g., `_posts/devops/2026-05-16-seo-automatico-jekyll.md`).
 
-2. Read the post's full content (frontmatter + body).
+2. Read the full post once into memory, preserving its exact original bytes
+   and frontmatter/body. Do not write the post during analysis. Detect series
+   metadata as above, but stage it in memory with the other legacy annotations.
 
-3. Analyze the post for deep semantic attributes using the instructions
-   in `_scripts/semantic-analysis-prompt.md`. Produce TWO JSON blocks:
-   - `difficulty_computed.semantic` — quantitative metrics
-   - `knowledge_prerequisites` — concept list with ontological grounding
+3. Analyze the original article using
+   `_scripts/semantic-analysis-prompt.md`. Build an in-memory frozen registry
+   for this run: map each concept to its canonical `concept_id`, label,
+   article language, and exact source-text context. Include existing
+   prerequisites and approved new concept IDs; if normal annotation metadata
+   is absent, do not silently initialize or rewrite the original file.
 
-4. Inject both blocks into the post's frontmatter YAML:
-   - `difficulty_computed.semantic` under `difficulty_computed:`
-   - `knowledge_prerequisites` under `knowledge_prerequisites:`
-   Merge carefully with existing frontmatter (don't lose any existing fields).
+4. Use only the read-only `wikidata_oracle` tool for Wikidata retrieval and
+   validation; never use shell, manual Ruby/CLI launches, or guessed tool
+   arguments as a fallback. Pass only `{operation, input, run_id}`. For
+   `open`, use the actual core payload `{post_path, concepts}` with a
+   repository-relative `post_path`; each concept has
+   `{concept_id, label, language, context}`, and `context` must be an exact
+   source-text substring. Omit `run_id` until the returned run supplies it.
+   Read the official tool response JSON from
+    `Tool.Result.content`. If the host saves oversized content to a managed
+    tool-output file, read that exact delivered file. A read-only local JSON
+    projection may help inspect its candidates, evidence, and graph records;
+    it is not permission to launch the oracle CLI or retrieve data with shell.
+    Preserve IDs and provenance; if the saved response cannot be read, close
+    the run and stop without selecting unseen evidence or writing.
+    Do not pass a model-selected root, request ID,
+   endpoint, user agent, CLI option, or limit.
 
-5. Populate `intended_audience`, `proficiency_level`, and
-   `difficulty_declared` in the frontmatter based on content analysis.
+5. Open the run against the unchanged post snapshot. Use `discover` with
+   `{concept_ids}` from the registry. Use `expand` with
+   `{selections:[{concept_id,candidate_id,evidence_ids,rationale,hop}]}`,
+   using only IDs returned by that run; do not infer editorial prerequisite
+   depth from graph hops. Judge each mapping in context—never
+   auto-select by label or assert `sameAs` without matching delivered
+   evidence. Record one `select`, `abstain`, or `preserve_existing` decision
+   per registered concept. If evidence is absent, partial, ambiguous, or
+   retrieval is unavailable, preserve uncertainty and abstain; an existing
+   value may only be preserved unchanged and remains uncertified. Do not add
+   concepts after opening; restart from a fresh read/run if the registry must
+   change. Retrieval exhaustion does not prevent local validation within the
+   run's lifetime.
 
-6. Scan the body for plain Markdown links (`[text](url)`) and
+6. Prepare the semantic draft entirely in memory from the original document.
+   It may change only `difficulty_computed.semantic` and
+   `knowledge_prerequisites`; keep the original body bytes and every other
+   frontmatter field semantically unchanged. Validate this complete draft
+   with `proposed_document`, the exact `acknowledged_snapshot_id` from `open`,
+    and one per-concept `decisions` entry. Every decision must include the
+    explicit `type` discriminator: `select` uses
+    `{type: "select", concept_id, candidate_id, evidence_ids, rationale, proposed_sameAs}`;
+    `abstain` uses `{type: "abstain", concept_id, reason}` with reason `ambiguous`, `no_match`,
+   `unavailable`, `unprocessed`, or `insufficient_evidence`;
+    `preserve_existing` uses `{type: "preserve_existing", concept_id}` and keeps the original value
+   unchanged.
+   Proceed only if the tool status is `ok`, `result.accepted` is true, and
+   `result.proposed_sha256` matches the submitted bytes. A rejected,
+   invalidated, malformed, or unavailable tool/run means stop without writing
+   or claiming success; close/reap any opened run first, and stop if closure
+   cannot be confirmed. This consultive workflow is not a technical
+   enforcement guarantee; acceptance validates the semantic draft, not the
+   later transformed document or the truth of its semantics.
+
+7. Only after accepted validation, carry those exact two approved semantic
+   fields unchanged through all remaining in-memory annotation. Populate
+   `intended_audience`, `proficiency_level`, and `difficulty_declared` based
+   on content analysis.
+
+8. Scan the body for plain Markdown links (`[text](url)`) and
    images (`![alt](path)`). For each:
 
    **Links to external URLs**: Replace with `{% xlink "url" "text" role="..." context="..." target="..." description="..." %}`.
@@ -83,7 +135,7 @@ If the post has no series indicators, skip this step entirely.
    `{% cloudinary /path alt="alt" caption="..." role="screenshot|diagram|chart|photo|illustration|code" context="step|result|architecture|comparison|reference|evidence|ambient" %}`.
    - Classify role and context based on surrounding text, image content, caption and long description.
 
-7. If the post has `master:` but no `image_meta:`, add one:
+9. If the post has `master:` but no `image_meta:`, add one:
    ```yaml
    image_meta:
      role: illustration
@@ -91,12 +143,20 @@ If the post has no series indicators, skip this step entirely.
      caption: "Brief description"
    ```
 
-8. For concepts that are **required** prerequisites but have no link in the
+10. For concepts that are **required** prerequisites but have no link in the
    article, consider adding an explicit `{% xlink %}` in the body at the
-   first mention of the concept, pointing to Wikipedia or official docs. Consider annotating the link with the relevant Wikidata term, too, but only if you are absolutely sure it's relevant or it's exactly the equivalent concept, as `sameAs` relationships _are_ semantically strict.
-   Use `role="prerequisite"` and `context="provides-context"` and `sameAs="<Wikidata Term"`>.
+   first mention of the concept, pointing to Wikipedia or official docs. Add
+   `sameAs` only when the exact canonical Wikidata URL was selected from this
+   run's delivered evidence; never guess a QID. `sameAs` relationships are
+   semantically strict. Use `role="prerequisite"` and
+   `context="provides-context"`.
 
-9. Write the modified content back to the file.
+11. Close the oracle run and confirm it is closed/reaped before the final
+   original-file check. Immediately before writing, reread the post and
+   compare it to the opened snapshot. If it changed, stop without writing and
+   start a fresh run. Otherwise write the fully composed document exactly
+   once; do not perform cleanup, await work, or intermediate writes between
+   that final check and the write.
 
 ## Knowledge Prerequisites Guidelines
 

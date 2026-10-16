@@ -1,0 +1,345 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:gabrielebaldassarre:author-pattern-consolidation:0.1",
+  "title": "Author pattern consolidation contract",
+  "description": "Closed local contracts for evidence-grounded cross-article consolidation.",
+  "$ref": "#/$defs/FinalBundle",
+  "$defs": {
+    "Dimension": {
+      "type": "string",
+      "enum": ["rhetorical", "epistemic", "semantic", "decisional"]
+    },
+    "Hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "ArticleId": {
+      "type": "string",
+      "enum": ["A01", "A02", "A03", "A04", "A05", "A06", "A07", "A08", "A09", "A10", "A11", "A12"]
+    },
+    "ObservationId": {
+      "type": "string",
+      "pattern": "^(?:A0[1-9]|A1[0-2])::O[0-9]{4}$"
+    },
+    "NonblankLabel": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200,
+      "pattern": "\\S"
+    },
+    "NonblankDescription": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000,
+      "pattern": "\\S"
+    },
+    "Method": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["consolidation_version", "projection_version", "instructions_version", "schema_hash", "instructions_hash"],
+      "properties": {
+        "consolidation_version": { "const": "consolidate/1" },
+        "projection_version": { "const": "observation-projection/1" },
+        "instructions_version": { "const": "author-pattern-consolidator/0.1" },
+        "schema_hash": { "$ref": "#/$defs/Hash" },
+        "instructions_hash": { "$ref": "#/$defs/Hash" }
+      }
+    },
+    "ProjectedEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["passage_id", "quote"],
+      "properties": {
+        "passage_id": { "type": "string", "pattern": "^P[0-9]{4}$" },
+        "quote": { "type": "string", "minLength": 1, "maxLength": 2000, "pattern": "\\S" }
+      }
+    },
+    "ProjectedObservation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["observation_id", "article_id", "dimension", "label", "description", "inference_kind", "evidence_refs"],
+      "properties": {
+        "observation_id": { "$ref": "#/$defs/ObservationId" },
+        "article_id": { "$ref": "#/$defs/ArticleId" },
+        "dimension": { "$ref": "#/$defs/Dimension" },
+        "label": { "$ref": "#/$defs/NonblankLabel" },
+        "description": { "$ref": "#/$defs/NonblankDescription" },
+        "inference_kind": { "type": "string", "enum": ["explicit", "inferred"] },
+        "evidence_refs": { "type": "array", "minItems": 1, "maxItems": 4, "items": { "$ref": "#/$defs/ProjectedEvidence" } }
+      }
+    },
+    "SupportEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["observation_id", "article_id"],
+      "properties": {
+        "observation_id": { "$ref": "#/$defs/ObservationId" },
+        "article_id": { "$ref": "#/$defs/ArticleId" }
+      }
+    },
+    "CandidateNonsemanticGroup": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["classification", "label", "description", "abstraction_kind", "rationale", "variation_notes", "member_observation_ids"],
+      "properties": {
+        "classification": { "type": "string", "enum": ["author_candidate", "editorial_format", "thematic"] },
+        "label": { "$ref": "#/$defs/NonblankLabel" },
+        "description": { "$ref": "#/$defs/NonblankDescription" },
+        "abstraction_kind": { "type": "string", "enum": ["observed_regularities", "inferred_generalization"] },
+        "rationale": { "$ref": "#/$defs/NonblankDescription" },
+        "variation_notes": { "type": "array", "maxItems": 12, "items": { "$ref": "#/$defs/NonblankDescription" } },
+        "member_observation_ids": { "type": "array", "minItems": 2, "maxItems": 144, "uniqueItems": true, "items": { "$ref": "#/$defs/ObservationId" } }
+      }
+    },
+    "CandidateSemanticGroup": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["semantic_kind", "label", "description", "abstraction_kind", "rationale", "variation_notes", "member_observation_ids"],
+      "properties": {
+        "semantic_kind": { "type": "string", "enum": ["concept", "relation"] },
+        "label": { "$ref": "#/$defs/NonblankLabel" },
+        "description": { "$ref": "#/$defs/NonblankDescription" },
+        "abstraction_kind": { "type": "string", "enum": ["observed_regularities", "inferred_generalization"] },
+        "rationale": { "$ref": "#/$defs/NonblankDescription" },
+        "variation_notes": { "type": "array", "maxItems": 12, "items": { "$ref": "#/$defs/NonblankDescription" } },
+        "member_observation_ids": { "type": "array", "minItems": 2, "maxItems": 144, "uniqueItems": true, "items": { "$ref": "#/$defs/ObservationId" } }
+      }
+    },
+    "CandidateUnclusteredObservation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["observation_id", "reason"],
+      "properties": {
+        "observation_id": { "$ref": "#/$defs/ObservationId" },
+        "reason": { "$ref": "#/$defs/NonblankDescription" }
+      }
+    },
+    "CandidateNonsemantic": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["groups", "unclustered_observations"],
+      "properties": {
+        "groups": { "type": "array", "maxItems": 144, "items": { "$ref": "#/$defs/CandidateNonsemanticGroup" } },
+        "unclustered_observations": { "type": "array", "maxItems": 144, "items": { "$ref": "#/$defs/CandidateUnclusteredObservation" } }
+      }
+    },
+    "CandidateSemantic": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["groups", "unclustered_observations"],
+      "properties": {
+        "groups": { "type": "array", "maxItems": 144, "items": { "$ref": "#/$defs/CandidateSemanticGroup" } },
+        "unclustered_observations": { "type": "array", "maxItems": 144, "items": { "$ref": "#/$defs/CandidateUnclusteredObservation" } }
+      }
+    },
+    "AcceptedNonsemanticGroup": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["classification", "label", "description", "abstraction_kind", "rationale", "variation_notes", "support", "observation_count", "article_count"],
+      "properties": {
+        "classification": { "type": "string", "enum": ["author_candidate", "editorial_format", "thematic"] },
+        "label": { "$ref": "#/$defs/NonblankLabel" },
+        "description": { "$ref": "#/$defs/NonblankDescription" },
+        "abstraction_kind": { "type": "string", "enum": ["observed_regularities", "inferred_generalization"] },
+        "rationale": { "$ref": "#/$defs/NonblankDescription" },
+        "variation_notes": { "type": "array", "maxItems": 12, "items": { "$ref": "#/$defs/NonblankDescription" } },
+        "support": { "type": "array", "minItems": 2, "maxItems": 144, "uniqueItems": true, "items": { "$ref": "#/$defs/SupportEntry" } },
+        "observation_count": { "type": "integer", "minimum": 2, "maximum": 144 },
+        "article_count": { "type": "integer", "minimum": 1, "maximum": 12 }
+      }
+    },
+    "AcceptedSemanticGroup": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["semantic_kind", "label", "description", "abstraction_kind", "rationale", "variation_notes", "support", "observation_count", "article_count"],
+      "properties": {
+        "semantic_kind": { "type": "string", "enum": ["concept", "relation"] },
+        "label": { "$ref": "#/$defs/NonblankLabel" },
+        "description": { "$ref": "#/$defs/NonblankDescription" },
+        "abstraction_kind": { "type": "string", "enum": ["observed_regularities", "inferred_generalization"] },
+        "rationale": { "$ref": "#/$defs/NonblankDescription" },
+        "variation_notes": { "type": "array", "maxItems": 12, "items": { "$ref": "#/$defs/NonblankDescription" } },
+        "support": { "type": "array", "minItems": 2, "maxItems": 144, "uniqueItems": true, "items": { "$ref": "#/$defs/SupportEntry" } },
+        "observation_count": { "type": "integer", "minimum": 2, "maximum": 144 },
+        "article_count": { "type": "integer", "minimum": 1, "maximum": 12 }
+      }
+    },
+    "AcceptedUnclusteredObservation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["observation_id", "article_id", "reason"],
+      "properties": {
+        "observation_id": { "$ref": "#/$defs/ObservationId" },
+        "article_id": { "$ref": "#/$defs/ArticleId" },
+        "reason": { "$ref": "#/$defs/NonblankDescription" }
+      }
+    },
+    "AcceptedDimension": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "dimension", "corpus_hash", "input_hash", "method", "groups", "unclustered_observations"],
+      "properties": {
+        "schema_version": { "const": "author-pattern-dimension/0.1" },
+        "dimension": { "$ref": "#/$defs/Dimension" },
+        "corpus_hash": { "$ref": "#/$defs/Hash" },
+        "input_hash": { "$ref": "#/$defs/Hash" },
+        "method": { "$ref": "#/$defs/Method" },
+        "groups": { "type": "array", "maxItems": 144, "items": { "oneOf": [{ "$ref": "#/$defs/AcceptedNonsemanticGroup" }, { "$ref": "#/$defs/AcceptedSemanticGroup" }] } },
+        "unclustered_observations": { "type": "array", "maxItems": 144, "items": { "$ref": "#/$defs/AcceptedUnclusteredObservation" } }
+      }
+    },
+    "PreparedDimension": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "schema_version", "corpus_hash", "input_hash", "method", "dimension", "observations"],
+      "properties": {
+        "status": { "const": "ready" },
+        "schema_version": { "const": "author-pattern-preparation/0.1" },
+        "corpus_hash": { "$ref": "#/$defs/Hash" },
+        "input_hash": { "$ref": "#/$defs/Hash" },
+        "method": { "$ref": "#/$defs/Method" },
+        "dimension": { "$ref": "#/$defs/Dimension" },
+        "observations": { "type": "array", "maxItems": 144, "items": { "$ref": "#/$defs/ProjectedObservation" } }
+      }
+    },
+    "Diagnostic": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code"],
+      "properties": {
+        "code": { "type": "string", "minLength": 1, "maxLength": 80, "pattern": "^[A-Z][A-Z0-9_]*$" },
+        "article_id": { "$ref": "#/$defs/ArticleId" },
+        "dimension": { "$ref": "#/$defs/Dimension" }
+      }
+    },
+    "BlockedPreparation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "schema_version", "corpus_hash", "diagnostics"],
+      "properties": {
+        "status": { "const": "blocked" },
+        "schema_version": { "const": "author-pattern-preparation/0.1" },
+        "corpus_hash": { "$ref": "#/$defs/Hash" },
+        "diagnostics": { "type": "array", "minItems": 1, "maxItems": 12, "items": { "$ref": "#/$defs/Diagnostic" } }
+      }
+    },
+    "PrepareResult": {
+      "oneOf": [{ "$ref": "#/$defs/PreparedDimension" }, { "$ref": "#/$defs/BlockedPreparation" }]
+    },
+    "PrepareInput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["dimension"],
+      "properties": { "dimension": { "$ref": "#/$defs/Dimension" } }
+    },
+    "SubmitInput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["dimension", "corpus_hash", "input_hash", "candidate_json"],
+      "properties": {
+        "dimension": { "$ref": "#/$defs/Dimension" },
+        "corpus_hash": { "$ref": "#/$defs/Hash" },
+        "input_hash": { "$ref": "#/$defs/Hash" },
+        "candidate_json": { "type": "string", "minLength": 1, "maxLength": 262144 }
+      }
+    },
+    "AcceptanceEnvelope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "canonical_json"],
+      "properties": {
+        "status": { "const": "accepted" },
+        "canonical_json": { "type": "string", "minLength": 1, "maxLength": 4194304 }
+      }
+    },
+    "FinalNonsemanticGroup": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "dimension", "classification", "label", "description", "abstraction_kind", "rationale", "variation_notes", "support", "observation_count", "article_count", "promotion_status", "review_status"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^(?:APC|EFC|THC)::[RED][0-9]{4}$" },
+        "dimension": { "$ref": "#/$defs/Dimension" },
+        "classification": { "type": "string", "enum": ["author_candidate", "editorial_format", "thematic"] },
+        "label": { "$ref": "#/$defs/NonblankLabel" },
+        "description": { "$ref": "#/$defs/NonblankDescription" },
+        "abstraction_kind": { "type": "string", "enum": ["observed_regularities", "inferred_generalization"] },
+        "rationale": { "$ref": "#/$defs/NonblankDescription" },
+        "variation_notes": { "type": "array", "maxItems": 12, "items": { "$ref": "#/$defs/NonblankDescription" } },
+        "support": { "type": "array", "minItems": 2, "maxItems": 144, "uniqueItems": true, "items": { "$ref": "#/$defs/SupportEntry" } },
+        "observation_count": { "type": "integer", "minimum": 2, "maximum": 144 },
+        "article_count": { "type": "integer", "minimum": 2, "maximum": 12 },
+        "promotion_status": { "type": "string", "enum": ["cross_article_candidate", "recurrent_candidate"] },
+        "review_status": { "const": "unreviewed" }
+      }
+    },
+    "FinalSemanticGroup": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "dimension", "semantic_kind", "label", "description", "abstraction_kind", "rationale", "variation_notes", "support", "observation_count", "article_count", "promotion_status", "review_status"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^SRC::S[0-9]{4}$" },
+        "dimension": { "$ref": "#/$defs/Dimension" },
+        "semantic_kind": { "type": "string", "enum": ["concept", "relation"] },
+        "label": { "$ref": "#/$defs/NonblankLabel" },
+        "description": { "$ref": "#/$defs/NonblankDescription" },
+        "abstraction_kind": { "type": "string", "enum": ["observed_regularities", "inferred_generalization"] },
+        "rationale": { "$ref": "#/$defs/NonblankDescription" },
+        "variation_notes": { "type": "array", "maxItems": 12, "items": { "$ref": "#/$defs/NonblankDescription" } },
+        "support": { "type": "array", "minItems": 2, "maxItems": 144, "uniqueItems": true, "items": { "$ref": "#/$defs/SupportEntry" } },
+        "observation_count": { "type": "integer", "minimum": 2, "maximum": 144 },
+        "article_count": { "type": "integer", "minimum": 2, "maximum": 12 },
+        "promotion_status": { "type": "string", "enum": ["cross_article_candidate", "recurrent_candidate"] },
+        "review_status": { "const": "unreviewed" }
+      }
+    },
+    "FinalUnclusteredObservation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["observation_id", "article_id", "dimension", "reason"],
+      "properties": {
+        "observation_id": { "$ref": "#/$defs/ObservationId" },
+        "article_id": { "$ref": "#/$defs/ArticleId" },
+        "dimension": { "$ref": "#/$defs/Dimension" },
+        "reason": { "$ref": "#/$defs/NonblankDescription" }
+      }
+    },
+    "AuthorPatternCandidates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "corpus_hash", "method", "patterns", "editorial_format", "thematic", "unclustered_observations", "diagnostics"],
+      "properties": {
+        "schema_version": { "const": "author-pattern-candidates/0.1" },
+        "corpus_hash": { "$ref": "#/$defs/Hash" },
+        "method": { "$ref": "#/$defs/Method" },
+        "patterns": { "type": "array", "maxItems": 144, "items": { "$ref": "#/$defs/FinalNonsemanticGroup" } },
+        "editorial_format": { "type": "array", "maxItems": 144, "items": { "$ref": "#/$defs/FinalNonsemanticGroup" } },
+        "thematic": { "type": "array", "maxItems": 144, "items": { "$ref": "#/$defs/FinalNonsemanticGroup" } },
+        "unclustered_observations": { "type": "array", "maxItems": 144, "items": { "$ref": "#/$defs/FinalUnclusteredObservation" } },
+        "diagnostics": { "type": "array", "maxItems": 100, "items": { "$ref": "#/$defs/Diagnostic" } }
+      }
+    },
+    "SemanticRecurrenceCandidates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "corpus_hash", "method", "concepts", "relations", "unclustered_observations", "diagnostics"],
+      "properties": {
+        "schema_version": { "const": "semantic-recurrence-candidates/0.1" },
+        "corpus_hash": { "$ref": "#/$defs/Hash" },
+        "method": { "$ref": "#/$defs/Method" },
+        "concepts": { "type": "array", "maxItems": 144, "items": { "$ref": "#/$defs/FinalSemanticGroup" } },
+        "relations": { "type": "array", "maxItems": 144, "items": { "$ref": "#/$defs/FinalSemanticGroup" } },
+        "unclustered_observations": { "type": "array", "maxItems": 144, "items": { "$ref": "#/$defs/FinalUnclusteredObservation" } },
+        "diagnostics": { "type": "array", "maxItems": 100, "items": { "$ref": "#/$defs/Diagnostic" } }
+      }
+    },
+    "FinalBundle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["author_patterns", "semantic_recurrences"],
+      "properties": {
+        "author_patterns": { "$ref": "#/$defs/AuthorPatternCandidates" },
+        "semantic_recurrences": { "$ref": "#/$defs/SemanticRecurrenceCandidates" }
+      }
+    }
+  }
+}

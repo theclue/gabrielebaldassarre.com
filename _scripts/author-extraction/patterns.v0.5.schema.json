@@ -1,0 +1,122 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:gabrielebaldassarre:author-pattern-consolidation:0.5",
+  "title": "Author consolidation with classification-coded epistemic IDs",
+  "$ref": "#/$defs/FinalBundle",
+  "$defs": {
+    "Method": {
+      "type": "object", "additionalProperties": false,
+      "required": ["consolidation_version", "projection_version", "instructions_version", "schema_hash", "instructions_hash"],
+      "properties": {
+        "consolidation_version": { "const": "consolidate/5" }, "projection_version": { "const": "observation-projection/1" },
+        "instructions_version": { "const": "author-pattern-consolidator/0.5" },
+        "schema_hash": { "$ref": "urn:gabrielebaldassarre:author-pattern-consolidation:0.1#/$defs/Hash" },
+        "instructions_hash": { "$ref": "urn:gabrielebaldassarre:author-pattern-consolidation:0.1#/$defs/Hash" }
+      }
+    },
+    "AnyMethod": { "oneOf": [{ "$ref": "#/$defs/Method" }, { "$ref": "urn:gabrielebaldassarre:author-pattern-consolidation:0.4#/$defs/AnyMethod" }] },
+    "CandidateRhetorical": { "$ref": "urn:gabrielebaldassarre:author-pattern-consolidation:0.2#/$defs/CandidateRhetorical" },
+    "CandidateSemantic": { "$ref": "urn:gabrielebaldassarre:author-pattern-consolidation:0.1#/$defs/CandidateSemantic" },
+    "CandidateNonsemantic": { "$ref": "urn:gabrielebaldassarre:author-pattern-consolidation:0.1#/$defs/CandidateNonsemantic" },
+    "EpistemicId": { "type": "string", "pattern": "^EPC:[AET][0-9]{4}$" },
+    "EpistemicIdClassification": {
+      "type": "object",
+      "allOf": [
+        { "if": { "properties": { "classification": { "const": "author_candidate" } } }, "then": { "properties": { "id": { "type": "string", "pattern": "^EPC:A[0-9]{4}$" } } } },
+        { "if": { "properties": { "classification": { "const": "editorial_format" } } }, "then": { "properties": { "id": { "type": "string", "pattern": "^EPC:E[0-9]{4}$" } } } },
+        { "if": { "properties": { "classification": { "const": "thematic" } } }, "then": { "properties": { "id": { "type": "string", "pattern": "^EPC:T[0-9]{4}$" } } } }
+      ]
+    },
+    "AcceptedEpistemicGroup": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "classification", "label", "description", "abstraction_kind", "rationale", "variation_notes", "support", "observation_count", "article_count"],
+      "properties": {
+        "id": { "$ref": "#/$defs/EpistemicId" }, "classification": { "enum": ["author_candidate", "editorial_format", "thematic"] },
+        "label": { "$ref": "urn:gabrielebaldassarre:author-pattern-consolidation:0.1#/$defs/NonblankLabel" },
+        "description": { "$ref": "urn:gabrielebaldassarre:author-pattern-consolidation:0.1#/$defs/NonblankDescription" },
+        "abstraction_kind": { "enum": ["observed_regularities", "inferred_generalization"] },
+        "rationale": { "$ref": "urn:gabrielebaldassarre:author-pattern-consolidation:0.1#/$defs/NonblankDescription" },
+        "variation_notes": { "type": "array", "maxItems": 12, "items": { "$ref": "urn:gabrielebaldassarre:author-pattern-consolidation:0.1#/$defs/NonblankDescription" } },
+        "support": { "type": "array", "minItems": 2, "maxItems": 144, "uniqueItems": true, "items": { "$ref": "urn:gabrielebaldassarre:author-pattern-consolidation:0.1#/$defs/SupportEntry" } },
+        "observation_count": { "type": "integer", "minimum": 2, "maximum": 144 }, "article_count": { "type": "integer", "minimum": 1, "maximum": 12 }
+      },
+      "allOf": [{ "$ref": "#/$defs/EpistemicIdClassification" }]
+    },
+    "AcceptedDimension": {
+      "type": "object", "additionalProperties": false, "required": ["schema_version", "dimension", "corpus_hash", "input_hash", "method", "groups", "unclustered_observations"],
+      "properties": {
+        "schema_version": { "const": "author-pattern-dimension/0.5" }, "dimension": { "$ref": "urn:gabrielebaldassarre:author-pattern-consolidation:0.1#/$defs/Dimension" },
+        "corpus_hash": { "$ref": "urn:gabrielebaldassarre:author-pattern-consolidation:0.1#/$defs/Hash" },
+        "input_hash": { "$ref": "urn:gabrielebaldassarre:author-pattern-consolidation:0.1#/$defs/Hash" }, "method": { "$ref": "#/$defs/Method" },
+        "groups": { "type": "array", "maxItems": 144 },
+        "unclustered_observations": { "type": "array", "maxItems": 144, "items": { "$ref": "urn:gabrielebaldassarre:author-pattern-consolidation:0.1#/$defs/AcceptedUnclusteredObservation" } }
+      },
+      "allOf": [
+        { "if": { "properties": { "dimension": { "const": "rhetorical" } } }, "then": { "properties": { "groups": { "type": "array", "items": { "$ref": "urn:gabrielebaldassarre:author-pattern-consolidation:0.2#/$defs/AcceptedRhetoricalGroup" } } } } },
+        { "if": { "properties": { "dimension": { "const": "semantic" } } }, "then": { "properties": { "groups": { "type": "array", "items": { "$ref": "urn:gabrielebaldassarre:author-pattern-consolidation:0.3#/$defs/AcceptedSemanticGroup" } } } } },
+        { "if": { "properties": { "dimension": { "const": "decisional" } } }, "then": { "properties": { "groups": { "type": "array", "items": { "$ref": "urn:gabrielebaldassarre:author-pattern-consolidation:0.4#/$defs/AcceptedDecisionalGroup" } } } } },
+        { "if": { "properties": { "dimension": { "const": "epistemic" } } }, "then": { "properties": { "groups": { "type": "array", "items": { "$ref": "#/$defs/AcceptedEpistemicGroup" } } } } }
+      ]
+    },
+    "PreparedDimension": {
+      "type": "object", "additionalProperties": false, "required": ["status", "schema_version", "corpus_hash", "input_hash", "method", "dimension", "observations"],
+      "properties": {
+        "status": { "const": "ready" }, "schema_version": { "const": "author-pattern-preparation/0.5" },
+        "corpus_hash": { "$ref": "urn:gabrielebaldassarre:author-pattern-consolidation:0.1#/$defs/Hash" },
+        "input_hash": { "$ref": "urn:gabrielebaldassarre:author-pattern-consolidation:0.1#/$defs/Hash" }, "method": { "$ref": "#/$defs/Method" },
+        "dimension": { "$ref": "urn:gabrielebaldassarre:author-pattern-consolidation:0.1#/$defs/Dimension" },
+        "observations": { "type": "array", "maxItems": 144, "items": { "$ref": "urn:gabrielebaldassarre:author-pattern-consolidation:0.1#/$defs/ProjectedObservation" } }
+      }
+    },
+    "PrepareResult": { "oneOf": [{ "$ref": "#/$defs/PreparedDimension" }, { "$ref": "urn:gabrielebaldassarre:author-pattern-consolidation:0.1#/$defs/BlockedPreparation" }] },
+    "FinalEpistemicGroup": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "dimension", "classification", "label", "description", "abstraction_kind", "rationale", "variation_notes", "support", "observation_count", "article_count", "promotion_status", "review_status"],
+      "properties": {
+        "id": { "$ref": "#/$defs/EpistemicId" }, "dimension": { "const": "epistemic" }, "classification": { "enum": ["author_candidate", "editorial_format", "thematic"] },
+        "label": { "$ref": "urn:gabrielebaldassarre:author-pattern-consolidation:0.1#/$defs/NonblankLabel" },
+        "description": { "$ref": "urn:gabrielebaldassarre:author-pattern-consolidation:0.1#/$defs/NonblankDescription" },
+        "abstraction_kind": { "enum": ["observed_regularities", "inferred_generalization"] },
+        "rationale": { "$ref": "urn:gabrielebaldassarre:author-pattern-consolidation:0.1#/$defs/NonblankDescription" },
+        "variation_notes": { "type": "array", "maxItems": 12, "items": { "$ref": "urn:gabrielebaldassarre:author-pattern-consolidation:0.1#/$defs/NonblankDescription" } },
+        "support": { "type": "array", "minItems": 2, "maxItems": 144, "uniqueItems": true, "items": { "$ref": "urn:gabrielebaldassarre:author-pattern-consolidation:0.1#/$defs/SupportEntry" } },
+        "observation_count": { "type": "integer", "minimum": 2, "maximum": 144 }, "article_count": { "type": "integer", "minimum": 2, "maximum": 12 },
+        "promotion_status": { "enum": ["cross_article_candidate", "recurrent_candidate"] }, "review_status": { "const": "unreviewed" }
+      },
+      "allOf": [{ "$ref": "#/$defs/EpistemicIdClassification" }]
+    },
+    "AnyFinalNonsemanticGroup": { "oneOf": [{ "$ref": "#/$defs/FinalEpistemicGroup" }, { "$ref": "urn:gabrielebaldassarre:author-pattern-consolidation:0.4#/$defs/AnyFinalNonsemanticGroup" }] },
+    "AuthorPatternCandidates": {
+      "type": "object", "additionalProperties": false, "required": ["schema_version", "corpus_hash", "method", "patterns", "editorial_format", "thematic", "rhetorical_groups", "unclustered_observations", "diagnostics"],
+      "properties": {
+        "schema_version": { "const": "author-pattern-candidates/0.5" },
+        "corpus_hash": { "$ref": "urn:gabrielebaldassarre:author-pattern-consolidation:0.1#/$defs/Hash" }, "method": { "$ref": "#/$defs/Method" },
+        "patterns": { "type": "array", "maxItems": 144, "items": { "$ref": "#/$defs/AnyFinalNonsemanticGroup" } },
+        "editorial_format": { "type": "array", "maxItems": 144, "items": { "$ref": "#/$defs/AnyFinalNonsemanticGroup" } },
+        "thematic": { "type": "array", "maxItems": 144, "items": { "$ref": "#/$defs/AnyFinalNonsemanticGroup" } },
+        "rhetorical_groups": { "type": "array", "maxItems": 144, "items": { "$ref": "urn:gabrielebaldassarre:author-pattern-consolidation:0.2#/$defs/FinalRhetoricalGroup" } },
+        "unclustered_observations": { "type": "array", "maxItems": 144, "items": { "$ref": "urn:gabrielebaldassarre:author-pattern-consolidation:0.1#/$defs/FinalUnclusteredObservation" } },
+        "diagnostics": { "type": "array", "maxItems": 100, "items": { "$ref": "urn:gabrielebaldassarre:author-pattern-consolidation:0.1#/$defs/Diagnostic" } }
+      }
+    },
+    "SemanticRecurrenceCandidates": {
+      "type": "object", "additionalProperties": false, "required": ["schema_version", "corpus_hash", "method", "concepts", "relations", "unclustered_observations", "diagnostics"],
+      "properties": {
+        "schema_version": { "const": "semantic-recurrence-candidates/0.5" },
+        "corpus_hash": { "$ref": "urn:gabrielebaldassarre:author-pattern-consolidation:0.1#/$defs/Hash" }, "method": { "$ref": "#/$defs/Method" },
+        "concepts": { "type": "array", "maxItems": 144, "items": { "$ref": "urn:gabrielebaldassarre:author-pattern-consolidation:0.3#/$defs/AnyFinalSemanticGroup" } },
+        "relations": { "type": "array", "maxItems": 144, "items": { "$ref": "urn:gabrielebaldassarre:author-pattern-consolidation:0.3#/$defs/AnyFinalSemanticGroup" } },
+        "unclustered_observations": { "type": "array", "maxItems": 144, "items": { "$ref": "urn:gabrielebaldassarre:author-pattern-consolidation:0.1#/$defs/FinalUnclusteredObservation" } },
+        "diagnostics": { "type": "array", "maxItems": 100, "items": { "$ref": "urn:gabrielebaldassarre:author-pattern-consolidation:0.1#/$defs/Diagnostic" } }
+      }
+    },
+    "DimensionMethods": {
+      "type": "object", "additionalProperties": false, "required": ["rhetorical", "epistemic", "semantic", "decisional"],
+      "properties": { "rhetorical": { "$ref": "#/$defs/AnyMethod" }, "epistemic": { "$ref": "#/$defs/AnyMethod" }, "semantic": { "$ref": "#/$defs/AnyMethod" }, "decisional": { "$ref": "#/$defs/AnyMethod" } }
+    },
+    "FinalBundle": {
+      "type": "object", "additionalProperties": false, "required": ["author_patterns", "semantic_recurrences", "dimension_methods"],
+      "properties": { "author_patterns": { "$ref": "#/$defs/AuthorPatternCandidates" }, "semantic_recurrences": { "$ref": "#/$defs/SemanticRecurrenceCandidates" }, "dimension_methods": { "$ref": "#/$defs/DimensionMethods" } }
+    }
+  }
+}

@@ -115,6 +115,7 @@ exclude:
   - Makefile
   - bin
   - "*.Rmd"
+  - plugins/author-pattern-consolidator
   # SEO monitoring pipeline — fuori dalla sfera Jekyll, evita autoreload
   # del dev server quando si modificano script Python / modelli dbt /
   # config monitoring / artefatti CI.

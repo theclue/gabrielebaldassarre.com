@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --test core.test.mjs native.test.mjs"
+    "test": "node --test core.test.mjs native.test.mjs consolidator.test.mjs consolidator-native.test.mjs",
+    "test:integration": "node --experimental-vm-modules --test plugin-loading.test.mjs"
   },
   "dependencies": {
     "@opencode/plugin": "2.0.24",

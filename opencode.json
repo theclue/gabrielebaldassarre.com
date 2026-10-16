@@ -1,4 +1,12 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "subagent_depth": 3
+  "subagent_depth": 3,
+  "plugins": [
+    {
+      "package": "./plugins/author-pattern-consolidator",
+      "options": {
+        "recordsDirectory": "docs/author-extraction-results/v1.2"
+      }
+    }
+  ]
 }

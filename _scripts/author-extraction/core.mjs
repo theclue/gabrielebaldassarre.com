@@ -6,19 +6,22 @@ import Ajv2020 from "ajv/dist/2020.js";
 import { isAlias, parseDocument } from "yaml";
 
 const ARTICLE_IDS = Array.from({ length: 12 }, (_, index) => `A${String(index + 1).padStart(2, "0")}`);
-const SCHEMA_PATH = "_scripts/author-extraction/extraction.schema.json";
+const LEGACY_SCHEMA_PATH = "_scripts/author-extraction/extraction.schema.json";
+const SCHEMA_PATH = "_scripts/author-extraction/extraction.v1.2.schema.json";
 const CORPUS_PATH = "docs/corpus.yaml";
 const INSTRUCTIONS_PATH = ".opencode/agents/author-extractor.md";
 const SOURCE_LIMIT = 262144;
 const CANDIDATE_LIMIT = 65536;
 const PREPARED_LIMIT = 4 * 1024 * 1024;
 const ACCEPTED_LIMIT = 1024 * 1024;
+const RECEIPT_SESSION_LIMIT = 256;
 const VERSION = Object.freeze({
-  schema_version: "author-extraction/1",
+  schema_version: "author-extraction/1.2",
   prepare_version: "prepare/1",
   segmentation_version: "raw-blank-lines/1",
   measurement_version: "raw-body-counts/1",
-  instructions_version: "author-extractor/1",
+  instructions_version: "author-extractor/1.2",
+  workflow_version: "host-session-whole-article/1",
 });
 
 function coreError(code, message, details = []) {
@@ -63,10 +66,10 @@ function validateSchema(errors, value, code, message) {
   fail(code, message, details);
 }
 
-async function getValidators(root) {
+async function getValidators(root, schemaPath = SCHEMA_PATH) {
   let schemaBytes;
   try {
-    schemaBytes = await readRootFile(root, SCHEMA_PATH);
+    schemaBytes = await readRootFile(root, schemaPath);
   } catch {
     fail("INTERNAL_ERROR", "The local extraction schema is unavailable.");
   }
@@ -88,7 +91,10 @@ async function getValidators(root) {
       compiled[name] = ajv.getSchema(`${schema.$id}#/$defs/${name}`);
       if (!compiled[name]) throw new Error("A schema definition could not be compiled.");
     }
-    if (!compiled.final || !compiled.Prepared || !compiled.Candidate) throw new Error("Required schemas were not compiled.");
+    if (!compiled.final || !compiled.Prepared || !compiled.Candidate ||
+      (schemaPath === SCHEMA_PATH && !compiled.WorkflowReceipt)) {
+      throw new Error("Required schemas were not compiled.");
+    }
     return compiled;
   } catch {
     fail("INTERNAL_ERROR", "The local extraction schema is invalid.");
@@ -311,6 +317,7 @@ async function prepareWith(root, articleId, schema) {
     instructions_version: VERSION.instructions_version,
     schema_hash: schema.schemaHash,
     instructions_hash: sha256(instructionsBytes),
+    workflow_version: VERSION.workflow_version,
   };
   const prepared = {
     schema_version: VERSION.schema_version,
@@ -416,14 +423,175 @@ function validateCandidateEvidence(candidate, prepared) {
   }
 }
 
-function validateCoverage(candidate) {
+function validateWorkflowReceipt(receipt, prepared) {
+  if (
+    !receipt || typeof receipt !== "object" || Array.isArray(receipt) ||
+    Object.keys(receipt).sort().join(",") !== "article_id,input_hash,mode,prepare_returned,session_id,workflow_version" ||
+    receipt.workflow_version !== VERSION.workflow_version ||
+    receipt.mode !== "whole_article" ||
+    typeof receipt.session_id !== "string" ||
+    receipt.session_id.trim().length === 0 ||
+    receipt.session_id.length > RECEIPT_SESSION_LIMIT ||
+    receipt.article_id !== prepared.source.article_id ||
+    receipt.input_hash !== prepared.input_hash ||
+    receipt.prepare_returned !== true
+  ) {
+    fail("WORKFLOW_RECEIPT_INVALID", "The host workflow receipt does not match the prepared article.");
+  }
+}
+
+function passageCitations(record) {
+  return new Set(record.observations.flatMap((observation) =>
+    observation.evidence.map((evidence) => evidence.passage_id),
+  ));
+}
+
+function validateDerivedRecord(record, body, passages) {
+  if (canonicalJson(record.measurements) !== canonicalJson(measureBody(body))) {
+    fail("RECORD_DERIVED_INVALID", "The record measurements do not match the source body.", ["/measurements"]);
+  }
   const dimensions = ["rhetorical", "epistemic", "semantic", "decisional"];
-  for (const dimension of dimensions) {
-    const observed = candidate.observations.some((observation) => observation.dimension === dimension);
-    if ((candidate.coverage[dimension].status === "observed") !== observed) {
-      fail("COVERAGE_INVALID", "Coverage must match the candidate observations.", [`/coverage/${dimension}`]);
+  const counts = Object.fromEntries(dimensions.map((dimension) => [dimension, 0]));
+  const passageIds = new Set(passages.map((passage) => passage.passage_id));
+  const cited = passageCitations(record);
+  for (let index = 0; index < record.observations.length; index += 1) {
+    const observation = record.observations[index];
+    const expectedId = `${record.source.article_id}::O${String(index + 1).padStart(4, "0")}`;
+    if (observation.id !== expectedId) {
+      fail("RECORD_DERIVED_INVALID", "Observation IDs do not follow record order.", [`/observations/${index}/id`]);
+    }
+    counts[observation.dimension] += 1;
+    for (let evidenceIndex = 0; evidenceIndex < observation.evidence.length; evidenceIndex += 1) {
+      const evidence = observation.evidence[evidenceIndex];
+      const passage = passages.find((item) => item.passage_id === evidence.passage_id);
+      if (
+        evidence.article_id !== record.source.article_id ||
+        !passageIds.has(evidence.passage_id) ||
+        !passage.text.includes(evidence.quote) ||
+        !body.includes(evidence.quote)
+      ) {
+        fail("RECORD_DERIVED_INVALID", "Record evidence does not quote its source passage exactly.", [
+          `/observations/${index}/evidence/${evidenceIndex}`,
+        ]);
+      }
     }
   }
+  const expectedPresence = Object.fromEntries(dimensions.map((dimension) => [dimension, {
+    status: counts[dimension] > 0 ? "observed" : "not_observed",
+    observation_count: counts[dimension],
+  }]));
+  if (canonicalJson(record.dimension_presence) !== canonicalJson(expectedPresence)) {
+    fail("RECORD_DERIVED_INVALID", "Dimension presence does not match the record observations.", ["/dimension_presence"]);
+  }
+  return cited;
+}
+
+function processingEligibility(record, citedPassages, availablePassages) {
+  const processing = record.processing;
+  if (record.schema_version === "author-extraction/1.1") {
+    if (
+      processing.passages_total !== availablePassages ||
+      processing.passages_with_observations !== citedPassages.size
+    ) {
+      fail("RECORD_DERIVED_INVALID", "Legacy processing totals do not match the source and citations.", ["/processing"]);
+    }
+    return { processing_eligible: false, processing_reason: "PROCESSING_NOT_TRACKED" };
+  }
+  if (processing.mode === "per_passage") {
+    if (processing.passages_with_observations !== citedPassages.size ||
+      processing.passages_total !== availablePassages ||
+      citedPassages.size > processing.passages_total) {
+      fail("RECORD_DERIVED_INVALID", "Passage processing totals do not match the source and citations.", ["/processing"]);
+    }
+    if (processing.status === "complete" &&
+      (processing.passages_processed !== processing.passages_total || processing.passages_failed !== 0)) {
+      fail("RECORD_DERIVED_INVALID", "Complete passage processing must cover every passage without failures.", ["/processing"]);
+    }
+    if (processing.status === "partial" &&
+      processing.passages_processed + processing.passages_failed > processing.passages_total) {
+      fail("RECORD_DERIVED_INVALID", "Passage processing counts exceed the source total.", ["/processing"]);
+    }
+    return { processing_eligible: false, processing_reason: "UNSUPPORTED_PROCESSING_MODE" };
+  }
+  if (
+    processing.passages_available !== availablePassages ||
+    processing.passages_cited !== citedPassages.size ||
+    citedPassages.size > availablePassages
+  ) {
+    fail("RECORD_DERIVED_INVALID", "Whole-article processing counts do not match the source and citations.", ["/processing"]);
+  }
+  if (processing.status === "not_tracked") {
+    return { processing_eligible: false, processing_reason: "PROCESSING_NOT_TRACKED" };
+  }
+  if (processing.status !== "complete" || processing.article_processed !== true || !processing.receipt) {
+    fail("WORKFLOW_RECEIPT_INVALID", "Complete processing requires a valid host workflow receipt.", ["/processing/receipt"]);
+  }
+  const receipt = processing.receipt;
+  const expectedInputHash = sha256(Buffer.from(canonicalJson({ source: record.source, method: record.method }), "utf8"));
+  if (
+    receipt.workflow_version !== VERSION.workflow_version ||
+    receipt.mode !== "whole_article" ||
+    receipt.article_id !== record.source.article_id ||
+    receipt.input_hash !== expectedInputHash ||
+    receipt.prepare_returned !== true
+  ) {
+    fail("WORKFLOW_RECEIPT_INVALID", "The record workflow receipt does not match its historical source and method.", ["/processing/receipt"]);
+  }
+  return { processing_eligible: true, processing_reason: null };
+}
+
+function validateHistoricalReceipt(record, schema) {
+  if (record.schema_version !== "author-extraction/1.2") return;
+  const processing = record.processing;
+  if (!processing || typeof processing !== "object" || Array.isArray(processing) || processing.mode !== "whole_article") return;
+  if (processing.status === "not_tracked") {
+    if (processing.receipt !== null) {
+      fail("WORKFLOW_RECEIPT_INVALID", "Untracked whole-article processing cannot include a workflow receipt.", ["/processing/receipt"]);
+    }
+    return;
+  }
+  if (processing.status !== "complete") return;
+  validateSchema(schema.WorkflowReceipt, processing.receipt, "WORKFLOW_RECEIPT_INVALID", "The record workflow receipt is invalid.");
+  if (record.source && record.method && typeof record.source === "object" && typeof record.method === "object") {
+    const expectedInputHash = sha256(Buffer.from(canonicalJson({ source: record.source, method: record.method }), "utf8"));
+    if (
+      processing.receipt.article_id !== record.source.article_id ||
+      processing.receipt.input_hash !== expectedInputHash
+    ) {
+      fail("WORKFLOW_RECEIPT_INVALID", "The record workflow receipt does not match its historical source and method.", ["/processing/receipt"]);
+    }
+  }
+}
+
+async function verifyRecordWith(root, record, schema) {
+  validateHistoricalReceipt(record, schema);
+  validateSchema(schema.final, record, "RECORD_SCHEMA_INVALID", "The record does not match its declared extraction schema.");
+  if (record.method.schema_hash !== schema.schemaHash) {
+    fail("RECORD_DERIVED_INVALID", "The record schema hash does not match its preserved local schema.", ["/method/schema_hash"]);
+  }
+  const corpus = await parseCorpus(root);
+  if (corpus.approved.get(record.source.article_id) !== record.source.path) {
+    fail("RECORD_DERIVED_INVALID", "The record source is not the allowlisted article path.", ["/source"]);
+  }
+  let sourceBytes;
+  try {
+    sourceBytes = await readRootFile(root, record.source.path, SOURCE_LIMIT);
+  } catch (error) {
+    if (error?.tooLarge) fail("LIMIT_EXCEEDED", "The approved source exceeds the size limit.");
+    fail("SOURCE_INVALID", "The approved source is unavailable or unsafe.");
+  }
+  if (record.source.corpus_hash !== sha256(corpus.bytes) || record.source.file_hash !== sha256(sourceBytes)) {
+    fail("RECORD_DERIVED_INVALID", "The record source hashes do not match the allowlisted corpus.", ["/source"]);
+  }
+  const body = decodeSource(sourceBytes);
+  const passages = splitPassages(body);
+  const citedPassages = validateDerivedRecord(record, body, passages);
+  const processing = processingEligibility(record, citedPassages, passages.length);
+  return {
+    record,
+    record_fingerprint: sha256(Buffer.from(canonicalJson(record), "utf8")),
+    ...processing,
+  };
 }
 
 export async function prepareArticle(repoRoot, articleId) {
@@ -436,7 +604,35 @@ export async function prepareArticle(repoRoot, articleId) {
   }
 }
 
-export async function acceptCandidate(repoRoot, articleId, inputHash, candidateJson) {
+export async function verifyExtractionRecord(repoRoot, recordJson) {
+  try {
+    if (typeof recordJson !== "string") fail("CORE_INVALID_ARGUMENT", "A record JSON string is required.");
+    if (Buffer.byteLength(recordJson, "utf8") > ACCEPTED_LIMIT) fail("LIMIT_EXCEEDED", "The record exceeds the verification size limit.");
+    let record;
+    try {
+      record = parseStrictJson(recordJson);
+    } catch {
+      fail("RECORD_JSON_INVALID", "The record is not valid strict JSON.");
+    }
+    if (!record || typeof record !== "object" || Array.isArray(record)) {
+      fail("RECORD_SCHEMA_INVALID", "The record must be a JSON object.");
+    }
+    const schemaPath = record.schema_version === "author-extraction/1.1"
+      ? LEGACY_SCHEMA_PATH
+      : record.schema_version === "author-extraction/1.2"
+        ? SCHEMA_PATH
+        : null;
+    if (!schemaPath) fail("RECORD_SCHEMA_INVALID", "The record schema version is not supported.", ["/schema_version"]);
+    const root = await trustedRoot(repoRoot);
+    const schema = await getValidators(root, schemaPath);
+    return await verifyRecordWith(root, record, schema);
+  } catch (error) {
+    if (isCoreError(error)) throw error;
+    throw coreError("INTERNAL_ERROR", "Record verification failed.");
+  }
+}
+
+export async function acceptCandidate(repoRoot, articleId, inputHash, candidateJson, hostOptions) {
   try {
     if (typeof articleId !== "string") fail("CORE_INVALID_ARGUMENT", "An article ID is required.");
     if (!ARTICLE_IDS.includes(articleId)) fail("UNKNOWN_ARTICLE", "The article ID is not approved.");
@@ -462,17 +658,53 @@ export async function acceptCandidate(repoRoot, articleId, inputHash, candidateJ
     const prepared = await prepareWith(root, articleId, schema);
     if (prepared.input_hash !== inputHash) fail("INPUT_CHANGED", "The prepared source or method has changed.");
     validateCandidateEvidence(candidate, prepared);
-    validateCoverage(candidate);
+    let workflowReceipt = null;
+    if (hostOptions !== undefined) {
+      if (
+        !hostOptions || typeof hostOptions !== "object" || Array.isArray(hostOptions) ||
+        Object.keys(hostOptions).length !== 1 || !Object.hasOwn(hostOptions, "workflowReceipt")
+      ) {
+        fail("WORKFLOW_RECEIPT_INVALID", "The host workflow options are invalid.");
+      }
+      workflowReceipt = hostOptions.workflowReceipt;
+      validateWorkflowReceipt(workflowReceipt, prepared);
+      validateSchema(schema.WorkflowReceipt, workflowReceipt, "WORKFLOW_RECEIPT_INVALID", "The host workflow receipt is invalid.");
+    }
+
+    const dimensions = ["rhetorical", "epistemic", "semantic", "decisional"];
+    const counts = Object.fromEntries(dimensions.map((dimension) => [dimension, 0]));
+    const citedPassages = new Set();
+    const observations = candidate.observations.map((observation, index) => {
+      counts[observation.dimension] += 1;
+      for (const evidence of observation.evidence) citedPassages.add(evidence.passage_id);
+      return {
+        ...observation,
+        id: `${articleId}::O${String(index + 1).padStart(4, "0")}`,
+        review_status: "unreviewed",
+      };
+    });
+    const dimensionPresence = Object.fromEntries(dimensions.map((dimension) => [dimension, {
+      status: counts[dimension] > 0 ? "observed" : "not_observed",
+      observation_count: counts[dimension],
+    }]));
 
     const finalRecord = {
       schema_version: VERSION.schema_version,
       source: prepared.source,
       method: prepared.method,
       measurements: prepared.measurements,
-      coverage: candidate.coverage,
-      observations: candidate.observations,
+      dimension_presence: dimensionPresence,
+      processing: {
+        mode: "whole_article",
+        status: workflowReceipt ? "complete" : "not_tracked",
+        article_processed: workflowReceipt ? true : null,
+        passages_available: prepared.passages.length,
+        passages_cited: citedPassages.size,
+        receipt: workflowReceipt,
+      },
+      observations,
     };
-    validateSchema(schema.final, finalRecord, "FINAL_SCHEMA_INVALID", "The assembled final record failed local validation.");
+    validateSchema(schema.final, finalRecord, "RECORD_SCHEMA_INVALID", "The assembled final record failed local validation.");
     const finalJson = canonicalJson(finalRecord);
     const envelopeJson = JSON.stringify({ status: "accepted", canonical_json: finalJson });
     if (Buffer.byteLength(finalJson, "utf8") > ACCEPTED_LIMIT || Buffer.byteLength(envelopeJson, "utf8") > ACCEPTED_LIMIT) {
