@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:gabrielebaldassarre:author-identifiers:1",
+  "title": "Canonical single-colon identifiers for new author-pipeline contracts",
+  "description": "Format validation only, not source eligibility or migration authority. Frozen contracts retain their original schemas and IDs.",
+  "$ref": "#/$defs/Identifier",
+  "$defs": {
+    "ObservationId": { "type": "string", "pattern": "^A(?:0[1-9]|[1-9][0-9]):O(?!0000)[0-9]{4}$" },
+    "RhetoricalPatternId": { "type": "string", "pattern": "^APC:R(?!0000)[0-9]{4}$" },
+    "SemanticPatternId": { "type": "string", "pattern": "^SPC:[CR](?!0000)[0-9]{4}$" },
+    "EpistemicPatternId": { "type": "string", "pattern": "^EPC:[AET](?!0000)[0-9]{4}$" },
+    "DecisionalPatternId": { "type": "string", "pattern": "^DPC:[AET](?!0000)[0-9]{4}$" },
+    "Identifier": {
+      "oneOf": [
+        { "$ref": "#/$defs/ObservationId" }, { "$ref": "#/$defs/RhetoricalPatternId" },
+        { "$ref": "#/$defs/SemanticPatternId" }, { "$ref": "#/$defs/EpistemicPatternId" },
+        { "$ref": "#/$defs/DecisionalPatternId" }
+      ]
+    }
+  }
+}

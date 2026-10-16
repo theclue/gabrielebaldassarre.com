@@ -1,0 +1,9 @@
+{
+  "mode": "review",
+  "content_type": "scientific_explainer",
+  "language": "it",
+  "objective": "Valutare una spiegazione introduttiva dei sistemi e dello spazio degli stati, distinguendo il sistema modellato dall'oggetto fisico associato.",
+  "topic": "Stati possibili, rappresentazione matematica e lancio della moneta come sistema",
+  "features": ["mathematical_formalism", "hypothetical_scenario"],
+  "semantic_topics": ["state_space", "system_object_distinction"]
+}

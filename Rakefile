@@ -1,5 +1,6 @@
 require "time"
 require "fileutils"
+require "json"
 
 SOURCE = "."
 POSTS  = File.join(SOURCE, "_posts")
@@ -27,10 +28,10 @@ task :post, [:title, :category, :slug] do |t, args|
   end
 
   puts "Creating post: #{filename}"
-  File.open(filename, "w") do |f|
+  File.open(filename, "wx") do |f|
     f.puts "---"
     f.puts "category: #{category}"
-    f.puts "title: \"#{title}\""
+    f.puts "title: #{title.to_json}"
     f.puts "excerpt: \"\""
     f.puts "master: /assets/images/posts/#{slug}.png"
     f.puts "image_meta:"
@@ -58,15 +59,17 @@ task :draft, [:title, :category, :slug] do |t, args|
 
   filename = File.join(DRAFTS, "#{slug}.md")
 
+  FileUtils.mkdir_p(DRAFTS)
+
   if File.exist?(filename)
     abort "#{filename} already exists."
   end
 
   puts "Creating draft: #{filename}"
-  File.open(filename, "w") do |f|
+  File.open(filename, "wx") do |f|
     f.puts "---"
     f.puts "category: #{category}"
-    f.puts "title: \"#{title}\""
+    f.puts "title: #{title.to_json}"
     f.puts "excerpt: \"\""
     f.puts "master: /assets/images/posts/#{slug}.png"
     f.puts "image_meta:"

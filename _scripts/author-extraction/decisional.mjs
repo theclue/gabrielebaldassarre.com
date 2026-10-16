@@ -1,3 +1,5 @@
+import { formatPatternId } from "./identifiers.mjs";
+
 // classification is unchanged. Each subtype owns an independent, membership-
 // ordered review-candidate counter; the separator is one colon, not two.
 export function assignDecisionalGroupIds(groups) {
@@ -6,5 +8,5 @@ export function assignDecisionalGroupIds(groups) {
   const compare = (left, right) => left < right ? -1 : left > right ? 1 : 0;
   const membership = (group) => JSON.stringify(group.support.map((entry) => entry.observation_id).sort());
   return groups.slice().sort((left, right) => compare(codes[left.classification], codes[right.classification]) || compare(membership(left), membership(right)))
-    .map((group) => ({ ...group, id: `DPC:${codes[group.classification]}${String(++counters[group.classification]).padStart(4, "0")}` }));
+    .map((group) => ({ ...group, id: formatPatternId("DPC", codes[group.classification], ++counters[group.classification]) }));
 }

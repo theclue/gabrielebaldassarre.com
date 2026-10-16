@@ -1,0 +1,11 @@
+{
+  "mode": "generate",
+  "content_type": "scientific_explainer",
+  "language": "it",
+  "objective": "Spiegare il rapporto fra elettronvolt, energia e massa, mostrando esplicitamente un esempio numerico con unità coerenti.",
+  "audience": "Lettori interessati alla fisica con conoscenze matematiche di base",
+  "topic": "Unità di energia e massa e analisi dimensionale",
+  "features": ["mathematical_formalism", "physical_quantities", "quantitative_calculation"],
+  "device_requests": [{ "id": "D02", "status": "required" }],
+  "constraints": ["Richiesto un calcolo numerico illustrativo, non dati presentati come misurati.", "Articolo autonomo: non annunciare un seguito."]
+}

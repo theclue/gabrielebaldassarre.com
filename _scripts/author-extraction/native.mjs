@@ -1,5 +1,6 @@
 import Ajv2020 from "ajv/dist/2020.js";
-import extractionSchema from "./extraction.v1.2.schema.json" with { type: "json" };
+import retainedExtractionSchema from "./extraction.v1.2.schema.json" with { type: "json" };
+import extractionSchema from "./extraction.v1.3.schema.json" with { type: "json" };
 
 const CORE_ERROR_CODES = new Set([
   "CORE_INVALID_ARGUMENT",
@@ -41,14 +42,16 @@ const validateSubmitInput = ajv.compile({
   ...localSchema,
   $ref: "#/$defs/SubmitInput",
 });
-const validatePreparedRecord = ajv.compile({
-  ...localSchema,
-  $ref: "#/$defs/Prepared",
-});
-const validateFinalRecord = ajv.compile({
-  ...localSchema,
-  $ref: "#/$defs/FinalRecord",
-});
+ajv.addSchema(retainedExtractionSchema);
+ajv.addSchema(extractionSchema);
+const validatePreparedRecord = ajv.compile({ oneOf: [
+  { $ref: `${retainedExtractionSchema.$id}#/$defs/Prepared` },
+  { $ref: `${extractionSchema.$id}#/$defs/Prepared` },
+] });
+const validateFinalRecord = ajv.compile({ oneOf: [
+  { $ref: `${retainedExtractionSchema.$id}#/$defs/FinalRecord` },
+  { $ref: `${extractionSchema.$id}#/$defs/FinalRecord` },
+] });
 const validateAcceptanceEnvelope = ajv.compile({
   ...localSchema,
   $ref: "#/$defs/AcceptanceEnvelope",
@@ -219,8 +222,8 @@ function validCoreJson(canonicalJson, { sessionId, articleId, inputHash, prepare
   } catch {
     throw failure("RECORD_JSON_INVALID", "The extraction core returned invalid record JSON.");
   }
-  if (!validateFinalRecord(record)) {
-    throw failure("RECORD_SCHEMA_INVALID", "The extraction core returned a record that does not match the v1.2 schema.");
+  if (!validateFinalRecord(record) || record.schema_version !== prepared.schema_version) {
+    throw failure("RECORD_SCHEMA_INVALID", "The extraction core returned a record that does not match its prepared schema version.");
   }
   const expectedReceipt = {
     workflow_version: "host-session-whole-article/1",

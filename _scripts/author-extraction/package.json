@@ -4,8 +4,17 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --test core.test.mjs native.test.mjs consolidator.test.mjs consolidator-native.test.mjs",
-    "test:integration": "node --experimental-vm-modules --test plugin-loading.test.mjs"
+    "test": "node --test core.test.mjs native.test.mjs consolidator.test.mjs consolidator-native.test.mjs review.test.mjs review-native.test.mjs model.test.mjs model-agent.test.mjs identifiers.test.mjs runtime.test.mjs post-authoring.test.mjs",
+    "test:integration": "node --experimental-vm-modules --test plugin-loading.test.mjs post-authoring-loading.test.mjs",
+    "test:author-model": "node --test model.test.mjs",
+    "test:author-model-agent": "node --test model-agent.test.mjs",
+    "test:identifiers": "node --test identifiers.test.mjs",
+    "test:author-runtime": "node --test runtime.test.mjs",
+    "test:post-authoring": "node --test post-authoring.test.mjs",
+    "compile:author-model": "node compile-author-model.mjs",
+    "check:author-model": "node compile-author-model.mjs --check",
+    "compile:author-runtime": "node compile-author-runtime.mjs",
+    "check:author-runtime": "node compile-author-runtime.mjs --check"
   },
   "dependencies": {
     "@opencode/plugin": "2.0.24",

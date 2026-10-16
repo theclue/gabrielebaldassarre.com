@@ -1,9 +1,15 @@
 contesto:
+  versione_corpus: "corpus-20/1"
   finalita: "Corpus di riferimento per il reverse engineering bottom-up dei contenuti, in vista di un futuro avatar LLM."
   approvazione_editoriale:
     ambito: "I markdown selezionati in _posts sono approvati come riferimenti editoriali canonici e rappresentativi dello stile; ciò non attesta autorialità umana esclusiva, assenza di AI o coautorialità."
     dichiarazione_utente: >-
       tutti gli articoli proposti tranne quello openscad sono rappresentativi del mio stile di scrittura, i markdown in _posts sono approvati
+    estensione_20_articoli:
+      data: "2026-10-14"
+      articoli_aggiuntivi: [A13, A14, A15, A16, A17, A18, A19, A20]
+      dichiarazione_utente: "si direi ottimo"
+      ambito: "Approvazione degli otto articoli proposti come rappresentativi; riesecuzione dei soli step 1 e 2 su tutti i venti articoli. Nessuna approvazione automatica del registro o avvio dello step 3."
   revisione_utente_modello_generato: pending
 
 fonti:
@@ -42,6 +48,30 @@ fonti:
     rappresentativo_stile: true
   - id: A12
     percorso: _posts/devops/2026-05-27-una-shell-history-per-ogni-progetto.md
+    rappresentativo_stile: true
+  - id: A13
+    percorso: _posts/fisica/2019-09-11-sistemi-classici-quantistici.md
+    rappresentativo_stile: true
+  - id: A14
+    percorso: _posts/fisica/2019-09-12-esperimenti-quantistici.md
+    rappresentativo_stile: true
+  - id: A15
+    percorso: _posts/fisica/2019-10-01-effetto-fotoelettrico.md
+    rappresentativo_stile: true
+  - id: A16
+    percorso: _posts/fisica/2019-10-28-stati-spin.md
+    rappresentativo_stile: true
+  - id: A17
+    percorso: _posts/fisica/2021-05-08-quantita-moto.md
+    rappresentativo_stile: true
+  - id: A18
+    percorso: _posts/home-assistant/2026-05-17-dashboard-astrometria-parte-2.md
+    rappresentativo_stile: true
+  - id: A19
+    percorso: _posts/home-assistant/2026-05-24-dashboard-astrometria-parte-3.md
+    rappresentativo_stile: true
+  - id: A20
+    percorso: _posts/devops/2026-05-28-seo-automatico-parte-2-monitoraggio.md
     rappresentativo_stile: true
 
 esclusioni:

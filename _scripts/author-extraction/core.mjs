@@ -4,11 +4,15 @@ import { lstat, open, realpath } from "node:fs/promises";
 import path from "node:path";
 import Ajv2020 from "ajv/dist/2020.js";
 import { isAlias, parseDocument } from "yaml";
+import { formatObservationId } from "./identifiers.mjs";
 
-const ARTICLE_IDS = Array.from({ length: 12 }, (_, index) => `A${String(index + 1).padStart(2, "0")}`);
+const ARTICLE_IDS = Array.from({ length: 20 }, (_, index) => `A${String(index + 1).padStart(2, "0")}`);
+const HISTORICAL_ARTICLE_IDS = ARTICLE_IDS.slice(0, 12);
 const LEGACY_SCHEMA_PATH = "_scripts/author-extraction/extraction.schema.json";
-const SCHEMA_PATH = "_scripts/author-extraction/extraction.v1.2.schema.json";
+const RETAINED_SCHEMA_PATH = "_scripts/author-extraction/extraction.v1.2.schema.json";
+const SCHEMA_PATH = "_scripts/author-extraction/extraction.v1.3.schema.json";
 const CORPUS_PATH = "docs/corpus.yaml";
+const HISTORICAL_CORPUS_PATH = "docs/corpus.v1.2.yaml";
 const INSTRUCTIONS_PATH = ".opencode/agents/author-extractor.md";
 const SOURCE_LIMIT = 262144;
 const CANDIDATE_LIMIT = 65536;
@@ -16,11 +20,11 @@ const PREPARED_LIMIT = 4 * 1024 * 1024;
 const ACCEPTED_LIMIT = 1024 * 1024;
 const RECEIPT_SESSION_LIMIT = 256;
 const VERSION = Object.freeze({
-  schema_version: "author-extraction/1.2",
+  schema_version: "author-extraction/1.3",
   prepare_version: "prepare/1",
   segmentation_version: "raw-blank-lines/1",
   measurement_version: "raw-body-counts/1",
-  instructions_version: "author-extractor/1.2",
+  instructions_version: "author-extractor/1.3",
   workflow_version: "host-session-whole-article/1",
 });
 
@@ -165,10 +169,18 @@ function yamlDocument(bytes, code, message) {
   }
 }
 
-async function parseCorpus(root) {
+async function parseCorpus(root, articleIds = ARTICLE_IDS, corpusPath = CORPUS_PATH) {
   let bytes;
   try {
-    bytes = await readRootFile(root, CORPUS_PATH);
+    try {
+      bytes = await readRootFile(root, corpusPath);
+    } catch (error) {
+      // Compatibility for isolated twelve-source fixtures/older checkouts only.
+      // A missing/unsafe archive never permits a twenty-source declaration to
+      // validate a historical twelve-source record: exact IDs are checked below.
+      if (corpusPath !== HISTORICAL_CORPUS_PATH || error.code !== "ENOENT") throw error;
+      bytes = await readRootFile(root, CORPUS_PATH);
+    }
   } catch {
     fail("CORPUS_INVALID", "The approved corpus declaration is unavailable or unsafe.");
   }
@@ -184,15 +196,19 @@ async function parseCorpus(root) {
     fail("CORPUS_INVALID", "The approved corpus declaration is invalid.");
   }
   const approved = new Map();
+  const seen = new Set();
+  const paths = new Set();
   for (const entry of corpus.fonti) {
     if (!entry || typeof entry !== "object" || Array.isArray(entry) ||
       Object.keys(entry).sort().join(",") !== "id,percorso,rappresentativo_stile" ||
-      typeof entry.id !== "string" || !ARTICLE_IDS.includes(entry.id)) {
+      typeof entry.id !== "string" || !articleIds.includes(entry.id)) {
       fail("CORPUS_INVALID", "The approved corpus declaration is invalid.");
     }
-    if (approved.has(entry.id) || typeof entry.percorso !== "string" || typeof entry.rappresentativo_stile !== "boolean") {
+    if (seen.has(entry.id) || paths.has(entry.percorso) || typeof entry.percorso !== "string" || typeof entry.rappresentativo_stile !== "boolean") {
       fail("CORPUS_INVALID", "The approved corpus declaration is invalid.");
     }
+    seen.add(entry.id);
+    paths.add(entry.percorso);
     if (entry.percorso.startsWith("/") || entry.percorso.includes("\\") || entry.percorso.includes("\0") || entry.percorso.split("/").some((part) => !part || part === "." || part === "..")) {
       fail("CORPUS_INVALID", "The approved corpus declaration is invalid.");
     }
@@ -203,8 +219,9 @@ async function parseCorpus(root) {
       typeof exclusion.percorso !== "string" || typeof exclusion.motivo !== "string") {
       fail("CORPUS_INVALID", "The approved corpus declaration is invalid.");
     }
+    if (paths.has(exclusion.percorso)) fail("CORPUS_INVALID", "An excluded source cannot be an approved corpus member.");
   }
-  if (ARTICLE_IDS.some((id) => !approved.has(id))) fail("CORPUS_INVALID", "The approved corpus declaration is incomplete.");
+  if (articleIds.some((id) => !approved.has(id))) fail("CORPUS_INVALID", "The approved corpus declaration is incomplete.");
   return { approved, bytes };
 }
 
@@ -456,7 +473,7 @@ function validateDerivedRecord(record, body, passages) {
   const cited = passageCitations(record);
   for (let index = 0; index < record.observations.length; index += 1) {
     const observation = record.observations[index];
-    const expectedId = `${record.source.article_id}::O${String(index + 1).padStart(4, "0")}`;
+    const expectedId = formatObservationId(record.source.article_id, index + 1, record.schema_version);
     if (observation.id !== expectedId) {
       fail("RECORD_DERIVED_INVALID", "Observation IDs do not follow record order.", [`/observations/${index}/id`]);
     }
@@ -541,7 +558,7 @@ function processingEligibility(record, citedPassages, availablePassages) {
 }
 
 function validateHistoricalReceipt(record, schema) {
-  if (record.schema_version !== "author-extraction/1.2") return;
+  if (!["author-extraction/1.2", "author-extraction/1.3"].includes(record.schema_version)) return;
   const processing = record.processing;
   if (!processing || typeof processing !== "object" || Array.isArray(processing) || processing.mode !== "whole_article") return;
   if (processing.status === "not_tracked") {
@@ -569,7 +586,8 @@ async function verifyRecordWith(root, record, schema) {
   if (record.method.schema_hash !== schema.schemaHash) {
     fail("RECORD_DERIVED_INVALID", "The record schema hash does not match its preserved local schema.", ["/method/schema_hash"]);
   }
-  const corpus = await parseCorpus(root);
+  const historical = record.schema_version !== "author-extraction/1.3";
+  const corpus = await parseCorpus(root, historical ? HISTORICAL_ARTICLE_IDS : ARTICLE_IDS, historical ? HISTORICAL_CORPUS_PATH : CORPUS_PATH);
   if (corpus.approved.get(record.source.article_id) !== record.source.path) {
     fail("RECORD_DERIVED_INVALID", "The record source is not the allowlisted article path.", ["/source"]);
   }
@@ -620,8 +638,8 @@ export async function verifyExtractionRecord(repoRoot, recordJson) {
     const schemaPath = record.schema_version === "author-extraction/1.1"
       ? LEGACY_SCHEMA_PATH
       : record.schema_version === "author-extraction/1.2"
-        ? SCHEMA_PATH
-        : null;
+        ? RETAINED_SCHEMA_PATH
+        : record.schema_version === "author-extraction/1.3" ? SCHEMA_PATH : null;
     if (!schemaPath) fail("RECORD_SCHEMA_INVALID", "The record schema version is not supported.", ["/schema_version"]);
     const root = await trustedRoot(repoRoot);
     const schema = await getValidators(root, schemaPath);
@@ -679,7 +697,7 @@ export async function acceptCandidate(repoRoot, articleId, inputHash, candidateJ
       for (const evidence of observation.evidence) citedPassages.add(evidence.passage_id);
       return {
         ...observation,
-        id: `${articleId}::O${String(index + 1).padStart(4, "0")}`,
+        id: formatObservationId(articleId, index + 1, VERSION.schema_version),
         review_status: "unreviewed",
       };
     });

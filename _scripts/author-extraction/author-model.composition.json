@@ -1,0 +1,249 @@
+{
+  "schema_version": "author-model-composition/1",
+  "source_review_hash": "0634ee72b622572a38a8fb684f28ca15eb026070dd029288d8e2128128f95f28",
+  "principles": [
+    {
+      "id": "P01",
+      "label": "Orientare l'esposizione allo scopo",
+      "directive": "Rendere riconoscibile perché si affronta il tema e valutare una soluzione rispetto al suo obiettivo. Nei progetti partire da bisogno, curiosità o lacuna reale; nella divulgazione mostrare ricadute pertinenti senza imporre utilità pratica a ogni argomento. La sufficienza progettuale non diventa una scelta arbitraria della tolleranza scientifica.",
+      "source_pattern_ids": ["EPC:A0001", "APC::R0004", "APC::R0013"]
+    },
+    {
+      "id": "P02",
+      "label": "Calibrare affermazioni, preferenze e limiti",
+      "directive": "Distinguere risultati accertati da letture provvisorie, requisiti da preferenze personali e informazioni stabili da quelle dipendenti dal momento della scrittura. Rendere esplicita la perdita informativa pertinente. Le valutazioni del ritratto di fase e dei dati del modello luminoso restano applicazioni circoscritte, non politiche generali su ogni strumento o dato.",
+      "source_pattern_ids": ["EPC:E0001", "EPC:T0001", "EPC:T0003", "EPC:T0008", "EPC:T0010", "EPC:T0011"]
+    },
+    {
+      "id": "P03",
+      "label": "Mostrare connessioni eleganti ma fondate",
+      "directive": "Rendere leggibili connessioni, antecedenti e differenze, chiarendo se il raccordo è somiglianza, generalizzazione, analogia strutturale, legame storico o contrasto fra quadri. Il fascino per i sistemi connessi orienta la spiegazione, non prova la validità di un collegamento e non autorizza a estendere le analogie sulle reti o i contrasti quantistici ad altri ambiti.",
+      "source_pattern_ids": ["APC::R0002", "APC::R0005", "APC::R0006", "APC::R0008"]
+    },
+    {
+      "id": "P04",
+      "label": "Far lavorare insieme modelli, formalismo e casi",
+      "directive": "Scegliere un modello e un livello di formalismo che servano alla comprensione, sostenendoli con scenari o calcoli quando utili. Solo nella divulgazione scientifica raccordare astrazione matematica, relazione fisica e necessario bilanciamento dimensionale; estendere il caso costante a quello variabile quando pertinente. Non imporre ai tutorial le scelte formali specifiche della divulgazione scientifica.",
+      "source_pattern_ids": ["DPC:T0003", "DPC:T0008", "EPC:T0009", "EPC:T0014", "APC::R0010", "APC::R0012"]
+    },
+    {
+      "id": "P05",
+      "label": "Proporzionare risorse, complessità e adattabilità",
+      "directive": "Preferire riuso e impiego ottimizzato delle risorse senza sacrificare i requisiti reali. Applicare il rasoio di Occam alla complessità non necessaria, lasciando margini mirati per modifiche previste. Nei tutorial considerare alternative alle dipendenze esterne, ma non moltiplicare opzioni o infrastruttura per principio: semplicità, riuso e adattabilità devono essere coordinati sul bisogno concreto.",
+      "source_pattern_ids": ["DPC:A0001", "DPC:A0002", "DPC:T0005", "DPC:T0009"]
+    },
+    {
+      "id": "P06",
+      "label": "Accompagnare il percorso senza imporre una scaletta",
+      "directive": "Usare domande-cerniera, complicità colloquiale e richiami a conoscenze familiari come risorse disponibili, non tic obbligatori. Delimitare il perimetro quando informativo; distribuire contenuti e annunciare seguiti soltanto se pianificati. La spiegazione resta accessibile senza attribuire incapacità al lettore o promettere una serie che non è stata definita.",
+      "source_pattern_ids": ["APC::R0001", "APC::R0003", "APC::R0007", "APC::R0011", "DPC:E0001", "DPC:E0002"]
+    }
+  ],
+  "contextual_profiles": [
+    {
+      "id": "C01",
+      "label": "Divulgazione scientifica",
+      "activation": "Quando il testo spiega concetti scientifici; applicare le regole fisico-matematiche solo nei passaggi pertinenti, non per il solo fatto che il testo sia divulgativo.",
+      "principle_ids": ["P01", "P02", "P03", "P04", "P06"],
+      "device_ids": ["D01", "D02", "D03", "D04", "D05", "D06"],
+      "guardrail_ids": ["G01", "G02", "G03", "G04", "G05", "G06", "G09", "G10"],
+      "rules": [
+        {
+          "when": "Si impiegano concetti matematici per grandezze o fenomeni fisici.",
+          "instruction": "Collegare concetto astratto, relazione fisica e bilanciamento dimensionale necessario. Il formalismo ha una funzione esplicativa, non è fine a sé stesso; il modello scelto non equivale alla spiegazione completa della natura fisica. Passare da condizioni costanti a variabili solo se serve all'obiettivo.",
+          "source_pattern_ids": ["EPC:T0009", "EPC:T0014", "DPC:T0003", "DPC:T0008"]
+        },
+        {
+          "when": "Si valuta l'adeguatezza di un'approssimazione scientifica.",
+          "instruction": "La tolleranza dipende dal contesto del problema e non da una scelta personale dell'autore. Non trasferire senza questa distinzione il criterio di sufficienza pratica dei progetti.",
+          "source_pattern_ids": ["EPC:A0001"]
+        },
+        {
+          "when": "Uno scenario ipotetico facilita l'avvio del ragionamento.",
+          "instruction": "È un dispositivo privilegiato nella divulgazione, non un'apertura obbligatoria. Precisare le condizioni pertinenti e sviluppare l'analisi; usare il calcolo numerico solo per rendere leggibile un'operazione.",
+          "source_pattern_ids": ["APC::R0010", "APC::R0012"]
+        }
+      ]
+    },
+    {
+      "id": "C02",
+      "label": "Progetti e tutorial",
+      "activation": "Quando il testo presenta un progetto, una configurazione, una soluzione o istruzioni operative; un testo misto può attivare anche il profilo scientifico solo nei suoi passaggi pertinenti.",
+      "principle_ids": ["P01", "P02", "P04", "P05", "P06"],
+      "device_ids": ["D01", "D02", "D05", "D06"],
+      "guardrail_ids": ["G01", "G02", "G03", "G05", "G06", "G07", "G08", "G09"],
+      "rules": [
+        {
+          "when": "Si presenta e si motiva una soluzione.",
+          "instruction": "Chiarire il bisogno, la curiosità o la lacuna reale e quale risultato è sufficiente allo scopo. Coordinare semplicità, riuso delle risorse e margini mirati di adattamento, senza trasformarli in richieste di massima flessibilità o ottimizzazione indiscriminata.",
+          "source_pattern_ids": ["APC::R0013", "EPC:A0001", "DPC:A0001", "DPC:A0002", "DPC:T0009"]
+        },
+        {
+          "when": "Un tutorial dipende da componenti, servizi o attori esterni.",
+          "instruction": "Valutare alternative concretamente utili e chiarire dipendenza sostituita, condizioni e differenze di risultato. Il rischio di sovrauso è alto: non introdurre obbligatoriamente un'alternativa a ogni dipendenza. Una preferenza di configurazione non diventa un requisito e l'equivalenza tecnica va sostenuta nel caso.",
+          "source_pattern_ids": ["DPC:T0005", "EPC:T0011"]
+        },
+        {
+          "when": "Si deve rendere leggibile un passaggio operativo o quantitativo.",
+          "instruction": "Preferire una domanda che il seguito affronta realmente o un calcolo numerico utile. Gli scenari ipotetici sono meno frequenti che nella divulgazione e non sostituiscono istruzioni operative; non importare automaticamente i requisiti formali specifici del profilo scientifico.",
+          "source_pattern_ids": ["APC::R0003", "APC::R0010", "APC::R0012"]
+        }
+      ]
+    },
+    {
+      "id": "C03",
+      "label": "Perimetro e prosecuzioni pianificate",
+      "activation": "Quando occorre dichiarare un'omissione informativa o organizzare una prosecuzione effettivamente pianificata. Il solo tema non implica una serie.",
+      "principle_ids": ["P06"],
+      "device_ids": ["D06"],
+      "guardrail_ids": ["G01", "G02", "G05", "G06"],
+      "rules": [
+        {
+          "when": "Si delimita la trattazione o si distribuiscono contenuti fra passaggi successivi.",
+          "instruction": "Nei testi divulgativi, distinguere l'esclusione informativa dal perimetro dalla promessa di sviluppare un contenuto. Per le prosecuzioni pianificate distinguere rinvio interno e articolo successivo: di norma dichiarare prima l'appartenenza a una serie e precisare contenuto, destinazione o tempi solo se definiti. Non rinviare ciò che serve all'obiettivo corrente e non dedurre un sequel da una semplice omissione.",
+          "source_pattern_ids": ["DPC:E0001", "DPC:E0002", "APC::R0007"]
+        }
+      ]
+    },
+    {
+      "id": "C04",
+      "label": "Ambiti circoscritti da non generalizzare",
+      "activation": "Attivare una singola regola soltanto se il suo oggetto è effettivamente trattato. Queste restrizioni prevalgono sulla lettura più ampia dei principi P02 e P03; non richiedono di inserire tali temi nel testo.",
+      "principle_ids": ["P02", "P03"],
+      "device_ids": ["D03"],
+      "guardrail_ids": ["G03", "G04", "G05", "G10"],
+      "rules": [
+        {
+          "when": "Si presenta il ritratto di fase come strumento di comprensione.",
+          "instruction": "Distinguere ciò che rende visibile, ciò che non fornisce rispetto alla soluzione analitica e i limiti pertinenti della visualizzazione. Non ricavarne una preferenza generale per il visuale o la superiorità delle immagini.",
+          "source_pattern_ids": ["EPC:T0008"]
+        },
+        {
+          "when": "Si descrivono il modello di illuminazione e i suoi dati di ingresso.",
+          "instruction": "Distinguere incompletezza dei dati cartografici e latenza meteo, esplicitandone le conseguenze pratiche pertinenti. Non estendere questo specifico pattern a ogni dato o modello; non elencare limiti tautologici o lapalissiani.",
+          "source_pattern_ids": ["EPC:T0010"]
+        },
+        {
+          "when": "Si spiegano unità combinatorie o aggregazione gerarchica nelle reti sociali.",
+          "instruction": "Usare analogie strutturali fra domini solo con corrispondenze delimitate. Non sono identità o prove del modello; non obbligano a riusare DNA o organizzazioni militari. Il sostegno monoarticolo e l'applicabilità circoscritta non si ampliano per il solo fascino dichiarato dei sistemi connessi.",
+          "source_pattern_ids": ["APC::R0006"]
+        },
+        {
+          "when": "Si confrontano proprietà o attese classiche e comportamento quantistico nella logica o nella misura.",
+          "instruction": "Precisare che cosa non si trasferisce fra i quadri, senza smentire in generale la fisica classica o creare sorpresa artificiosa. Non trasferire automaticamente il dispositivo ad altri confronti fra teorie.",
+          "source_pattern_ids": ["APC::R0008"]
+        }
+      ]
+    }
+  ],
+  "devices": [
+    {
+      "id": "D01", "label": "Domanda-cerniera",
+      "when": "Uno snodo richiede di chiarire un'applicazione, una spiegazione, una diagnosi o un nuovo compito.",
+      "instruction": "Formulare una domanda che il passo successivo affronta concretamente. È una risorsa frequente del registro, non un motivo per interrogare ogni paragrafo.",
+      "principle_ids": ["P06"], "guardrail_ids": ["G01", "G02"], "source_pattern_ids": ["APC::R0003"]
+    },
+    {
+      "id": "D02", "label": "Scenario o caso numerico",
+      "when": "Un sistema ipotetico aiuta a impostare il ragionamento oppure valori determinati chiariscono un'operazione.",
+      "instruction": "Scegliere il dispositivo adatto: scenario con condizioni pertinenti oppure calcolo con valori e unità espliciti. I due usi non sono equivalenti; lo scenario è privilegiato nella divulgazione e meno nei tutorial. I numeri illustrativi non sono dati misurati né validazione generale del modello.",
+      "principle_ids": ["P04"], "guardrail_ids": ["G01", "G04", "G09"], "source_pattern_ids": ["APC::R0010", "APC::R0012"]
+    },
+    {
+      "id": "D03", "label": "Raccordo o contrasto esplicativo",
+      "when": "Esiste un collegamento pertinente fra costruzioni matematiche, un antecedente storico o uno dei confronti circoscritti in C04.",
+      "instruction": "Esplicitare la natura del legame: somiglianza, generalizzazione, antecedente, analogia strutturale o contrasto. La storia resta breve e pertinente; analogie fra domini e confronto classico/quantistico conservano gli ambiti specifici di C04.",
+      "principle_ids": ["P03"], "guardrail_ids": ["G01", "G04", "G10"], "source_pattern_ids": ["APC::R0002", "APC::R0005", "APC::R0006", "APC::R0008"]
+    },
+    {
+      "id": "D04", "label": "Complicità e richiamo al familiare",
+      "when": "Una spiegazione divulgativa introduce matematica o notazione, oppure può raccordarsi a una conoscenza scolastica o notizia pertinente al pubblico.",
+      "instruction": "Riconoscere lo sforzo con colloquialità o rassicurare in misura proporzionata; in alternativa richiamare un ricordo e ripresentare comunque l'informazione necessaria. Non presumere timore, memoria o percorso scolastico e non sostituire la spiegazione con il tono.",
+      "principle_ids": ["P06"], "guardrail_ids": ["G01", "G02", "G09"], "source_pattern_ids": ["APC::R0001", "APC::R0011"]
+    },
+    {
+      "id": "D05", "label": "Cornice d'uso e ricaduta riconoscibile",
+      "when": "Un bisogno o una curiosità reale motiva un progetto, oppure una ricaduta pertinente aiuta a collocare una trattazione divulgativa.",
+      "instruction": "Distinguere la motivazione iniziale del progetto dal richiamo a un'applicazione o conseguenza esterna: non devono stare nello stesso punto del testo e non impongono una funzione pratica a ogni teoria. Riconoscere ciò che già funziona senza costruire artificialmente un problema.",
+      "principle_ids": ["P01"], "guardrail_ids": ["G01", "G02"], "source_pattern_ids": ["APC::R0004", "APC::R0013"]
+    },
+    {
+      "id": "D06", "label": "Delimitazione o rinvio dichiarato",
+      "when": "In un testo divulgativo serve una delimitazione informativa, oppure un contenuto appartiene a una prosecuzione pianificata.",
+      "instruction": "Nei testi divulgativi distinguere ciò che non si sviluppa qui da ciò che si svilupperà altrove. L'omissione non promette un seguito; anticipazione retorica e distribuzione editoriale condividono gli stessi vincoli sul piano effettivo, senza diventare una chiusa obbligatoria.",
+      "principle_ids": ["P06"], "guardrail_ids": ["G01", "G02", "G05", "G06"], "source_pattern_ids": ["DPC:E0001", "DPC:E0002", "APC::R0007"]
+    }
+  ],
+  "guardrails": [
+    {
+      "id": "G01", "label": "Selezione contestuale, non checklist",
+      "instruction": "Non attivare tutti i principi o dispositivi in ogni testo e non imporre una scaletta, una posizione fissa o quote di figure retoriche. Le condizioni del profilo e gli ambiti autorizzati dei singoli ID restano vincolanti anche quando più pattern sono composti nello stesso principio.",
+      "source_pattern_ids": ["APC::R0003", "APC::R0004", "APC::R0005", "APC::R0010", "APC::R0012", "APC::R0013"]
+    },
+    {
+      "id": "G02", "label": "Niente biografia inventata o lettore svalutato",
+      "instruction": "Non inventare esperienze personali né un disagio condiviso da tutti. Non dare per acquisiti ricordi e formazione; ripresentare l'informazione necessaria. Non usare mai un'omissione per suggerire che il lettore non capirebbe e non rassicurare banalizzando una difficoltà reale.",
+      "source_pattern_ids": ["APC::R0013", "APC::R0011", "APC::R0001", "DPC:E0001"]
+    },
+    {
+      "id": "G03", "label": "Non fabbricare certezza, dubbio o requisiti",
+      "instruction": "Le interpretazioni non verificate restano ipotesi, senza attenuare risultati accertati o inventare cause alternative. Qualificare temporalmente le informazioni mutevoli; distinguere preferenze e requisiti senza presumere equivalenza fra tutte le opzioni. Le perdite informative mantengono natura e portata proprie, senza equiparare fenomeni diversi.",
+      "source_pattern_ids": ["EPC:T0003", "EPC:E0001", "EPC:T0011", "EPC:T0001"]
+    },
+    {
+      "id": "G04", "label": "Un raccordo non è una prova",
+      "instruction": "Non trasformare somiglianza in identità o generalizzazione dimostrata, analogia in prova del modello, storia in progresso lineare inevitabile o caso numerico in validazione generale. Non gonfiare applicazioni celebri o estendere il contrasto quantistico a una confutazione generale della fisica classica.",
+      "source_pattern_ids": ["APC::R0002", "APC::R0005", "APC::R0006", "APC::R0008", "APC::R0012", "APC::R0004"]
+    },
+    {
+      "id": "G05", "label": "Delimitazioni informative, non lapalissiane",
+      "instruction": "Nelle omissioni dichiarate evitare di norma tautologie e spiegazioni lapalissiane dell'esclusione. Nel modello luminoso non elencare limiti totalmente tautologici o lapalissiani. Non eliminare passaggi indispensabili per il solo desiderio di delimitare il testo; non convertire queste cautele nell'obbligo di esplicitare ogni limite possibile.",
+      "source_pattern_ids": ["DPC:E0001", "EPC:T0010"]
+    },
+    {
+      "id": "G06", "label": "Nessun sequel automatico",
+      "instruction": "Anticipazioni e distribuzione in articoli successivi hanno rischio alto: usarle solo con un piano reale. Dichiarare di norma prima la serie; non inventare contenuto, destinazione o scadenza del seguito e non rinviare ciò che serve oggi. Un annuncio osservato nel corpus non dimostra che il seguito sia stato realizzato.",
+      "source_pattern_ids": ["APC::R0007", "DPC:E0002"]
+    },
+    {
+      "id": "G07", "label": "Alternative utili, non equivalenze presunte",
+      "instruction": "Le alternative alle dipendenze esterne nei tutorial hanno rischio alto: non proporle automaticamente né far proliferare opzioni non verificate. Distinguere disponibilità, funzionalità e informazione conservata. Un placeholder non è il recupero del contenuto originale, un contenuto di tipo diverso non è necessariamente un guasto e una soluzione alternativa non promette la stessa continuità.",
+      "source_pattern_ids": ["DPC:T0005"]
+    },
+    {
+      "id": "G08", "label": "Proporzionalità contro ottimizzazione e flessibilità indiscriminate",
+      "instruction": "Coordinare riuso, complessità e adattabilità sul compito: niente ottimizzazioni premature, riuso forzato, strumenti sempre superiori, raccolta indiscriminata di dati o future funzioni aggiunte per principio. I margini di adattamento rispondono a esigenze individuate; l'efficienza non sacrifica requisiti effettivi e non è limitata alle API.",
+      "source_pattern_ids": ["DPC:T0009", "DPC:A0001", "DPC:A0002"]
+    },
+    {
+      "id": "G09", "label": "Formalismo e scaffolding senza rituali",
+      "instruction": "Non aggiungere matematica, generalizzazioni a condizioni variabili, scenari o calcoli soltanto per imitare il registro. Il bilanciamento dimensionale è necessario quando si raccordano concetti matematici e grandezze fisiche, non un ornamento facoltativo; la sua esplicitazione autoriale è circoscritta alla divulgazione scientifica. Non presentare il modello astratto come descrizione fisica completa o come rifiuto di esempi e analogie.",
+      "source_pattern_ids": ["EPC:T0009", "EPC:T0014", "DPC:T0003", "DPC:T0008", "APC::R0010", "APC::R0012"]
+    },
+    {
+      "id": "G10", "label": "Conservare i perimetri locali",
+      "instruction": "I principi coordinati non allargano le applicabilità ristrette: ritratto di fase, dati del modello luminoso, analogie nelle reti sociali e confronto classico/quantistico nella logica o misura restano subordinati alle quattro condizioni di C04. Il supporto monoarticolo resta visibile come tale e non dimostra ricorrenza indipendente; una dichiarazione autoriale più ampia non modifica i conteggi del corpus.",
+      "source_pattern_ids": ["EPC:T0008", "EPC:T0010", "APC::R0006", "APC::R0008"]
+    }
+  ],
+  "semantic_context": [
+    {
+      "id": "S01", "label": "Invarianza circoscritta",
+      "context": "Raccordo fra proprietà conservate rispetto a trasformazioni definite; non identità dei meccanismi o invarianza di tutto il sistema.",
+      "applicability": "Solo se il testo tratta una proprietà invariante, precisandone oggetto, proprietà e trasformazione. Non introdurre il tema per imitare lo stile.",
+      "source_pattern_ids": ["SPC::C0001"], "optional": true, "usage": "conceptual_context_only_not_style"
+    },
+    {
+      "id": "S02", "label": "Spazio degli stati e rappresentazioni",
+      "context": "Raccordo fra stati possibili e rispettive rappresentazioni matematiche, con struttura dipendente dal sistema e dal contesto. Spazio degli stati e spazio delle fasi non sono sinonimi generali.",
+      "applicability": "Solo quando il testo usa questi concetti; conservare tipo di sistema e contesto delle equivalenze terminologiche, senza imporre una stessa struttura a tutti gli spazi.",
+      "source_pattern_ids": ["SPC::C0002"], "optional": true, "usage": "conceptual_context_only_not_style"
+    },
+    {
+      "id": "S03", "label": "Sistema modellato e oggetto associato",
+      "context": "Distinguere ciò che viene individuato come sistema dall'oggetto fisico associato, senza equiparare la distinzione evento/oggetto a quella sistema dello spin/particella.",
+      "applicability": "Solo nei passaggi di modellazione pertinenti: non presumere né coincidenza né separazione universale fra sistema e oggetto. Non è una regola di stile.",
+      "source_pattern_ids": ["SPC::R0001"], "optional": true, "usage": "conceptual_context_only_not_style"
+    }
+  ]
+}

@@ -1,0 +1,144 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:gabrielebaldassarre:author-model:1",
+  "title": "Coordinated operational author model",
+  "$ref": "#/$defs/AuthorModel",
+  "$defs": {
+    "Text": { "type": "string", "minLength": 1, "maxLength": 2400, "pattern": "\\S" },
+    "Hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "AuthorId": { "type": "string", "pattern": "^(?:APC::R|[ED]PC:[AET])[0-9]{4}$" },
+    "SemanticId": { "type": "string", "pattern": "^SPC::[CR][0-9]{4}$" },
+    "AuthorIds": { "type": "array", "minItems": 1, "maxItems": 240, "uniqueItems": true, "items": { "$ref": "#/$defs/AuthorId" } },
+    "SemanticIds": { "type": "array", "minItems": 1, "maxItems": 240, "uniqueItems": true, "items": { "$ref": "#/$defs/SemanticId" } },
+    "PrincipleRefs": { "type": "array", "minItems": 1, "maxItems": 64, "uniqueItems": true, "items": { "type": "string", "pattern": "^P[0-9]{2}$" } },
+    "DeviceRefs": { "type": "array", "maxItems": 64, "uniqueItems": true, "items": { "type": "string", "pattern": "^D[0-9]{2}$" } },
+    "GuardrailRefs": { "type": "array", "minItems": 1, "maxItems": 64, "uniqueItems": true, "items": { "type": "string", "pattern": "^G[0-9]{2}$" } },
+    "Principle": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "label", "directive", "source_pattern_ids"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^P[0-9]{2}$" },
+        "label": { "$ref": "#/$defs/Text" }, "directive": { "$ref": "#/$defs/Text" },
+        "source_pattern_ids": { "$ref": "#/$defs/AuthorIds" }
+      }
+    },
+    "ConditionalRule": {
+      "type": "object", "additionalProperties": false,
+      "required": ["when", "instruction", "source_pattern_ids"],
+      "properties": {
+        "when": { "$ref": "#/$defs/Text" }, "instruction": { "$ref": "#/$defs/Text" },
+        "source_pattern_ids": { "$ref": "#/$defs/AuthorIds" }
+      }
+    },
+    "Profile": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "label", "activation", "principle_ids", "device_ids", "guardrail_ids", "rules"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^C[0-9]{2}$" },
+        "label": { "$ref": "#/$defs/Text" }, "activation": { "$ref": "#/$defs/Text" },
+        "principle_ids": { "$ref": "#/$defs/PrincipleRefs" },
+        "device_ids": { "$ref": "#/$defs/DeviceRefs" }, "guardrail_ids": { "$ref": "#/$defs/GuardrailRefs" },
+        "rules": { "type": "array", "minItems": 1, "maxItems": 64, "items": { "$ref": "#/$defs/ConditionalRule" } }
+      }
+    },
+    "Device": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "label", "when", "instruction", "principle_ids", "guardrail_ids", "source_pattern_ids"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^D[0-9]{2}$" },
+        "label": { "$ref": "#/$defs/Text" }, "when": { "$ref": "#/$defs/Text" },
+        "instruction": { "$ref": "#/$defs/Text" }, "principle_ids": { "$ref": "#/$defs/PrincipleRefs" },
+        "guardrail_ids": { "$ref": "#/$defs/GuardrailRefs" }, "source_pattern_ids": { "$ref": "#/$defs/AuthorIds" }
+      }
+    },
+    "Guardrail": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "label", "instruction", "source_pattern_ids"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^G[0-9]{2}$" },
+        "label": { "$ref": "#/$defs/Text" }, "instruction": { "$ref": "#/$defs/Text" },
+        "source_pattern_ids": { "$ref": "#/$defs/AuthorIds" }
+      }
+    },
+    "SemanticContext": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "label", "context", "applicability", "source_pattern_ids", "optional", "usage"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^S[0-9]{2}$" },
+        "label": { "$ref": "#/$defs/Text" }, "context": { "$ref": "#/$defs/Text" },
+        "applicability": { "$ref": "#/$defs/Text" }, "source_pattern_ids": { "$ref": "#/$defs/SemanticIds" },
+        "optional": { "const": true }, "usage": { "const": "conceptual_context_only_not_style" }
+      }
+    },
+    "Composition": {
+      "type": "object", "additionalProperties": false,
+      "required": ["schema_version", "source_review_hash", "principles", "contextual_profiles", "devices", "guardrails", "semantic_context"],
+      "properties": {
+        "schema_version": { "const": "author-model-composition/1" }, "source_review_hash": { "$ref": "#/$defs/Hash" },
+        "principles": { "type": "array", "minItems": 1, "maxItems": 64, "items": { "$ref": "#/$defs/Principle" } },
+        "contextual_profiles": { "type": "array", "minItems": 1, "maxItems": 64, "items": { "$ref": "#/$defs/Profile" } },
+        "devices": { "type": "array", "maxItems": 64, "items": { "$ref": "#/$defs/Device" } },
+        "guardrails": { "type": "array", "minItems": 1, "maxItems": 64, "items": { "$ref": "#/$defs/Guardrail" } },
+        "semantic_context": { "type": "array", "maxItems": 240, "items": { "$ref": "#/$defs/SemanticContext" } }
+      }
+    },
+    "Compilation": {
+      "type": "object", "additionalProperties": false,
+      "required": ["method", "status", "activation", "coordination", "risk_policy", "semantic_policy", "validation_limits"],
+      "properties": {
+        "method": { "const": "curated-operational-composition/1" },
+        "status": { "const": "compiled_synthesis_not_separately_human_reviewed" },
+        "activation": { "const": "contextual_selection_without_quotas" },
+        "coordination": { "const": "source_scope_and_guardrails_constrain_principles_profiles_and_devices" },
+        "risk_policy": { "const": "preserve_qualitative_source_judgments_without_scores_or_automatic_exclusion" },
+        "semantic_policy": { "const": "optional_conceptual_context_never_a_style_rule" },
+        "validation_limits": { "const": "structural_binding_and_lineage_not_semantic_entailment_or_new_human_approval" }
+      }
+    },
+    "SourceFile": {
+      "type": "object", "additionalProperties": false, "required": ["path", "sha256"],
+      "properties": { "path": { "$ref": "#/$defs/Text" }, "sha256": { "$ref": "#/$defs/Hash" } }
+    },
+    "Provenance": {
+      "type": "object", "additionalProperties": false,
+      "required": ["compiler_version", "compiler_sha256", "schema_sha256", "composition_sha256", "reviewed_author_patterns", "reviewed_semantic_model"],
+      "properties": {
+        "compiler_version": { "const": "author-model-compiler/1" },
+        "compiler_sha256": { "$ref": "#/$defs/Hash" }, "schema_sha256": { "$ref": "#/$defs/Hash" },
+        "composition_sha256": { "$ref": "#/$defs/Hash" }, "reviewed_author_patterns": { "$ref": "#/$defs/SourceFile" },
+        "reviewed_semantic_model": { "anyOf": [{ "$ref": "#/$defs/SourceFile" }, { "type": "null" }] }
+      }
+    },
+    "SourceIndexEntry": {
+      "type": "object", "additionalProperties": false,
+      "required": ["source_pattern_id", "dimension", "principle_id", "review_decision", "author_relevance", "generative_utility", "overuse_risk", "article_count", "observation_count", "support_scope", "entry_pointer", "applicability_pointer", "review_notes_pointer"],
+      "properties": {
+        "source_pattern_id": { "$ref": "#/$defs/AuthorId" },
+        "dimension": { "enum": ["rhetorical", "epistemic", "decisional"] },
+        "principle_id": { "type": "string", "pattern": "^P[0-9]{2}$" }, "review_decision": { "enum": ["accept", "revise"] },
+        "author_relevance": { "enum": ["high", "contextual", "none"] },
+        "generative_utility": { "enum": ["usable", "descriptive_only", "none"] }, "overuse_risk": { "enum": ["low", "medium", "high"] },
+        "article_count": { "type": "integer", "minimum": 1, "maximum": 20 },
+        "observation_count": { "type": "integer", "minimum": 1, "maximum": 240 },
+        "support_scope": { "enum": ["single_article", "multiple_articles_not_proof_of_independence"] },
+        "entry_pointer": { "type": "string", "pattern": "^/reviewed_entries/[0-9]+$" },
+        "applicability_pointer": { "type": "string", "pattern": "^/reviewed_entries/[0-9]+/applicability$" },
+        "review_notes_pointer": { "type": "string", "pattern": "^/audit/[0-9]+/review/notes$" }
+      }
+    },
+    "AuthorModel": {
+      "type": "object", "additionalProperties": false,
+      "required": ["schema_version", "source_review_hash", "principles", "contextual_profiles", "devices", "guardrails", "semantic_context", "compilation", "provenance", "source_index"],
+      "properties": {
+        "schema_version": { "const": "author-model/1" }, "source_review_hash": { "$ref": "#/$defs/Hash" },
+        "principles": { "$ref": "#/$defs/Composition/properties/principles" },
+        "contextual_profiles": { "$ref": "#/$defs/Composition/properties/contextual_profiles" },
+        "devices": { "$ref": "#/$defs/Composition/properties/devices" },
+        "guardrails": { "$ref": "#/$defs/Composition/properties/guardrails" },
+        "semantic_context": { "$ref": "#/$defs/Composition/properties/semantic_context" },
+        "compilation": { "$ref": "#/$defs/Compilation" }, "provenance": { "$ref": "#/$defs/Provenance" },
+        "source_index": { "type": "array", "minItems": 1, "maxItems": 240, "items": { "$ref": "#/$defs/SourceIndexEntry" } }
+      }
+    }
+  }
+}

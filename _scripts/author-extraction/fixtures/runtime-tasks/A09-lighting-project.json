@@ -1,0 +1,10 @@
+{
+  "mode": "review",
+  "content_type": "project_article",
+  "language": "it",
+  "objective": "Valutare una spiegazione del progetto di compensazione della luce domestica rispetto allo scopo d'uso e ai limiti pertinenti dei dati.",
+  "audience": "Utenti Home Assistant interessati al progetto",
+  "topic": "Modello luminoso domestico per lo smartworking",
+  "features": ["configuration_choices", "mutable_information", "quantitative_calculation"],
+  "local_topics": ["lighting_model"]
+}

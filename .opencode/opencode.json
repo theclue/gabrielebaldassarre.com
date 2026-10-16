@@ -17,6 +17,11 @@
           "action": "subagent",
           "effect": "allow",
           "resource": "author-pattern-consolidator"
+        },
+        {
+          "action": "subagent",
+          "effect": "allow",
+          "resource": "author-model-compiler"
         }
       ]
     }

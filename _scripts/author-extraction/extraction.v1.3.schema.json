@@ -1,0 +1,856 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:gabrielebaldassarre:author-extraction:1.3",
+  "title": "Twenty-article author extraction contract v1.3",
+  "description": "Closed local contract for deterministic article preparation, candidate acceptance, and operational processing provenance. Cross-field processing counts are checked by the core verifier.",
+  "$ref": "#/$defs/FinalRecord",
+  "$defs": {
+    "Source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "article_id",
+        "path",
+        "corpus_hash",
+        "file_hash"
+      ],
+      "properties": {
+        "article_id": {
+          "type": "string",
+          "enum": [
+            "A01",
+            "A02",
+            "A03",
+            "A04",
+            "A05",
+            "A06",
+            "A07",
+            "A08",
+            "A09",
+            "A10",
+            "A11",
+            "A12",
+            "A13",
+            "A14",
+            "A15",
+            "A16",
+            "A17",
+            "A18",
+            "A19",
+            "A20"
+          ]
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500,
+          "pattern": "\\S"
+        },
+        "corpus_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "file_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      }
+    },
+    "Method": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "prepare_version",
+        "segmentation_version",
+        "measurement_version",
+        "instructions_version",
+        "workflow_version",
+        "schema_hash",
+        "instructions_hash"
+      ],
+      "properties": {
+        "prepare_version": {
+          "const": "prepare/1"
+        },
+        "segmentation_version": {
+          "const": "raw-blank-lines/1"
+        },
+        "measurement_version": {
+          "const": "raw-body-counts/1"
+        },
+        "instructions_version": {
+          "const": "author-extractor/1.3"
+        },
+        "workflow_version": {
+          "const": "host-session-whole-article/1"
+        },
+        "schema_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "instructions_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      }
+    },
+    "Measurements": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scope",
+        "utf8_bytes",
+        "unicode_code_points",
+        "nonblank_lines",
+        "advanced_stylometry"
+      ],
+      "properties": {
+        "scope": {
+          "const": "raw_markdown_body"
+        },
+        "utf8_bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 262144
+        },
+        "unicode_code_points": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 262144
+        },
+        "nonblank_lines": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 262144
+        },
+        "advanced_stylometry": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "status",
+            "value",
+            "reason_code"
+          ],
+          "properties": {
+            "status": {
+              "const": "not_computed"
+            },
+            "value": {
+              "type": "null"
+            },
+            "reason_code": {
+              "const": "OUT_OF_SCOPE_V1"
+            }
+          }
+        }
+      }
+    },
+    "Passage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "passage_id",
+        "start_cp",
+        "end_cp",
+        "text"
+      ],
+      "properties": {
+        "passage_id": {
+          "type": "string",
+          "pattern": "^P[0-9]{4}$"
+        },
+        "start_cp": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 262144
+        },
+        "end_cp": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 262144
+        },
+        "text": {
+          "type": "string",
+          "maxLength": 262144
+        }
+      }
+    },
+    "Prepared": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "source",
+        "method",
+        "input_hash",
+        "body",
+        "passages",
+        "measurements"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "author-extraction/1.3"
+        },
+        "source": {
+          "$ref": "#/$defs/Source"
+        },
+        "method": {
+          "$ref": "#/$defs/Method"
+        },
+        "input_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "body": {
+          "type": "string",
+          "maxLength": 262144
+        },
+        "passages": {
+          "type": "array",
+          "maxItems": 512,
+          "items": {
+            "$ref": "#/$defs/Passage"
+          }
+        },
+        "measurements": {
+          "$ref": "#/$defs/Measurements"
+        }
+      }
+    },
+    "Evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "article_id",
+        "passage_id",
+        "quote"
+      ],
+      "properties": {
+        "article_id": {
+          "type": "string",
+          "enum": [
+            "A01",
+            "A02",
+            "A03",
+            "A04",
+            "A05",
+            "A06",
+            "A07",
+            "A08",
+            "A09",
+            "A10",
+            "A11",
+            "A12",
+            "A13",
+            "A14",
+            "A15",
+            "A16",
+            "A17",
+            "A18",
+            "A19",
+            "A20"
+          ]
+        },
+        "passage_id": {
+          "type": "string",
+          "pattern": "^P[0-9]{4}$"
+        },
+        "quote": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000,
+          "pattern": "\\S"
+        }
+      }
+    },
+    "CandidateObservation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "dimension",
+        "label",
+        "description",
+        "inference_kind",
+        "evidence"
+      ],
+      "properties": {
+        "dimension": {
+          "type": "string",
+          "enum": [
+            "rhetorical",
+            "epistemic",
+            "semantic",
+            "decisional"
+          ]
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "pattern": "\\S"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000,
+          "pattern": "\\S"
+        },
+        "inference_kind": {
+          "type": "string",
+          "enum": [
+            "explicit",
+            "inferred"
+          ]
+        },
+        "evidence": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 4,
+          "items": {
+            "$ref": "#/$defs/Evidence"
+          }
+        }
+      }
+    },
+    "Candidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "observations"
+      ],
+      "properties": {
+        "observations": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 12,
+          "items": {
+            "$ref": "#/$defs/CandidateObservation"
+          }
+        }
+      }
+    },
+    "FinalObservation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "dimension",
+        "label",
+        "description",
+        "inference_kind",
+        "evidence",
+        "review_status"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^(?:A0[1-9]|A1[0-9]|A20)::O[0-9]{4}$"
+        },
+        "dimension": {
+          "type": "string",
+          "enum": [
+            "rhetorical",
+            "epistemic",
+            "semantic",
+            "decisional"
+          ]
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "pattern": "\\S"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000,
+          "pattern": "\\S"
+        },
+        "inference_kind": {
+          "type": "string",
+          "enum": [
+            "explicit",
+            "inferred"
+          ]
+        },
+        "evidence": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 4,
+          "items": {
+            "$ref": "#/$defs/Evidence"
+          }
+        },
+        "review_status": {
+          "const": "unreviewed"
+        }
+      }
+    },
+    "DimensionPresenceEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "observation_count"
+      ],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "observed",
+            "not_observed"
+          ]
+        },
+        "observation_count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 12
+        }
+      },
+      "oneOf": [
+        {
+          "properties": {
+            "status": {
+              "const": "observed"
+            },
+            "observation_count": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        },
+        {
+          "properties": {
+            "status": {
+              "const": "not_observed"
+            },
+            "observation_count": {
+              "const": 0
+            }
+          }
+        }
+      ]
+    },
+    "DimensionPresence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "rhetorical",
+        "epistemic",
+        "semantic",
+        "decisional"
+      ],
+      "properties": {
+        "rhetorical": {
+          "$ref": "#/$defs/DimensionPresenceEntry"
+        },
+        "epistemic": {
+          "$ref": "#/$defs/DimensionPresenceEntry"
+        },
+        "semantic": {
+          "$ref": "#/$defs/DimensionPresenceEntry"
+        },
+        "decisional": {
+          "$ref": "#/$defs/DimensionPresenceEntry"
+        }
+      }
+    },
+    "WorkflowReceipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "workflow_version",
+        "mode",
+        "session_id",
+        "article_id",
+        "input_hash",
+        "prepare_returned"
+      ],
+      "properties": {
+        "workflow_version": {
+          "const": "host-session-whole-article/1"
+        },
+        "mode": {
+          "const": "whole_article"
+        },
+        "session_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "\\S"
+        },
+        "article_id": {
+          "type": "string",
+          "enum": [
+            "A01",
+            "A02",
+            "A03",
+            "A04",
+            "A05",
+            "A06",
+            "A07",
+            "A08",
+            "A09",
+            "A10",
+            "A11",
+            "A12",
+            "A13",
+            "A14",
+            "A15",
+            "A16",
+            "A17",
+            "A18",
+            "A19",
+            "A20"
+          ]
+        },
+        "input_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "prepare_returned": {
+          "const": true
+        }
+      }
+    },
+    "Processing": {
+      "description": "Whole-article host receipts and a reserved, unsupported per-passage mode use distinct closed shapes.",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "mode",
+            "status",
+            "article_processed",
+            "passages_available",
+            "passages_cited",
+            "receipt"
+          ],
+          "properties": {
+            "mode": {
+              "const": "whole_article"
+            },
+            "status": {
+              "enum": [
+                "complete",
+                "not_tracked"
+              ]
+            },
+            "article_processed": {
+              "type": [
+                "boolean",
+                "null"
+              ]
+            },
+            "passages_available": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 512
+            },
+            "passages_cited": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 512
+            },
+            "receipt": {
+              "oneOf": [
+                {
+                  "$ref": "#/$defs/WorkflowReceipt"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "oneOf": [
+            {
+              "properties": {
+                "status": {
+                  "const": "complete"
+                },
+                "article_processed": {
+                  "const": true
+                },
+                "receipt": {
+                  "$ref": "#/$defs/WorkflowReceipt"
+                }
+              }
+            },
+            {
+              "properties": {
+                "status": {
+                  "const": "not_tracked"
+                },
+                "article_processed": {
+                  "type": "null"
+                },
+                "receipt": {
+                  "type": "null"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "mode",
+            "status",
+            "passages_total",
+            "passages_processed",
+            "passages_failed",
+            "passages_with_observations"
+          ],
+          "properties": {
+            "mode": {
+              "const": "per_passage"
+            },
+            "status": {
+              "enum": [
+                "complete",
+                "partial",
+                "not_tracked"
+              ]
+            },
+            "passages_total": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 512
+            },
+            "passages_processed": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "minimum": 0,
+              "maximum": 512
+            },
+            "passages_failed": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "minimum": 0,
+              "maximum": 512
+            },
+            "passages_with_observations": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 512
+            }
+          },
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "status": {
+                    "const": "not_tracked"
+                  }
+                },
+                "required": [
+                  "status"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "passages_processed": {
+                    "type": "null"
+                  },
+                  "passages_failed": {
+                    "type": "null"
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "status": {
+                    "const": "partial"
+                  }
+                },
+                "required": [
+                  "status"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "passages_processed": {
+                    "type": "integer"
+                  },
+                  "passages_failed": {
+                    "type": "integer"
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "status": {
+                    "const": "complete"
+                  }
+                },
+                "required": [
+                  "status"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "passages_processed": {
+                    "type": "integer"
+                  },
+                  "passages_failed": {
+                    "const": 0
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "FinalRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "source",
+        "method",
+        "measurements",
+        "dimension_presence",
+        "processing",
+        "observations"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "author-extraction/1.3"
+        },
+        "source": {
+          "$ref": "#/$defs/Source"
+        },
+        "method": {
+          "$ref": "#/$defs/Method"
+        },
+        "measurements": {
+          "$ref": "#/$defs/Measurements"
+        },
+        "dimension_presence": {
+          "$ref": "#/$defs/DimensionPresence"
+        },
+        "processing": {
+          "$ref": "#/$defs/Processing"
+        },
+        "observations": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 12,
+          "items": {
+            "$ref": "#/$defs/FinalObservation"
+          }
+        }
+      }
+    },
+    "AcceptanceEnvelope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "canonical_json"
+      ],
+      "properties": {
+        "status": {
+          "const": "accepted"
+        },
+        "canonical_json": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1048576
+        }
+      }
+    },
+    "PrepareInput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "article_id"
+      ],
+      "properties": {
+        "article_id": {
+          "type": "string",
+          "enum": [
+            "A01",
+            "A02",
+            "A03",
+            "A04",
+            "A05",
+            "A06",
+            "A07",
+            "A08",
+            "A09",
+            "A10",
+            "A11",
+            "A12",
+            "A13",
+            "A14",
+            "A15",
+            "A16",
+            "A17",
+            "A18",
+            "A19",
+            "A20"
+          ]
+        }
+      }
+    },
+    "SubmitInput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "article_id",
+        "input_hash",
+        "candidate_json"
+      ],
+      "properties": {
+        "article_id": {
+          "type": "string",
+          "enum": [
+            "A01",
+            "A02",
+            "A03",
+            "A04",
+            "A05",
+            "A06",
+            "A07",
+            "A08",
+            "A09",
+            "A10",
+            "A11",
+            "A12",
+            "A13",
+            "A14",
+            "A15",
+            "A16",
+            "A17",
+            "A18",
+            "A19",
+            "A20"
+          ]
+        },
+        "input_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "candidate_json": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 65536
+        }
+      }
+    }
+  }
+}

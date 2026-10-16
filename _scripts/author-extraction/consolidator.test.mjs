@@ -11,7 +11,8 @@ import { prepareConsolidation, acceptDimensionCandidate, finalizeConsolidation }
 const PACKAGE_DIR = fileURLToPath(new URL('.', import.meta.url));
 const REPO_ROOT = fileURLToPath(new URL('../../', import.meta.url));
 const APPROVED_TEMP = '/private/var/folders/qm/5mfn0b0n5ds_d9xpg0l9jqgc0000gp/T/opencode';
-const RECORDS_DIRECTORY = 'docs/author-extraction-results/v1.2';
+const RECORDS_DIRECTORY = 'docs/author-extraction-results/v1.3';
+const TWELVE_RECORDS_DIRECTORY = 'docs/author-extraction-results/v1.2';
 const LEGACY_RECORDS_DIRECTORY = 'docs/author-extraction-results/v1.1';
 
 function sha256(bytes) {
@@ -27,7 +28,7 @@ const CHILD_PROCESS = String.raw`
   let corpusHash;
   let inputHash;
   for (const dimension of dimensions) {
-    const prepared = await prepareConsolidation(root, dimension, 'docs/author-extraction-results/v1.2');
+    const prepared = await prepareConsolidation(root, dimension, 'docs/author-extraction-results/v1.3');
     if (prepared.status !== 'ready') throw new Error('expected ready preparation for ' + dimension + ': ' + JSON.stringify(prepared));
     if (dimension === 'rhetorical') {
       corpusHash = prepared.corpus_hash;
@@ -35,10 +36,10 @@ const CHILD_PROCESS = String.raw`
     }
     const dimensionCandidate = dimension === 'rhetorical' ? candidate : { groups: [], unclustered_observations: [] };
     accepted.push(await acceptDimensionCandidate(
-      root, dimension, prepared.corpus_hash, prepared.input_hash, JSON.stringify(dimensionCandidate), 'docs/author-extraction-results/v1.2',
+      root, dimension, prepared.corpus_hash, prepared.input_hash, JSON.stringify(dimensionCandidate), 'docs/author-extraction-results/v1.3',
     ));
   }
-  const finalJson = await finalizeConsolidation(root, corpusHash, accepted, 'docs/author-extraction-results/v1.2');
+  const finalJson = await finalizeConsolidation(root, corpusHash, accepted, 'docs/author-extraction-results/v1.3');
   const finalBundle = JSON.parse(finalJson);
   console.log(JSON.stringify({
     locale: new Intl.Collator().resolvedOptions().locale,
@@ -85,8 +86,10 @@ async function makeTrackedSyntheticRepository(t, {
   tracked = true,
   recordsDirectory = RECORDS_DIRECTORY,
   legacyRecords = false,
-  recordOrder = Array.from({ length: 12 }, (_, index) => index + 1),
+  recordOrder,
 } = {}) {
+  const count = recordsDirectory === RECORDS_DIRECTORY ? 20 : 12;
+  recordOrder ??= Array.from({ length: count }, (_, index) => index + 1);
   const root = await mkdtemp(join(APPROVED_TEMP, 'author-consolidation-locale-'));
   t.after(() => rm(root, { recursive: true, force: true }));
   for (const relative of [
@@ -97,7 +100,7 @@ async function makeTrackedSyntheticRepository(t, {
   ]) await mkdir(join(root, relative), { recursive: true });
 
   const sourceEntries = [];
-  for (let index = 1; index <= 12; index += 1) {
+  for (let index = 1; index <= 20; index += 1) {
     const articleId = `A${String(index).padStart(2, '0')}`;
     const sourcePath = `_posts/synthetic/${articleId}.md`;
     sourceEntries.push(`  - id: ${articleId}\n    percorso: ${sourcePath}\n    rappresentativo_stile: true`);
@@ -118,18 +121,24 @@ async function makeTrackedSyntheticRepository(t, {
     '    motivo: Non incluso nel corpus sintetico.',
     '',
   ].join('\n'));
+  let archivedCorpus = await readFile(join(root, 'docs/corpus.yaml'), 'utf8');
+  for (const entry of sourceEntries.slice(12)) archivedCorpus = archivedCorpus.replace(`${entry}\n`, '');
+  await writeFile(join(root, 'docs/corpus.v1.2.yaml'), archivedCorpus);
 
   await writeFile(join(root, '_scripts/author-extraction/extraction.schema.json'), await readFile(join(PACKAGE_DIR, 'extraction.schema.json')));
   await writeFile(join(root, '_scripts/author-extraction/extraction.v1.2.schema.json'), await readFile(join(PACKAGE_DIR, 'extraction.v1.2.schema.json')));
+  await writeFile(join(root, '_scripts/author-extraction/extraction.v1.3.schema.json'), await readFile(join(PACKAGE_DIR, 'extraction.v1.3.schema.json')));
   await writeFile(join(root, '_scripts/author-extraction/patterns.schema.json'), await readFile(join(PACKAGE_DIR, 'patterns.schema.json')));
   await writeFile(join(root, '_scripts/author-extraction/patterns.v0.2.schema.json'), await readFile(join(PACKAGE_DIR, 'patterns.v0.2.schema.json')));
   await writeFile(join(root, '_scripts/author-extraction/patterns.v0.3.schema.json'), await readFile(join(PACKAGE_DIR, 'patterns.v0.3.schema.json')));
   await writeFile(join(root, '_scripts/author-extraction/patterns.v0.4.schema.json'), await readFile(join(PACKAGE_DIR, 'patterns.v0.4.schema.json')));
   await writeFile(join(root, '_scripts/author-extraction/patterns.v0.5.schema.json'), await readFile(join(PACKAGE_DIR, 'patterns.v0.5.schema.json')));
+  await writeFile(join(root, '_scripts/author-extraction/patterns.v0.6.schema.json'), await readFile(join(PACKAGE_DIR, 'patterns.v0.6.schema.json')));
   await writeFile(join(root, '_scripts/author-extraction/author-pattern-consolidator.v0.1.md'), '# Synthetic consolidator instructions\n');
   await writeFile(join(root, '_scripts/author-extraction/author-pattern-consolidator.v0.2.md'), '# Synthetic consolidator instructions\n');
   await writeFile(join(root, '_scripts/author-extraction/author-pattern-consolidator.v0.3.md'), '# Synthetic consolidator instructions\n');
   await writeFile(join(root, '_scripts/author-extraction/author-pattern-consolidator.v0.4.md'), '# Synthetic consolidator instructions\n');
+  await writeFile(join(root, '_scripts/author-extraction/author-pattern-consolidator.v0.5.md'), '# Synthetic consolidator instructions\n');
   await writeFile(join(root, '.opencode/agents/author-extractor.md'), '# Synthetic extractor instructions v1.2\n');
   await writeFile(join(root, '.opencode/agents/author-pattern-consolidator.md'), '# Synthetic consolidator instructions\n');
 
@@ -155,10 +164,24 @@ async function makeTrackedSyntheticRepository(t, {
       },
     } : undefined;
     let recordJson = await acceptCandidate(root, articleId, prepared.input_hash, candidateJson, options);
+    if (recordsDirectory === TWELVE_RECORDS_DIRECTORY) {
+      const retained = JSON.parse(recordJson);
+      retained.schema_version = 'author-extraction/1.2';
+      retained.source.corpus_hash = sha256(Buffer.from(archivedCorpus));
+      retained.method.instructions_version = 'author-extractor/1.2';
+      retained.method.schema_hash = sha256(await readFile(join(PACKAGE_DIR, 'extraction.v1.2.schema.json')));
+      if (retained.processing.receipt) {
+        const canonicalize = (value) => Array.isArray(value) ? value.map(canonicalize) : value !== null && typeof value === 'object'
+          ? Object.fromEntries(Object.keys(value).sort().map((key) => [key, canonicalize(value[key])])) : value;
+        retained.processing.receipt.input_hash = sha256(Buffer.from(JSON.stringify(canonicalize({ source: retained.source, method: retained.method }))));
+      }
+      recordJson = JSON.stringify(retained);
+    }
     if (legacyRecords) {
       const legacySchema = await readFile(join(PACKAGE_DIR, 'extraction.schema.json'));
       const legacyRecord = JSON.parse(recordJson);
       legacyRecord.schema_version = 'author-extraction/1.1';
+      legacyRecord.source.corpus_hash = sha256(Buffer.from(archivedCorpus));
       legacyRecord.method = {
         prepare_version: 'prepare/1',
         segmentation_version: 'raw-blank-lines/1',
@@ -279,8 +302,8 @@ function runWithLocale(root, candidateJson, locale) {
 describe('consolidation ordering is independent of the runtime locale', () => {
   it('keeps final pattern IDs invariant for identical non-ASCII groups and hashes', async (t) => {
     const root = await makeTrackedSyntheticRepository(t);
-    const zetaMembers = Array.from({ length: 6 }, (_, index) => `A${String(index + 1).padStart(2, '0')}::O0001`);
-    const angstromMembers = Array.from({ length: 6 }, (_, index) => `A${String(index + 7).padStart(2, '0')}::O0001`);
+    const zetaMembers = Array.from({ length: 10 }, (_, index) => `A${String(index + 1).padStart(2, '0')}::O0001`);
+    const angstromMembers = Array.from({ length: 10 }, (_, index) => `A${String(index + 11).padStart(2, '0')}::O0001`);
     const candidateJson = JSON.stringify({
       groups: [
         candidateGroup('zeta pattern', zetaMembers),
@@ -308,7 +331,7 @@ describe('consolidation ordering is independent of the runtime locale', () => {
   });
 });
 
-describe('consolidator core contract over synthetic tracked v1.2 records', () => {
+describe('consolidator core contract over twenty-source and retained tracked records', () => {
   it('projects only requested observation fields and binds repeatable hashes to records and method', async (t) => {
     const root = await makeTrackedSyntheticRepository(t, { dimensionsForArticle: featureDimensions });
     const prepared = await prepareConsolidation(root, 'rhetorical', RECORDS_DIRECTORY);
@@ -331,7 +354,7 @@ describe('consolidator core contract over synthetic tracked v1.2 records', () =>
 
     const reverseRoot = await makeTrackedSyntheticRepository(t, {
       dimensionsForArticle: featureDimensions,
-      recordOrder: Array.from({ length: 12 }, (_, index) => 12 - index),
+      recordOrder: Array.from({ length: 20 }, (_, index) => 20 - index),
     });
     const reversePrepared = await prepareConsolidation(reverseRoot, 'rhetorical', RECORDS_DIRECTORY);
     assert.equal(reversePrepared.corpus_hash, prepared.corpus_hash, 'record-file creation order must not affect the verified corpus hash');
@@ -355,7 +378,7 @@ describe('consolidator core contract over synthetic tracked v1.2 records', () =>
     assert.notEqual(changedInstructions.input_hash, prepared.input_hash, 'instruction bytes are part of the preparation hash');
     await writeFile(instructionsPath, originalInstructions);
 
-    const schemaPath = join(root, '_scripts/author-extraction/patterns.schema.json');
+    const schemaPath = join(root, '_scripts/author-extraction/patterns.v0.6.schema.json');
     const originalSchema = await readFile(schemaPath, 'utf8');
     await writeFile(schemaPath, ` ${originalSchema}`);
     const changedSchema = await prepareConsolidation(root, 'rhetorical', RECORDS_DIRECTORY);
@@ -363,12 +386,12 @@ describe('consolidator core contract over synthetic tracked v1.2 records', () =>
     assert.notEqual(changedSchema.input_hash, prepared.input_hash, 'schema bytes are part of the preparation hash');
   });
 
-  it('blocks a valid twelve-record dataset with untracked processing before exposing observations', async (t) => {
+  it('blocks valid current and historical corpora with untracked processing before exposing observations', async (t) => {
     const root = await makeTrackedSyntheticRepository(t, { tracked: false, dimensionsForArticle: featureDimensions });
     const blocked = await prepareConsolidation(root, 'rhetorical', RECORDS_DIRECTORY);
     assert.equal(blocked.status, 'blocked');
     assert.deepEqual(Object.keys(blocked).sort(), ['corpus_hash', 'diagnostics', 'schema_version', 'status']);
-    assert.equal(blocked.diagnostics.length, 12);
+    assert.equal(blocked.diagnostics.length, 20);
     assert.ok(blocked.diagnostics.every((item) => item.code === 'PROCESSING_NOT_TRACKED'));
     assert.equal(Object.hasOwn(blocked, 'observations'), false);
     await assert.rejects(
@@ -408,11 +431,11 @@ describe('consolidator core contract over synthetic tracked v1.2 records', () =>
     await writeFile(join(root, RECORDS_DIRECTORY, 'A12.json'), trackedA12);
     const mixed = await prepareConsolidation(root, 'rhetorical', RECORDS_DIRECTORY);
     assert.equal(mixed.status, 'blocked');
-    assert.equal(mixed.diagnostics.length, 11);
+    assert.equal(mixed.diagnostics.length, 19);
     assert.equal(mixed.diagnostics.some((item) => item.article_id === 'A12'), false);
   });
 
-  it('projects the bounded maximum of 144 observations across all four dimensions', async (t) => {
+  it('projects the bounded maximum of 240 observations across all four dimensions', async (t) => {
     const dimensions = () => [
       'rhetorical', 'rhetorical', 'rhetorical',
       'epistemic', 'epistemic', 'epistemic',
@@ -422,8 +445,8 @@ describe('consolidator core contract over synthetic tracked v1.2 records', () =>
     const root = await makeTrackedSyntheticRepository(t, { dimensionsForArticle: dimensions });
     const prepared = await Promise.all(DIMENSIONS.map((dimension) => prepareConsolidation(root, dimension, RECORDS_DIRECTORY)));
     assert.ok(prepared.every((result) => result.status === 'ready'));
-    assert.ok(prepared.every((result) => result.observations.length === 36));
-    assert.equal(prepared.reduce((total, result) => total + result.observations.length, 0), 144);
+    assert.ok(prepared.every((result) => result.observations.length === 60));
+    assert.equal(prepared.reduce((total, result) => total + result.observations.length, 0), 240);
   });
 
   it('validates schemas, exact partitioning, member dimensions, and candidate-authored prose', async (t) => {
@@ -432,7 +455,7 @@ describe('consolidator core contract over synthetic tracked v1.2 records', () =>
     const validCandidate = featureCandidate('rhetorical', prepared);
     const acceptedText = await acceptDimensionCandidate(root, 'rhetorical', prepared.corpus_hash, prepared.input_hash, JSON.stringify(validCandidate), RECORDS_DIRECTORY);
     const accepted = JSON.parse(acceptedText);
-    assert.equal(accepted.schema_version, 'author-pattern-dimension/0.5');
+    assert.equal(accepted.schema_version, 'author-pattern-dimension/0.6');
     assert.equal(accepted.groups.length, 4);
     const groupFacts = accepted.groups.map((group) => [group.label, group.observation_count, group.article_count])
       .sort((left, right) => left[0] < right[0] ? -1 : left[0] > right[0] ? 1 : 0);
@@ -528,7 +551,7 @@ describe('consolidator core contract over synthetic tracked v1.2 records', () =>
     const rhetoricalSchema = JSON.parse(await readFile(join(PACKAGE_DIR, 'patterns.v0.2.schema.json'), 'utf8'));
     const semanticSchema = JSON.parse(await readFile(join(PACKAGE_DIR, 'patterns.v0.3.schema.json'), 'utf8'));
     const decisionalSchema = JSON.parse(await readFile(join(PACKAGE_DIR, 'patterns.v0.4.schema.json'), 'utf8'));
-    const schema = JSON.parse(await readFile(join(PACKAGE_DIR, 'patterns.v0.5.schema.json'), 'utf8'));
+    const schema = JSON.parse(await readFile(join(PACKAGE_DIR, 'patterns.v0.6.schema.json'), 'utf8'));
     const ajv = new (await import('ajv/dist/2020.js')).default({ allErrors: true, strict: true });
     ajv.addSchema(baseSchema);
     ajv.addSchema(rhetoricalSchema);
@@ -638,7 +661,7 @@ describe('consolidator core contract over synthetic tracked v1.2 records', () =>
     await writeFile(recordPath, '{');
     await assert.rejects(prepareConsolidation(root, 'rhetorical', RECORDS_DIRECTORY), (error) => error.code === 'DATASET_INVALID');
     await writeFile(recordPath, record);
-    await writeFile(join(root, RECORDS_DIRECTORY, 'A13.json'), '{}');
+    await writeFile(join(root, RECORDS_DIRECTORY, 'A21.json'), '{}');
     await assert.rejects(prepareConsolidation(root, 'rhetorical', RECORDS_DIRECTORY), (error) => error.code === 'DATASET_INVALID');
   });
 
@@ -758,10 +781,10 @@ describe('consolidator core contract over synthetic tracked v1.2 records', () =>
     }
   });
 
-  it('binds current preparation to retained schemas and rejects a changed rhetorical extension', async (t) => {
+  it('binds current preparation to its self-contained twenty-source schema', async (t) => {
     const root = await makeTrackedSyntheticRepository(t);
     const prepared = await prepareConsolidation(root, 'rhetorical', RECORDS_DIRECTORY);
-    const schemaPath = join(root, '_scripts/author-extraction/patterns.v0.2.schema.json');
+    const schemaPath = join(root, '_scripts/author-extraction/patterns.v0.6.schema.json');
     await writeFile(schemaPath, ` ${await readFile(schemaPath, 'utf8')}`);
     const revised = await prepareConsolidation(root, 'rhetorical', RECORDS_DIRECTORY);
     assert.notEqual(revised.method.schema_hash, prepared.method.schema_hash);
@@ -771,8 +794,9 @@ describe('consolidator core contract over synthetic tracked v1.2 records', () =>
   });
 
   it('combines revised rhetorical data with untouched historical non-rhetorical dimensions using their exact contract snapshot', async (t) => {
-    const root = await makeTrackedSyntheticRepository(t, { dimensionsForArticle: featureDimensions });
-    const { prepared, accepted, corpusHash } = await acceptedFeatureDimensions(root);
+    const recordsDirectory = TWELVE_RECORDS_DIRECTORY;
+    const root = await makeTrackedSyntheticRepository(t, { dimensionsForArticle: featureDimensions, recordsDirectory });
+    const { prepared, accepted, corpusHash } = await acceptedFeatureDimensions(root, recordsDirectory);
     const canonicalize = (value) => Array.isArray(value) ? value.map(canonicalize) : value !== null && typeof value === 'object'
       ? Object.fromEntries(Object.keys(value).sort().map((key) => [key, canonicalize(value[key])])) : value;
     const canonical = (value) => JSON.stringify(canonicalize(value));
@@ -790,13 +814,13 @@ describe('consolidator core contract over synthetic tracked v1.2 records', () =>
       record.input_hash = sha256(Buffer.from(canonical({ corpus_hash: corpusHash, dimension: record.dimension, observations: prepared.get(record.dimension).observations, method: legacyMethod })));
       return canonical(record);
     });
-    const bundle = JSON.parse(await finalizeConsolidation(root, corpusHash, mixed, RECORDS_DIRECTORY));
-    assert.equal(bundle.dimension_methods.rhetorical.instructions_version, 'author-pattern-consolidator/0.5');
+    const bundle = JSON.parse(await finalizeConsolidation(root, corpusHash, mixed, recordsDirectory));
+    assert.equal(bundle.dimension_methods.rhetorical.instructions_version, 'author-pattern-consolidator/0.6');
     for (const dimension of ['epistemic', 'semantic', 'decisional']) assert.deepEqual(bundle.dimension_methods[dimension], legacyMethod);
     assert.deepEqual(bundle.author_patterns.rhetorical_groups.map((group) => group.id), JSON.parse(mixed[0]).groups.map((group) => group.id));
     const stale = mixed.map((json) => JSON.parse(json));
     stale[1].method = { ...legacyMethod, instructions_hash: 'e'.repeat(64) };
-    await rejectionWithCode(finalizeConsolidation(root, corpusHash, stale.map(JSON.stringify), RECORDS_DIRECTORY), 'INPUT_CHANGED');
+    await rejectionWithCode(finalizeConsolidation(root, corpusHash, stale.map(JSON.stringify), recordsDirectory), 'INPUT_CHANGED');
   });
 
   it('assigns independent concept/relation IDs from membership and preserves them in finalization', async (t) => {
@@ -874,8 +898,9 @@ describe('consolidator core contract over synthetic tracked v1.2 records', () =>
   });
 
   it('combines current semantic IDs with retained rhetorical v0.2 and other v0.1 dimensions without relabelling them', async (t) => {
-    const root = await makeTrackedSyntheticRepository(t, { dimensionsForArticle: featureDimensions });
-    const { prepared, accepted, corpusHash } = await acceptedFeatureDimensions(root);
+    const recordsDirectory = TWELVE_RECORDS_DIRECTORY;
+    const root = await makeTrackedSyntheticRepository(t, { dimensionsForArticle: featureDimensions, recordsDirectory });
+    const { prepared, accepted, corpusHash } = await acceptedFeatureDimensions(root, recordsDirectory);
     const canonicalize = (value) => Array.isArray(value) ? value.map(canonicalize) : value !== null && typeof value === 'object'
       ? Object.fromEntries(Object.keys(value).sort().map((key) => [key, canonicalize(value[key])])) : value;
     const canonical = (value) => JSON.stringify(canonicalize(value));
@@ -898,21 +923,21 @@ describe('consolidator core contract over synthetic tracked v1.2 records', () =>
       record.input_hash = sha256(Buffer.from(canonical({ corpus_hash: corpusHash, dimension: record.dimension, observations: prepared.get(record.dimension).observations, method: record.method })));
       return canonical(record);
     });
-    const bundle = JSON.parse(await finalizeConsolidation(root, corpusHash, mixed, RECORDS_DIRECTORY));
+    const bundle = JSON.parse(await finalizeConsolidation(root, corpusHash, mixed, recordsDirectory));
     assert.equal(bundle.dimension_methods.rhetorical.instructions_version, 'author-pattern-consolidator/0.2');
-    assert.equal(bundle.dimension_methods.semantic.instructions_version, 'author-pattern-consolidator/0.5');
+    assert.equal(bundle.dimension_methods.semantic.instructions_version, 'author-pattern-consolidator/0.6');
     assert.equal(bundle.dimension_methods.epistemic.instructions_version, 'author-pattern-consolidator/0.1');
     assert.deepEqual(bundle.author_patterns.rhetorical_groups.map((group) => group.id), JSON.parse(mixed[0]).groups.map((group) => group.id));
     assert.equal(bundle.semantic_recurrences.concepts[0].id, 'SPC::C0001');
     assert.equal(bundle.semantic_recurrences.relations[0].id, 'SPC::R0001');
     await writeFile(join(root, '_scripts/author-extraction/author-pattern-consolidator.v0.2.md'), '# Changed frozen instructions\n');
-    await rejectionWithCode(finalizeConsolidation(root, corpusHash, mixed, RECORDS_DIRECTORY), 'INPUT_CHANGED');
+    await rejectionWithCode(finalizeConsolidation(root, corpusHash, mixed, recordsDirectory), 'INPUT_CHANGED');
   });
 
   it('binds preparation to the semantic schema bytes and rejects a stale semantic candidate', async (t) => {
     const root = await makeTrackedSyntheticRepository(t, { dimensionsForArticle: featureDimensions });
     const prepared = await prepareConsolidation(root, 'semantic', RECORDS_DIRECTORY);
-    const schemaPath = join(root, '_scripts/author-extraction/patterns.v0.3.schema.json');
+    const schemaPath = join(root, '_scripts/author-extraction/patterns.v0.6.schema.json');
     await writeFile(schemaPath, ` ${await readFile(schemaPath, 'utf8')}`);
     const changed = await prepareConsolidation(root, 'semantic', RECORDS_DIRECTORY);
     assert.notEqual(changed.method.schema_hash, prepared.method.schema_hash);
@@ -961,8 +986,9 @@ describe('consolidator core contract over synthetic tracked v1.2 records', () =>
   });
 
   it('supports current decisional IDs alongside retained v0.3 semantic records and rejects a stale decisional contract', async (t) => {
-    const root = await makeTrackedSyntheticRepository(t, { dimensionsForArticle: featureDimensions });
-    const { prepared, accepted, corpusHash } = await acceptedFeatureDimensions(root);
+    const recordsDirectory = TWELVE_RECORDS_DIRECTORY;
+    const root = await makeTrackedSyntheticRepository(t, { dimensionsForArticle: featureDimensions, recordsDirectory });
+    const { prepared, accepted, corpusHash } = await acceptedFeatureDimensions(root, recordsDirectory);
     const canonicalize = (value) => Array.isArray(value) ? value.map(canonicalize) : value !== null && typeof value === 'object'
       ? Object.fromEntries(Object.keys(value).sort().map((key) => [key, canonicalize(value[key])])) : value;
     const canonical = (value) => JSON.stringify(canonicalize(value));
@@ -980,17 +1006,17 @@ describe('consolidator core contract over synthetic tracked v1.2 records', () =>
     semantic.input_hash = sha256(Buffer.from(canonical({ corpus_hash: corpusHash, dimension: 'semantic', observations: prepared.get('semantic').observations, method: semantic.method })));
     const mixed = [...accepted];
     mixed[2] = canonical(semantic);
-    const bundle = JSON.parse(await finalizeConsolidation(root, corpusHash, mixed, RECORDS_DIRECTORY));
+    const bundle = JSON.parse(await finalizeConsolidation(root, corpusHash, mixed, recordsDirectory));
     assert.equal(bundle.dimension_methods.semantic.instructions_version, 'author-pattern-consolidator/0.3');
-    assert.equal(bundle.dimension_methods.decisional.instructions_version, 'author-pattern-consolidator/0.5');
+    assert.equal(bundle.dimension_methods.decisional.instructions_version, 'author-pattern-consolidator/0.6');
     assert.equal(bundle.semantic_recurrences.concepts[0].id, 'SPC::C0001');
     const projection = prepared.get('decisional');
-    const schemaPath = join(root, '_scripts/author-extraction/patterns.v0.4.schema.json');
+    const schemaPath = join(root, '_scripts/author-extraction/patterns.v0.6.schema.json');
     await writeFile(schemaPath, ` ${await readFile(schemaPath, 'utf8')}`);
-    const revised = await prepareConsolidation(root, 'decisional', RECORDS_DIRECTORY);
+    const revised = await prepareConsolidation(root, 'decisional', recordsDirectory);
     assert.notEqual(revised.input_hash, projection.input_hash);
     await rejectionWithCode(acceptDimensionCandidate(root, 'decisional', corpusHash, projection.input_hash,
-      JSON.stringify(featureCandidate('decisional', projection)), RECORDS_DIRECTORY), 'INPUT_CHANGED');
+      JSON.stringify(featureCandidate('decisional', projection)), recordsDirectory), 'INPUT_CHANGED');
   });
 
   it('derives epistemic subtype IDs with independent counters and preserves them in their final buckets', async (t) => {
@@ -1028,8 +1054,9 @@ describe('consolidator core contract over synthetic tracked v1.2 records', () =>
   });
 
   it('combines new epistemic IDs with retained v0.4 decisional provenance and rejects stale epistemic schema bytes', async (t) => {
-    const root = await makeTrackedSyntheticRepository(t, { dimensionsForArticle: featureDimensions });
-    const { prepared, accepted, corpusHash } = await acceptedFeatureDimensions(root);
+    const recordsDirectory = TWELVE_RECORDS_DIRECTORY;
+    const root = await makeTrackedSyntheticRepository(t, { dimensionsForArticle: featureDimensions, recordsDirectory });
+    const { prepared, accepted, corpusHash } = await acceptedFeatureDimensions(root, recordsDirectory);
     const canonicalize = (value) => Array.isArray(value) ? value.map(canonicalize) : value !== null && typeof value === 'object'
       ? Object.fromEntries(Object.keys(value).sort().map((key) => [key, canonicalize(value[key])])) : value;
     const canonical = (value) => JSON.stringify(canonicalize(value));
@@ -1046,15 +1073,31 @@ describe('consolidator core contract over synthetic tracked v1.2 records', () =>
     decisional.input_hash = sha256(Buffer.from(canonical({ corpus_hash: corpusHash, dimension: 'decisional', observations: prepared.get('decisional').observations, method: decisional.method })));
     const mixed = [...accepted];
     mixed[3] = canonical(decisional);
-    const bundle = JSON.parse(await finalizeConsolidation(root, corpusHash, mixed, RECORDS_DIRECTORY));
+    const bundle = JSON.parse(await finalizeConsolidation(root, corpusHash, mixed, recordsDirectory));
     assert.equal(bundle.dimension_methods.decisional.instructions_version, 'author-pattern-consolidator/0.4');
-    assert.equal(bundle.dimension_methods.epistemic.instructions_version, 'author-pattern-consolidator/0.5');
+    assert.equal(bundle.dimension_methods.epistemic.instructions_version, 'author-pattern-consolidator/0.6');
     assert.equal(bundle.author_patterns.patterns.find((group) => group.dimension === 'epistemic').id, 'EPC:A0001');
     const projection = prepared.get('epistemic');
-    const schemaPath = join(root, '_scripts/author-extraction/patterns.v0.5.schema.json');
+    const schemaPath = join(root, '_scripts/author-extraction/patterns.v0.6.schema.json');
     await writeFile(schemaPath, ` ${await readFile(schemaPath, 'utf8')}`);
-    assert.notEqual((await prepareConsolidation(root, 'epistemic', RECORDS_DIRECTORY)).input_hash, projection.input_hash);
+    assert.notEqual((await prepareConsolidation(root, 'epistemic', recordsDirectory)).input_hash, projection.input_hash);
     await rejectionWithCode(acceptDimensionCandidate(root, 'epistemic', corpusHash, projection.input_hash,
-      JSON.stringify(featureCandidate('epistemic', projection)), RECORDS_DIRECTORY), 'INPUT_CHANGED');
+      JSON.stringify(featureCandidate('epistemic', projection)), recordsDirectory), 'INPUT_CHANGED');
+  });
+
+  it('uses all twenty articles in one support group and rejects mixing old records into the expanded dataset', async (t) => {
+    const root = await makeTrackedSyntheticRepository(t);
+    const prepared = await prepareConsolidation(root, 'rhetorical', RECORDS_DIRECTORY);
+    assert.equal(prepared.observations.length, 20);
+    assert.equal(prepared.observations.at(-1).article_id, 'A20');
+    const candidate = { groups: [candidateGroup('Twenty-source fixture', prepared.observations.map((item) => item.observation_id))], unclustered_observations: [] };
+    const accepted = JSON.parse(await acceptDimensionCandidate(root, 'rhetorical', prepared.corpus_hash, prepared.input_hash, JSON.stringify(candidate), RECORDS_DIRECTORY));
+    assert.equal(accepted.groups[0].article_count, 20);
+    assert.equal(accepted.groups[0].observation_count, 20);
+    const historicalRoot = await makeTrackedSyntheticRepository(t, { recordsDirectory: TWELVE_RECORDS_DIRECTORY });
+    const historical = await readFile(join(historicalRoot, TWELVE_RECORDS_DIRECTORY, 'A01.json'), 'utf8');
+    assert.equal((await verifyExtractionRecord(root, historical)).processing_eligible, true);
+    await writeFile(join(root, RECORDS_DIRECTORY, 'A01.json'), historical);
+    await rejectionWithCode(prepareConsolidation(root, 'rhetorical', RECORDS_DIRECTORY), 'DATASET_INVALID');
   });
 });

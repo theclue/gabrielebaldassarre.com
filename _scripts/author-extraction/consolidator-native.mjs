@@ -3,7 +3,8 @@ import patternSchema from "./patterns.schema.json" with { type: "json" };
 import rhetoricalPatternSchema from "./patterns.v0.2.schema.json" with { type: "json" };
 import semanticPatternSchema from "./patterns.v0.3.schema.json" with { type: "json" };
 import decisionalPatternSchema from "./patterns.v0.4.schema.json" with { type: "json" };
-import currentPatternSchema from "./patterns.v0.5.schema.json" with { type: "json" };
+import epistemicPatternSchema from "./patterns.v0.5.schema.json" with { type: "json" };
+import currentPatternSchema from "./patterns.v0.6.schema.json" with { type: "json" };
 import { assignRhetoricalGroupIds } from "./rhetorical.mjs";
 import { assignSemanticGroupIds } from "./semantic.mjs";
 import { assignDecisionalGroupIds } from "./decisional.mjs";
@@ -34,6 +35,7 @@ const DIMENSIONS = new Set(patternSchema.$defs.Dimension.enum);
 const RECORD_DIRECTORIES = new Set([
   "docs/author-extraction-results/v1.1",
   "docs/author-extraction-results/v1.2",
+  "docs/author-extraction-results/v1.3",
 ]);
 const DEFAULT_RECORD_DIRECTORY = "docs/author-extraction-results/v1.1";
 const CANDIDATE_LIMIT = 256 * 1024;
@@ -44,6 +46,7 @@ ajv.addSchema(patternSchema);
 ajv.addSchema(rhetoricalPatternSchema);
 ajv.addSchema(semanticPatternSchema);
 ajv.addSchema(decisionalPatternSchema);
+ajv.addSchema(epistemicPatternSchema);
 ajv.addSchema(currentPatternSchema);
 const localSchema = { $schema: patternSchema.$schema, $defs: patternSchema.$defs };
 const validatePrepareInput = ajv.compile({ ...localSchema, $ref: "#/$defs/PrepareInput" });
@@ -53,6 +56,8 @@ const validatePrepareResult = ajv.compile({ oneOf: [
   { $ref: `${rhetoricalPatternSchema.$id}#/$defs/PreparedDimension` },
   { $ref: `${semanticPatternSchema.$id}#/$defs/PreparedDimension` },
   { $ref: `${decisionalPatternSchema.$id}#/$defs/PreparedDimension` },
+  { $ref: `${epistemicPatternSchema.$id}#/$defs/PreparedDimension` },
+  { $ref: `${currentPatternSchema.$id}#/$defs/BlockedPreparation` },
   { $ref: `${currentPatternSchema.$id}#/$defs/PreparedDimension` },
 ] });
 const validateAcceptedDimensionSchema = ajv.compile({ oneOf: [
@@ -60,14 +65,22 @@ const validateAcceptedDimensionSchema = ajv.compile({ oneOf: [
   { $ref: `${rhetoricalPatternSchema.$id}#/$defs/AcceptedDimension` },
   { $ref: `${semanticPatternSchema.$id}#/$defs/AcceptedDimension` },
   { $ref: `${decisionalPatternSchema.$id}#/$defs/AcceptedDimension` },
+  { $ref: `${epistemicPatternSchema.$id}#/$defs/AcceptedDimension` },
   { $ref: `${currentPatternSchema.$id}#/$defs/AcceptedDimension` },
 ] });
 const validateAcceptanceEnvelope = ajv.compile({ ...localSchema, $ref: "#/$defs/AcceptanceEnvelope" });
 const validateNonsemanticCandidate = ajv.compile({ ...localSchema, $ref: "#/$defs/CandidateNonsemantic" });
 const validateSemanticCandidate = ajv.compile({ ...localSchema, $ref: "#/$defs/CandidateSemantic" });
-const validateRhetoricalCandidate = ajv.getSchema(`${currentPatternSchema.$id}#/$defs/CandidateRhetorical`);
+const validateRhetoricalCandidate = ajv.getSchema(`${epistemicPatternSchema.$id}#/$defs/CandidateRhetorical`);
+const currentCandidateValidators = {
+  rhetorical: ajv.getSchema(`${currentPatternSchema.$id}#/$defs/CandidateRhetorical`),
+  semantic: ajv.getSchema(`${currentPatternSchema.$id}#/$defs/CandidateSemantic`),
+  epistemic: ajv.getSchema(`${currentPatternSchema.$id}#/$defs/CandidateNonsemantic`),
+  decisional: ajv.getSchema(`${currentPatternSchema.$id}#/$defs/CandidateNonsemantic`),
+};
 
 function candidateValidator(dimension, prepared) {
+  if (prepared.schema_version === "author-pattern-preparation/0.6") return currentCandidateValidators[dimension];
   return dimension === "semantic" ? validateSemanticCandidate
     : dimension === "rhetorical" && ["author-pattern-preparation/0.2", "author-pattern-preparation/0.3", "author-pattern-preparation/0.4", "author-pattern-preparation/0.5"].includes(prepared.schema_version) ? validateRhetoricalCandidate
       : validateNonsemanticCandidate;
@@ -236,16 +249,16 @@ function validateCandidateAgainstPrepared(candidate, dimension, prepared) {
       article_count: new Set(support.map((entry) => entry.article_id)).size,
     };
   }).sort((left, right) => compareLexically(JSON.stringify(canonicalize(left)), JSON.stringify(canonicalize(right))));
-  if (dimension === "rhetorical" && ["author-pattern-preparation/0.2", "author-pattern-preparation/0.3", "author-pattern-preparation/0.4", "author-pattern-preparation/0.5"].includes(prepared.schema_version)) {
-    expectedGroups = assignRhetoricalGroupIds(expectedGroups);
+  if (dimension === "rhetorical" && ["author-pattern-preparation/0.2", "author-pattern-preparation/0.3", "author-pattern-preparation/0.4", "author-pattern-preparation/0.5", "author-pattern-preparation/0.6"].includes(prepared.schema_version)) {
+    expectedGroups = assignRhetoricalGroupIds(expectedGroups, prepared.schema_version);
   }
-  if (dimension === "semantic" && ["author-pattern-preparation/0.3", "author-pattern-preparation/0.4", "author-pattern-preparation/0.5"].includes(prepared.schema_version)) {
-    expectedGroups = assignSemanticGroupIds(expectedGroups);
+  if (dimension === "semantic" && ["author-pattern-preparation/0.3", "author-pattern-preparation/0.4", "author-pattern-preparation/0.5", "author-pattern-preparation/0.6"].includes(prepared.schema_version)) {
+    expectedGroups = assignSemanticGroupIds(expectedGroups, prepared.schema_version);
   }
-  if (dimension === "decisional" && ["author-pattern-preparation/0.4", "author-pattern-preparation/0.5"].includes(prepared.schema_version)) {
+  if (dimension === "decisional" && ["author-pattern-preparation/0.4", "author-pattern-preparation/0.5", "author-pattern-preparation/0.6"].includes(prepared.schema_version)) {
     expectedGroups = assignDecisionalGroupIds(expectedGroups);
   }
-  if (dimension === "epistemic" && prepared.schema_version === "author-pattern-preparation/0.5") {
+  if (dimension === "epistemic" && ["author-pattern-preparation/0.5", "author-pattern-preparation/0.6"].includes(prepared.schema_version)) {
     expectedGroups = assignEpistemicGroupIds(expectedGroups);
   }
   const expectedUnclustered = candidate.unclustered_observations.map((item) => ({

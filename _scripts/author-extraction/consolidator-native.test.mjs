@@ -421,7 +421,7 @@ describe('consolidation native adapter protocol (closed schemas; no SDK or provi
     delete accepted.groups[0].classification;
     accepted.groups[0].pattern_scope = 'editorial_format';
     accepted.groups[0].author_relevance = 'candidate';
-    accepted.groups = assignRhetoricalGroupIds(accepted.groups);
+    accepted.groups = assignRhetoricalGroupIds(accepted.groups, accepted.schema_version);
     const current = adapterWith({ prepareConsolidation: async () => prepared, acceptDimensionCandidate: async () => JSON.stringify(canonicalize(accepted)) });
     await current.adapter.prepare({ dimension: 'rhetorical' }, ALLOWED_CONTEXT);
     const envelope = await current.adapter.submit(submitInput({ candidate_json: JSON.stringify(proposal) }), ALLOWED_CONTEXT);
@@ -457,7 +457,7 @@ describe('consolidation native adapter protocol (closed schemas; no SDK or provi
       groups: assignSemanticGroupIds(proposal.groups.map(({ member_observation_ids, ...group }) => ({
         ...group, support: member_observation_ids.map((observation_id) => ({ observation_id, article_id: observation_id.split('::')[0] })),
         observation_count: member_observation_ids.length, article_count: 2,
-      }))), unclustered_observations: [],
+      })), prepared.schema_version), unclustered_observations: [],
     };
     const input = submitInput({ dimension: 'semantic', candidate_json: JSON.stringify(proposal) });
     const current = adapterWith({ prepareConsolidation: async () => prepared, acceptDimensionCandidate: async () => JSON.stringify(canonicalize(accepted)) });

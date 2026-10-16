@@ -1,0 +1,17 @@
+{
+  "schema_version": "author-runtime-artifacts/1",
+  "runtime_id": "ARP:6D694FF2CDF563CBFBFAD186",
+  "source_author_model_sha256": "88d622c01aee9e0dafa44a2966ebbbe63ff8249336eb0e861da13c157051f8b5",
+  "profile_path": "docs/author-pattern-results/v1.3/author-runtimes/arp-6d694ff2cdf563cbfbfad186/author-runtime-profile.json",
+  "profile_sha256": "5cb6d5aa218e4020daa595c373240fc820674029e3ceb294ad8300f4a4fcd23b",
+  "instructions_path": "docs/author-pattern-results/v1.3/author-runtimes/arp-6d694ff2cdf563cbfbfad186/author-runtime-instructions.md",
+  "instructions_sha256": "72f36ddeebda5b6eef9c8b90619733e181dc828aff233bf8ef6a4767f6fa98cd",
+  "counts": {
+    "profiles": 1,
+    "principles": 2,
+    "contextual_rules": 1,
+    "devices": 2,
+    "guardrails": 8,
+    "semantic_context": 0
+  }
+}

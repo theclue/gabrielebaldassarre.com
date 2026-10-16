@@ -13,7 +13,8 @@ const ARTICLE_PATH = '_posts/synthetic.md';
 const REPO_ROOT = fileURLToPath(new URL('../../', import.meta.url));
 const INSTRUCTIONS = '# Synthetic author-extractor fixture\n';
 const BODY = 'A😀\r\nline\r\n \t\r\nz e\u0301\r\n\r\ncode $x$';
-const SCHEMA_BYTES = await readFile(join(PACKAGE_DIR, 'extraction.v1.2.schema.json'));
+const SCHEMA_BYTES = await readFile(join(PACKAGE_DIR, 'extraction.v1.3.schema.json'));
+const RETAINED_SCHEMA_BYTES = await readFile(join(PACKAGE_DIR, 'extraction.v1.2.schema.json'));
 const LEGACY_SCHEMA_BYTES = await readFile(join(PACKAGE_DIR, 'extraction.schema.json'));
 const LEGACY_SCHEMA_SHA256 = '063c71461104299b4cfae449d1c32f24642c76fcfe0d9a8340a7023a48fa1047';
 const SEED_AGGREGATE_SHA256 = 'bac1a6b9535a2175bde2653ed3aa1cce62fee68b338c26e638b48100e172d69f';
@@ -52,7 +53,7 @@ function workflowReceipt(prepared, sessionId = 'synthetic-core-session') {
 }
 
 function corpusText(path = ARTICLE_PATH, representative = true, { omitId } = {}) {
-  const articleIds = Array.from({ length: 12 }, (_, index) => `A${String(index + 1).padStart(2, '0')}`);
+  const articleIds = Array.from({ length: 20 }, (_, index) => `A${String(index + 1).padStart(2, '0')}`);
   const sources = articleIds
     .filter((id) => id !== omitId)
     .flatMap((id) => [
@@ -91,7 +92,8 @@ async function makeRepo(t, {
   await mkdir(join(root, '_posts'), { recursive: true });
   await writeFile(join(root, 'docs/corpus.yaml'), corpus);
   await writeFile(join(root, '_scripts/author-extraction/extraction.schema.json'), LEGACY_SCHEMA_BYTES);
-  await writeFile(join(root, '_scripts/author-extraction/extraction.v1.2.schema.json'), SCHEMA_BYTES);
+  await writeFile(join(root, '_scripts/author-extraction/extraction.v1.2.schema.json'), RETAINED_SCHEMA_BYTES);
+  await writeFile(join(root, '_scripts/author-extraction/extraction.v1.3.schema.json'), SCHEMA_BYTES);
   await writeFile(join(root, '.opencode/agents/author-extractor.md'), INSTRUCTIONS);
   if (path === ARTICLE_PATH) await writeFile(join(root, ARTICLE_PATH), source);
   return root;
@@ -148,9 +150,9 @@ async function rejectionCode(promise, code) {
 
 describe('author extraction core', () => {
   it('compiles the full Draft 2020-12 schema and Candidate with Ajv strict mode', async () => {
-    const schema = JSON.parse(await readFile(join(PACKAGE_DIR, 'extraction.v1.2.schema.json'), 'utf8'));
+    const schema = JSON.parse(await readFile(join(PACKAGE_DIR, 'extraction.v1.3.schema.json'), 'utf8'));
     const legacySchema = JSON.parse(LEGACY_SCHEMA_BYTES);
-    assert.equal(schema.$id, 'urn:gabrielebaldassarre:author-extraction:1.2');
+    assert.equal(schema.$id, 'urn:gabrielebaldassarre:author-extraction:1.3');
     assert.equal(legacySchema.$id, 'urn:gabrielebaldassarre:author-extraction:1.1');
     assert.equal(sha256(LEGACY_SCHEMA_BYTES), LEGACY_SCHEMA_SHA256, 'the frozen v1.1 schema bytes must remain unchanged');
     const ajv = new Ajv2020({
@@ -188,16 +190,16 @@ describe('author extraction core', () => {
       prepare_version: 'prepare/1',
       segmentation_version: 'raw-blank-lines/1',
       measurement_version: 'raw-body-counts/1',
-      instructions_version: 'author-extractor/1.2',
+      instructions_version: 'author-extractor/1.3',
       workflow_version: 'host-session-whole-article/1',
       schema_hash: schemaHash,
       instructions_hash: sha256(instructionsBytes),
     };
-    const expectedCanonicalInput = `{"method":{"instructions_hash":"${method.instructions_hash}","instructions_version":"author-extractor/1.2","measurement_version":"raw-body-counts/1","prepare_version":"prepare/1","schema_hash":"${schemaHash}","segmentation_version":"raw-blank-lines/1","workflow_version":"host-session-whole-article/1"},"source":{"article_id":"A12","corpus_hash":"${source.corpus_hash}","file_hash":"${source.file_hash}","path":"${ARTICLE_PATH}"}}`;
+    const expectedCanonicalInput = `{"method":{"instructions_hash":"${method.instructions_hash}","instructions_version":"author-extractor/1.3","measurement_version":"raw-body-counts/1","prepare_version":"prepare/1","schema_hash":"${schemaHash}","segmentation_version":"raw-blank-lines/1","workflow_version":"host-session-whole-article/1"},"source":{"article_id":"A12","corpus_hash":"${source.corpus_hash}","file_hash":"${source.file_hash}","path":"${ARTICLE_PATH}"}}`;
 
     assert.deepEqual(prepared.source, source);
     assert.deepEqual(prepared.method, method);
-    assert.equal(prepared.schema_version, 'author-extraction/1.2');
+    assert.equal(prepared.schema_version, 'author-extraction/1.3');
     assert.equal(prepared.input_hash, sha256(Buffer.from(expectedCanonicalInput, 'utf8')));
     assert.equal(prepared.body, BODY);
     assert.deepEqual(prepared.passages, [
@@ -224,7 +226,7 @@ describe('author extraction core', () => {
       assert.deepEqual(Object.keys(finalRecord).sort(), [
         'dimension_presence', 'measurements', 'method', 'observations', 'processing', 'schema_version', 'source',
       ]);
-      assert.equal(finalRecord.schema_version, 'author-extraction/1.2');
+      assert.equal(finalRecord.schema_version, 'author-extraction/1.3');
       assert.equal(finalRecord.observations[0].dimension, dimension);
       assert.deepEqual(Object.keys(finalRecord.observations[0]).sort(), [
         'description', 'dimension', 'evidence', 'id', 'inference_kind', 'label', 'review_status',
@@ -430,7 +432,7 @@ describe('author extraction core', () => {
 
   it('rejects unknown and non-representative articles without accepting arbitrary sources', async (t) => {
     const root = await makeRepo(t);
-    await rejectionCode(prepareArticle(root, 'A13'), 'UNKNOWN_ARTICLE');
+    await rejectionCode(prepareArticle(root, 'A21'), 'UNKNOWN_ARTICLE');
 
     const unapprovedRoot = await makeRepo(t, { representative: false });
     await rejectionCode(prepareArticle(unapprovedRoot, 'A12'), 'CORPUS_INVALID');
@@ -592,5 +594,21 @@ describe('author extraction core', () => {
     const error = await rejectionCode(acceptCandidate(root, 'A12', prepared.input_hash, invalid), 'CANDIDATE_SCHEMA_INVALID');
     assert.equal(error.message.includes(secretFixtureText), false);
     assert.equal(JSON.stringify(error.details).includes(secretFixtureText), false);
+  });
+
+  it('accepts A20 with tracked v1.3 processing and rejects A21 or an incomplete twenty-source manifest', async (t) => {
+    const root = await makeRepo(t);
+    await mkdir(join(root, '_posts/synthetic'), { recursive: true });
+    await writeFile(join(root, '_posts/synthetic/A20.md'), '---\ntitle: Synthetic A20\n---\nsafe quote');
+    const prepared = await prepareArticle(root, 'A20');
+    const payload = candidate({ evidence: { article_id: 'A20', passage_id: 'P0001', quote: 'safe quote' } });
+    const record = await acceptCandidate(root, 'A20', prepared.input_hash, JSON.stringify(payload), { workflowReceipt: workflowReceipt(prepared, 'synthetic-A20') });
+    const verified = await verifyExtractionRecord(root, record);
+    assert.equal(verified.record.schema_version, 'author-extraction/1.3');
+    assert.equal(verified.record.observations[0].id, 'A20::O0001');
+    assert.equal(verified.processing_eligible, true);
+    await rejectionCode(prepareArticle(root, 'A21'), 'UNKNOWN_ARTICLE');
+    await writeFile(join(root, 'docs/corpus.yaml'), corpusText(ARTICLE_PATH, true, { omitId: 'A20' }));
+    await rejectionCode(prepareArticle(root, 'A12'), 'CORPUS_INVALID');
   });
 });

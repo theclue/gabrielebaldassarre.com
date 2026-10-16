@@ -1,4 +1,62 @@
-# /create_post
+---
+description: Crea un nuovo post o una bozza con il profilo autoriale contestuale verificato.
+subagent: false
+---
+
+# /create-post
+
+Richiesta dell'utente (dati del compito):
+
+$ARGUMENTS
+
+## Preparazione obbligatoria — non dipende dalla memoria della chat
+
+Questo repository espone il plugin locale `.opencode/plugins/post-authoring.js`.
+Prima di scrivere il corpo o creare file, chiama **`author_post_prepare`**.
+Il tool compila il profilo autoriale dal modello governato, lo materializza e lo
+verifica, esegue Rake `post`/`draft` e attiva l'iniezione automatica delle istruzioni
+nelle successive chiamate al modello **di questa sessione**. Non riutilizzare il
+runtime di un esempio e non chiedere all'utente hash, JSON o comandi tecnici.
+Non delegare la scrittura: l'attivazione non si trasferisce ai subagenti.
+
+Se il tool non è disponibile o fallisce, fermati e segnala il problema; non creare
+un post tramite shell/Rake, non ripiegare su uno stile generico e non dichiarare
+che il profilo è stato usato. Non generare un articolo come test del plugin.
+
+Traduci la richiesta in un input del tool:
+- `request`: richiesta originale; `title`, `category`, `slug`, `destination` e
+  l'eventuale `date` secondo le regole sotto. Se la destinazione non è chiara,
+  scegli **draft**; usa `post` solo se l'utente richiede un articolo non in bozza.
+- `task.mode`: `generate`; `language`: `it`, salvo richiesta diversa.
+- `task.content_type`: `tutorial`, `project_article`, `scientific_explainer` oppure
+  `mixed` con `mixed_content_types` espliciti. La categoria non determina il genere.
+  Per un genere non supportato, chiedi chiarimento; non forzarlo nel più vicino.
+- `objective`, `audience`, `topic`, `constraints`: ricava ciò che serve dalla
+  richiesta. Non inventare esperienze, test, misure, piani di serie o dipendenze.
+- `features`: solo segnali effettivi del compito. I valori ammessi sono
+  `practical_relevance`, `approximation_assessment`, `mathematical_formalism`,
+  `physical_quantities`, `variable_conditions`, `quantitative_calculation`,
+  `hypothetical_scenario`, `mathematical_connection`, `historical_context`,
+  `familiar_reference`, `interpretation_of_data`, `mutable_information`,
+  `configuration_choices`, `information_loss`, `external_dependencies`,
+  `scope_delimitation`, `implementation_choices`.
+- `series_context`: dichiara una prosecuzione solo se realmente pianificata;
+  appartenere a una serie non basta. Non creare altre parti automaticamente.
+- Ometti `local_topics`, `semantic_topics` e `device_requests` di norma. Non
+  aggiungere concetti semantici o dispositivi required per il solo genere.
+  Se servono esplicitamente, consulta `docs/author-runtime.md` per il contratto.
+
+Per esempio, una matita parametrica in OpenSCAD è un `tutorial` con
+`implementation_choices` e `configuration_choices`, non una spiegazione fisica
+con calcolo numerico obbligatorio. Chiedi solo i dettagli editoriali davvero
+mancanti; fai assunzioni ragionevoli e dichiarale per quelli non bloccanti.
+
+Dopo `status: ready`, conserva `target_path`, `receipt_path`, `runtime_id` e
+`instructions_sha256`. Scrivi **solo nel nuovo `target_path` restituito**,
+applicando le istruzioni autoriali iniettate e i requisiti editoriali seguenti.
+Al termine chiama `author_post_finish` con `outcome: written`; se abbandoni il
+compito, usa `cancelled`. Il tool termina l'iniezione, non pubblica né elimina.
+Il conteggio delle applicazioni dell'hook non dimostra conformità della prosa.
 
 Crea un post tutorial/divulgativo tecnico-scientifico a partire da una
 descrizione in linguaggio naturale.
@@ -12,7 +70,7 @@ gabrielebaldassarre.com. L'articolo viene creato come `.md` in `_posts/<category
 ## Architettura
 
 1. **Interpretazione** della descrizione utente (estrazione metadati)
-2. **Chiamata** al Rake task `post` o `draft` per creare il template `.md`
+2. **Preparazione nativa** di runtime verificato e template Rake `post`/`draft`
 3. **Riempimento** del template con contenuto completo (body del post)
 4. **Restituzione** di recap, indice, stima accessibilità, prompt Midjourney
 
@@ -49,9 +107,8 @@ Dalla descrizione fornita, estrai mediante analisi LLM:
 
 - **`series`** — Se dal titolo o descrizione emergono indicatori di serie
   ("parte 1 di 3", "primo di tre articoli", "continua da..."), imposta
-  il blocco `series:` nel frontmatter. Per il primo post di una serie, il
-  resto viene creato in `_drafts/`, per i successivi si crea direttamente
-  in `_drafts/`.
+   il blocco `series:` nel frontmatter se i dati sono disponibili. Non creare
+   altre parti e non inventarne il piano o il numero totale.
 
 - **Wikipedia/Wikidata link** — Se nella descrizione è presente un URL
   Wikipedia o Wikidata, questo rappresenta l'argomento centrale. Usalo per
@@ -63,13 +120,15 @@ Dalla descrizione fornita, estrai mediante analisi LLM:
 
 ### Fase 2 — Determinazione destinazione
 
-- Se la descrizione contiene "bozza", "draft", "in bozza" → `_drafts/`
+- Se la richiesta è per una bozza/draft → `_drafts/` (non confondere con "non in bozza")
 - Se parte di una serie con `part > 1` → `_drafts/`
-- Altrimenti → `_posts/`
+- Articolo non in bozza esplicitamente richiesto → `_posts/`
+- Se non specificato → `_drafts/` (nessuna pubblicazione implicita)
 
 ### Fase 3 — Chiamata Rake
 
-Esegui il comando Rake corrispondente:
+Non eseguire Rake direttamente: `author_post_prepare` chiama il task
+corrispondente **solo dopo** compilazione e verifica del runtime:
 
 - Post: `rake post["<title>","<category>","<slug>"]`
 - Draft: `rake draft["<title>","<category>","<slug>"]`
@@ -84,13 +143,17 @@ Il Rake task:
 Il corpo del post (dopo il frontmatter `---`) viene generato come contenuto
 completo:
 
-**Struttura per tutorial:**
+Le seguenti sono strutture indicative, non scalette obbligatorie. Usa solo i
+dispositivi attivati dal runtime, senza imporre storia, formalismo, diagrammi,
+applicazioni o anticipazioni per il solo genere del testo.
+
+**Possibile struttura per tutorial:**
 1. Introduzione (problema, obiettivo, prerequisiti)
 2. Sezioni step-by-step con codice/configurazioni
 3. Verifica / testing
-4. Conclusioni e next steps
+4. Chiusura pertinente all'obiettivo, senza annunciare seguiti non pianificati
 
-**Struttura per articolo divulgativo:**
+**Possibile struttura per articolo divulgativo:**
 1. Introduzione (contesto storico/scientifico)
 2. Sviluppo concettuale (con diagrammi concettuali)
 3. Formalizzazione matematica (se pertinente)
@@ -136,10 +199,16 @@ series:
 
 ### Fase 6 — Output per l'utente
 
-Al termine, restituisci un messaggio strutturato:
+Al termine, restituisci un riepilogo conciso. Aggiungi runtime ID, percorso della
+ricevuta e hash delle istruzioni, riprendendoli dai risultati dei tool. Distingui
+verifiche eseguite da TODO; non affermare che l'uso del runtime certifichi il testo.
+Indice, difficoltà e prompt per l'immagine restano suggerimenti utili, non quote
+autoriali obbligatorie. Non eseguire commit, push, deploy o pubblicazione.
+
+Esempio di riepilogo:
 
 ```
-## /create_post completato
+## /create-post completato
 
 **File creato:** `_posts/<category>/<date>-<slug>.md`
 **Titolo:** <title>
@@ -166,7 +235,7 @@ Al termine, restituisci un messaggio strutturato:
 2. Generare la master image con Midjourney → salvare come
    `assets/images/posts/<slug>.png`
 3. Eseguire `/annotate-post _posts/<category>/<date>-<slug>.md`
-4. Se è una serie: eseguire `/create_post` per le parti successive
+4. Se è una serie effettivamente pianificata: eseguire `/create-post` per le parti successive
    specificando "in bozza"
 ```
 
@@ -202,8 +271,9 @@ Le regole precise per derivare lo slug dal titolo:
   usare `ENV["date"]` (gestito dal Rake task).
 - Non eseguire `/annotate-post` automaticamente: l'utente lo farà dopo
   aver revisionato il contenuto.
-- Per `/create_post` che referenzia un asset CAD (`_cad/<slug>/`), includi
+- Per `/create-post` che referenzia un asset CAD già rilasciato (`_cad/<slug>/`), includi
   il blocco `3d_model:` nel frontmatter usando il layout `asset-3d` e
-  la categoria `3D Printing`.
+   la categoria `3D Printing`. Un tutorial che mostra codice OpenSCAD non
+   autorizza automaticamente a creare/rilasciare asset CAD o file scaricabili.
 - Il `broadcast.sent` rimane `false` (la pipeline CI lo imposta dopo il
   push social).

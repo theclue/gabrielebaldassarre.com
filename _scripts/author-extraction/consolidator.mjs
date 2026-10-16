@@ -3,42 +3,53 @@ import { constants as fsConstants } from "node:fs";
 import { lstat, open, readdir, realpath } from "node:fs/promises";
 import path from "node:path";
 import Ajv2020 from "ajv/dist/2020.js";
-import { verifyExtractionRecord } from "./core.mjs";
+import { verifyExtractionRecord } from "./core.mjs?contract=1.3";
 import { assignRhetoricalGroupIds } from "./rhetorical.mjs";
 import { assignSemanticGroupIds } from "./semantic.mjs";
 import { assignDecisionalGroupIds } from "./decisional.mjs";
 import { assignEpistemicGroupIds } from "./epistemic.mjs";
 
 const ARTICLE_IDS = Array.from({ length: 12 }, (_, index) => `A${String(index + 1).padStart(2, "0")}`);
+const CURRENT_ARTICLE_IDS = Array.from({ length: 20 }, (_, index) => `A${String(index + 1).padStart(2, "0")}`);
 const DIMENSIONS = ["rhetorical", "epistemic", "semantic", "decisional"];
 const RECORD_DIRECTORIES = new Set([
   "docs/author-extraction-results/v1.1",
   "docs/author-extraction-results/v1.2",
+  "docs/author-extraction-results/v1.3",
 ]);
+const DATASETS = Object.freeze({
+  "docs/author-extraction-results/v1.1": { ids: ARTICLE_IDS, schema_version: "author-extraction/1.1" },
+  "docs/author-extraction-results/v1.2": { ids: ARTICLE_IDS, schema_version: "author-extraction/1.2" },
+  "docs/author-extraction-results/v1.3": { ids: CURRENT_ARTICLE_IDS, schema_version: "author-extraction/1.3" },
+});
 const SCHEMA_PATH = "_scripts/author-extraction/patterns.schema.json";
 const RHETORICAL_SCHEMA_PATH = "_scripts/author-extraction/patterns.v0.2.schema.json";
 const SEMANTIC_SCHEMA_PATH = "_scripts/author-extraction/patterns.v0.3.schema.json";
 const DECISIONAL_SCHEMA_PATH = "_scripts/author-extraction/patterns.v0.4.schema.json";
-const CURRENT_SCHEMA_PATH = "_scripts/author-extraction/patterns.v0.5.schema.json";
+const EPISTEMIC_SCHEMA_PATH = "_scripts/author-extraction/patterns.v0.5.schema.json";
+const CURRENT_SCHEMA_PATH = "_scripts/author-extraction/patterns.v0.6.schema.json";
 const INSTRUCTIONS_PATH = ".opencode/agents/author-pattern-consolidator.md";
 const LEGACY_INSTRUCTIONS_PATH = "_scripts/author-extraction/author-pattern-consolidator.v0.1.md";
 const RETAINED_INSTRUCTIONS_PATH = "_scripts/author-extraction/author-pattern-consolidator.v0.2.md";
 const SEMANTIC_INSTRUCTIONS_PATH = "_scripts/author-extraction/author-pattern-consolidator.v0.3.md";
 const DECISIONAL_INSTRUCTIONS_PATH = "_scripts/author-extraction/author-pattern-consolidator.v0.4.md";
+const EPISTEMIC_INSTRUCTIONS_PATH = "_scripts/author-extraction/author-pattern-consolidator.v0.5.md";
 const DATASET_LIMIT = 1024 * 1024;
 const CANDIDATE_LIMIT = 256 * 1024;
 const OUTPUT_LIMIT = 4 * 1024 * 1024;
 const VERSION = Object.freeze({
-  consolidation_version: "consolidate/5",
+  consolidation_version: "consolidate/6",
   projection_version: "observation-projection/1",
-  instructions_version: "author-pattern-consolidator/0.5",
+  instructions_version: "author-pattern-consolidator/0.6",
 });
+const CURRENT_DIMENSION_VERSION = "author-pattern-dimension/0.6";
 const CONTRACTS = Object.freeze({
   "0.1": { schemaPaths: [SCHEMA_PATH], instructionsPath: LEGACY_INSTRUCTIONS_PATH, consolidation_version: "consolidate/1", instructions_version: "author-pattern-consolidator/0.1" },
   "0.2": { schemaPaths: [SCHEMA_PATH, RHETORICAL_SCHEMA_PATH], instructionsPath: RETAINED_INSTRUCTIONS_PATH, consolidation_version: "consolidate/2", instructions_version: "author-pattern-consolidator/0.2" },
   "0.3": { schemaPaths: [SCHEMA_PATH, RHETORICAL_SCHEMA_PATH, SEMANTIC_SCHEMA_PATH], instructionsPath: SEMANTIC_INSTRUCTIONS_PATH, consolidation_version: "consolidate/3", instructions_version: "author-pattern-consolidator/0.3" },
   "0.4": { schemaPaths: [SCHEMA_PATH, RHETORICAL_SCHEMA_PATH, SEMANTIC_SCHEMA_PATH, DECISIONAL_SCHEMA_PATH], instructionsPath: DECISIONAL_INSTRUCTIONS_PATH, consolidation_version: "consolidate/4", instructions_version: "author-pattern-consolidator/0.4" },
-  "0.5": { schemaPaths: [SCHEMA_PATH, RHETORICAL_SCHEMA_PATH, SEMANTIC_SCHEMA_PATH, DECISIONAL_SCHEMA_PATH, CURRENT_SCHEMA_PATH], instructionsPath: INSTRUCTIONS_PATH, ...VERSION },
+  "0.5": { schemaPaths: [SCHEMA_PATH, RHETORICAL_SCHEMA_PATH, SEMANTIC_SCHEMA_PATH, DECISIONAL_SCHEMA_PATH, EPISTEMIC_SCHEMA_PATH], instructionsPath: EPISTEMIC_INSTRUCTIONS_PATH, consolidation_version: "consolidate/5", instructions_version: "author-pattern-consolidator/0.5" },
+  "0.6": { schemaPaths: [CURRENT_SCHEMA_PATH], instructionsPath: INSTRUCTIONS_PATH, ...VERSION },
 });
 
 function errorWith(code, message, details = []) {
@@ -195,7 +206,7 @@ async function readRootFile(root, relativePath, maximumBytes = Number.MAX_SAFE_I
   }
 }
 
-async function readContract(root, version = "0.5") {
+async function readContract(root, version = "0.6") {
   const selected = CONTRACTS[version];
   if (!selected) fail("INTERNAL_ERROR", "The requested local consolidation contract is unsupported.");
   let schemaBytes;
@@ -228,7 +239,7 @@ async function readContract(root, version = "0.5") {
         consolidation_version: selected.consolidation_version,
         projection_version: "observation-projection/1",
         instructions_version: selected.instructions_version,
-        schema_hash: version === "0.1" ? sha256(schemaBytes[0]) : sha256(Buffer.from(canonicalJson(version === "0.2" ? {
+        schema_hash: ["0.1", "0.6"].includes(version) ? sha256(schemaBytes[0]) : sha256(Buffer.from(canonicalJson(version === "0.2" ? {
           base_schema_hash: sha256(schemaBytes[0]), extension_schema_hash: sha256(schemaBytes[1]),
         } : {
           base_schema_hash: sha256(schemaBytes[0]), rhetorical_schema_hash: sha256(schemaBytes[1]), semantic_schema_hash: sha256(schemaBytes[2]),
@@ -251,7 +262,7 @@ function normalizeRecordsDirectory(recordsDirectory) {
   return selected;
 }
 
-async function datasetEntries(root, recordsDirectory) {
+async function datasetEntries(root, recordsDirectory, articleIds) {
   const parts = recordsDirectory.split("/");
   let current = root.path;
   try {
@@ -263,11 +274,11 @@ async function datasetEntries(root, recordsDirectory) {
     const entries = await readdir(current, { withFileTypes: true });
     const names = new Set(entries.map((entry) => entry.name));
     for (const name of names) {
-      if (/\.json$/i.test(name) && !ARTICLE_IDS.some((id) => name === `${id}.json`)) throw new Error("Unexpected dataset record.");
+      if (/\.json$/i.test(name) && !articleIds.some((id) => name === `${id}.json`)) throw new Error("Unexpected dataset record.");
       if (!/\.json$/i.test(name) && !/\.md$/i.test(name)) throw new Error("Unexpected dataset entry.");
       if (/\.md$/i.test(name) && !entries.find((entry) => entry.name === name)?.isFile()) throw new Error("Unexpected dataset entry.");
     }
-    if (ARTICLE_IDS.some((id) => !names.has(`${id}.json`))) throw new Error("Incomplete dataset.");
+    if (articleIds.some((id) => !names.has(`${id}.json`))) throw new Error("Incomplete dataset.");
   } catch {
     fail("DATASET_INVALID", "The author record dataset is incomplete or unsafe.");
   }
@@ -275,9 +286,10 @@ async function datasetEntries(root, recordsDirectory) {
 
 async function loadDataset(root, recordsDirectory) {
   const directory = normalizeRecordsDirectory(recordsDirectory);
-  await datasetEntries(root, directory);
+  const selected = DATASETS[directory];
+  await datasetEntries(root, directory, selected.ids);
   const verified = [];
-  for (const articleId of ARTICLE_IDS) {
+  for (const articleId of selected.ids) {
     let raw;
     try {
       raw = await readRootFile(root, `${directory}/${articleId}.json`, DATASET_LIMIT);
@@ -296,7 +308,7 @@ async function loadDataset(root, recordsDirectory) {
     } catch {
       fail("DATASET_INVALID", "An author record failed source and evidence verification.");
     }
-    if (result.record.source.article_id !== articleId) {
+    if (result.record.source.article_id !== articleId || result.record.schema_version !== selected.schema_version) {
       fail("DATASET_INVALID", "An author record does not match its allowlisted dataset filename.");
     }
     verified.push(result);
@@ -335,7 +347,7 @@ async function prepareCurrent(repoRoot, dimension, recordsDirectory) {
   if (ineligible.length) {
     return {
       status: "blocked",
-      schema_version: "author-pattern-preparation/0.1",
+      schema_version: recordsDirectory === "docs/author-extraction-results/v1.3" ? "author-pattern-preparation/0.6" : "author-pattern-preparation/0.1",
       corpus_hash: corpusHash,
       diagnostics: ineligible.map(({ record, processing_reason }) => ({
         code: processing_reason === "PROCESSING_NOT_TRACKED" ? "PROCESSING_NOT_TRACKED" : "PROCESSING_INCOMPLETE",
@@ -346,7 +358,7 @@ async function prepareCurrent(repoRoot, dimension, recordsDirectory) {
   const observations = projectObservations(verified, dimension);
   const prepared = {
     status: "ready",
-    schema_version: "author-pattern-preparation/0.5",
+    schema_version: "author-pattern-preparation/0.6",
     corpus_hash: corpusHash,
     input_hash: currentInputHash(corpusHash, dimension, observations, contract.method),
     method: contract.method,
@@ -412,27 +424,27 @@ function groupSort(left, right) {
 }
 
 function verifyAcceptedPartition(accepted, observations, dimension) {
-  if (dimension === "rhetorical" && ["author-pattern-dimension/0.2", "author-pattern-dimension/0.3", "author-pattern-dimension/0.4", "author-pattern-dimension/0.5"].includes(accepted.schema_version)) {
-    const expected = assignRhetoricalGroupIds(accepted.groups.map(({ id, ...group }) => group));
+  if (dimension === "rhetorical" && ["author-pattern-dimension/0.2", "author-pattern-dimension/0.3", "author-pattern-dimension/0.4", "author-pattern-dimension/0.5", "author-pattern-dimension/0.6"].includes(accepted.schema_version)) {
+    const expected = assignRhetoricalGroupIds(accepted.groups.map(({ id, ...group }) => group), accepted.schema_version);
     if (canonicalJson(expected) !== canonicalJson(accepted.groups)) {
       fail("RECORD_DERIVED_INVALID", "Rhetorical IDs and ordering must be derived from group membership.", ["/groups"]);
     }
   }
-  if (dimension === "semantic" && ["author-pattern-dimension/0.3", "author-pattern-dimension/0.4", "author-pattern-dimension/0.5"].includes(accepted.schema_version)) {
-    const expected = assignSemanticGroupIds(accepted.groups.map(({ id, ...group }) => group));
+  if (dimension === "semantic" && ["author-pattern-dimension/0.3", "author-pattern-dimension/0.4", "author-pattern-dimension/0.5", "author-pattern-dimension/0.6"].includes(accepted.schema_version)) {
+    const expected = assignSemanticGroupIds(accepted.groups.map(({ id, ...group }) => group), accepted.schema_version);
     if (canonicalJson(expected) !== canonicalJson(accepted.groups)) {
       fail("RECORD_DERIVED_INVALID", "Semantic IDs, kind codes, and ordering must be derived from group membership.", ["/groups"]);
     }
   }
   const observationIndex = new Map(observations.map((observation) => [observation.observation_id, observation]));
-  if (dimension === "decisional" && ["author-pattern-dimension/0.4", "author-pattern-dimension/0.5"].includes(accepted.schema_version)) {
+  if (dimension === "decisional" && ["author-pattern-dimension/0.4", "author-pattern-dimension/0.5", "author-pattern-dimension/0.6"].includes(accepted.schema_version)) {
     const expected = assignDecisionalGroupIds(accepted.groups.map(({ id, ...group }) => group));
     if (canonicalJson(expected) !== canonicalJson(accepted.groups)) {
       fail("RECORD_DERIVED_INVALID", "Decisional IDs and subtype counters must be derived from classification and membership.", ["/groups"]);
     }
   }
   const assigned = new Set();
-  if (dimension === "epistemic" && accepted.schema_version === "author-pattern-dimension/0.5") {
+  if (dimension === "epistemic" && ["author-pattern-dimension/0.5", "author-pattern-dimension/0.6"].includes(accepted.schema_version)) {
     const expected = assignEpistemicGroupIds(accepted.groups.map(({ id, ...group }) => group));
     if (canonicalJson(expected) !== canonicalJson(accepted.groups)) {
       fail("RECORD_DERIVED_INVALID", "Epistemic IDs and subtype counters must be derived from classification and membership.", ["/groups"]);
@@ -504,7 +516,7 @@ function finalGroupFrom(group, dimension, classification, support, id) {
 
 function makeFinalBundle(corpusHash, method, acceptedByDimension) {
   const authorPatterns = {
-    schema_version: "author-pattern-candidates/0.5",
+    schema_version: "author-pattern-candidates/0.6",
     corpus_hash: corpusHash,
     method,
     patterns: [],
@@ -515,7 +527,7 @@ function makeFinalBundle(corpusHash, method, acceptedByDimension) {
     diagnostics: [],
   };
   const semanticRecurrences = {
-    schema_version: "semantic-recurrence-candidates/0.5",
+    schema_version: "semantic-recurrence-candidates/0.6",
     corpus_hash: corpusHash,
     method,
     concepts: [],
@@ -622,8 +634,8 @@ export async function acceptDimensionCandidate(repoRoot, dimension, corpusHash, 
     let groups = candidate.groups
       .map((group) => normalizedGroup(group, observationIndex, dimension))
       .sort(groupSort);
-    if (dimension === "rhetorical") groups = assignRhetoricalGroupIds(groups);
-    if (dimension === "semantic") groups = assignSemanticGroupIds(groups);
+    if (dimension === "rhetorical") groups = assignRhetoricalGroupIds(groups, CURRENT_DIMENSION_VERSION);
+    if (dimension === "semantic") groups = assignSemanticGroupIds(groups, CURRENT_DIMENSION_VERSION);
     if (dimension === "decisional") groups = assignDecisionalGroupIds(groups);
     if (dimension === "epistemic") groups = assignEpistemicGroupIds(groups);
     const unclusteredObservations = candidate.unclustered_observations
@@ -634,7 +646,7 @@ export async function acceptDimensionCandidate(repoRoot, dimension, corpusHash, 
       }))
       .sort((left, right) => compareLexically(left.observation_id, right.observation_id));
     const accepted = {
-      schema_version: "author-pattern-dimension/0.5",
+      schema_version: CURRENT_DIMENSION_VERSION,
       dimension,
       corpus_hash: currentCorpusHash,
       input_hash: expectedInputHash,
@@ -649,40 +661,59 @@ export async function acceptDimensionCandidate(repoRoot, dimension, corpusHash, 
   }, "Consolidation candidate acceptance failed.");
 }
 
+async function verifyConsolidationInputsImpl(repoRoot, corpusHash, acceptedDimensionJsons, recordsDirectory) {
+  if (typeof corpusHash !== "string" || !/^[a-f0-9]{64}$/.test(corpusHash) || !Array.isArray(acceptedDimensionJsons)) {
+    fail("CORE_INVALID_ARGUMENT", "Finalization arguments are invalid.");
+  }
+  if (acceptedDimensionJsons.length !== DIMENSIONS.length) fail("DIMENSION_INVALID", "Exactly one accepted dimension is required for each dimension.");
+  const root = await trustedRoot(repoRoot);
+  const contract = await readContract(root);
+  const { verified, corpusHash: currentCorpusHash } = await loadDataset(root, recordsDirectory);
+  requireEligible(verified);
+  if (corpusHash !== currentCorpusHash) fail("INPUT_CHANGED", "The author records have changed since consolidation preparation.");
+  const acceptedByDimension = new Map();
+  const contractsByVersion = new Map([["0.6", contract]]);
+  for (const acceptedJson of acceptedDimensionJsons) {
+    if (typeof acceptedJson !== "string" || Buffer.byteLength(acceptedJson, "utf8") > OUTPUT_LIMIT) fail("LIMIT_EXCEEDED", "Accepted dimension data exceeds the size limit.");
+    const accepted = parseStrictJson(acceptedJson, "DIMENSION_INVALID", "Accepted dimension JSON is invalid.");
+    const version = accepted && typeof accepted === "object" && !Array.isArray(accepted)
+      ? { "author-pattern-dimension/0.1": "0.1", "author-pattern-dimension/0.2": "0.2", "author-pattern-dimension/0.3": "0.3", "author-pattern-dimension/0.4": "0.4", "author-pattern-dimension/0.5": "0.5", "author-pattern-dimension/0.6": "0.6" }[accepted.schema_version] : undefined;
+    if (!version) fail("DIMENSION_INVALID", "Accepted dimension data uses an unsupported contract version.");
+    if (!contractsByVersion.has(version)) contractsByVersion.set(version, await readContract(root, version));
+    const dimensionContract = contractsByVersion.get(version);
+    validateSchema(dimensionContract.validators.AcceptedDimension, accepted, "DIMENSION_INVALID", "Accepted dimension data is invalid.");
+    if (acceptedByDimension.has(accepted.dimension)) fail("DIMENSION_INVALID", "Accepted dimensions must be unique.");
+    const observations = projectObservations(verified, accepted.dimension);
+    const expectedInputHash = currentInputHash(currentCorpusHash, accepted.dimension, observations, dimensionContract.method);
+    if (accepted.corpus_hash !== currentCorpusHash || accepted.input_hash !== expectedInputHash || canonicalJson(accepted.method) !== canonicalJson(dimensionContract.method)) {
+      fail("INPUT_CHANGED", "Accepted dimension data was prepared against a different dataset or method.");
+    }
+    verifyAcceptedPartition(accepted, observations, accepted.dimension);
+    acceptedByDimension.set(accepted.dimension, accepted);
+  }
+  if (DIMENSIONS.some((dimension) => !acceptedByDimension.has(dimension))) fail("DIMENSION_INVALID", "Exactly one accepted dimension is required for each dimension.");
+  return {
+    corpus_hash: currentCorpusHash,
+    verified_records: verified.map(({ record }) => record),
+    accepted_dimensions: DIMENSIONS.map((dimension) => acceptedByDimension.get(dimension)),
+    method: contract.method,
+    validators: contract.validators,
+  };
+}
+
+export async function verifyConsolidationInputs(repoRoot, corpusHash, acceptedDimensionJsons, recordsDirectory) {
+  return runApi(async () => {
+    const { corpus_hash, verified_records, accepted_dimensions } = await verifyConsolidationInputsImpl(repoRoot, corpusHash, acceptedDimensionJsons, recordsDirectory);
+    return { corpus_hash, verified_records, accepted_dimensions };
+  }, "Consolidation input verification failed.");
+}
+
 export async function finalizeConsolidation(repoRoot, corpusHash, acceptedDimensionJsons, recordsDirectory) {
   return runApi(async () => {
-    if (typeof corpusHash !== "string" || !/^[a-f0-9]{64}$/.test(corpusHash) || !Array.isArray(acceptedDimensionJsons)) {
-      fail("CORE_INVALID_ARGUMENT", "Finalization arguments are invalid.");
-    }
-    if (acceptedDimensionJsons.length !== DIMENSIONS.length) fail("DIMENSION_INVALID", "Exactly one accepted dimension is required for each dimension.");
-    const root = await trustedRoot(repoRoot);
-    const contract = await readContract(root);
-    const { verified, corpusHash: currentCorpusHash } = await loadDataset(root, recordsDirectory);
-    requireEligible(verified);
-    if (corpusHash !== currentCorpusHash) fail("INPUT_CHANGED", "The author records have changed since consolidation preparation.");
-    const acceptedByDimension = new Map();
-    const contractsByVersion = new Map([["0.5", contract]]);
-    for (const acceptedJson of acceptedDimensionJsons) {
-      if (typeof acceptedJson !== "string" || Buffer.byteLength(acceptedJson, "utf8") > OUTPUT_LIMIT) fail("LIMIT_EXCEEDED", "Accepted dimension data exceeds the size limit.");
-      const accepted = parseStrictJson(acceptedJson, "DIMENSION_INVALID", "Accepted dimension JSON is invalid.");
-      const version = accepted && typeof accepted === "object" && !Array.isArray(accepted)
-        ? { "author-pattern-dimension/0.1": "0.1", "author-pattern-dimension/0.2": "0.2", "author-pattern-dimension/0.3": "0.3", "author-pattern-dimension/0.4": "0.4", "author-pattern-dimension/0.5": "0.5" }[accepted.schema_version] : undefined;
-      if (!version) fail("DIMENSION_INVALID", "Accepted dimension data uses an unsupported contract version.");
-      if (!contractsByVersion.has(version)) contractsByVersion.set(version, await readContract(root, version));
-      const dimensionContract = contractsByVersion.get(version);
-      validateSchema(dimensionContract.validators.AcceptedDimension, accepted, "DIMENSION_INVALID", "Accepted dimension data is invalid.");
-      if (acceptedByDimension.has(accepted.dimension)) fail("DIMENSION_INVALID", "Accepted dimensions must be unique.");
-      const observations = projectObservations(verified, accepted.dimension);
-      const expectedInputHash = currentInputHash(currentCorpusHash, accepted.dimension, observations, dimensionContract.method);
-      if (accepted.corpus_hash !== currentCorpusHash || accepted.input_hash !== expectedInputHash || canonicalJson(accepted.method) !== canonicalJson(dimensionContract.method)) {
-        fail("INPUT_CHANGED", "Accepted dimension data was prepared against a different dataset or method.");
-      }
-      verifyAcceptedPartition(accepted, observations, accepted.dimension);
-      acceptedByDimension.set(accepted.dimension, accepted);
-    }
-    if (DIMENSIONS.some((dimension) => !acceptedByDimension.has(dimension))) fail("DIMENSION_INVALID", "Exactly one accepted dimension is required for each dimension.");
-    const finalBundle = makeFinalBundle(currentCorpusHash, contract.method, acceptedByDimension);
-    validateSchema(contract.validators.FinalBundle, finalBundle, "INTERNAL_ERROR", "Final consolidation data failed local validation.");
+    const { corpus_hash: currentCorpusHash, accepted_dimensions: dimensions, method, validators } = await verifyConsolidationInputsImpl(repoRoot, corpusHash, acceptedDimensionJsons, recordsDirectory);
+    const acceptedByDimension = new Map(dimensions.map((accepted) => [accepted.dimension, accepted]));
+    const finalBundle = makeFinalBundle(currentCorpusHash, method, acceptedByDimension);
+    validateSchema(validators.FinalBundle, finalBundle, "INTERNAL_ERROR", "Final consolidation data failed local validation.");
     const canonical = canonicalJson(finalBundle);
     if (Buffer.byteLength(canonical, "utf8") > OUTPUT_LIMIT) fail("LIMIT_EXCEEDED", "The final consolidation bundle exceeds the response limit.");
     return canonical;

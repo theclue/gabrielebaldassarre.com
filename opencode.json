@@ -5,7 +5,7 @@
     {
       "package": "./plugins/author-pattern-consolidator",
       "options": {
-        "recordsDirectory": "docs/author-extraction-results/v1.2"
+        "recordsDirectory": "docs/author-extraction-results/v1.3"
       }
     }
   ]

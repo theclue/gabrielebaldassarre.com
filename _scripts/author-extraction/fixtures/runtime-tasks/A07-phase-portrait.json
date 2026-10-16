@@ -1,0 +1,10 @@
+{
+  "mode": "rewrite",
+  "content_type": "scientific_explainer",
+  "language": "it",
+  "objective": "Rielaborare una spiegazione del ritratto di fase mantenendo distinti modello, stati possibili e limiti della visualizzazione.",
+  "topic": "Spazio degli stati e ritratto di fase di un sistema dinamico",
+  "features": ["mathematical_formalism", "physical_quantities", "hypothetical_scenario"],
+  "local_topics": ["phase_portrait"],
+  "semantic_topics": ["state_space"]
+}

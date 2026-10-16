@@ -4,7 +4,7 @@ import {
   loadPluginSDK,
   prepareInputSchema,
   submitInputSchema,
-} from "../../_scripts/author-extraction/native.mjs";
+} from "../../_scripts/author-extraction/native.mjs?contract=1.3";
 
 const { Plugin } = await loadPluginSDK();
 
@@ -18,7 +18,7 @@ function cancelledError() {
 export default Plugin.define({
   id: "author-extraction",
   async setup(ctx) {
-    const coreApi = await import("../../_scripts/author-extraction/core.mjs");
+    const coreApi = await import("../../_scripts/author-extraction/core.mjs?contract=1.3");
     const repoRoot = fileURLToPath(new URL("../../", import.meta.url));
     const adapter = createExtractionAdapter(coreApi, repoRoot);
     const knownSessions = new Set();

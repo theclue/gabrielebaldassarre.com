@@ -1,0 +1,109 @@
+{
+  "schema_version": "author-runtime-artifacts/1",
+  "runtime_id": "ARP:4B5275EA8296FB42E66217BE",
+  "source_author_model_sha256": "88d622c01aee9e0dafa44a2966ebbbe63ff8249336eb0e861da13c157051f8b5",
+  "runtime_compiler_version": "author-runtime-compiler/1.1",
+  "profile_path": "docs/author-pattern-results/v1.3/author-runtimes/arp-4b5275ea8296fb42e66217be/author-runtime-profile.json",
+  "profile_sha256": "27ff5283b4f9863a1d7d4208f5bd4bebe592cd993fab52e7f871359e7f0e1ac0",
+  "instructions_path": "docs/author-pattern-results/v1.3/author-runtimes/arp-4b5275ea8296fb42e66217be/author-runtime-instructions.md",
+  "instructions_sha256": "def154a056dc0549f861f3cda8e7f18d6cecdae13867b06ea45acd848994ba5d",
+  "counts": {
+    "profiles": 1,
+    "principles": 2,
+    "contextual_rules": 1,
+    "devices": 2,
+    "guardrails": 6,
+    "semantic_context": 0
+  },
+  "guardrail_resolution": [
+    {
+      "guardrail_id": "G01",
+      "disposition": "projected",
+      "clause_ids": [
+        "G01:C01"
+      ],
+      "runtime_target": "/guardrails/0",
+      "covered_clause_ids": [],
+      "covered_by": null,
+      "reason": "Clausole pertinenti obbligatorie, selezionate dal brief."
+    },
+    {
+      "guardrail_id": "G02",
+      "disposition": "projected",
+      "clause_ids": [
+        "G02:C01"
+      ],
+      "runtime_target": "/guardrails/1",
+      "covered_clause_ids": [],
+      "covered_by": null,
+      "reason": "Clausole pertinenti obbligatorie, selezionate dal brief."
+    },
+    {
+      "guardrail_id": "G03",
+      "disposition": "projected",
+      "clause_ids": [
+        "G03:C01"
+      ],
+      "runtime_target": "/guardrails/2",
+      "covered_clause_ids": [],
+      "covered_by": null,
+      "reason": "Clausole pertinenti obbligatorie, selezionate dal brief."
+    },
+    {
+      "guardrail_id": "G04",
+      "disposition": "projected",
+      "clause_ids": [
+        "G04:C03"
+      ],
+      "runtime_target": "/guardrails/3",
+      "covered_clause_ids": [],
+      "covered_by": null,
+      "reason": "Clausole pertinenti obbligatorie, selezionate dal brief."
+    },
+    {
+      "guardrail_id": "G05",
+      "disposition": "projected",
+      "clause_ids": [
+        "G05:C03",
+        "G05:C04"
+      ],
+      "runtime_target": "/guardrails/4",
+      "covered_clause_ids": [],
+      "covered_by": null,
+      "reason": "Clausole pertinenti obbligatorie, selezionate dal brief."
+    },
+    {
+      "guardrail_id": "G06",
+      "disposition": "covered_by_prohibition",
+      "clause_ids": [],
+      "runtime_target": null,
+      "covered_clause_ids": [
+        "G06:C01"
+      ],
+      "covered_by": "/runtime_instructions/prohibitions/1",
+      "reason": "Obbligo già presente nella prohibition specifica; nessuna duplicazione."
+    },
+    {
+      "guardrail_id": "G09",
+      "disposition": "projected",
+      "clause_ids": [
+        "G09:C01",
+        "G09:C03",
+        "G09:C04"
+      ],
+      "runtime_target": "/guardrails/5",
+      "covered_clause_ids": [],
+      "covered_by": null,
+      "reason": "Clausole pertinenti obbligatorie, selezionate dal brief."
+    },
+    {
+      "guardrail_id": "G10",
+      "disposition": "not_applicable",
+      "clause_ids": [],
+      "runtime_target": null,
+      "covered_clause_ids": [],
+      "covered_by": null,
+      "reason": "Nessuna condizione di applicabilità attiva nel brief."
+    }
+  ]
+}

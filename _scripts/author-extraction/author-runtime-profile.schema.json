@@ -1,0 +1,148 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:gabrielebaldassarre:author-runtime-profile:1",
+  "title": "Compact resolved author runtime profile",
+  "description": "Task-specific selection from a governed author-model, not another consolidation or a duplicate of that model.",
+  "$ref": "#/$defs/RuntimeProfile",
+  "$defs": {
+    "Text": { "type": "string", "minLength": 1, "maxLength": 4000, "pattern": "\\S" },
+    "Hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "ProfileId": { "type": "string", "pattern": "^C[0-9]{2}$" },
+    "DeviceId": { "type": "string", "pattern": "^D[0-9]{2}$" },
+    "SourcePatternId": {
+      "allOf": [
+        { "$ref": "urn:gabrielebaldassarre:author-identifiers:1#/$defs/Identifier" },
+        { "type": "string", "pattern": "^(?:APC|SPC|EPC|DPC):" }
+      ]
+    },
+    "AuthorPatternId": { "allOf": [{ "$ref": "#/$defs/SourcePatternId" }, { "pattern": "^(?:APC|EPC|DPC):" }] },
+    "SemanticPatternId": { "allOf": [{ "$ref": "#/$defs/SourcePatternId" }, { "pattern": "^SPC:" }] },
+    "ProfileIds": { "type": "array", "minItems": 1, "maxItems": 4, "uniqueItems": true, "items": { "$ref": "#/$defs/ProfileId" } },
+    "AuthorPatternIds": { "type": "array", "minItems": 1, "maxItems": 240, "uniqueItems": true, "items": { "$ref": "#/$defs/AuthorPatternId" } },
+    "Status": { "enum": ["available", "preferred", "required"] },
+    "SeriesContext": {
+      "type": "object", "additionalProperties": false, "required": ["is_series"],
+      "properties": {
+        "is_series": { "type": "boolean" }, "series_name": { "$ref": "#/$defs/Text" },
+        "planned_continuation": { "type": "boolean" }, "continuation_topic": { "$ref": "#/$defs/Text" }
+      },
+      "allOf": [
+        { "if": { "properties": { "is_series": { "const": false } }, "required": ["is_series"] }, "then": { "properties": { "series_name": false } } },
+        { "if": { "properties": { "planned_continuation": { "const": true } }, "required": ["planned_continuation"] }, "then": { "required": ["continuation_topic"] }, "else": { "properties": { "continuation_topic": false } } }
+      ]
+    },
+    "DeviceRequest": {
+      "type": "object", "additionalProperties": false, "required": ["id", "status"],
+      "properties": { "id": { "$ref": "#/$defs/DeviceId" }, "status": { "$ref": "#/$defs/Status" } }
+    },
+    "TaskContext": {
+      "type": "object", "additionalProperties": false, "required": ["mode", "content_type", "language", "objective"],
+      "properties": {
+        "mode": { "enum": ["generate", "rewrite", "expand", "review"] },
+        "content_type": { "enum": ["scientific_explainer", "project_article", "tutorial", "mixed", "other"] },
+        "mixed_content_types": { "type": "array", "minItems": 2, "maxItems": 3, "uniqueItems": true, "items": { "enum": ["scientific_explainer", "project_article", "tutorial"] } },
+        "language": { "type": "string", "pattern": "^[a-z]{2}(?:-[A-Z]{2})?$" },
+        "objective": { "type": "string", "minLength": 1, "maxLength": 1600, "pattern": "\\S" },
+        "audience": { "type": "string", "minLength": 1, "maxLength": 500, "pattern": "\\S" },
+        "topic": { "type": "string", "minLength": 1, "maxLength": 600, "pattern": "\\S" },
+        "series_context": { "$ref": "#/$defs/SeriesContext" },
+        "constraints": { "type": "array", "maxItems": 16, "uniqueItems": true, "items": { "type": "string", "minLength": 1, "maxLength": 500, "pattern": "\\S" } },
+        "features": {
+          "type": "array", "maxItems": 17, "uniqueItems": true,
+          "items": { "enum": ["practical_relevance", "approximation_assessment", "mathematical_formalism", "physical_quantities", "variable_conditions", "quantitative_calculation", "hypothetical_scenario", "mathematical_connection", "historical_context", "familiar_reference", "interpretation_of_data", "mutable_information", "configuration_choices", "information_loss", "external_dependencies", "scope_delimitation", "implementation_choices"] }
+        },
+        "local_topics": { "type": "array", "maxItems": 4, "uniqueItems": true, "items": { "enum": ["phase_portrait", "lighting_model", "social_networks", "quantum_logic_or_measurement_contrast"] } },
+        "semantic_topics": { "type": "array", "maxItems": 3, "uniqueItems": true, "items": { "enum": ["invariance", "state_space", "system_object_distinction"] } },
+        "device_requests": { "type": "array", "maxItems": 6, "items": { "$ref": "#/$defs/DeviceRequest" } }
+      },
+      "allOf": [
+        { "if": { "properties": { "content_type": { "const": "mixed" } }, "required": ["content_type"] }, "then": { "required": ["mixed_content_types"] }, "else": { "properties": { "mixed_content_types": false } } },
+        { "if": { "properties": { "semantic_topics": { "minItems": 1 } }, "required": ["semantic_topics"] }, "then": { "required": ["topic"] } }
+      ]
+    },
+    "Selection": {
+      "type": "object", "additionalProperties": false, "required": ["profile_ids", "reason", "source_pattern_ids"],
+      "properties": { "profile_ids": { "$ref": "#/$defs/ProfileIds" }, "reason": { "$ref": "#/$defs/Text" }, "source_pattern_ids": { "$ref": "#/$defs/AuthorPatternIds" } }
+    },
+    "Principle": {
+      "type": "object", "additionalProperties": false, "required": ["id", "instruction", "selection"],
+      "properties": { "id": { "type": "string", "pattern": "^P[0-9]{2}$" }, "instruction": { "$ref": "#/$defs/Text" }, "selection": { "$ref": "#/$defs/Selection" } }
+    },
+    "ContextualRule": {
+      "type": "object", "additionalProperties": false, "required": ["id", "when", "instruction", "selection"],
+      "properties": { "id": { "type": "string", "pattern": "^C[0-9]{2}:R[0-9]{2}$" }, "when": { "$ref": "#/$defs/Text" }, "instruction": { "$ref": "#/$defs/Text" }, "selection": { "$ref": "#/$defs/Selection" } }
+    },
+    "Device": {
+      "type": "object", "additionalProperties": false, "required": ["id", "status", "status_basis", "when", "instruction", "selection"],
+      "properties": {
+        "id": { "$ref": "#/$defs/DeviceId" }, "status": { "$ref": "#/$defs/Status" },
+        "status_basis": { "enum": ["context_available", "context_preference", "task_preference", "task_requirement"] },
+        "when": { "$ref": "#/$defs/Text" }, "instruction": { "$ref": "#/$defs/Text" }, "selection": { "$ref": "#/$defs/Selection" }
+      },
+      "allOf": [{ "if": { "properties": { "status": { "const": "required" } }, "required": ["status"] }, "then": { "properties": { "status_basis": { "const": "task_requirement" } } } }]
+    },
+    "Guardrail": {
+      "type": "object", "additionalProperties": false, "required": ["id", "instruction", "selection"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^G[0-9]{2}$" }, "instruction": { "$ref": "#/$defs/Text" }, "selection": { "$ref": "#/$defs/Selection" },
+        "source_clause_ids": { "type": "array", "minItems": 1, "maxItems": 16, "uniqueItems": true, "items": { "type": "string", "pattern": "^G[0-9]{2}:C[0-9]{2}$" } }
+      }
+    },
+    "SemanticContext": {
+      "type": "object", "additionalProperties": false, "required": ["id", "context", "applicability", "optional", "usage", "selection_reason", "source_pattern_ids"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^S[0-9]{2}$" }, "context": { "$ref": "#/$defs/Text" }, "applicability": { "$ref": "#/$defs/Text" },
+        "optional": { "const": true }, "usage": { "const": "conceptual_context_only_not_style" }, "selection_reason": { "$ref": "#/$defs/Text" },
+        "source_pattern_ids": { "type": "array", "minItems": 1, "maxItems": 240, "uniqueItems": true, "items": { "$ref": "#/$defs/SemanticPatternId" } }
+      }
+    },
+    "Instructions": {
+      "type": "object", "additionalProperties": false, "required": ["authoring_directives", "prohibitions", "activation_policy", "output_requirements"],
+      "properties": {
+        "authoring_directives": { "type": "array", "minItems": 1, "maxItems": 8, "uniqueItems": true, "items": { "$ref": "#/$defs/Text" } },
+        "prohibitions": { "type": "array", "minItems": 1, "maxItems": 8, "uniqueItems": true, "items": { "$ref": "#/$defs/Text" } },
+        "activation_policy": { "const": "contextual_selection_without_quotas" },
+        "output_requirements": { "type": "array", "minItems": 1, "maxItems": 8, "uniqueItems": true, "items": { "$ref": "#/$defs/Text" } }
+      }
+    },
+    "Binding": {
+      "type": "object", "additionalProperties": false, "required": ["id", "source_pointer"],
+      "properties": {
+        "id": { "$ref": "#/$defs/SourcePatternId" },
+        "source_pointer": { "type": "string", "pattern": "^/(?:source_index/[0-9]+/source_pattern_id|semantic_context/[0-9]+/source_pattern_ids/[0-9]+)$" }
+      }
+    },
+    "RuntimeProfile": {
+      "type": "object", "additionalProperties": false,
+      "required": ["schema_version", "runtime_id", "source", "task_context", "active_profile_ids", "principles", "contextual_rules", "devices", "guardrails", "semantic_context", "runtime_instructions", "provenance"],
+      "allOf": [{
+        "if": { "properties": { "provenance": { "properties": { "runtime_compiler_version": { "const": "author-runtime-compiler/1.1" } }, "required": ["runtime_compiler_version"] } }, "required": ["provenance"] },
+        "then": { "properties": { "guardrails": { "items": { "required": ["source_clause_ids"] } } } }
+      }],
+      "properties": {
+        "schema_version": { "const": "author-runtime-profile/1" }, "runtime_id": { "type": "string", "pattern": "^ARP:[A-F0-9]{24}$" },
+        "source": {
+          "type": "object", "additionalProperties": false, "required": ["author_model_schema_version", "author_model_sha256", "source_review_hash"],
+          "properties": { "author_model_schema_version": { "const": "author-model/1" }, "author_model_sha256": { "$ref": "#/$defs/Hash" }, "source_review_hash": { "$ref": "#/$defs/Hash" } }
+        },
+        "task_context": { "$ref": "#/$defs/TaskContext" }, "active_profile_ids": { "$ref": "#/$defs/ProfileIds" },
+        "principles": { "type": "array", "minItems": 1, "maxItems": 6, "items": { "$ref": "#/$defs/Principle" } },
+        "contextual_rules": { "type": "array", "maxItems": 11, "items": { "$ref": "#/$defs/ContextualRule" } },
+        "devices": { "type": "array", "maxItems": 6, "items": { "$ref": "#/$defs/Device" } },
+        "guardrails": { "type": "array", "minItems": 1, "maxItems": 10, "items": { "$ref": "#/$defs/Guardrail" } },
+        "semantic_context": { "type": "array", "maxItems": 3, "items": { "$ref": "#/$defs/SemanticContext" } },
+        "runtime_instructions": { "$ref": "#/$defs/Instructions" },
+        "provenance": {
+          "type": "object", "additionalProperties": false,
+          "required": ["runtime_compiler_version", "selection_method", "runtime_compiler_sha256", "runtime_schema_sha256", "identifier_schema_sha256", "task_context_sha256", "source_pattern_bindings"],
+          "properties": {
+            "runtime_compiler_version": { "enum": ["author-runtime-compiler/1", "author-runtime-compiler/1.1"] }, "selection_method": { "const": "deterministic" },
+            "runtime_compiler_sha256": { "$ref": "#/$defs/Hash" }, "runtime_schema_sha256": { "$ref": "#/$defs/Hash" },
+            "identifier_schema_sha256": { "$ref": "#/$defs/Hash" }, "task_context_sha256": { "$ref": "#/$defs/Hash" },
+            "source_pattern_bindings": { "type": "array", "minItems": 1, "maxItems": 240, "items": { "$ref": "#/$defs/Binding" } }
+          }
+        }
+      }
+    }
+  }
+}

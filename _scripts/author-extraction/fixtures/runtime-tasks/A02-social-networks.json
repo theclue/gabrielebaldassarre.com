@@ -1,0 +1,10 @@
+{
+  "mode": "review",
+  "content_type": "scientific_explainer",
+  "language": "it",
+  "objective": "Valutare i raccordi storici e le analogie strutturali in una spiegazione delle reti sociali, senza trattarli come prove del modello.",
+  "topic": "Reti sociali scale-free e invarianza circoscritta",
+  "features": ["historical_context", "mathematical_connection"],
+  "local_topics": ["social_networks"],
+  "semantic_topics": ["invariance"]
+}

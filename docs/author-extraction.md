@@ -1,36 +1,36 @@
 # Author extraction and pattern consolidation
 
-This is a local, offline-capable workflow over the 12 positively approved entries in `docs/corpus.yaml`. Extraction stores candidate article-grounded observations; a separate, dimension-by-dimension consolidation stage proposes reviewable cross-article groups. Neither stage creates a verified author model, ontology, knowledge graph, durable ledger, score, fingerprint, or proof of human authorship. The corpus declaration itself says approval as a representative reference does not establish exclusive human authorship, absence of AI, or coauthorship. The excluded OpenSCAD article is not an eligible source.
+This workflow now covers the **20 positively approved entries A01–A20** in `docs/corpus.yaml`. The first twelve IDs retain their paths; the author explicitly approved the eight proposed additions on 2026-10-14. The byte-identical twelve-article declaration is retained as `docs/corpus.v1.2.yaml`. Extraction stores article-grounded candidates; separate dimension-by-dimension consolidation proposes reviewable groups. Neither stage creates a verified author model, ontology, knowledge graph, durable ledger, fingerprint, or proof of human authorship. Approval as an editorial reference does not establish exclusive human authorship, absence of AI, or coauthorship. The excluded OpenSCAD article remains ineligible.
 
-The current extraction runtime is v1.2, with the v1.1 schema retained for verification of historical records. The detailed v1.1 contract and pilot notes below are explicitly historical. The current processing gate and consolidation workflow are documented next.
+The current extraction runtime is **v1.3**, consolidation **v0.6**. Historical schemas and instructions are retained, not edited or relabelled. The new full run is in [`author-extraction-results/v1.3/`](author-extraction-results/v1.3/) and [`author-pattern-results/v1.3/`](author-pattern-results/v1.3/); the corresponding reports preserve native session/message/call identities and exact-byte verification. The old v1.1/v1.2 result files remain unchanged. **The extraction/consolidation run stops after step 2.** The source-bound [`author-pattern-review.json`](author-pattern-results/v1.3/author-pattern-review.json) was created pending, then completed through 52 explicit human decisions. Its two reviewed JSON outputs were subsequently generated locally with separate completed-hash authorization; native apply remains fail-closed. [Step 4](author-model.md) composes the 29 approved author patterns into an operational model without reopening those decisions.
 
 For practical invocation, example prompts, and result handling, see the [quick guide to using the author subagents](../_scripts/author-extraction/INTEGRATION.md#guida-rapida-usare-i-subagent-in-futuro). It covers the current agents; the v1.1 TUI notes below are historical.
 
 ## Scope and trust boundary
 
-- Only the fixed `A01`–`A12` IDs in the corpus allowlist select source files. Callers/native tools accept no path, workspace root, or arbitrary source text. `path` in a prepared record is provenance from that allowlist, not user/model-controlled input.
+- Only fixed `A01`–`A20` IDs select current sources. Historical v1.1/v1.2 records use the preserved twelve-entry manifest. Callers/native tools accept no source path, workspace root, manifest selection, or arbitrary text. `path` in prepared data is allowlist provenance, not model-controlled input.
 - For extraction, read the corpus, selected post, version-matched extraction schema, and extractor instructions as bytes and hash them as specified below. For consolidation, read only the approved extracted-record directory, `patterns.schema.json`, and the consolidator instructions. Missing or unsafe required inputs fail closed. Do not treat old author-model front matter, other article metadata, or unrelated workspace files as extraction/consolidation facts.
-- Core preparation, verification, candidate acceptance, and finalization are offline: no core model/provider/API request, provider default, HTTP client, service, or database. The native extractor and consolidator submit only bounded candidate proposals to the explicitly selected model; no model is used to read source posts or verify evidence.
+- Core preparation, verification, acceptance, and finalization are offline: no core model/provider/API request, provider default, HTTP client, service, or database. Models read only prepared bodies/projections through restricted native tools, not files or alternative sources; mechanical evidence verification is performed by code, not a model.
 - Extraction has four candidate dimensions: rhetorical, epistemic, semantic, and decisional. Each observation is a *candidate* inference with article/passage quote evidence; quote membership does not prove semantic entailment. Cross-article grouping is a separate review-candidate stage; it must not be presented as author identity, a stable trait, or proof of authorship.
 - Counts are mechanical over the raw Markdown body and include code, mathematics, and template text. `advanced_stylometry` is explicitly `not_computed`, null, `OUT_OF_SCOPE_V1`; do not substitute readability, prose metrics, or a fingerprint.
 
-## Current v1.2 processing and consolidation workflow
+## Current v1.3 processing and consolidation workflow
 
-The extractor prepares `author-extraction/1.2` records with method versions `prepare/1`, `raw-blank-lines/1`, `raw-body-counts/1`, and `author-extractor/1.2`; its method also identifies `host-session-whole-article/1`. The v1.2 contract is `_scripts/author-extraction/extraction.v1.2.schema.json`; `_scripts/author-extraction/extraction.schema.json` remains the local v1.1 contract. Do not relabel historical v1.1 records or regenerate their provenance to make them eligible.
+The extractor prepares `author-extraction/1.3` records with `prepare/1`, `raw-blank-lines/1`, `raw-body-counts/1`, `author-extractor/1.3`, and `host-session-whole-article/1`. The current contract is `extraction.v1.3.schema.json`; v1.1/v1.2 schemas remain byte-preserved. Each article still permits 1–12 local observations, four dimensions, exact passage evidence, and the same byte/time/session bounds. Twenty articles therefore permit at most **240 observations**, not twenty observations per article. Italian is used for generated descriptions/labels, without translating or normalizing evidence quotes.
 
 ```text
-prepareArticle(repoRoot, articleId) -> Promise<PreparedV12>
+prepareArticle(repoRoot, articleId) -> Promise<PreparedV13>
 acceptCandidate(repoRoot, articleId, inputHash, candidateJson, hostOptions?) -> Promise<canonicalFinalJsonString>
 verifyExtractionRecord(repoRoot, recordJson) -> Promise<{ record, record_fingerprint, processing_eligible, processing_reason }>
 ```
 
 `hostOptions` is an internal core call option, not a model/tool field. Only the native adapter supplies `{ workflowReceipt }` after a successful preparation has been validated and returned in the same host session. The closed receipt is `{ workflow_version: "host-session-whole-article/1", mode: "whole_article", session_id, article_id, input_hash, prepare_returned: true }`; the core validates it against the current prepared article and hash. A direct core acceptance without a receipt remains `processing.status: "not_tracked"`, `article_processed: null`, and `receipt: null`; it must never be promoted to complete by inference from citations.
 
-For v1.2, `processing` distinguishes `mode: "whole_article"` from a reserved `mode: "per_passage"`. Whole-article counts are code-derived: `passages_available` is the current prepared passage count and `passages_cited` is the number of distinct cited passage IDs. `complete` is an operational host workflow receipt, not evidence of exhaustive cognitive attention or coverage. The schema reserves the per-passage shape, but there is no per-passage producer; verification fails closed for that unsupported mode. Do not infer passage processing from citation counts.
+For v1.2/v1.3, `processing` distinguishes `mode: "whole_article"` from reserved `mode: "per_passage"`. Counts are code-derived: `passages_available` is the prepared passage count and `passages_cited` counts distinct cited IDs. `complete` is an operational host receipt, not proof of exhaustive cognitive attention. The per-passage shape has no producer and remains ineligible. Never infer processing from citation counts.
 
-`verifyExtractionRecord` parses strict bounded JSON, validates the complete local v1.1 or v1.2 schema, and verifies the allowlisted source path and hashes, method/schema provenance, source measurements, literal passage evidence, observation IDs, dimension counts, and processing-derived values. It does not compare historical `instructions_hash` values against today’s instruction file. It returns the unchanged verified record and canonical fingerprint. Legacy v1.1 and v1.2 `not_tracked` records remain ineligible with `PROCESSING_NOT_TRACKED`; invalid provenance or derived data rejects rather than being repaired or migrated.
+`verifyExtractionRecord` selects the declared v1.1/v1.2/v1.3 schema and its matching corpus scope, validates full bounded strict JSON, source path/hashes, measurements, evidence, IDs, counts, and receipts, and returns the unchanged record plus canonical fingerprint and eligibility. Old records are checked against `docs/corpus.v1.2.yaml`, not the expanded manifest. Historical instructions are not compared to today's instruction bytes. Untracked records stay ineligible; provenance/derived-data failures reject, never migrate or repair. The expanded dataset requires exactly twenty **new v1.3 records**: twelve old receipts plus eight new records cannot pass as a full rerun.
 
-The current consolidation method is closed and versioned as `consolidate/5`, `observation-projection/1`, and `author-pattern-consolidator/0.5`. It uses `patterns.v0.5.schema.json` with only local references to retained v0.1–v0.4 schemas. Its `schema_hash` is SHA-256 of canonical UTF-8 JSON `{base_schema_hash, rhetorical_schema_hash, semantic_schema_hash, decisional_schema_hash, epistemic_schema_hash}`, whose values hash the raw bytes of the v0.1–v0.5 schema files respectively; `instructions_hash` hashes the current agent file. Retained v0.4 omits `epistemic_schema_hash`; v0.3 also omits `decisional_schema_hash`; v0.2 retains canonical `{base_schema_hash, extension_schema_hash}` over its two files, and v0.1 hashes its single schema directly. The corpus hash covers the sorted twelve article IDs and their full-record fingerprints; the input hash binds that corpus hash, one dimension's projection, and the method. Changed records or contract bytes invalidate an input for that version. Old accepted records use their exact schema/instruction snapshots and are never silently relabelled.
+The current method is `consolidate/6`, `observation-projection/1`, `author-pattern-consolidator/0.6`. `patterns.v0.6.schema.json` is a **self-contained, locally materialized** twenty-article schema: `schema_hash` hashes its raw bytes directly, and `instructions_hash` hashes the current agent file. Retained v0.1–v0.5 contracts keep their original single/composite hash formulas and instruction snapshots. The consolidation corpus hash covers sorted IDs and full-record fingerprints for the selected dataset (twenty current records, twelve for historical datasets); it is different from the raw YAML hash in extraction `source.corpus_hash`. Dimension input hashes bind that verified dataset, projection, and method. No historical acceptance or review is silently transferred to the expanded run.
 
 ### Rhetorical contract v0.2
 
@@ -136,7 +136,7 @@ authorize another dimension, extraction, or step-3 run.
 
 ### Consolidation inputs and tools
 
-The consolidator reads only the twelve extracted JSON records from the host-selected approved directory: `docs/author-extraction-results/v1.1` by default, or `docs/author-extraction-results/v1.2` when explicitly selected by host configuration. The directory is not a tool input. The core re-verifies each complete record through `verifyExtractionRecord`, requires all twelve to be processing-eligible, and only then returns observation projections. The corpus hash fingerprints the sorted set of twelve full-record fingerprints; the dimension input hash also binds the projected observations and current consolidation method, including local schema and agent-instruction hashes.
+The active plugin explicitly selects `docs/author-extraction-results/v1.3`: exactly A01–A20, all v1.3 and processing-eligible. Directory and manifest are host configuration, never tool inputs. The core re-verifies every complete record before exposing projections. Missing/extra JSON, wrong filename/source identity, mixed versions, unsafe paths, stale hashes, or any ineligible record fail closed. The offline API's historical default remains v1.1; v1.1/v1.2 directories remain bounded twelve-record datasets, not aliases for the current run.
 
 ```text
 prepareConsolidation(repoRoot, dimension, recordsDirectory?) -> Promise<PreparedDimension | BlockedPreparation>
@@ -148,11 +148,143 @@ The V2 plugin exposes only `author_pattern_consolidation_prepare({ dimension })`
 
 Preparation returns either a projection (`observation_id`, `article_id`, `dimension`, `label`, `description`, `inference_kind`, and exact `evidence_refs`) or a blocked result with diagnostics only. A candidate has exactly `groups` and `unclustered_observations`; each unclustered entry has `observation_id` and `reason`. Each group has `label`, `description`, `abstraction_kind`, `rationale`, `variation_notes`, and `member_observation_ids`, plus the dimension-specific fields documented above. The inference marker is `observed_regularities` or `inferred_generalization`. Groups require at least two members. The model supplies member observation IDs, not support mappings, counts, article totals, pattern IDs, processing status, or quotes. Core acceptance maps IDs back to verified article support and checks the exhaustive disjoint partition.
 
-Offline finalization rechecks the current dataset, version-specific hashes/methods, four unique accepted dimensions, and support mappings. It creates `author_patterns` (`author-pattern-candidates/0.5`) with `patterns`, `editorial_format`, `thematic`, and `rhetorical_groups`, plus `semantic_recurrences` (`semantic-recurrence-candidates/0.5`) with `concepts` and `relations`, and root `dimension_methods`. Revised rhetorical groups stay in `rhetorical_groups` with both axes, so scope and author relevance are not collapsed into mutually exclusive buckets. Historical and other-dimension groups retain their original routing. Every support entry, observation count, article count, promotion status, and review status is code-derived; every group remains `unreviewed`. Groups supported by one article are moved to `LOCAL_ONLY` unclustered observations. All accepted IDs introduced for the four dimensions are preserved; remaining historical final IDs use the existing deterministic `APC`, `EFC`, `THC`, and `SRC` prefixes with locale-independent ordering. Two supporting articles yield `cross_article_candidate`; three or more yield `recurrent_candidate`. These mechanical incidence categories do not upgrade `author_relevance` or establish stable author traits. Finalization is offline and does not persist a file.
+Offline finalization rechecks the dataset, version-specific hashes/methods, four unique dimensions, and support. It returns `author_patterns` and `semantic_recurrences` (v0.6) plus `dimension_methods`, preserving accepted IDs and classifications. Single-article groups become `LOCAL_ONLY` unclustered observations in the final view; they remain visible with IDs in the accepted dimension files. Every observation is represented exactly once; retained groups stay `unreviewed`. Two supporting articles yield `cross_article_candidate`, three or more `recurrent_candidate`: mechanical incidence, not proof of independent examples, distinctive style, or author approval. Related series parts and topic/period confounding require human judgement. The pure finalizer does not persist; the parent may save its canonical output as `consolidated-candidates.json`, a **step-2 candidate bundle**, not an author avatar or step-3 release.
 
-The current twelve v1.1 extracted records are source/evidence-valid but have `processing.status: "not_tracked"`. Therefore the default preparation is expected to return `blocked` with twelve `PROCESSING_NOT_TRACKED` diagnostics, without exposing projected observations or creating a consolidation artifact. Do not fabricate receipts, retroactively mark those records complete, bypass the gate, or launch another extraction. A future authorized corpus with verifiable complete v1.2 receipts is required to proceed under this policy.
+The retained twelve v1.1 records remain source/evidence-valid but `not_tracked`; the historical default therefore remains blocked with twelve `PROCESSING_NOT_TRACKED` diagnostics. No receipts were fabricated or relabelled. The active v1.3 corpus passes through twenty fresh, host-tracked native extractions instead. Another future refresh still requires authorization; neither this run nor the preserved historical results authorize automatic inference or step 3.
 
-The local unit/session tests and tool registration checks do not prove complete tool-result transfer in an actual host/provider runtime. The plugin’s `metadata.truncated: false` is not independent evidence of byte-for-byte delivery; that host/provider transfer branch remains unverified.
+Local tests and producer `metadata.truncated: false` alone do not prove runtime transfer. The v1.3 run reports separately document actual native prepare/submit byte comparisons, including source outputs above 51,200 bytes. Those checks establish the tested producer/native retrieval boundary, not provider attention, exhaustive analysis, semantic correctness, or permanent readiness for future inputs.
+
+## Step 3: human-curated author-pattern review (pending)
+
+Step 3 is a **human-curated review layer**, not another extraction or clustering
+run, and not an avatar, voice prompt, authorship test, or automatic personality
+model. It reviews all 52 original groups, including one-article/local groups;
+it does not filter by recurrence, score, or presumed author relevance. The
+pending sheet is a convenience for making explicit decisions, not evidence that
+any reviewer has made them. Its full observation index, cited passage contexts,
+and unclustered coverage are read-only context: they do not create extra review
+rows or decisions.
+
+The source-bound contract is `_scripts/author-extraction/author-review.schema.json`
+(`author-pattern-review/1`). `review.mjs` exports offline
+`validateAuthorPatterns(repoRoot)`, `prepareAuthorReview(repoRoot)`, and
+`applyAuthorReview(repoRoot, completeJson)`. Preparation validates the frozen
+corpus, records, four accepted dimensions, schemas, method, and passage context,
+then returns a pretty-printed JSON string with a final newline. It writes
+nothing. Applying a completed sheet is also pure: it returns canonical strings
+and hashes for two transformations, and never writes or publishes them.
+
+The pending sheet binds exact source-file SHA-256 values, each dimension's
+`input_hash`, the consolidation corpus hash and method, raw/review schema hashes,
+and a `review_source_hash` over the binding. For this snapshot the corpus hash is
+`bc061167c298415d96547a6709c21aa6889a48814793726d55b670f4c46502f5`, the method
+is `consolidate/6` / `observation-projection/1` /
+`author-pattern-consolidator/0.6`, and the review schema hash is
+`e7f861b8b7ea5f1f85328cb918db139c24be4e17aae5dcb5e6ccc8fbd917212b`. The source
+SHA-256 values are rhetorical `c8b5cf945df6e43f477300df025c536f9168e65cf8eaa076d656fb2f8775dda0`,
+epistemic `57544ad260e6418087922e883e5d7173516bd8ea7e74fb73519bb4915f90b8de`,
+semantic `8fd77c9b3b248ab0ada18d49bc2e407c3dc360c18c8f9c4a6e8b906cffbcc4cd`,
+and decisional `a070df8a4229fc3cb075d248f7da308f3388e7e448052f938a6d473b753b9d08`.
+The `review_source_hash` is
+`d8b3cf7c11e9328e37fbad296741e069b0c15a7ca0f12b1ad59be5cefa9223e6`. Each
+dimension's binding also includes its own input hash. Equal input hashes alone
+do not imply equal grouping: different accepted groupings can share an input
+hash. Any stale or edited source-bound snapshot is rejected, not repaired.
+
+The sheet contains 13 rhetorical, 16 epistemic, 9 semantic, and 14 decisional
+groups; 16 groups have support from only one article. It indexes 217 observations
+and 246 evidence references, provides 229 exact cited passage contexts, and
+lists all 86 raw unclustered observations. Those counts are coverage and
+provenance, not evidence of entailment, recurrence, independence, or correctness.
+Every review field is initially `null`; `semantic_merges` is empty. Original
+candidate fields and source IDs stay immutable. Candidate `variation_notes` are
+group-level free prose: preserving them does not certify that every member
+observation entails the same claim.
+
+Record one decision per original group. For rhetorical, epistemic, and decisional
+groups, the decision is `accept`, `revise`, `reject`, or `defer`; for semantic
+groups it is `retain`, `merge`, `revise`, or `discard`. A visible single-article
+approval is allowed but does not prove recurrence. The schema constrains review
+values; there are no additional hidden score or eligibility filters. The
+candidate's rhetorical `author_relevance` is immutable and separate from
+`pattern_scope`; the review-row `author_relevance` is a distinct human
+assessment, not an overwrite of the original candidate field. Original correctness
+is judged against the cited passages (`yes`, `partial`, or `no`); applicability
+and notes are explicit reviewer text. For accepted/revised R/E/D groups,
+`author_relevance` (`high`, `contextual`, `none`), `generative_utility`
+(`usable`, `descriptive_only`, `none`), and `overuse_risk` (`low`, `medium`,
+`high`) are explicit qualitative assessments, not hidden gates. Semantic review
+is limited to correctness, applicability, and notes, rather than the R/E/D
+relevance, utility, or risk assessments.
+
+`revise` approves an author-supplied effective change to the candidate label or
+description, or to an existing type/classification/abstraction field where the
+dimension permits it. A revise decision with no effective change is invalid;
+the original source pattern ID and source membership are preserved. A decisional
+candidate classified as `thematic` cannot be approved as-is; revise its
+classification to a supported existing non-thematic value, or reject/defer it.
+
+Semantic `merge` is allowed only when every participant consents to one explicit
+merge specification for whole existing groups, with the final semantic kind and
+formulation supplied. Cross-kind merges are possible. Partial memberships,
+unclustered additions, overlapping groups, merge chains, and invented permanent
+semantic IDs are not. The result records original source pattern IDs as lineage;
+they are not relabelled as `SPC` identifiers. The non-semantic transformation
+contains an audit and `reviewed_entries`; the semantic transformation contains
+its own audit and corpus-concept/corpus-relation entries. Neither output is a
+voice prompt.
+
+The native adapter defines three empty-object tools: `author_patterns_validate`,
+`author_review_prepare`, and `author_review_apply`. Native source allowlisting
+is limited to the actual host identities `build` and `plan`; extractor,
+consolidator, and custom-orchestrator roles are denied. Tool arguments cannot
+select an identity, source path, or review file. The pinned OpenCode 2.0.24 SDK
+does not expose a documented, registered non-paid tool-result executor for
+these native operations, so VM/core tests do not establish real dispatch or
+byte transfer. Real parent calls to validate/apply returned `AGENT_DENIED`; this
+shows the guard is reachable, not that an allowed native call succeeded. No
+successful native prepare or authorization-UI path is claimed. An operator may
+select the actual `build` or `plan` primary in the OpenCode UI to attempt native
+validation/preparation; no new slash command or identity argument exists.
+
+Even for `build` and `plan`, native apply always rejects with
+`AUTHORIZATION_UNAVAILABLE`: the current SDK has no hash-bound human approval
+producer, and this tool never calls the core apply function or writes a preview.
+No boolean, name, hash, token, ordinary permission, “Allow Always”, or
+`ctx.permission.reply` is author consent. A future non-native publication would
+require actual completed decisions and an operator's explicit authorization of
+the exact canonical completed-review hash; the software cannot mechanically
+certify the physical identity of that human. That is outside this phase. Keep
+both destinations absent: `reviewed-author-patterns.json` and
+`reviewed-semantic-model.json`. A pending sheet must fail as `REVIEW_INCOMPLETE`,
+without authority claims or writes. Do not publish reviewed JSON in this phase.
+
+## Identifier convention for new contracts
+
+New identifier generation defaults to one `:` across observation and pattern
+namespaces. The active retained extraction 1.1–1.3 and consolidation through 0.6
+contracts explicitly preserve their legacy IDs, so all source records, reviews
+and model hashes remain valid. New contracts must use the centralized formatter
+and canonical schema consistently; this is not permission to rename frozen
+artifacts in place. See [identifier conventions](author-identifiers.md).
+
+## Step 4 — Author Model Compiler
+
+The step-3 pending/preparation descriptions above preserve that phase's contract.
+The corpus-20 human review has since been completed (52/52 decisions), and the
+two reviewed JSON artifacts were subsequently generated locally with explicit
+completed-hash authorization; native apply remains fail-closed. Step 4 is a
+separate operational composition, documented in [Author Model Compiler](author-model.md).
+It composes the 29 approved author patterns without changing any source decision
+and treats the three retained semantic groups as optional conceptual context.
+
+## Step 5 — Author Runtime Compiler
+
+[The runtime compiler](author-runtime.md) makes a compact, resolved selection
+from the governed model for a declared task. It emits a runtime profile and
+ready-to-use instructions, with mandatory guardrail closure, explicit device
+status and optional conceptual-only semantics. It performs no consolidation or
+new pattern review and does not change the governed model or source artifacts.
 
 ## Historical v1.1 extraction contract: versions, API, and hashes
 
@@ -263,4 +395,4 @@ The captured v1 accepted JSON is outside the repository at `/private/var/folders
 
 ## Verification notes and test runner
 
-From `_scripts/author-extraction`, run `npm test`. The package runner invokes `core.test.mjs`, `native.test.mjs`, `consolidator.test.mjs`, and `consolidator-native.test.mjs`; these are local checks and do not request a model/provider or perform extraction. The consolidation suite also checks deterministic final ordering across process locales using synthetic non-ASCII labels. Schema/protocol tests establish neither semantic entailment nor author correctness. A passing local suite does not establish complete byte-for-byte delivery through an actual host/provider tool-output path; that branch remains unverified.
+From `_scripts/author-extraction`, run `npm test`. The package runner invokes `core.test.mjs`, `native.test.mjs`, `consolidator.test.mjs`, `consolidator-native.test.mjs`, `review.test.mjs`, and `review-native.test.mjs`; these are local checks and do not request a model/provider or perform extraction. The consolidation suite also checks deterministic final ordering across process locales using synthetic non-ASCII labels. Review schema/protocol tests establish neither semantic entailment nor author correctness, real host dispatch, byte transfer, or hash-bound human authorization. A passing local suite is not evidence of any of those claims.

@@ -1,0 +1,9 @@
+{
+  "mode": "review",
+  "content_type": "tutorial",
+  "language": "it",
+  "objective": "Valutare la guida alla dashboard lunare, distinguendo scelte personali, dipendenze esterne e alternative effettivamente utili.",
+  "topic": "Dashboard lunare in Home Assistant",
+  "features": ["external_dependencies", "configuration_choices"],
+  "series_context": { "is_series": true, "planned_continuation": false }
+}

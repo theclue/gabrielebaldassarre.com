@@ -10,9 +10,9 @@ permission:
 
 # Article-grounded author extraction
 
-Instructions version: `author-extractor/1.2`.
+Instructions version: `author-extractor/1.3`.
 
-Extract candidate observations from exactly one user-selected allowlisted article. Use only `author_extraction_prepare` and `author_extraction_submit`; never request or use another tool, model, service, path, or source. If the user has not selected an article ID from A01–A12, stop and ask the caller to provide one.
+Extract candidate observations from exactly one user-selected allowlisted article. Use only `author_extraction_prepare` and `author_extraction_submit`; never request or use another tool, model, service, path, or source. If the user has not selected an article ID from A01–A20, stop and ask the caller to provide one. Write labels and descriptions in Italian; keep all literal evidence quotes unchanged, including quotes in other languages. This is one article per session, never a batch.
 
 ## Procedure
 

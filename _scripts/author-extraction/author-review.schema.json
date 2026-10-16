@@ -1,0 +1,325 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:gabrielebaldassarre:author-pattern-review:1",
+  "title": "Author pattern review sheet and transformation contract",
+  "description": "Closed offline contract for human review of the four immutable corpus-20 author-pattern sources. Cross-record, lineage, evidence, hash, and decision-consistency checks are performed by the local core verifier.",
+  "$ref": "#/$defs/ReviewSheet",
+  "$defs": {
+    "Hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "ArticleId": {
+      "type": "string",
+      "enum": ["A01", "A02", "A03", "A04", "A05", "A06", "A07", "A08", "A09", "A10", "A11", "A12", "A13", "A14", "A15", "A16", "A17", "A18", "A19", "A20"]
+    },
+    "Dimension": { "type": "string", "enum": ["decisional", "epistemic", "rhetorical", "semantic"] },
+    "NonblankLabel": { "type": "string", "minLength": 1, "maxLength": 200, "pattern": "\\S" },
+    "NonblankDescription": { "type": "string", "minLength": 1, "maxLength": 2000, "pattern": "\\S" },
+    "NonblankReviewText": { "type": "string", "minLength": 1, "maxLength": 4000, "pattern": "\\S" },
+    "NullableReviewText": { "anyOf": [{ "$ref": "#/$defs/NonblankReviewText" }, { "type": "null" }] },
+    "AbstractionKind": { "type": "string", "enum": ["observed_regularities", "inferred_generalization"] },
+    "Classification": { "type": "string", "enum": ["author_candidate", "editorial_format", "thematic"] },
+    "PatternScope": { "type": "string", "enum": ["rhetorical_strategy", "explanatory_device", "editorial_format", "local_content_pattern"] },
+    "SemanticKind": { "type": "string", "enum": ["concept", "relation"] },
+    "Support": {
+      "type": "object", "additionalProperties": false,
+      "required": ["article_id", "observation_id"],
+      "properties": {
+        "article_id": { "$ref": "#/$defs/ArticleId" },
+        "observation_id": { "type": "string", "pattern": "^(?:A0[1-9]|A1[0-9]|A20)::O[0-9]{4}$" }
+      }
+    },
+    "RhetoricalCandidate": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "pattern_scope", "label", "description", "abstraction_kind", "rationale", "author_relevance", "variation_notes", "support", "observation_count", "article_count"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^APC::R[0-9]{4}$" }, "pattern_scope": { "$ref": "#/$defs/PatternScope" },
+        "label": { "$ref": "#/$defs/NonblankLabel" }, "description": { "$ref": "#/$defs/NonblankDescription" },
+        "abstraction_kind": { "$ref": "#/$defs/AbstractionKind" }, "rationale": { "$ref": "#/$defs/NonblankDescription" },
+        "author_relevance": { "type": "string", "enum": ["candidate", "uncertain", "unlikely"] },
+        "variation_notes": { "type": "array", "maxItems": 12, "items": { "$ref": "#/$defs/NonblankDescription" } },
+        "support": { "type": "array", "minItems": 2, "maxItems": 240, "uniqueItems": true, "items": { "$ref": "#/$defs/Support" } },
+        "observation_count": { "type": "integer", "minimum": 2, "maximum": 240 }, "article_count": { "type": "integer", "minimum": 1, "maximum": 20 }
+      }
+    },
+    "EpistemicCandidate": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "classification", "label", "description", "abstraction_kind", "rationale", "variation_notes", "support", "observation_count", "article_count"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^EPC:[AET][0-9]{4}$" }, "classification": { "$ref": "#/$defs/Classification" },
+        "label": { "$ref": "#/$defs/NonblankLabel" }, "description": { "$ref": "#/$defs/NonblankDescription" },
+        "abstraction_kind": { "$ref": "#/$defs/AbstractionKind" }, "rationale": { "$ref": "#/$defs/NonblankDescription" },
+        "variation_notes": { "type": "array", "maxItems": 12, "items": { "$ref": "#/$defs/NonblankDescription" } },
+        "support": { "type": "array", "minItems": 2, "maxItems": 240, "uniqueItems": true, "items": { "$ref": "#/$defs/Support" } },
+        "observation_count": { "type": "integer", "minimum": 2, "maximum": 240 }, "article_count": { "type": "integer", "minimum": 1, "maximum": 20 }
+      }
+    },
+    "DecisionalCandidate": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "classification", "label", "description", "abstraction_kind", "rationale", "variation_notes", "support", "observation_count", "article_count"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^DPC:[AET][0-9]{4}$" }, "classification": { "$ref": "#/$defs/Classification" },
+        "label": { "$ref": "#/$defs/NonblankLabel" }, "description": { "$ref": "#/$defs/NonblankDescription" },
+        "abstraction_kind": { "$ref": "#/$defs/AbstractionKind" }, "rationale": { "$ref": "#/$defs/NonblankDescription" },
+        "variation_notes": { "type": "array", "maxItems": 12, "items": { "$ref": "#/$defs/NonblankDescription" } },
+        "support": { "type": "array", "minItems": 2, "maxItems": 240, "uniqueItems": true, "items": { "$ref": "#/$defs/Support" } },
+        "observation_count": { "type": "integer", "minimum": 2, "maximum": 240 }, "article_count": { "type": "integer", "minimum": 1, "maximum": 20 }
+      }
+    },
+    "SemanticCandidate": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "semantic_kind", "label", "description", "abstraction_kind", "rationale", "variation_notes", "support", "observation_count", "article_count"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^SPC::[CR][0-9]{4}$" }, "semantic_kind": { "$ref": "#/$defs/SemanticKind" },
+        "label": { "$ref": "#/$defs/NonblankLabel" }, "description": { "$ref": "#/$defs/NonblankDescription" },
+        "abstraction_kind": { "$ref": "#/$defs/AbstractionKind" }, "rationale": { "$ref": "#/$defs/NonblankDescription" },
+        "variation_notes": { "type": "array", "maxItems": 12, "items": { "$ref": "#/$defs/NonblankDescription" } },
+        "support": { "type": "array", "minItems": 2, "maxItems": 240, "uniqueItems": true, "items": { "$ref": "#/$defs/Support" } },
+        "observation_count": { "type": "integer", "minimum": 2, "maximum": 240 }, "article_count": { "type": "integer", "minimum": 1, "maximum": 20 }
+      }
+    },
+    "CandidateSnapshot": {
+      "oneOf": [
+        { "type": "object", "additionalProperties": false, "required": ["dimension", "source_pattern_id", "candidate"], "properties": { "dimension": { "const": "rhetorical" }, "source_pattern_id": { "type": "string", "minLength": 1, "maxLength": 100, "pattern": "\\S" }, "candidate": { "$ref": "#/$defs/RhetoricalCandidate" } } },
+        { "type": "object", "additionalProperties": false, "required": ["dimension", "source_pattern_id", "candidate"], "properties": { "dimension": { "const": "epistemic" }, "source_pattern_id": { "type": "string", "minLength": 1, "maxLength": 100, "pattern": "\\S" }, "candidate": { "$ref": "#/$defs/EpistemicCandidate" } } },
+        { "type": "object", "additionalProperties": false, "required": ["dimension", "source_pattern_id", "candidate"], "properties": { "dimension": { "const": "decisional" }, "source_pattern_id": { "type": "string", "minLength": 1, "maxLength": 100, "pattern": "\\S" }, "candidate": { "$ref": "#/$defs/DecisionalCandidate" } } },
+        { "type": "object", "additionalProperties": false, "required": ["dimension", "source_pattern_id", "candidate"], "properties": { "dimension": { "const": "semantic" }, "source_pattern_id": { "type": "string", "minLength": 1, "maxLength": 100, "pattern": "\\S" }, "candidate": { "$ref": "#/$defs/SemanticCandidate" } } }
+      ]
+    },
+    "Evidence": {
+      "type": "object", "additionalProperties": false, "required": ["article_id", "passage_id", "quote"],
+      "properties": { "article_id": { "$ref": "#/$defs/ArticleId" }, "passage_id": { "type": "string", "pattern": "^P[0-9]{4}$" }, "quote": { "type": "string", "minLength": 1, "maxLength": 2000, "pattern": "\\S" } }
+    },
+    "Observation": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "dimension", "label", "description", "inference_kind", "evidence", "review_status"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^(?:A0[1-9]|A1[0-9]|A20)::O[0-9]{4}$" }, "dimension": { "$ref": "#/$defs/Dimension" },
+        "label": { "$ref": "#/$defs/NonblankLabel" }, "description": { "$ref": "#/$defs/NonblankDescription" },
+        "inference_kind": { "type": "string", "enum": ["explicit", "inferred"] }, "evidence": { "type": "array", "minItems": 1, "maxItems": 4, "items": { "$ref": "#/$defs/Evidence" } }, "review_status": { "const": "unreviewed" }
+      }
+    },
+    "ObservationIndexEntry": {
+      "type": "object", "additionalProperties": false, "required": ["dimension", "observation_id", "source_article_id", "observation"],
+      "properties": { "dimension": { "$ref": "#/$defs/Dimension" }, "observation_id": { "type": "string", "pattern": "^(?:A0[1-9]|A1[0-9]|A20)::O[0-9]{4}$" }, "source_article_id": { "$ref": "#/$defs/ArticleId" }, "observation": { "$ref": "#/$defs/Observation" } }
+    },
+    "PassageContext": {
+      "type": "object", "additionalProperties": false, "required": ["article_id", "passage_id", "start_cp", "end_cp", "text"],
+      "properties": { "article_id": { "$ref": "#/$defs/ArticleId" }, "passage_id": { "type": "string", "pattern": "^P[0-9]{4}$" }, "start_cp": { "type": "integer", "minimum": 0, "maximum": 262144 }, "end_cp": { "type": "integer", "minimum": 0, "maximum": 262144 }, "text": { "type": "string", "maxLength": 262144 } }
+    },
+    "UnclusteredObservation": {
+      "type": "object", "additionalProperties": false, "required": ["observation_id", "reason"],
+      "properties": { "observation_id": { "type": "string", "pattern": "^(?:A0[1-9]|A1[0-9]|A20)::O[0-9]{4}$" }, "reason": { "$ref": "#/$defs/NonblankDescription" } }
+    },
+    "UnclusteredCoverage": {
+      "type": "object", "additionalProperties": false, "required": ["dimension", "observations"],
+      "properties": { "dimension": { "$ref": "#/$defs/Dimension" }, "observations": { "type": "array", "maxItems": 240, "items": { "$ref": "#/$defs/UnclusteredObservation" } } }
+    },
+    "SourceFileDecisional": {
+      "type": "object", "additionalProperties": false, "required": ["dimension", "path", "sha256", "schema_version", "input_hash"],
+      "properties": { "dimension": { "const": "decisional" }, "path": { "const": "docs/author-pattern-results/v1.3/decisional.json" }, "sha256": { "const": "a070df8a4229fc3cb075d248f7da308f3388e7e448052f938a6d473b753b9d08" }, "schema_version": { "const": "author-pattern-dimension/0.6" }, "input_hash": { "const": "844a36d0fb1d2d9e6ece30e4ed8d69dd9b3278f0956933064190a3c6cb6d48fa" } }
+    },
+    "SourceFileEpistemic": {
+      "type": "object", "additionalProperties": false, "required": ["dimension", "path", "sha256", "schema_version", "input_hash"],
+      "properties": { "dimension": { "const": "epistemic" }, "path": { "const": "docs/author-pattern-results/v1.3/epistemic.json" }, "sha256": { "const": "57544ad260e6418087922e883e5d7173516bd8ea7e74fb73519bb4915f90b8de" }, "schema_version": { "const": "author-pattern-dimension/0.6" }, "input_hash": { "const": "ff7b77517c445abbb3797395f42d115fb190a4d11e2fd5040ea79a46f8880682" } }
+    },
+    "SourceFileRhetorical": {
+      "type": "object", "additionalProperties": false, "required": ["dimension", "path", "sha256", "schema_version", "input_hash"],
+      "properties": { "dimension": { "const": "rhetorical" }, "path": { "const": "docs/author-pattern-results/v1.3/rhetorical.json" }, "sha256": { "const": "c8b5cf945df6e43f477300df025c536f9168e65cf8eaa076d656fb2f8775dda0" }, "schema_version": { "const": "author-pattern-dimension/0.6" }, "input_hash": { "const": "0c600651749639d4551986edc685b2df4cab55082ba0a9d3d6036e0b1960887a" } }
+    },
+    "SourceFileSemantic": {
+      "type": "object", "additionalProperties": false, "required": ["dimension", "path", "sha256", "schema_version", "input_hash"],
+      "properties": { "dimension": { "const": "semantic" }, "path": { "const": "docs/author-pattern-results/v1.3/semantic.json" }, "sha256": { "const": "8fd77c9b3b248ab0ada18d49bc2e407c3dc360c18c8f9c4a6e8b906cffbcc4cd" }, "schema_version": { "const": "author-pattern-dimension/0.6" }, "input_hash": { "const": "5e76f6940ff13135dadf2dec12bde653e8a8235e725d40057b1bbb2bbffb2592" } }
+    },
+    "OriginalMethod": {
+      "type": "object", "additionalProperties": false,
+      "required": ["consolidation_version", "projection_version", "instructions_version", "schema_hash", "instructions_hash"],
+      "properties": { "consolidation_version": { "const": "consolidate/6" }, "projection_version": { "const": "observation-projection/1" }, "instructions_version": { "const": "author-pattern-consolidator/0.6" }, "schema_hash": { "const": "1cc2d9fd3c779f51c294719cd28e85f3570ffe65e274e8dc6fea1f1f39eef834" }, "instructions_hash": { "const": "55d8d19d8249264cae595b1030e009ceaf3a75c382aa8fe16f3ca7cab9a145f1" } }
+    },
+    "Binding": {
+      "type": "object", "additionalProperties": false,
+      "required": ["corpus_hash", "source_files", "method", "review_contract_version", "raw_schema_sha256", "review_schema_sha256", "review_source_hash"],
+      "properties": {
+        "corpus_hash": { "const": "bc061167c298415d96547a6709c21aa6889a48814793726d55b670f4c46502f5" },
+        "source_files": { "type": "array", "minItems": 4, "maxItems": 4, "prefixItems": [{ "$ref": "#/$defs/SourceFileDecisional" }, { "$ref": "#/$defs/SourceFileEpistemic" }, { "$ref": "#/$defs/SourceFileRhetorical" }, { "$ref": "#/$defs/SourceFileSemantic" }], "items": false },
+        "method": { "$ref": "#/$defs/OriginalMethod" }, "review_contract_version": { "const": "author-review/1" },
+        "raw_schema_sha256": { "const": "1cc2d9fd3c779f51c294719cd28e85f3570ffe65e274e8dc6fea1f1f39eef834" }, "review_schema_sha256": { "$ref": "#/$defs/Hash" }, "review_source_hash": { "$ref": "#/$defs/Hash" }
+      }
+    },
+    "RhetoricalRevision": {
+      "type": "object", "additionalProperties": false, "required": ["label", "description", "abstraction_kind", "pattern_scope"],
+      "properties": { "label": { "$ref": "#/$defs/NonblankLabel" }, "description": { "$ref": "#/$defs/NonblankDescription" }, "abstraction_kind": { "anyOf": [{ "$ref": "#/$defs/AbstractionKind" }, { "type": "null" }] }, "pattern_scope": { "anyOf": [{ "$ref": "#/$defs/PatternScope" }, { "type": "null" }] } }
+    },
+    "EpistemicRevision": {
+      "type": "object", "additionalProperties": false, "required": ["label", "description", "abstraction_kind", "classification"],
+      "properties": { "label": { "$ref": "#/$defs/NonblankLabel" }, "description": { "$ref": "#/$defs/NonblankDescription" }, "abstraction_kind": { "anyOf": [{ "$ref": "#/$defs/AbstractionKind" }, { "type": "null" }] }, "classification": { "anyOf": [{ "$ref": "#/$defs/Classification" }, { "type": "null" }] } }
+    },
+    "DecisionalRevision": {
+      "type": "object", "additionalProperties": false, "required": ["label", "description", "abstraction_kind", "classification"],
+      "properties": { "label": { "$ref": "#/$defs/NonblankLabel" }, "description": { "$ref": "#/$defs/NonblankDescription" }, "abstraction_kind": { "anyOf": [{ "$ref": "#/$defs/AbstractionKind" }, { "type": "null" }] }, "classification": { "anyOf": [{ "$ref": "#/$defs/Classification" }, { "type": "null" }] } }
+    },
+    "SemanticRevision": {
+      "type": "object", "additionalProperties": false, "required": ["label", "description", "abstraction_kind", "semantic_kind"],
+      "properties": { "label": { "$ref": "#/$defs/NonblankLabel" }, "description": { "$ref": "#/$defs/NonblankDescription" }, "abstraction_kind": { "anyOf": [{ "$ref": "#/$defs/AbstractionKind" }, { "type": "null" }] }, "semantic_kind": { "anyOf": [{ "$ref": "#/$defs/SemanticKind" }, { "type": "null" }] } }
+    },
+    "AuthorReviewFields": {
+      "type": "object", "additionalProperties": false,
+      "required": ["source_pattern_id", "decision", "correctness", "applicability", "notes", "revision", "author_relevance", "generative_utility", "overuse_risk"],
+      "properties": {
+        "dimension": { "type": "string", "enum": ["rhetorical", "epistemic", "decisional"] },
+        "source_pattern_id": { "type": "string", "minLength": 1, "maxLength": 100, "pattern": "\\S" }, "decision": { "anyOf": [{ "type": "string", "enum": ["accept", "revise", "reject", "defer"] }, { "type": "null" }] },
+        "correctness": { "anyOf": [{ "type": "string", "enum": ["yes", "partial", "no"] }, { "type": "null" }] }, "applicability": { "$ref": "#/$defs/NullableReviewText" }, "notes": { "$ref": "#/$defs/NullableReviewText" },
+        "revision": { "anyOf": [{ "$ref": "#/$defs/RhetoricalRevision" }, { "$ref": "#/$defs/EpistemicRevision" }, { "$ref": "#/$defs/DecisionalRevision" }, { "type": "null" }] },
+        "author_relevance": { "anyOf": [{ "type": "string", "enum": ["high", "contextual", "none"] }, { "type": "null" }] },
+        "generative_utility": { "anyOf": [{ "type": "string", "enum": ["usable", "descriptive_only", "none"] }, { "type": "null" }] },
+        "overuse_risk": { "anyOf": [{ "type": "string", "enum": ["low", "medium", "high"] }, { "type": "null" }] }
+      }
+    },
+    "RhetoricalReview": {
+      "allOf": [
+        { "$ref": "#/$defs/AuthorReviewFields" },
+        { "type": "object", "required": ["dimension"], "properties": { "dimension": { "const": "rhetorical" }, "revision": { "anyOf": [{ "$ref": "#/$defs/RhetoricalRevision" }, { "type": "null" }] } } },
+        { "if": { "type": "object", "properties": { "decision": { "type": "null" } }, "required": ["decision"] }, "then": { "type": "object", "properties": { "correctness": { "type": "null" }, "applicability": { "type": "null" }, "revision": { "type": "null" }, "author_relevance": { "type": "null" }, "generative_utility": { "type": "null" }, "overuse_risk": { "type": "null" } } } },
+        { "if": { "type": "object", "properties": { "decision": { "enum": ["accept", "revise"] } }, "required": ["decision"] }, "then": { "type": "object", "properties": { "correctness": { "enum": ["yes", "partial", "no"] }, "applicability": { "$ref": "#/$defs/NonblankReviewText" }, "author_relevance": { "enum": ["high", "contextual", "none"] }, "generative_utility": { "enum": ["usable", "descriptive_only", "none"] }, "overuse_risk": { "enum": ["low", "medium", "high"] } } } },
+        { "if": { "type": "object", "properties": { "decision": { "const": "accept" } }, "required": ["decision"] }, "then": { "type": "object", "properties": { "revision": { "type": "null" } } } },
+        { "if": { "type": "object", "properties": { "decision": { "const": "revise" } }, "required": ["decision"] }, "then": { "type": "object", "properties": { "revision": { "$ref": "#/$defs/RhetoricalRevision" } } } },
+        { "if": { "type": "object", "properties": { "decision": { "enum": ["reject", "defer"] } }, "required": ["decision"] }, "then": { "type": "object", "properties": { "correctness": { "enum": ["yes", "partial", "no"] }, "applicability": { "type": "null" }, "revision": { "type": "null" }, "author_relevance": { "type": "null" }, "generative_utility": { "type": "null" }, "overuse_risk": { "type": "null" } } } }
+      ]
+    },
+    "EpistemicReview": {
+      "allOf": [
+        { "$ref": "#/$defs/AuthorReviewFields" },
+        { "type": "object", "required": ["dimension"], "properties": { "dimension": { "const": "epistemic" }, "revision": { "anyOf": [{ "$ref": "#/$defs/EpistemicRevision" }, { "type": "null" }] } } },
+        { "if": { "type": "object", "properties": { "decision": { "type": "null" } }, "required": ["decision"] }, "then": { "type": "object", "properties": { "correctness": { "type": "null" }, "applicability": { "type": "null" }, "revision": { "type": "null" }, "author_relevance": { "type": "null" }, "generative_utility": { "type": "null" }, "overuse_risk": { "type": "null" } } } },
+        { "if": { "type": "object", "properties": { "decision": { "enum": ["accept", "revise"] } }, "required": ["decision"] }, "then": { "type": "object", "properties": { "correctness": { "enum": ["yes", "partial", "no"] }, "applicability": { "$ref": "#/$defs/NonblankReviewText" }, "author_relevance": { "enum": ["high", "contextual", "none"] }, "generative_utility": { "enum": ["usable", "descriptive_only", "none"] }, "overuse_risk": { "enum": ["low", "medium", "high"] } } } },
+        { "if": { "type": "object", "properties": { "decision": { "const": "accept" } }, "required": ["decision"] }, "then": { "type": "object", "properties": { "revision": { "type": "null" } } } },
+        { "if": { "type": "object", "properties": { "decision": { "const": "revise" } }, "required": ["decision"] }, "then": { "type": "object", "properties": { "revision": { "$ref": "#/$defs/EpistemicRevision" } } } },
+        { "if": { "type": "object", "properties": { "decision": { "enum": ["reject", "defer"] } }, "required": ["decision"] }, "then": { "type": "object", "properties": { "correctness": { "enum": ["yes", "partial", "no"] }, "applicability": { "type": "null" }, "revision": { "type": "null" }, "author_relevance": { "type": "null" }, "generative_utility": { "type": "null" }, "overuse_risk": { "type": "null" } } } }
+      ]
+    },
+    "DecisionalReview": {
+      "allOf": [
+        { "$ref": "#/$defs/AuthorReviewFields" },
+        { "type": "object", "required": ["dimension"], "properties": { "dimension": { "const": "decisional" }, "revision": { "anyOf": [{ "$ref": "#/$defs/DecisionalRevision" }, { "type": "null" }] } } },
+        { "if": { "type": "object", "properties": { "decision": { "type": "null" } }, "required": ["decision"] }, "then": { "type": "object", "properties": { "correctness": { "type": "null" }, "applicability": { "type": "null" }, "revision": { "type": "null" }, "author_relevance": { "type": "null" }, "generative_utility": { "type": "null" }, "overuse_risk": { "type": "null" } } } },
+        { "if": { "type": "object", "properties": { "decision": { "enum": ["accept", "revise"] } }, "required": ["decision"] }, "then": { "type": "object", "properties": { "correctness": { "enum": ["yes", "partial", "no"] }, "applicability": { "$ref": "#/$defs/NonblankReviewText" }, "author_relevance": { "enum": ["high", "contextual", "none"] }, "generative_utility": { "enum": ["usable", "descriptive_only", "none"] }, "overuse_risk": { "enum": ["low", "medium", "high"] } } } },
+        { "if": { "type": "object", "properties": { "decision": { "const": "accept" } }, "required": ["decision"] }, "then": { "type": "object", "properties": { "revision": { "type": "null" } } } },
+        { "if": { "type": "object", "properties": { "decision": { "const": "revise" } }, "required": ["decision"] }, "then": { "type": "object", "properties": { "revision": { "$ref": "#/$defs/DecisionalRevision" } } } },
+        { "if": { "type": "object", "properties": { "decision": { "enum": ["reject", "defer"] } }, "required": ["decision"] }, "then": { "type": "object", "properties": { "correctness": { "enum": ["yes", "partial", "no"] }, "applicability": { "type": "null" }, "revision": { "type": "null" }, "author_relevance": { "type": "null" }, "generative_utility": { "type": "null" }, "overuse_risk": { "type": "null" } } } }
+      ]
+    },
+    "SemanticReview": {
+      "type": "object", "additionalProperties": false,
+      "required": ["dimension", "source_pattern_id", "decision", "correctness", "applicability", "notes", "revision", "merge_key"],
+      "properties": {
+        "dimension": { "const": "semantic" }, "source_pattern_id": { "type": "string", "minLength": 1, "maxLength": 100, "pattern": "\\S" },
+        "decision": { "anyOf": [{ "type": "string", "enum": ["retain", "merge", "revise", "discard"] }, { "type": "null" }] },
+        "correctness": { "anyOf": [{ "type": "string", "enum": ["yes", "partial", "no"] }, { "type": "null" }] }, "applicability": { "$ref": "#/$defs/NullableReviewText" }, "notes": { "$ref": "#/$defs/NullableReviewText" },
+        "revision": { "anyOf": [{ "$ref": "#/$defs/SemanticRevision" }, { "type": "null" }] }, "merge_key": { "anyOf": [{ "type": "string", "minLength": 1, "maxLength": 100, "pattern": "\\S" }, { "type": "null" }] }
+      },
+      "allOf": [
+        { "if": { "type": "object", "properties": { "decision": { "type": "null" } }, "required": ["decision"] }, "then": { "type": "object", "properties": { "correctness": { "type": "null" }, "applicability": { "type": "null" }, "revision": { "type": "null" }, "merge_key": { "type": "null" } } } },
+        { "if": { "type": "object", "properties": { "decision": { "const": "retain" } }, "required": ["decision"] }, "then": { "type": "object", "properties": { "correctness": { "enum": ["yes", "partial", "no"] }, "applicability": { "$ref": "#/$defs/NonblankReviewText" }, "revision": { "type": "null" }, "merge_key": { "type": "null" } } } },
+        { "if": { "type": "object", "properties": { "decision": { "const": "revise" } }, "required": ["decision"] }, "then": { "type": "object", "properties": { "correctness": { "enum": ["yes", "partial", "no"] }, "applicability": { "$ref": "#/$defs/NonblankReviewText" }, "revision": { "$ref": "#/$defs/SemanticRevision" }, "merge_key": { "type": "null" } } } },
+        { "if": { "type": "object", "properties": { "decision": { "const": "merge" } }, "required": ["decision"] }, "then": { "type": "object", "properties": { "correctness": { "enum": ["yes", "partial", "no"] }, "applicability": { "type": "null" }, "revision": { "type": "null" }, "merge_key": { "type": "string", "minLength": 1, "maxLength": 100, "pattern": "\\S" } } } },
+        { "if": { "type": "object", "properties": { "decision": { "const": "discard" } }, "required": ["decision"] }, "then": { "type": "object", "properties": { "correctness": { "enum": ["yes", "partial", "no"] }, "applicability": { "type": "null" }, "revision": { "type": "null" }, "merge_key": { "type": "null" } } } }
+      ]
+    },
+    "Review": { "oneOf": [{ "$ref": "#/$defs/RhetoricalReview" }, { "$ref": "#/$defs/EpistemicReview" }, { "$ref": "#/$defs/DecisionalReview" }, { "$ref": "#/$defs/SemanticReview" }] },
+    "SemanticMerge": {
+      "type": "object", "additionalProperties": false,
+      "required": ["merge_key", "source_pattern_ids", "label", "description", "semantic_kind", "abstraction_kind", "applicability", "notes"],
+      "properties": {
+        "merge_key": { "type": "string", "minLength": 1, "maxLength": 100, "pattern": "\\S" },
+        "source_pattern_ids": { "type": "array", "minItems": 2, "maxItems": 240, "uniqueItems": true, "items": { "type": "string", "minLength": 1, "maxLength": 100, "pattern": "\\S" } },
+        "label": { "$ref": "#/$defs/NonblankLabel" }, "description": { "$ref": "#/$defs/NonblankDescription" }, "semantic_kind": { "$ref": "#/$defs/SemanticKind" }, "abstraction_kind": { "$ref": "#/$defs/AbstractionKind" },
+        "applicability": { "$ref": "#/$defs/NonblankReviewText" }, "notes": { "$ref": "#/$defs/NullableReviewText" }
+      }
+    },
+    "ReviewSheet": {
+      "type": "object", "additionalProperties": false,
+      "required": ["schema_version", "binding", "candidates", "observation_index", "passage_context_index", "unclustered_coverage", "reviews", "semantic_merges"],
+      "properties": {
+        "schema_version": { "const": "author-pattern-review/1" }, "binding": { "$ref": "#/$defs/Binding" },
+        "candidates": { "type": "array", "minItems": 1, "maxItems": 240, "items": { "$ref": "#/$defs/CandidateSnapshot" } },
+        "observation_index": { "type": "array", "minItems": 1, "maxItems": 240, "items": { "$ref": "#/$defs/ObservationIndexEntry" } },
+        "passage_context_index": { "type": "array", "minItems": 1, "maxItems": 960, "items": { "$ref": "#/$defs/PassageContext" } },
+        "unclustered_coverage": { "type": "array", "minItems": 4, "maxItems": 4, "prefixItems": [{ "$ref": "#/$defs/UnclusteredCoverage" }, { "$ref": "#/$defs/UnclusteredCoverage" }, { "$ref": "#/$defs/UnclusteredCoverage" }, { "$ref": "#/$defs/UnclusteredCoverage" }], "items": false },
+        "reviews": { "type": "array", "minItems": 1, "maxItems": 240, "items": { "$ref": "#/$defs/Review" } }, "semantic_merges": { "type": "array", "maxItems": 120, "items": { "$ref": "#/$defs/SemanticMerge" } }
+      }
+    },
+    "PendingReview": {
+      "allOf": [
+        { "$ref": "#/$defs/Review" },
+        { "if": { "type": "object", "properties": { "dimension": { "enum": ["rhetorical", "epistemic", "decisional"] } }, "required": ["dimension"] }, "then": { "type": "object", "properties": { "decision": { "type": "null" }, "correctness": { "type": "null" }, "applicability": { "type": "null" }, "notes": { "type": "null" }, "revision": { "type": "null" }, "author_relevance": { "type": "null" }, "generative_utility": { "type": "null" }, "overuse_risk": { "type": "null" } } }, "else": { "type": "object", "properties": { "decision": { "type": "null" }, "correctness": { "type": "null" }, "applicability": { "type": "null" }, "notes": { "type": "null" }, "revision": { "type": "null" }, "merge_key": { "type": "null" } } } }
+      ]
+    },
+    "CompletedReview": {
+      "allOf": [
+        { "$ref": "#/$defs/Review" },
+        { "if": { "type": "object", "properties": { "dimension": { "enum": ["rhetorical", "epistemic", "decisional"] } }, "required": ["dimension"] }, "then": { "type": "object", "properties": { "decision": { "enum": ["accept", "revise", "reject", "defer"] }, "correctness": { "enum": ["yes", "partial", "no"] } } }, "else": { "type": "object", "properties": { "decision": { "enum": ["retain", "merge", "revise", "discard"] }, "correctness": { "enum": ["yes", "partial", "no"] } } } }
+      ]
+    },
+    "PendingSheet": {
+      "allOf": [{ "$ref": "#/$defs/ReviewSheet" }, { "type": "object", "properties": { "reviews": { "type": "array", "items": { "$ref": "#/$defs/PendingReview" } }, "semantic_merges": { "type": "array", "maxItems": 0 } } }]
+    },
+    "CompletedSheet": {
+      "allOf": [{ "$ref": "#/$defs/ReviewSheet" }, { "type": "object", "properties": { "reviews": { "type": "array", "items": { "$ref": "#/$defs/CompletedReview" } } } }]
+    },
+    "OutputProvenance": {
+      "type": "object", "additionalProperties": false, "required": ["binding", "review_source_hash", "completed_review_hash"],
+      "properties": { "binding": { "$ref": "#/$defs/Binding" }, "review_source_hash": { "$ref": "#/$defs/Hash" }, "completed_review_hash": { "$ref": "#/$defs/Hash" } }
+    },
+    "AuditEntry": {
+      "type": "object", "additionalProperties": false, "required": ["dimension", "source_pattern_id", "candidate", "review"],
+      "properties": { "dimension": { "$ref": "#/$defs/Dimension" }, "source_pattern_id": { "type": "string", "minLength": 1, "maxLength": 100, "pattern": "\\S" }, "candidate": { "$ref": "#/$defs/CandidateSnapshot" }, "review": { "$ref": "#/$defs/CompletedReview" } }
+    },
+    "Incidence": {
+      "type": "object", "additionalProperties": false, "required": ["article_id", "observation_count"],
+      "properties": { "article_id": { "$ref": "#/$defs/ArticleId" }, "observation_count": { "type": "integer", "minimum": 1, "maximum": 240 } }
+    },
+    "ReviewedAuthorEntry": {
+      "type": "object", "additionalProperties": false,
+      "required": ["dimension", "source_pattern_id", "label", "description", "abstraction_kind", "type", "applicability", "author_relevance", "generative_utility", "overuse_risk", "support", "observation_count", "article_count", "local_incidence"],
+      "properties": {
+        "dimension": { "type": "string", "enum": ["rhetorical", "epistemic", "decisional"] }, "source_pattern_id": { "type": "string", "minLength": 1, "maxLength": 100, "pattern": "\\S" },
+        "label": { "$ref": "#/$defs/NonblankLabel" }, "description": { "$ref": "#/$defs/NonblankDescription" }, "abstraction_kind": { "$ref": "#/$defs/AbstractionKind" },
+        "type": { "anyOf": [{ "$ref": "#/$defs/PatternScope" }, { "$ref": "#/$defs/Classification" }] }, "applicability": { "$ref": "#/$defs/NonblankReviewText" },
+        "author_relevance": { "type": "string", "enum": ["high", "contextual", "none"] }, "generative_utility": { "type": "string", "enum": ["usable", "descriptive_only", "none"] }, "overuse_risk": { "type": "string", "enum": ["low", "medium", "high"] },
+        "support": { "type": "array", "minItems": 1, "maxItems": 240, "items": { "$ref": "#/$defs/Support" } }, "observation_count": { "type": "integer", "minimum": 1, "maximum": 240 }, "article_count": { "type": "integer", "minimum": 1, "maximum": 20 }, "local_incidence": { "type": "array", "minItems": 1, "maxItems": 20, "items": { "$ref": "#/$defs/Incidence" } }
+      }
+    },
+    "ReviewedSemanticEntry": {
+      "type": "object", "additionalProperties": false,
+      "required": ["decision", "source_pattern_ids", "role", "semantic_kind", "label", "description", "abstraction_kind", "applicability", "support", "observation_count", "article_count", "local_incidence"],
+      "properties": {
+        "decision": { "type": "string", "enum": ["retain", "revise", "merge"] }, "source_pattern_ids": { "type": "array", "minItems": 1, "maxItems": 240, "uniqueItems": true, "items": { "type": "string", "minLength": 1, "maxLength": 100, "pattern": "\\S" } },
+        "role": { "type": "string", "enum": ["corpus_concept", "corpus_relation"] }, "semantic_kind": { "$ref": "#/$defs/SemanticKind" },
+        "label": { "$ref": "#/$defs/NonblankLabel" }, "description": { "$ref": "#/$defs/NonblankDescription" }, "abstraction_kind": { "$ref": "#/$defs/AbstractionKind" }, "applicability": { "$ref": "#/$defs/NonblankReviewText" },
+        "support": { "type": "array", "minItems": 1, "maxItems": 240, "items": { "$ref": "#/$defs/Support" } }, "observation_count": { "type": "integer", "minimum": 1, "maximum": 240 }, "article_count": { "type": "integer", "minimum": 1, "maximum": 20 }, "local_incidence": { "type": "array", "minItems": 1, "maxItems": 20, "items": { "$ref": "#/$defs/Incidence" } }
+      }
+    },
+    "ReviewedAuthorPatterns": {
+      "type": "object", "additionalProperties": false, "required": ["schema_version", "provenance", "observation_index", "passage_context_index", "audit", "reviewed_entries"],
+      "properties": { "schema_version": { "const": "reviewed-author-patterns/1" }, "provenance": { "$ref": "#/$defs/OutputProvenance" }, "observation_index": { "type": "array", "minItems": 1, "maxItems": 240, "items": { "$ref": "#/$defs/ObservationIndexEntry" } }, "passage_context_index": { "type": "array", "minItems": 1, "maxItems": 960, "items": { "$ref": "#/$defs/PassageContext" } }, "audit": { "type": "array", "minItems": 1, "maxItems": 240, "items": { "$ref": "#/$defs/AuditEntry" } }, "reviewed_entries": { "type": "array", "maxItems": 240, "items": { "$ref": "#/$defs/ReviewedAuthorEntry" } } }
+    },
+    "ReviewedSemanticModel": {
+      "type": "object", "additionalProperties": false, "required": ["schema_version", "provenance", "observation_index", "passage_context_index", "audit", "semantic_merges", "reviewed_entries"],
+      "properties": { "schema_version": { "const": "reviewed-semantic-model/1" }, "provenance": { "$ref": "#/$defs/OutputProvenance" }, "observation_index": { "type": "array", "minItems": 1, "maxItems": 240, "items": { "$ref": "#/$defs/ObservationIndexEntry" } }, "passage_context_index": { "type": "array", "minItems": 1, "maxItems": 960, "items": { "$ref": "#/$defs/PassageContext" } }, "audit": { "type": "array", "minItems": 1, "maxItems": 240, "items": { "$ref": "#/$defs/AuditEntry" } }, "semantic_merges": { "type": "array", "maxItems": 120, "items": { "$ref": "#/$defs/SemanticMerge" } }, "reviewed_entries": { "type": "array", "maxItems": 240, "items": { "$ref": "#/$defs/ReviewedSemanticEntry" } } }
+    },
+    "DimensionCount": {
+      "type": "object", "additionalProperties": false, "required": ["dimension", "groups", "observations", "evidence", "unclustered_observations"],
+      "properties": { "dimension": { "$ref": "#/$defs/Dimension" }, "groups": { "type": "integer", "minimum": 0, "maximum": 240 }, "observations": { "type": "integer", "minimum": 0, "maximum": 240 }, "evidence": { "type": "integer", "minimum": 0, "maximum": 960 }, "unclustered_observations": { "type": "integer", "minimum": 0, "maximum": 240 } }
+    },
+    "ValidationReport": {
+      "type": "object", "additionalProperties": false, "required": ["schema_version", "binding", "per_dimension", "total_groups", "total_observations", "total_evidence"],
+      "properties": { "schema_version": { "const": "author-pattern-validation/1" }, "binding": { "$ref": "#/$defs/Binding" }, "per_dimension": { "type": "array", "minItems": 4, "maxItems": 4, "prefixItems": [{ "$ref": "#/$defs/DimensionCount" }, { "$ref": "#/$defs/DimensionCount" }, { "$ref": "#/$defs/DimensionCount" }, { "$ref": "#/$defs/DimensionCount" }], "items": false }, "total_groups": { "type": "integer", "minimum": 0, "maximum": 960 }, "total_observations": { "type": "integer", "minimum": 0, "maximum": 240 }, "total_evidence": { "type": "integer", "minimum": 0, "maximum": 960 } }
+    },
+    "ReviewTransformation": {
+      "type": "object", "additionalProperties": false, "required": ["schema_version", "review_source_hash", "completed_review_hash", "reviewed_author_patterns_json", "reviewed_author_patterns_sha256", "reviewed_semantic_model_json", "reviewed_semantic_model_sha256"],
+      "properties": {
+        "schema_version": { "const": "author-review-transformation/1" }, "review_source_hash": { "$ref": "#/$defs/Hash" }, "completed_review_hash": { "$ref": "#/$defs/Hash" },
+        "reviewed_author_patterns_json": { "type": "string", "minLength": 2, "maxLength": 16777216 }, "reviewed_author_patterns_sha256": { "$ref": "#/$defs/Hash" },
+        "reviewed_semantic_model_json": { "type": "string", "minLength": 2, "maxLength": 16777216 }, "reviewed_semantic_model_sha256": { "$ref": "#/$defs/Hash" }
+      }
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "mode": "expand",
+  "content_type": "project_article",
+  "language": "it",
+  "objective": "Ampliare la presentazione del monitoraggio SEO, distinguendo ipotesi sui dati, scelte operative e roadmap non ancora implementata.",
+  "topic": "Monitoraggio temporale di una pipeline SEO",
+  "features": ["implementation_choices", "interpretation_of_data", "mutable_information"],
+  "series_context": { "is_series": true, "planned_continuation": true, "continuation_topic": "Il blocco successivo delle migliorie proposte dall'agente" },
+  "constraints": ["La prosecuzione è un piano: non inventare date e non dichiararla implementata."]
+}

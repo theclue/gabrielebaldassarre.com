@@ -1,0 +1,13 @@
+{
+  "schema_version": "author-runtime-corpus-cases/1",
+  "description": "Explicit task annotations for real approved corpus articles; not new pattern extraction or a prose-quality benchmark.",
+  "cases": [
+    { "article_id": "A02", "task": "A02-social-networks.json", "source_markers": ["scale-free", "triadi"], "profiles": ["C01", "C04"], "local_rules": ["C04:R03"], "semantic_context": ["S01"], "devices": { "D01": "available", "D03": "available" } },
+    { "article_id": "A07", "task": "A07-phase-portrait.json", "source_markers": ["spazio degli stati", "pendolo"], "profiles": ["C01", "C04"], "local_rules": ["C04:R01"], "semantic_context": ["S02"], "devices": { "D01": "available", "D02": "preferred" } },
+    { "article_id": "A08", "task": "A08-scientific-units.json", "source_markers": ["elettronvolt", "Facciamo un esempio"], "profiles": ["C01"], "local_rules": [], "semantic_context": [], "devices": { "D01": "available", "D02": "required" } },
+    { "article_id": "A09", "task": "A09-lighting-project.json", "source_markers": ["400 lux", "input_number"], "profiles": ["C02", "C04"], "local_rules": ["C04:R02"], "semantic_context": [], "devices": { "D01": "available", "D02": "available", "D05": "preferred" } },
+    { "article_id": "A10", "task": "A10-lunar-tutorial.json", "source_markers": ["Home Assistant", "NASA"], "profiles": ["C02", "C03"], "local_rules": [], "semantic_context": [], "devices": { "D01": "available", "D05": "preferred" } },
+    { "article_id": "A13", "task": "A13-states-and-systems.json", "source_markers": ["spazio degli stati", "lancio"], "profiles": ["C01"], "local_rules": [], "semantic_context": ["S02", "S03"], "devices": { "D01": "available", "D02": "preferred" } },
+    { "article_id": "A20", "task": "A20-seo-project.json", "source_markers": ["wrangler", "istantanea"], "profiles": ["C02", "C03"], "local_rules": [], "semantic_context": [], "devices": { "D01": "available", "D05": "preferred", "D06": "available" } }
+  ]
+}

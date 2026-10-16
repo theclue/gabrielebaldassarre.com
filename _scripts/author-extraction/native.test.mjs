@@ -311,7 +311,7 @@ describe('v1.2 whole-article processing receipt (native host context)', () => {
     await mkdir(join(root, '.opencode/agents'), { recursive: true });
     await mkdir(join(root, '_posts'), { recursive: true });
     const articlePath = '_posts/synthetic.md';
-    const corpusSources = Array.from({ length: 12 }, (_, index) => {
+    const corpusSources = Array.from({ length: 20 }, (_, index) => {
       const articleId = `A${String(index + 1).padStart(2, '0')}`;
       return `  - id: ${articleId}\n    percorso: ${articleId === 'A12' ? articlePath : `_posts/synthetic/${articleId}.md`}\n    rappresentativo_stile: true`;
     });
@@ -324,13 +324,14 @@ describe('v1.2 whole-article processing receipt (native host context)', () => {
     await writeFile(join(root, 'docs/corpus.yaml'), corpus);
     await writeFile(join(root, '_scripts/author-extraction/extraction.schema.json'), await readFile(new URL('./extraction.schema.json', import.meta.url)));
     await writeFile(join(root, '_scripts/author-extraction/extraction.v1.2.schema.json'), await readFile(new URL('./extraction.v1.2.schema.json', import.meta.url)));
+    await writeFile(join(root, '_scripts/author-extraction/extraction.v1.3.schema.json'), await readFile(new URL('./extraction.v1.3.schema.json', import.meta.url)));
     await writeFile(join(root, '.opencode/agents/author-extractor.md'), '# Synthetic author-extractor 1.2 fixture\n');
     await writeFile(join(root, articlePath), `---\ntitle: Synthetic\n---\n${body}`);
 
     const adapter = createExtractionAdapter({ prepareArticle, acceptCandidate }, root);
     const context = { sessionId: 'integration-session-A12', agent: 'author-extractor' };
     const prepared = await adapter.prepare({ article_id: 'A12' }, context);
-    assert.equal(prepared.schema_version, 'author-extraction/1.2');
+    assert.equal(prepared.schema_version, 'author-extraction/1.3');
     assert.equal(prepared.passages.length, 3);
     const candidate = JSON.stringify({ observations: [{
       dimension: 'rhetorical', label: 'synthetic observation',
