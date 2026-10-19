@@ -52,6 +52,10 @@ config.status
 
 node_modules/
 
+# Local authoring transactions (revision snapshots and run receipts)
+/.opencode/authoring-revisions/
+/docs/authoring-runs/
+
 /vendor
 .idea
 .venv

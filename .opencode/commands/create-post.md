@@ -58,6 +58,14 @@ Al termine chiama `author_post_finish` con `outcome: written`; se abbandoni il
 compito, usa `cancelled`. Il tool termina l'iniezione, non pubblica né elimina.
 Il conteggio delle applicazioni dell'hook non dimostra conformità della prosa.
 
+`written` chiude davvero il runtime. Se l'utente chiede correzioni dopo quella
+chiusura, non modificare l'articolo presumendo che il profilo sia ancora attivo:
+segui il flusso **`/revise-post`**, con `author_post_revision_prepare` sul file
+esistente, e mantieni il runtime attivo fino al confronto editoriale e alla fine
+della revisione. La preparazione di un nuovo articolo non autorizza a riusare la
+ricevuta per le successive versioni. Il confronto editoriale esplicito è un gate
+del flusso di revisione; il solo `written` della creazione non lo sostituisce.
+
 Crea un post tutorial/divulgativo tecnico-scientifico a partire da una
 descrizione in linguaggio naturale.
 

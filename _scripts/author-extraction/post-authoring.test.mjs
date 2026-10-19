@@ -148,6 +148,24 @@ describe("new post authoring: runtime gate and actual Rake, isolated files only"
 });
 
 describe("OpenCode V2 authoring hook, session scope and permissions (no LLM calls)", () => {
+  it("fails closed with an actionable error when the host cannot assert permissions", async (t) => {
+    for (const permission of [undefined, {}, { assert: null }, { assert: true }]) {
+      const root = await fixture(t), h = host(root);
+      h.ctx.app = { version: "2.0.24" };
+      h.ctx.permission = permission;
+      const cleanup = await setupPostAuthoring(h.ctx, root); t.after(cleanup);
+      const before = await readdir(root, { recursive: true });
+      await assert.rejects(h.tools.get("author_post_prepare").execute(request, h.toolContext), {
+        code: "AUTHOR_POST_HOST_UNSUPPORTED", message: /OpenCode 2\.0\.29.*permission\.assert.*2\.0\.24/,
+      });
+      assert.deepEqual(await readdir(root, { recursive: true }), before);
+      assert.equal(h.storage.size, 0); assert.equal(h.permissions.length, 0);
+      // Unsupported hosts must still allow model-free cancellation, not fail setup.
+      await h.commands.get("cancel-post").execute({ sessionID: "session-1" });
+      assert.equal(h.synthetic.length, 1);
+    }
+  });
+
   it("asserts host edit permission before any runtime/scaffold writes", async (t) => {
     const root = await fixture(t), h = host(root), cleanup = await setupPostAuthoring(h.ctx, root); t.after(cleanup); h.deny();
     await assert.rejects(h.tools.get("author_post_prepare").execute(request, h.toolContext), { code: "DENIED" });

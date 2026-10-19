@@ -58,13 +58,13 @@ async function assertNewTarget(root, target) {
   fail("AUTHOR_POST_EXISTS", "The target already exists; no existing post or draft will be overwritten.");
 }
 
-async function immutable(root, relative, text) {
+async function immutable(root, relative, text, limit = 64 * 1024) {
   await safeDirectory(root, path.dirname(relative), true);
   try {
     const handle = await open(path.join(root, relative), constants.O_WRONLY | constants.O_CREAT | constants.O_EXCL, 0o644);
     try { await handle.writeFile(text); await handle.sync(); } finally { await handle.close(); }
   } catch (error) { if (error.code !== "EEXIST") throw error; }
-  if ((await readAuthorRuntimeInput(root, relative, 64 * 1024)).text !== text) fail("AUTHOR_POST_COLLISION", "Existing authoring evidence differs; nothing was overwritten.");
+  if ((await readAuthorRuntimeInput(root, relative, limit)).text !== text) fail("AUTHOR_POST_COLLISION", "Existing authoring evidence differs; nothing was overwritten.");
 }
 
 export async function planAuthorPost(root, input) {
@@ -154,3 +154,6 @@ export async function verifyAuthorPostWritten(root, prepared) {
   const body = /^---\r?\n[\s\S]*?\r?\n---\s*\r?\n([\s\S]*)$/.exec(target.text)?.[1];
   if (sha(target.bytes) === prepared.scaffold_sha256 || !body?.trim()) fail("AUTHOR_POST_BODY_MISSING", "The new file still has no article body; use cancelled to end without writing.");
 }
+
+// Shared create-only evidence primitives; revision never invokes the Rake path.
+export { json as authoringJson, sha as authoringSha, immutable as immutableAuthoringEvidence };

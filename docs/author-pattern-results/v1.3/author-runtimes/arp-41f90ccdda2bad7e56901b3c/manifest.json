@@ -1,0 +1,131 @@
+{
+  "schema_version": "author-runtime-artifacts/1",
+  "runtime_id": "ARP:41F90CCDDA2BAD7E56901B3C",
+  "source_author_model_sha256": "88d622c01aee9e0dafa44a2966ebbbe63ff8249336eb0e861da13c157051f8b5",
+  "runtime_compiler_version": "author-runtime-compiler/1.1",
+  "profile_path": "docs/author-pattern-results/v1.3/author-runtimes/arp-41f90ccdda2bad7e56901b3c/author-runtime-profile.json",
+  "profile_sha256": "dd43113575aa987c798013714c60fe4c93251dd90559e7a142bb19df0130fe03",
+  "instructions_path": "docs/author-pattern-results/v1.3/author-runtimes/arp-41f90ccdda2bad7e56901b3c/author-runtime-instructions.md",
+  "instructions_sha256": "3883189db7976acc3e969e5526ce0f664a06c7f97e57517029e3bff80ef61516",
+  "counts": {
+    "profiles": 1,
+    "principles": 5,
+    "contextual_rules": 3,
+    "devices": 3,
+    "guardrails": 8,
+    "semantic_context": 0
+  },
+  "guardrail_resolution": [
+    {
+      "guardrail_id": "G01",
+      "disposition": "projected",
+      "clause_ids": [
+        "G01:C01"
+      ],
+      "runtime_target": "/guardrails/0",
+      "covered_clause_ids": [],
+      "covered_by": null,
+      "reason": "Clausole pertinenti obbligatorie, selezionate dal brief."
+    },
+    {
+      "guardrail_id": "G02",
+      "disposition": "projected",
+      "clause_ids": [
+        "G02:C01"
+      ],
+      "runtime_target": "/guardrails/1",
+      "covered_clause_ids": [],
+      "covered_by": null,
+      "reason": "Clausole pertinenti obbligatorie, selezionate dal brief."
+    },
+    {
+      "guardrail_id": "G03",
+      "disposition": "projected",
+      "clause_ids": [
+        "G03:C01"
+      ],
+      "runtime_target": "/guardrails/2",
+      "covered_clause_ids": [],
+      "covered_by": null,
+      "reason": "Clausole pertinenti obbligatorie, selezionate dal brief."
+    },
+    {
+      "guardrail_id": "G04",
+      "disposition": "projected",
+      "clause_ids": [
+        "G04:C03",
+        "G04:C04"
+      ],
+      "runtime_target": "/guardrails/3",
+      "covered_clause_ids": [],
+      "covered_by": null,
+      "reason": "Clausole pertinenti obbligatorie, selezionate dal brief."
+    },
+    {
+      "guardrail_id": "G05",
+      "disposition": "projected",
+      "clause_ids": [
+        "G05:C03",
+        "G05:C04"
+      ],
+      "runtime_target": "/guardrails/4",
+      "covered_clause_ids": [],
+      "covered_by": null,
+      "reason": "Clausole pertinenti obbligatorie, selezionate dal brief."
+    },
+    {
+      "guardrail_id": "G06",
+      "disposition": "covered_by_prohibition",
+      "clause_ids": [],
+      "runtime_target": null,
+      "covered_clause_ids": [
+        "G06:C01"
+      ],
+      "covered_by": "/runtime_instructions/prohibitions/1",
+      "reason": "Obbligo già presente nella prohibition specifica; nessuna duplicazione."
+    },
+    {
+      "guardrail_id": "G07",
+      "disposition": "projected",
+      "clause_ids": [
+        "G07:C01",
+        "G07:C02"
+      ],
+      "runtime_target": "/guardrails/5",
+      "covered_clause_ids": [],
+      "covered_by": null,
+      "reason": "Clausole pertinenti obbligatorie, selezionate dal brief."
+    },
+    {
+      "guardrail_id": "G08",
+      "disposition": "projected",
+      "clause_ids": [
+        "G08:C01"
+      ],
+      "runtime_target": "/guardrails/6",
+      "covered_clause_ids": [],
+      "covered_by": null,
+      "reason": "Clausole pertinenti obbligatorie, selezionate dal brief."
+    },
+    {
+      "guardrail_id": "G09",
+      "disposition": "projected",
+      "clause_ids": [
+        "G09:C01"
+      ],
+      "runtime_target": "/guardrails/7",
+      "covered_clause_ids": [],
+      "covered_by": null,
+      "reason": "Clausole pertinenti obbligatorie, selezionate dal brief."
+    },
+    {
+      "guardrail_id": "G10",
+      "disposition": "not_applicable",
+      "clause_ids": [],
+      "runtime_target": null,
+      "covered_clause_ids": [],
+      "covered_by": null,
+      "reason": "Nessuna condizione di applicabilità attiva nel brief."
+    }
+  ]
+}
