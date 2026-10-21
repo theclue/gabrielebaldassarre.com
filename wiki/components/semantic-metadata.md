@@ -15,6 +15,9 @@ source_files:
   - "_plugins/validate.rb"
   - "_plugins/llms_full_generator.rb"
   - "_includes/seo.html"
+  - "_includes/image_credit.html"
+  - "_layouts/post.html"
+  - ".opencode/commands/annotate-post.md"
   - "_data/link_schema.yml"
   - "_data/glossary.yml"
   - "frontmatter-schema.yml"
@@ -22,7 +25,7 @@ source_files:
   - "docs/authoring-oracles.md"
   - "_posts/3d-printing/2026-06-18-openscad-tutorial-parte-2.md"
 created: "2026-10-15"
-last_updated: "2026-10-15"
+last_updated: "2026-10-20"
 ---
 
 # Semantic Metadata
@@ -44,6 +47,7 @@ This component turns editorial frontmatter and annotated Liquid tags into render
 | `difficulty_computed.semantic` | Annotated semantic metrics | Despite its parent name, this block is supplied by authoring analysis, not inferred by the Jekyll difficulty plugin. |
 | Link tags | `xlink`, `post_link`, `repo_url` with `role`, optional `context` / `target` | Editorial link classification, interpreted during Liquid rendering. |
 | `master` + `image_meta` | Image path plus semantic image hash | Frontmatter input for the master image. |
+| `image_credit` | Optional `author`, `author_url`, `source`, `source_url` strings | Separate visible hero-credit input; not part of the `image_meta` whitelist or an automatic structured-data creator mapping. |
 | `cloudinary` tag | Path, `alt`, caption and semantic attributes | Body-image input; `alt` belongs to the tag, not the frontmatter `image_meta` hash. |
 | `series` | `id`, `title`, `part`, `total_parts` | Editorial membership and declared numbering; generated navigation fields are separate. |
 | `_data/glossary.yml` | `term`, `description`, `url` records | Static editorial glossary consumed by SEO and merged into the runtime dictionary. |
@@ -116,6 +120,8 @@ Contexts are `supports-claim`, `provides-context`, `enables-step`, `validates-re
 
 `_plugins/image_meta.rb` recognizes roles `decorative`, `screenshot`, `diagram`, `chart`, `photo`, `illustration`, and `code`; contexts are `step`, `result`, `architecture`, `comparison`, `reference`, `evidence`, and `ambient`. It normalizes caption, long description, step number, comparison path, and `representativeOfPage`.
 
+These are whitelisted semantic fields. Photographer/source fields and the separate `image_credit` mapping are not parsed or merged into `image_objects`.
+
 - Missing/invalid role yields no semantic image object; invalid context becomes absent.
 - A positive `step` outside `context=step` is removed with a warning. `compare_with` outside `context=comparison` is likewise removed.
 - A diagram/chart without `long_description` warns but is still accepted. The parser does not enforce the converse requirements that every step/comparison context must contain a step/comparison value.
@@ -124,6 +130,22 @@ Contexts are `supports-claim`, `provides-context`, `enables-step`, `validates-re
 `_plugins/cloudinary_url.rb` separately renders body-image HTML. Decorative tags get empty alternative text and presentation semantics; other tags produce a figure, optional caption, and extended description for diagram/chart roles. Step context can add a figure ID, comparison metadata a data attribute, and ambient context presentation classes. These HTML paths are separate from `ImageMeta.parse`; they should not be assumed to share all validation rules.
 
 **Collection timing limitation:** the image aggregation hook runs at site `pre_render`, reading `master`/`image_meta` and any already-present `image_meta_body`. However, the `cloudinary` tag appends `image_meta_body` during rendering. The aggregator also skips a post when `image_objects` already exists. These phases do not demonstrate that newly rendered body-image metadata reaches the same build's SEO output. Body-image completeness and repeated-build behavior require lifecycle verification; no such output verification is claimed here.
+
+### Hero credit versus semantic metadata
+
+`frontmatter-schema.yml` documents `image_credit` independently of `image_meta`. `_layouts/post.html` includes `_includes/image_credit.html` immediately after article content and before series navigation. The include tests `credit.author or credit.source` using *[Liquid](../glossary.md)* truthiness, not a trimmed/nonblank check: empty strings remain truthy, URLs alone do not enable the line, and no hero-image or role check is made. Names and corresponding optional URLs are HTML-escaped; this is not URL-scheme validation or schema enforcement. See [Site Presentation](./site-presentation.md#hero-credits-and-alternative-text) for localized labels, link attributes, and hero alt selection.
+
+The include writes anchors directly with `link-meta link-role-attribution` classes; it does not invoke `xlink` or append `link_objects`. These classes therefore do **not** automatically create structured link records or `ImageObject.creator`. `_includes/seo.html` does not consume `image_credit`. Visible footer attribution, hero caption/alt, and semantic image collection remain separate paths.
+
+## Command-Side Annotation Inputs
+
+`.opencode/commands/annotate-post.md` describes additional authoring-time work, not metadata generated by the Ruby plugins:
+
+- **Screenshots:** screenshot-comment placeholders supply a URL and what to show; the command instructs browser capture and replacement with a local `cloudinary` tag carrying `alt`, caption, role, and context.
+- **Hero:** when both `master` and `header.overlay_image` are absent, best-effort image selection can supply `master`, `image_meta`, and `image_credit`. For an Unsplash selection, the command places the returned `attribution_text`, including the photographer's name, in `image_meta.caption`, which the post layout uses as nondecorative hero alt text. It separately fills `image_credit` for the template-rendered footer line, not a duplicate body credit.
+- **Social:** for an eligible unsent `broadcast` mapping, the command drafts missing `broadcast.<channel>.text` and `hashtags`, preserving existing text and image configuration. See [Social Broadcast](../modules/social-broadcast.md#authoring-time-copy) for channel rules, prompt/budget handling, and downstream assembly rather than treating these as SEO-derived fields.
+
+The command validates a draft limited to `knowledge_prerequisites` and `difficulty_computed.semantic` before these later transformations. Screenshot, hero/credit, and social-copy additions are outside that accepted semantic draft; *[oracle](../glossary.md)* acceptance does not validate the final transformed document or certify those outputs. Command instructions are not evidence that capture, retrieval, attribution tracking, or publication occurred.
 
 ## Runtime Derivation
 
@@ -181,7 +203,7 @@ Series reading time counts raw content with a word regex and divides by 150; it 
 | `ItemList` | Declared series title/`total_parts` plus the generated, date-ordered post list; item positions come from iteration order. |
 | `BreadcrumbList` and `Person` | Categories, page identity, author details, and author profile links. |
 | `DefinedTerm` / `DefinedTermSet` | Static glossary: article terms selected by URL containing `page.category`; the complete set on non-article pages. |
-| `ImageObject` array | Existing `page.image_objects`: content URL, caption, representative flag, role/context/step/comparison properties. The stored long description is not serialized by this block; it does not create a `HowToStep` graph. |
+| `ImageObject` array | Existing `page.image_objects`: content URL, caption, representative flag, role/context/step/comparison properties. Neither stored long description nor `image_credit`/`creator` is serialized by this block; it does not create a `HowToStep` graph. |
 | Link-bearing `WebPage` | `page.link_objects` grouped by `schema_prop`, with `CreativeWork` URL/name, `gb:link_role`, optional context/target, and DOI identifier. |
 | Mermaid `SoftwareSourceCode` | A conditional descriptor when `page.mermaid` is present, optionally including `page.mermaid_diagram_type`; this block does not embed diagram source text. |
 
@@ -197,7 +219,7 @@ These checks log warnings and a summary rather than deliberately failing the bui
 
 `docs/authoring-oracles.md` freezes a proposed AST/Unicode readability engine, CLI, provenance hashes, and controlled in-memory injection. Its readability roadmap remains blocked at T1: the production `readability_analyze` oracle is **not implemented or delivered**. Feature probes and a temporary probe registration do not replace the legacy Ruby plugin. The separately documented Wikidata read-only oracle concerns evidence and proposal checks; it does not turn lexical indexes or identity annotations into semantic truth.
 
-This page is based on source inspection. No build, tests, or rendered-output validation were performed for this documentation pass.
+This page is based on source inspection, including the new, untracked `_includes/image_credit.html`, not a deployed-site result. No build, tests, external calls, or rendered-output validation were performed for this documentation pass.
 
 ## Related Sources
 
@@ -205,3 +227,5 @@ This page is based on source inspection. No build, tests, or rendered-output val
 - `metadata-schema.jsonld`: published vocabulary descriptions, including planned concepts.
 - `docs/authoring-oracles.md`: implementation census, propagation gaps, and current-versus-proposed derivation boundaries.
 - `_includes/seo.html`: actual structured-data serialization, distinct from vocabulary promises.
+- `_includes/image_credit.html` and `_layouts/post.html`: visible hero attribution, separate from semantic collection.
+- `.opencode/commands/annotate-post.md`: staged authoring instructions and the scope of semantic-draft validation.

@@ -24,8 +24,10 @@ source_files:
   - "_scripts/author-extraction/patterns.v0.6.schema.json"
   - "_scripts/author-extraction/author-runtime-profile.schema.json"
   - "_scripts/author-extraction/identifiers.mjs"
+  - "_scripts/author-extraction/package.json"
+  - "_scripts/author-extraction/bun.lock"
 created: "2026-10-15"
-last_updated: "2026-10-19"
+last_updated: "2026-10-20"
 ---
 
 # Native Author Tools
@@ -53,6 +55,18 @@ Extraction/consolidation entrypoints derive the repository root from their modul
 Consolidation's `recordsDirectory` is a **host option**, never a tool argument. The adapter allows only `docs/author-extraction-results/v1.1`, `v1.2`, or `v1.3`, defaulting to `v1.1` when omitted. The first two datasets contain twelve records; `v1.3` contains twenty. Review/model sources are independently fixed to the `v1.3` workflow; changing consolidation's dataset does not rebind review.
 
 Sources: `_scripts/author-extraction/native.mjs:70–92,271–310`, `_scripts/author-extraction/consolidator-native.mjs:116–129,320–373`, `_scripts/author-extraction/review-native.mjs:29–49`, `_scripts/author-extraction/model-native.mjs:141–179`, `_scripts/author-extraction/post-authoring-plugin.mjs:19–43,79–145`, `_scripts/author-extraction/consolidator.mjs:15–24`, `_scripts/author-extraction/review.mjs:9–23`.
+
+### Post Host Compatibility
+
+`docs/post-authoring.md` documents **OpenCode 2.0.29 or newer** as required. The implementation checks the running host's capability, **not a semantic-version comparison**. The plugin *[SDK]* (see [Glossary](../glossary.md)) dependency `@opencode/plugin` is pinned to **2.0.31** in the author-extraction package and Bun lockfile; those pins do not prove the installed host's version or capabilities. Updating only the SDK does not upgrade an older running server.
+
+For both `author_post_prepare` and `author_post_revision_prepare`, the shared preparation wrapper checks cancellation, repository location, and absence of an active article, then requires `typeof ctx.permission?.assert === "function"` **before either planner runs**. A missing or non-callable API throws an `Error` with `code: "AUTHOR_POST_HOST_UNSUPPORTED"`, not a JSON `blocked` result or preparation receipt. Its message names the minimum version, reports `ctx.app?.version` (or `"an unknown host version"`), and instructs the operator to upgrade OpenCode and restart the server. Failure precedes runtime compilation, evidence writes, Rake, and activation; the plugin does not emulate the missing permission API or bypass host rules. When available, the host assertions still enforce the edit/shell permissions described below.
+
+Editorial submission independently throws the same code with the shorter message `Host permission.assert is required.` before its edit assertion or report persistence. Read-only editorial preparation has no such permission-capability check. An unsupported preparation leaves the plugin loaded and clears its busy guard; `/cancel-post` remains available without permission assertions or runtime verification, but still refuses while an operation is busy. Documentation requires a **server restart**, not just configuration/plugin reload, after upgrading OpenCode.
+
+This host-capability failure is separate from review application's `AUTHORIZATION_UNAVAILABLE`: providing edit/shell permission support does not provide hash-bound human release authorization or enable `author_review_apply`.
+
+Sources: `_scripts/author-extraction/post-authoring-plugin.mjs:7–9,24–47,66–74,79–145`, `_scripts/author-extraction/review-native.mjs:3–4,144–148`, `_scripts/author-extraction/package.json:20–24`, `_scripts/author-extraction/bun.lock:4–11,113`, `docs/post-authoring.md:111–124`.
 
 ## Tools
 
@@ -127,7 +141,7 @@ The effective `author_post_prepare` contract is narrower than the reusable task 
 | Optional task fields | `audience`, `topic`, `series_context`, `constraints`, `features`, `local_topics`, `semantic_topics`, `device_requests`; closed enums/bounds are defined by `TaskContext` |
 | Conditional task fields | `mixed` requires 2–3 distinct `mixed_content_types`; nonempty `semantic_topics` requires `topic`. Planned continuation requires `continuation_topic`; device requests use `Dnn` and `available`, `preferred`, or `required` |
 
-Before filesystem/process work, the plugin asserts host **edit** permission for the target, authoring-run directory, and runtime tree, plus **shell** permission for the Rake invocation. The core creates `_drafts/<slug>.md` or `_posts/<category-slug>/<date>-<slug>.md` using `execFile("rake", ...)`, not interpolated shell code. Rake has a 30-second timeout and 64 KiB output buffer. No provider is selected and no text generation is performed by preparation.
+After read-only planning and runtime compilation, but before filesystem writes or process execution, the plugin asserts host **edit** permission for the target, authoring-run directory, and runtime tree, plus **shell** permission for the Rake invocation. The core creates `_drafts/<slug>.md` or `_posts/<category-slug>/<date>-<slug>.md` using `execFile("rake", ...)`, not interpolated shell code. Rake has a 30-second timeout and 64 KiB output buffer. No provider is selected and no text generation is performed by preparation.
 
 Session `context` and `generate` hooks verify runtime integrity and inject instructions. For creation, `written` completion additionally requires an observed hook application and a changed scaffold with a nonempty body; it does **not** automatically require an editorial report. `cancelled` removes activation without writing checks. Neither completion publishes or deletes a file. The registered `/cancel-post` command also removes activation, but refuses while an authoring operation is busy.
 

@@ -7,13 +7,17 @@ source_files:
   - "_scripts/author-extraction/post-authoring.mjs"
   - "_scripts/author-extraction/post-revision.mjs"
   - "_scripts/author-extraction/post-authoring-plugin.mjs"
+  - "_scripts/author-extraction/post-authoring.test.mjs"
+  - "_scripts/author-extraction/post-authoring-loading.test.mjs"
+  - "_scripts/author-extraction/package.json"
+  - "_scripts/author-extraction/review-native.mjs"
   - ".opencode/plugins/post-authoring.js"
   - ".opencode/commands/create-post.md"
   - ".opencode/commands/revise-post.md"
   - "Rakefile"
   - "docs/post-authoring.md"
 created: "2026-10-15"
-last_updated: "2026-10-19"
+last_updated: "2026-10-20"
 ---
 
 # Governed Post Authoring
@@ -34,6 +38,9 @@ The separate `/revise-post` command prepares one **existing `.md` article** for 
 | `_scripts/author-extraction/post-authoring-plugin.mjs` | Registers tools, permission checks, session hooks, durable activation, and `/cancel-post`. |
 | `_scripts/author-extraction/post-authoring.mjs` | Validates and plans requests, prepares runtime evidence and Rake scaffolds, and verifies context and written-body prerequisites. |
 | `_scripts/author-extraction/post-revision.mjs` | Plans revisions, saves immutable source snapshots, binds approved reference excerpts, and validates current-byte editorial candidates and completion. |
+| `_scripts/author-extraction/package.json` | Pins the authoring *[SDK](../glossary.md)* dependency and declares the authoring, revision, and integration test commands. |
+| `_scripts/author-extraction/post-authoring.test.mjs` | Temporary-workspace creation and plugin fixtures, including unsupported-host rejection and cancellation recovery. |
+| `_scripts/author-extraction/post-authoring-loading.test.mjs` | Actual entrypoint loading and installed-SDK Promise-adapter contract fixtures with simulated dependencies/host. |
 | `Rakefile` | Implements create-only `post` and `draft` scaffolds; also contains separate publishing and R Markdown tasks. |
 | `docs/post-authoring.md` | Operator guidance, guarantees, recovery limits, and verification boundaries. |
 
@@ -72,10 +79,10 @@ Preparation inputs are closed against unknown properties. Creation planning acce
 ```mermaid
 graph LR
     Command["/create-post or /revise-post"] --> Plugin["Local plugin and session tools"]
-    Plugin --> Core["Preparation and verification core"]
+    Plugin --> Permission["Host permission.assert"]
+    Permission --> Core["Preparation and verification core"]
     Core --> Runtime["Runtime compiler and materializer"]
-    Core --> Rake["Host Rake post or draft"]
-    Rake --> Target["New Markdown target"]
+    Core --> Rake["Host Rake: new post or draft scaffold"]
     Core --> Evidence["Request, task, and receipt"]
     Core --> Revision["Revision snapshot and comparison"]
     Plugin --> Storage["Durable session storage"]
@@ -85,6 +92,20 @@ graph LR
 ```
 
 The core imports runtime compilation and input-reading helpers from `runtime.mjs`, materialization from `compile-author-runtime.mjs`, the runtime schema, Ajv 2020, and Node filesystem, crypto, path, and child-process APIs. Revision additionally uses `prepareArticle` from `core.mjs` to verify approved references and `yaml` to reject duplicate report keys. The entrypoint loads the plugin SDK through `native.mjs`. Creation requires host Rake and its Ruby dependencies; revision does not execute Rake. The plugin installs neither. Sources: imports in the implementation files; `docs/post-authoring.md`.
+
+### Host compatibility and installation
+
+The operator guide requires **OpenCode 2.0.29 or newer**; separately, `_scripts/author-extraction/package.json` pins `@opencode/plugin` to **2.0.31**. Installing that SDK does not upgrade a running host or add its missing permission API. The implementation checks the actual capability, `typeof ctx.permission?.assert === "function"`, rather than comparing host version numbers; `ctx.app.version` is diagnostic information, not the acceptance criterion.
+
+The shared `prepareInSession` gate runs after location and active-task checks but **before either creation or revision planning**, runtime compilation, output-file writes, or process execution. A missing or non-callable API raises `AUTHOR_POST_HOST_UNSUPPORTED`, reporting the host version when available and requesting an OpenCode upgrade and server restart. Setup does not fail merely because the capability is absent, so model-free `/cancel-post` remains registered. Editorial submission independently checks callability before asserting report-edit permission. Capability detection is not a permission grant: supported hosts still receive the operation-specific assertions described below. Source: `post-authoring-plugin.mjs:24–43,66–74,124–139`.
+
+For missing package dependencies, the [operator installation and restart guidance](../../docs/post-authoring.md#artefatti-e-manutenzione) specifies the committed Bun *[lockfile](../glossary.md)* workflow from the repository root:
+
+```sh
+bun install --cwd _scripts/author-extraction --frozen-lockfile
+```
+
+After upgrading OpenCode, restart the server; reloading configuration or the plugin alone does not update the running host. Sources: `docs/post-authoring.md:111–134`; `_scripts/author-extraction/package.json:20–24`. This documentation update did not run the installation or restart a service.
 
 ## Authoring Flow
 
@@ -96,7 +117,7 @@ The task language defaults to Italian unless requested otherwise. Content type i
 
 ### Prepare before creating the scaffold
 
-The plugin requires the session's resolved directory to equal the repository root and allows only one active authoring task per session, shared between creation and revision. For creation it first plans the request, then explicitly asserts **both host edit and shell permissions**. Edit resources cover the target, authoring-run evidence, and runtime outputs; the shell permission covers the intended Rake task. Native filesystem and process work therefore does not silently bypass host permission rules.
+The plugin requires the session's resolved directory to equal the repository root and allows only one active authoring task per session, shared between creation and revision. After the host-capability check, creation plans the request, then explicitly asserts **both host edit and shell permissions** before output writes or process execution. Edit resources cover the target, authoring-run evidence, and runtime outputs; the shell permission covers the intended Rake task. Native filesystem and process work therefore does not silently bypass host permission rules.
 
 Preparation then proceeds in this order:
 
@@ -169,8 +190,14 @@ The command requires preparation before writing, then a finish call after fillin
 
 ## Assurance Boundaries
 
-This is a permission-aware preparation gate and session-context integration, **not a global editorial sandbox**. Generic edit or shell tools can technically bypass the procedural command; the plugin does not revoke them or govern unrelated edits. The no-fallback and no-delegation rules are command instructions, not proof that every possible agent action is confined.
+This is a permission-aware preparation gate and session-context integration, **not a global editorial sandbox**. Generic edit or shell tools can technically bypass the procedural command; the plugin does not revoke them or govern unrelated edits. The no-fallback and no-delegation rules are command instructions, not proof that every possible agent action is confined. Host edit/shell permission support does not supply native hash-bound human release authorization or convert an editorial candidate into human approval. Sources: `post-authoring-plugin.mjs`; `review-native.mjs:4,144–149`.
 
 [Successful hooks](../concepts/governance-and-verification.md) establish that verified instructions were inserted into the host-assembled context. They do not prove byte-for-byte provider delivery, model attention, or prose compliance; another plugin may also alter context afterward. Hashes and `written` completion are not content certification.
 
 The operator guide separates offline verification from live generation. Creation tests use temporary-directory Rake execution and plugin lifecycle checks; revision tests use temporary fixtures without a Rakefile to check snapshots, references, permissions, cancellation/reload, stale reports, and candidate-versus-human-approval boundaries. They do not call providers, generate repository articles, or measure voice quality. Neither those tests nor a successful individual revision certify generation generally. Sources: `docs/post-authoring.md:199–221`; the finish result explicitly reports `runtime_integrity_and_context_hook_application_not_prose_compliance_or_provider_delivery` in `post-authoring-plugin.mjs`.
+
+The following are **source-inspected fixtures, not execution results for this 2026-10-20 update**:
+
+- `post-authoring.test.mjs:150–167` simulates host version `2.0.24` with absent, empty, null-assert, and boolean-assert permission APIs. Its creation-preparation fixture expects `AUTHOR_POST_HOST_UNSUPPORTED`, an actionable version/API message, an unchanged recursive file listing, no activation or permission calls, and a still-usable `/cancel-post`. This fixture exercises creation; the implementation's shared gate also protects revision preparation.
+- `post-authoring-loading.test.mjs:10–29` loads the actual auto-discovered entrypoint with the V2 SDK while substituting setup dependencies, checking that the root comes from the entrypoint rather than `ctx.options.repoRoot`. Lines 31–51 separately traverse the installed SDK's real `fromPromise` adapter with an Effect-based simulated host, checking assertion-input forwarding and propagation of the same denial error. The Promise permission API under test is not manually stubbed; this is still not a live host or provider test.
+- `package.json` maps the creation fixtures to `test:post-authoring` and the loading/adapter fixtures to `test:integration`, which uses Node's experimental VM modules. No tests, builds, installs, external calls, or live generation were performed for this update.

@@ -126,6 +126,8 @@ exclude:
   - lighthouse-results.json
   - .lighthouseci
   - .github
+  - docs
+  - wiki
 
 keep_files:
   - .git

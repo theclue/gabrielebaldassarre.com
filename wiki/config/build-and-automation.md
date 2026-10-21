@@ -2,6 +2,7 @@
 title: "Build and Automation Configuration"
 description: "Configuration layers, native and container builds, editor entry points, and deployment and SEO automation."
 category: "config"
+language: en
 source_files:
   - "_config.yml"
   - "_seo-monitor.yml"
@@ -22,6 +23,8 @@ source_files:
   - ".github/workflows/seo-pipeline.yml"
   - ".github/workflows/seo-monitor.yml"
   - ".gitignore"
+  - "_scripts/author-extraction/post-authoring.mjs"
+  - "_scripts/author-extraction/post-revision.mjs"
   - "Rakefile"
   - "_scripts/seo/monitor.py"
   - "_scripts/seo/d1.py"
@@ -31,7 +34,7 @@ source_files:
   - ".github/lighthouse/lighthouserc.json"
   - "test/vscode_process_rake_tasks_test.rb"
 created: "2026-10-15"
-last_updated: "2026-10-15"
+last_updated: "2026-10-20"
 ---
 
 # Build and Automation Configuration
@@ -68,7 +71,7 @@ These are not one merged settings file. Make optionally includes `.build_config`
 
 Both recipes depend on the Jekyll image build and diagrams. Neither depends on `knitr` or `cad`: generating Markdown or CAD assets is a separate operation. Mapping port 35729 is not evidence that live reload is enabled; the development command has no `--livereload` flag. (`Makefile.common`.)
 
-HTML compression is configured to ignore development, and Cloudinary has `only_prod: true`. Jekyll excludes R Markdown sources, container/build inputs, and SEO scripts, dbt files, monitoring configuration, and several CI artifacts. **Neither `docs/` nor `wiki/` is explicitly excluded.** Their treatment in generated output must be checked before assuming these directories remain private; this page does not claim that publication was tested. (`_config.yml`.)
+HTML compression is configured to ignore development, and Cloudinary has `only_prod: true`. Jekyll excludes R Markdown sources, container/build inputs, and SEO scripts, dbt files, monitoring configuration, and several CI artifacts. **Neither `docs/` nor `wiki/` is explicitly excluded.** Git ignore rules, including the local authoring transaction rules below, are separate from Jekyll exclusions and do not establish publication privacy. Treatment in generated output and public exposure remain unverified; this page does not claim that publication was tested. (`_config.yml`, `.gitignore`.)
 
 ### Environment and Secret Names
 
@@ -85,6 +88,17 @@ Only names are listed here; do not copy real credential values into documentatio
 The R template contains commented examples. The SEO template does not list all names used by workflows, notably the Pages credentials, PageSpeed key, and R2 bucket override. A local `.env` is consumed by `make seo`; the inspected workflow steps instead supply environment variables explicitly. (`.env.example`, `.Renviron.example`, `Makefile.common`, the three workflow files, `_scripts/seo/monitor.py`.)
 
 `.gitignore` ignores `.env`, `.Renviron`, `.build_config`, Autoconf runtime artifacts, Jekyll output/cache files, local libraries, Python caches, SEO alerts/reports, and dbt output/logs. It also ignores `*.lock` with explicit exceptions for `renv.lock` and the author-extraction Bun lockfile; an ignore rule alone does not establish whether a file is already tracked.
+
+### Local Authoring Transactions
+
+`.gitignore` adds two root-anchored rules for local authoring evidence:
+
+| Ignore rule | Source-defined contents |
+|-------------|-------------------------|
+| `/.opencode/authoring-revisions/` | Existing-article revisions use `<request-hash>/<UUID>/` directories containing `request.json`, `task.json`, the original `source.md` snapshot, and `preparation.json`; submitted editorial comparisons are saved under `editorial/<report-hash>.json`. Each preparation selects a new UUID, even for an identical brief. |
+| `/docs/authoring-runs/` | New-post preparation uses `<request-hash>/` directories containing `request.json`, `task.json`, and `preparation.json`. The receipt binds the separate Rake-created draft/post scaffold and runtime artifacts; the article itself is not stored in this transaction directory. |
+
+These are *[create-only]* artifacts (see [Glossary](../glossary.md)): the shared evidence writer can reuse identical bytes but rejects conflicting existing contents rather than overwriting them. Revision preparation snapshots an existing article without invoking Rake; new-post preparation invokes Rake and refuses an existing target. Ignoring these local transactions is a Git policy, not a change to `_config.yml` or proof that `docs/authoring-runs/` is excluded from a local site build. (`.gitignore`, `_scripts/author-extraction/post-authoring.mjs`, `_scripts/author-extraction/post-revision.mjs`.)
 
 ## Native Detection and Build Targets
 

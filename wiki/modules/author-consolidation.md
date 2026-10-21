@@ -2,6 +2,7 @@
 title: "Author Pattern Consolidation"
 description: "Verified dimension projections, bounded candidate acceptance, deterministic IDs, and offline candidate-bundle assembly."
 category: "modules"
+language: en
 source_files:
   - "_scripts/author-extraction/consolidator.mjs"
   - "_scripts/author-extraction/consolidator-native.mjs"
@@ -14,7 +15,7 @@ source_files:
   - ".opencode/agents/author-pattern-consolidator.md"
   - "_scripts/author-extraction/INTEGRATION.md"
 created: "2026-10-15"
-last_updated: "2026-10-15"
+last_updated: "2026-10-20"
 ---
 
 # Author Pattern Consolidation

@@ -49,6 +49,17 @@ broadcast:
   channels:        [string]?                     # Canali target: linkedin, mastodon, bluesky, youtube
   sent:            boolean?                      # true = già inviato, la pipeline lo salta
 
+  # Copy social scritto in authoring (annotate-post). Se `text` è presente la pipeline lo manda
+  # a Buffer così com'è, senza chiamare GitHub Models; l'URL e gli hashtag li accoda lei.
+  # Un canale senza `text` si comporta come prima (copy generato in pipeline).
+  linkedin:
+    text:          string?                        # Testo del post, URL escluso (usa `|-` per i paragrafi)
+    hashtags:      [string]?                      # Hashtag accodati dopo l'URL
+
+  mastodon:
+    text:          string?                        # Testo del post, URL escluso
+    hashtags:      [string]?                      # Hashtag accodati dopo l'URL
+
   # Per-channel image config (applicati a page.master o overlay_image via Cloudinary)
   mastodon_image:
     overlay_image: string?                        # Override immagine per questo canale (default: page.master)
@@ -109,6 +120,15 @@ image_meta:
   step:             integer?                      # Obbligatorio se context=step
   compare_with:     string?                       # Obbligatorio se context=comparison
   representativeOfPage: boolean?                  # default: false
+
+# Credito dell'immagine hero (master): la riga a fondo articolo la genera
+# _includes/image_credit.html solo se author o source sono valorizzati.
+# La fonte può essere qualsiasi (Unsplash, altro sito, ...).
+image_credit:
+  author:           string?                       # Nome dell'autore della foto
+  author_url:       string?                       # Link al profilo/pagina dell'autore
+  source:           string?                       # Fonte (es. "Unsplash")
+  source_url:       string?                       # Link alla fonte
 
 # Role:
 #   decorative   → alt="" role="presentation", no figure, no JSON-LD

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Trasmette articoli del blog sui canali social tramite Buffer, usando GitHub Models per i copy
-e Cloudinary per i ritagli delle immagini.
+e Cloudinary per i ritagli delle immagini. Se il frontmatter ha già il copy di un canale
+(broadcast.<canale>.text), usa quello e non chiama GitHub Models per quel canale.
 
 Uso:
   python3 _scripts/broadcast.py [--dry-run] [--posts post1.md post2.md ...]
@@ -65,6 +66,15 @@ SOCIAL_CROPS = {
 # Default channels to broadcast when no explicit list is in frontmatter
 DEFAULT_CHANNELS = ["linkedin", "mastodon"]
 
+# Il limite di ogni canale vale per il post finale (testo + URL + hashtag).
+# Spazio lasciato agli hashtag accodati dopo l'URL, "\n\n" incluso.
+HASHTAGS_RESERVE = 40
+
+
+def text_budget(channel, url):
+    """Caratteri disponibili per il solo testo, al netto di URL, separatori e hashtag."""
+    return SOCIAL_CROPS[channel]["max_chars"] - len(url) - 2 - HASHTAGS_RESERVE
+
 SOCIAL_COPY_PROMPT = """Sei un ingegnere italiano che scrive di fisica, automazione e data science su un blog personale. Non sei un social media manager.
 
 IL TUO CARATTERE:
@@ -74,26 +84,38 @@ IL TUO CARATTERE:
 - Scrivi in italiano colloquiale, come parli. Niente inglesismi inutili.
 - Sei appassionato di quello che racconti, e si vede.
 
-LINKEDIN (max 800 caratteri, URL escluso):
+STILE (per ogni canale):
+- Niente comparazioni negative. Evita le frasi che si definiscono per contrasto con ciò che non sono o che non hai fatto: "Ho fatto questo, non quello", "non è X, è Y", "serve a X, non a Y", "più che X, Y". Dì cosa c'è, in positivo.
+- L'onestà sull'approssimazione si dice in positivo: "è una stima", "dà un ordine di grandezza". Un limite reale si afferma come fatto: "espongono solo Normal o Low".
+- Prima di rispondere rileggi ogni frase con un "non": se fa da contraltare a un'altra frase, riscrivila in positivo.
+- L'autoironia è una battuta secca, una per post, spesso tra parentesi e sempre nuova (come registro: "(che noia)").
+- Paragrafi brevi, un'idea ciascuno. Usa i termini tecnici dell'articolo.
+- Niente dati numerici o metriche: durate, percentuali, soglie, capacità, valori di configurazione (come "55 giorni", "80%", "2220 mAh") restano nell'articolo. Il dettaglio specifico che racconti è un meccanismo o un'osservazione, e il lettore trova i numeri nell'articolo.
+
+LINKEDIN (max 800 caratteri in totale: testo, URL e hashtag):
 - Apertura: domanda in bold Unicode che stuzzica. Esempio:
   "𝙀̀ 𝙥𝙤𝙨𝙨𝙞𝙗𝙞𝙡𝙚 𝙨𝙚𝙜𝙢𝙚𝙣𝙩𝙖𝙧𝙚 𝙞𝙡 𝙥𝙧𝙤𝙥𝙧𝙞𝙤 𝙙𝙖𝙩𝙖𝙗𝙖𝙨𝙚 𝙞𝙣 𝙗𝙖𝙨𝙚 𝙖𝙡𝙡𝙖 𝙨𝙚𝙣𝙨𝙞𝙗𝙞𝙡𝙞𝙩𝙖̀ 𝙙𝙚𝙞 𝙘𝙡𝙞𝙚𝙣𝙩𝙞?"
-- Corpo: 2-3 paragrafi. Spiega di cosa parli, cosa hai scoperto, perché è interessante. Usa dettagli specifici dell'articolo.
-- Hashtag inline nel testo: hashtag#parola (3-5 max). Esempio: "nel mondo del hashtag#databasemarketing..."
-- Chiusura: domanda al lettore in bold Unicode. Esempio: "𝙀 𝙫𝙤𝙞? 𝘾𝙤𝙨𝙖 𝙣𝙚 𝙥𝙚𝙣𝙨𝙖𝙩𝙚?"
-- L'URL viene aggiunto dopo. Ignoralo.
+- Corpo: 3-4 paragrafi brevi, dal generale al particolare: la situazione, perché è scomoda, cosa hai costruito, un dettaglio concreto dell'articolo.
+- Hashtag: 3-5 in tutto. Uno o due inline nel testo, dentro una frase: "nel mondo del #databasemarketing...". Gli altri in "hashtags".
+- Chiusura, solo se il budget lo permette: domanda al lettore in bold Unicode. Esempio: "𝙀 𝙫𝙤𝙞? 𝘾𝙤𝙨𝙖 𝙣𝙚 𝙥𝙚𝙣𝙨𝙖𝙩𝙚?"
+- Non scrivere l'URL nel testo: viene accodato dopo.
 
-MASTODON (max 390 caratteri, URL escluso):
+MASTODON (max 390 caratteri in totale: testo, URL e hashtag):
 - Apertura: prima persona, concreta. "Ho studiato...", "Mi sono chiesto..."
 - 2-3 frasi. Asciutto, onesto. Un dettaglio specifico dall'articolo.
 - 2-3 hashtag in fondo: #parola
-- L'URL viene aggiunto dopo. Ignoralo.
+- Non scrivere l'URL nel testo: viene accodato dopo.
+
+LIMITI:
+- Il limite di ogni canale vale per il post finale: testo, riga vuota, URL, riga vuota, hashtag. Il messaggio indica il budget del solo testo, già al netto di URL e hashtag: rispettalo, perché oltre il limite la pipeline accorcia il testo a metà e lo chiude con "…".
+- Ogni hashtag compare una sola volta nel post finale, senza distinguere maiuscole e minuscole: in "hashtags" metti solo quelli che non hai già usato nel testo.
 
 Scrivi il testo su UNA RIGA SOLA (usa \\n per i paragrafi). Questo è critico per il formato JSON.
 
 OUTPUT: JSON valido, niente testo prima o dopo.
 {
   "linkedin": {
-    "text": "Domanda in bold?\\n\\nCorpo del post con hashtag#inline...\\n\\nDomanda finale?",
+    "text": "Domanda in bold?\\n\\nCorpo del post con #inline...\\n\\nDomanda finale?",
     "hashtags": ["#parola1", "#parola2"]
   },
   "mastodon": {
@@ -177,6 +199,28 @@ def get_broadcast_config(fm):
     return {"enabled": False, "channels": [], "sent": False}
 
 
+def get_frontmatter_copy(fm, channels):
+    """Copy già scritto in authoring: broadcast.<canale>.text, con hashtags opzionali.
+    Restituisce { canale: {"text": ..., "hashtags": [...]} } solo per i canali che ce l'hanno."""
+    bc = fm.get("broadcast")
+    if not isinstance(bc, dict):
+        return {}
+
+    found = {}
+    for ch in channels:
+        entry = bc.get(ch)
+        if not isinstance(entry, dict):
+            continue
+        text = entry.get("text")
+        if not isinstance(text, str) or not text.strip():
+            continue
+        tags = entry.get("hashtags") or []
+        if isinstance(tags, str):
+            tags = tags.split()
+        found[ch] = {"text": text.strip(), "hashtags": [str(t) for t in tags]}
+    return found
+
+
 def get_master_image(fm):
     """Ottiene il percorso dell'immagine master dal frontmatter, con fallback a overlay_image."""
     master = fm.get("master")
@@ -236,6 +280,9 @@ def call_github_models(post_info, active_channels):
         return None
 
     channel_list = ", ".join(active_channels)
+    budgets = ", ".join(
+        f"{ch} {text_budget(ch, post_info['url'])}" for ch in active_channels if ch in SOCIAL_CROPS
+    )
     body_snippet = post_info.get("body", "")
     user_prompt = f"""Titolo: {post_info['title']}
 Categoria: {post_info['category']}
@@ -247,7 +294,8 @@ Proficiency: {post_info.get('proficiency', 'intermediate')}
 Contenuto dell'articolo (primi paragrafi):
 {body_snippet}
 
-Genera il copy per: {channel_list}"""
+Genera il copy per: {channel_list}
+Budget del solo testo, in caratteri (URL e hashtag già sottratti): {budgets}"""
 
     for model in ["openai/gpt-4o", "openai/gpt-4o-mini"]:
         if model != "openai/gpt-4o":
@@ -664,9 +712,43 @@ def create_buffer_draft(channel_id, text, photo_url=None, retries=3, label=""):
         return None
 
 
-def finalize_text(text, post_url):
-    """Aggiunge l'URL dell'articolo al copy social."""
-    return f"{text}\n\n{post_url}"
+def unique_hashtags(text, hashtags):
+    """Scarta dagli hashtag da accodare quelli già nel testo e i ripetuti, senza distinguere le maiuscole."""
+    if isinstance(hashtags, str):
+        hashtags = hashtags.split()
+    seen = {t.lower() for t in re.findall(r"#\w+", text)}
+    unique = []
+    for tag in hashtags or []:
+        if tag.lower() not in seen:
+            seen.add(tag.lower())
+            unique.append(tag)
+    return unique
+
+
+def build_post(text, post_url, hashtags, max_chars):
+    """Compone testo + URL + hashtag. Oltre il limite del canale accorcia solo il testo
+    (a fine parola, chiuso da «…»): URL e hashtag restano. Restituisce (post, caratteri tolti al testo)."""
+    hashtags = unique_hashtags(text, hashtags)
+
+    def tail_for(tags):
+        return f"\n\n{post_url}" + (f"\n\n{' '.join(tags)}" if tags else "")
+
+    tail = tail_for(hashtags)
+    if not max_chars or len(text) + len(tail) <= max_chars:
+        return text + tail, 0
+
+    room = max_chars - len(tail) - 1  # 1 = «…»
+    if room <= 0:  # URL e hashtag da soli non ci stanno: sacrifico gli hashtag
+        hashtags = []
+        tail = tail_for(hashtags)
+        room = max(max_chars - len(tail) - 1, 0)
+
+    cut = text[:room]
+    if cut and not text[len(cut)].isspace():  # taglio a metà parola
+        parts = cut.rsplit(None, 1)
+        cut = parts[0] if len(parts) > 1 else cut
+    cut = cut.rstrip(" ,;:.\n")
+    return cut + "…" + tail, len(text) - len(cut)
 
 
 def broadcast_post(filepath, dry_run=False):
@@ -754,13 +836,21 @@ def broadcast_post(filepath, dry_run=False):
         print("  FALLITO: warmup immagini Cloudinary non riuscito — esco senza consumare token LLM")
         return False
 
-    # Step 3: Generate social copy via LLM
-    print("  Generazione copy social via GitHub Models...")
-    copy = call_github_models(post_info, active_channels)
-    if not copy:
-        print("  FALLITA generazione copy social")
-        return False
-    print("  Copy generato con successo")
+    # Step 3: Copy social — quello già nel frontmatter ha la precedenza, il resto via LLM
+    copy = get_frontmatter_copy(fm, active_channels)
+    if copy:
+        print(f"  Copy dal frontmatter: {list(copy.keys())} — nessuna chiamata a GitHub Models per questi canali")
+    missing = [ch for ch in active_channels if ch not in copy]
+    if missing:
+        print("  Generazione copy social via GitHub Models...")
+        generated = call_github_models(post_info, missing)
+        if not generated:
+            print("  FALLITA generazione copy social")
+            return False
+        for ch in missing:
+            if ch in generated:
+                copy[ch] = generated[ch]
+        print("  Copy generato con successo")
 
     # Step 4: Create drafts in Buffer
     created_count = 0
@@ -777,22 +867,18 @@ def broadcast_post(filepath, dry_run=False):
         ch_id = channel_map[ch_type]
         channel_copy = copy.get(ch_type, {})
         if isinstance(channel_copy, str):
-            text = finalize_text(channel_copy, post_info["url"])
+            body_text, tags = channel_copy, []
         elif isinstance(channel_copy, dict):
-            text = channel_copy.get("text", "")
-            text = finalize_text(text, post_info["url"])
-            hashtags = channel_copy.get("hashtags", [])
-            if hashtags:
-                text += "\n\n" + " ".join(hashtags)
+            body_text, tags = channel_copy.get("text", ""), channel_copy.get("hashtags", [])
         else:
             print(f"  ATTENZIONE: Nessun copy generato per {ch_type}")
             continue
 
-        # Enforce per-channel character limit
+        # Limite per canale: se il post lo supera si accorcia solo il testo, URL e hashtag restano
         max_chars = SOCIAL_CROPS[ch_type].get("max_chars", 0)
-        if max_chars and len(text) > max_chars:
-            print(f"  ATTENZIONE: Testo di {len(text)} caratteri supera il limite di {max_chars} — troncato")
-            text = text[:max_chars].rsplit(" ", 1)[0]
+        text, cut = build_post(body_text, post_info["url"], tags, max_chars)
+        if cut:
+            print(f"  ATTENZIONE: Post oltre il limite di {max_chars} caratteri per {ch_type} — accorciato il solo testo di {cut} caratteri")
 
         target_count += 1
         photo_url = channel_photo_urls.get(ch_type)

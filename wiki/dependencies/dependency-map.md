@@ -11,6 +11,7 @@ source_files:
   - "_scripts/author-extraction/bun.lock"
   - "_scripts/author-extraction/core.mjs"
   - "_scripts/author-extraction/native.mjs"
+  - "_scripts/author-extraction/post-authoring-plugin.mjs"
   - "_scripts/wikidata-integration/package.json"
   - "_scripts/wikidata-integration/package-lock.json"
   - "_scripts/wikidata-integration/index.mjs"
@@ -33,9 +34,10 @@ source_files:
   - "Makefile.common"
   - "_scripts/cad/build.py"
   - "docs/post-authoring.md"
+  - ".opencode/commands/annotate-post.md"
   - ".gitignore"
 created: "2026-10-15"
-last_updated: "2026-10-15"
+last_updated: "2026-10-20"
 ---
 
 # Dependency Map
@@ -84,29 +86,51 @@ The `jekyll_plugins` group supplies feeds, include caching, redirects, emoji, me
 
 | Dependency | Declared and Bun-locked version | Consumer |
 |------------|--------------------------------|----------|
-| `@opencode/plugin` | `2.0.24` | OpenCode plugin SDK loaded by `native.mjs` |
+| `@opencode/plugin` | `2.0.31` | OpenCode plugin *[SDK](../glossary.md)* loaded by `native.mjs` |
 | Ajv | `8.20.0` | JSON Schema validation; `native.mjs` constructs the strict Ajv 2020 validator |
 | `yaml` | `2.8.1` | YAML parsing and alias inspection in `core.mjs` |
 
 The package scripts invoke Node for tests and author-model/runtime compilation. They do not define a browser application build. The lockfile is Bun format version 2, config version 1; using Node for scripts does not turn that file into an npm lockfile.
 
-### Wikidata Package and Shared SDK Boundary
+### Wikidata Package and Independent SDK Boundaries
 
 `_scripts/wikidata-integration/package.json` has one direct dependency, `@opencode/plugin` exactly `2.0.24`, resolved in its own npm lockfile. `index.mjs` dynamically loads `Plugin`, registers `wikidata_oracle`, and bridges requests to `_scripts/wikidata-oracle.rb`.
 
-Both lockfiles resolve the OpenCode `ai`, `client`, `protocol`, `schema`, and `util` packages to `2.0.24`. These are transitive SDK components, not separately declared application modules. The pin is for the integration SDK, not a declaration of the installed OpenCode executable version.
+The author package's Bun lock resolves the OpenCode `ai`, `client`, `protocol`, `schema`, and `util` packages to **2.0.31**; the Wikidata npm lock independently resolves those packages to **2.0.24**. These are transitive SDK components, not separately declared application modules. Neither SDK pin declares the installed OpenCode executable version.
 
-The SDK brings additional packages such as Effect, Zod, OpenTelemetry, AWS credential helpers, and Google's authentication library. Their presence does **not** identify selected project AI providers or prove that those services are configured or contacted. The two package locks are independent snapshots: for example, the Bun lock resolves `@aws-sdk/core` to `3.978.2`, while the Wikidata npm lock resolves it to `3.978.3`, despite the same direct SDK pin.
+Both SDK dependency trees include Effect, OpenTelemetry, AWS credential helpers, and Google's authentication library; the Wikidata lock also includes Zod. Their presence does **not** identify selected project AI providers or prove that those services are configured or contacted. The two package locks are independent snapshots: for example, the Bun lock resolves `@aws-sdk/core` to `3.978.2`, while the Wikidata npm lock resolves it to `3.978.3`. Effect itself resolves to `4.0.1` in the author lock and `4.0.0-rc.112` in the Wikidata lock.
 
-### Documented npm Installation Gap
+### Documented Installation Boundary
 
-`docs/post-authoring.md` gives this command:
+`docs/post-authoring.md` now documents a frozen Bun installation from the repository root:
 
 ```sh
-npm --prefix _scripts/author-extraction ci
+bun install --cwd _scripts/author-extraction --frozen-lockfile
 ```
 
-Filesystem inspection on 2026-10-15 found `bun.lock` but neither `package-lock.json` nor `npm-shrinkwrap.json` in that package. The command therefore lacks the local npm lockfile that `npm ci` requires. The Wikidata package's lockfile cannot supply this boundary, and there is no root npm lockfile. This is an unresolved documentation/package-manager discrepancy, not an installation procedure validated here.
+The author package has `bun.lock`, but no local `package-lock.json` or `npm-shrinkwrap.json`. The guide's `npm --prefix ... run ...` commands invoke package scripts; they are not npm installation instructions. The Wikidata npm lockfile cannot substitute for the author package's Bun snapshot.
+
+**Historical evidence:** the 2026-10-15 version of this map recorded the guide's earlier `npm --prefix _scripts/author-extraction ci` command alongside the absence of a local npm lockfile. That was a documentation/package-manager discrepancy at that snapshot. The current guide's frozen Bun command resolves the documented mismatch; no installation was performed to validate it in this update.
+
+### SDK Availability Versus Host Permission Support
+
+For [Governed Post Authoring](../modules/governed-post-authoring.md), the SDK pin is separate from the running host's capabilities. `docs/post-authoring.md` requires **OpenCode 2.0.29 or newer**, documenting that earlier Promise-plugin contexts lack `permission.assert`. Installing SDK 2.0.31 does not add that API to an older host process, and neither manifest nor lockfile establishes the currently installed or running host version.
+
+`post-authoring-plugin.mjs` checks `typeof ctx.permission?.assert === "function"` before invoking preparation planning/compilation or writing preparation artifacts. Missing or non-function support raises `AUTHOR_POST_HOST_UNSUPPORTED`; the plugin remains loaded and `/cancel-post` remains available. Creation asserts host `edit` and `shell` permissions for filesystem work and Rake; revision preparation asserts `edit` only and does not run Rake. The plugin uses the existing package dependencies and host `rake`; it does not install Ruby, gems, or providers.
+
+The guide requires restarting the **server** after upgrading OpenCode, not merely reloading configuration or plugins. For the background service it documents stopping active operations first, then `opencode service restart`. This is operator recovery guidance, not evidence that an upgrade or restart has occurred.
+
+## Annotation Workflow Dependencies
+
+`.opencode/commands/annotate-post.md` describes command-level dependencies beyond the JavaScript manifests. Its semantic stage requires the read-only [Wikidata Oracle](../api/wikidata-oracle.md), including accepted proposal validation and confirmed run closure before the final snapshot check and single post write; it forbids shell/CLI fallback retrieval. Later link/image transformations are outside the semantic proposal's validation scope.
+
+| Tool or service | Bounded authoring role |
+|-----------------|------------------------|
+| Chrome DevTools MCP | Captures existing or newly proposed live-page screenshot placeholders. Before the first capture, check authentication on the site's origin: continue if signed in, otherwise stop for the user to sign in and wait for their reply, asking at most once per run. Use `take_snapshot` and an element `uid` for `take_screenshot`; unmatched content requires clarification, not a whole-page capture. |
+| Unsplash MCP and photo download | Best-effort hero selection only when both `master` and `header.overlay_image` are absent. Use `search_photos` with landscape orientation and high content filtering; skip and report if two queries find nothing suitable. Download the selected `urls.full`, call `track_download` with its photo ID, and preserve the returned photographer attribution and image-credit metadata. Download tracking is part of using a selected photo, not an optional substitute for attribution. |
+| Host ImageMagick (`magick`) | Crops loose-text screenshots using browser bounding boxes scaled by `devicePixelRatio`, and optionally strips/resizes captures. The raw viewport image stays temporarily outside the repository because it may contain private data; crop to the intended content and delete the raw file. Hero processing uses a centered 16:9 crop, resizing, metadata stripping, and JPEG quality adjustment. |
+
+Screenshots are saved as `assets/images/<slug>-<n>.png`; downloaded heroes use `assets/images/posts/<slug>.jpg`. The command requires inspecting captures and listing saved image paths for the user's private-data review before committing. These workflow requirements are **not newly declared npm dependencies**, nor proof that MCP servers, authentication, downloads, or host `magick` are available. ImageMagick in a Docker recipe does not establish its availability on the authoring host; none of these services or tools was exercised in this update.
 
 ## Python SEO Dependencies
 

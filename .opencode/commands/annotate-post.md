@@ -10,7 +10,8 @@ This agent does the **deep semantic work** at authoring time. The
 `difficulty.rb` plugin does **algebraic/calculative work** at build time:
 
 - **LLM (now)**: Populates `knowledge_prerequisites`, `difficulty_computed.semantic`,
-  `intended_audience`, `proficiency_level`, `difficulty_declared`, link/image annotations.
+  `intended_audience`, `proficiency_level`, `difficulty_declared`, link/image annotations,
+  and the social copy under `broadcast.<channel>`.
 - **Plugin (build time)**: Merges lexical data (Gulpease), recomputes composite
   score, populates `termsdictionary` from all posts' prerequisites.
 
@@ -135,7 +136,76 @@ If the post has no series indicators, skip this step entirely.
    `{% cloudinary /path alt="alt" caption="..." role="screenshot|diagram|chart|photo|illustration|code" context="step|result|architecture|comparison|reference|evidence|ambient" %}`.
    - Classify role and context based on surrounding text, image content, caption and long description.
 
-9. If the post has `master:` but no `image_meta:`, add one:
+   **Screenshots**: every placeholder written as
+   `<!-- screenshot: <url> | <what to show> -->` — whether already in the
+   body or added by you under the Image Placement Policy below — gets
+   captured instead of being left as a comment:
+   1. Before the first screenshot, open Chrome with the `chrome-devtools` MCP
+      on the site's origin (not the target page) and check whether it is
+      already signed in. If it is, carry on without stopping. If it shows a
+      login, **stop**, tell the user the browser is ready, and wait for their
+      reply so they can sign in. Ask at most once per run. Then navigate to
+      `<url>`.
+   2. `take_snapshot` and find the element matching `<what to show>`. If it
+      is a single element with a `uid`, `take_screenshot` with that `uid` and
+      `filePath` `assets/images/<slug>-<n>.png` (`<slug>` = post filename
+      without date and `.md`; `<n>` = next free progressive number for that
+      slug). If the content is only loose text with no container to pick,
+      take the bounding box with `evaluate_script` (pass the uids of its
+      text nodes as `args`; use `getBoundingClientRect()`, `scrollIntoView`
+      first, note `devicePixelRatio`), screenshot the viewport to a temp
+      path outside the repo (the full viewport may show private data) and
+      crop it into `assets/images/<slug>-<n>.png` with
+      `magick <raw> -crop <W>x<H>+<X>+<Y> +repage -strip <file>`, scaling
+      the box by `devicePixelRatio`; delete the raw file afterwards. If no
+      element matches, ask instead of capturing the whole page.
+   3. Look at the PNG. Check it shows what the text needs and nothing
+      unrelated. If only part of it is relevant, crop further with
+      `magick <file> -crop <W>x<H>+<X>+<Y> +repage <file>`. Optionally also
+      `magick <file> -strip -resize '1600x>' <file>`.
+   4. Replace the placeholder with
+      `{% cloudinary /assets/images/<slug>-<n>.png alt="..." caption="..." role="screenshot" context="step|result|reference|evidence" %}`,
+      writing alt and caption from `<what to show>` and the adjacent text.
+
+   List the saved image paths in the final summary so the user can check
+   them for private data before committing.
+
+9. **Hero image.** If the post has no `master:` and no `header.overlay_image`,
+   find one on Unsplash, best effort. If nothing suitable turns up after two
+   queries, skip it and say so in the final summary.
+   1. `unsplash` MCP `search_photos` with 2–3 English keywords from the post's
+      topic, `orientation: "landscape"`, `content_filter: "high"`. Pick the
+      most relevant, visually calm photo (no text, brands or recognisable
+      faces). It must be related to the article, not generic stock.
+   2. Download `urls.full` to `assets/images/posts/<slug>.jpg` (`<slug>` as
+      for screenshots; create the folder if missing). The hero is 16:9: if
+      the photo is not already, crop from the centre (wider than 16:9 → width
+      = height×16/9, otherwise height = width×9/16) with
+      `magick <file> -gravity center -crop <W>x<H>+0+0 +repage -resize '2400x>' -strip -quality 85 <file>`.
+   3. Call `track_download` with the photo `id` (Unsplash requirement), then
+      set `master: /assets/images/posts/<slug>.jpg` and:
+      ```yaml
+      image_meta:
+        role: illustration
+        context: ambient
+        caption: "<short description>. <attribution_text>"
+      image_credit:
+        author: "<photographer_name>"
+        author_url: "<photographer_url>"
+        source: "Unsplash"
+        source_url: "<Unsplash home URL from attribution_html>"
+      ```
+      The `caption` is the hero's alt text, so it must always carry the
+      photographer's name (Unsplash attribution); use the `attribution_text`
+      returned by the MCP for that part. `image_credit` feeds the credit line
+      at the end of the article: the template renders it, so **do not write
+      any credit line in the body**.
+   4. If the photo ever comes from another source, fill `image_credit` with
+      whatever it has (`author`, `author_url`, `source`, `source_url`; all
+      optional, but at least `author` or `source`). Without `image_credit`
+      nothing is shown.
+
+   If the post has `master:` but no `image_meta:`, add one:
    ```yaml
    image_meta:
      role: illustration
@@ -151,7 +221,52 @@ If the post has no series indicators, skip this step entirely.
    semantically strict. Use `role="prerequisite"` and
    `context="provides-context"`.
 
-11. Close the oracle run and confirm it is closed/reaped before the final
+11. **Social copy.** Draft the social copy for the post, so it can be reviewed
+    before the push. Only if `broadcast` is a mapping and `broadcast.sent` is
+    not `true`; otherwise skip and say so in the final summary.
+    1. Channels: `broadcast.channels`, or `linkedin` and `mastodon` if absent.
+       Handle only those that `SOCIAL_COPY_PROMPT` in `_scripts/broadcast.py`
+       describes; leave the others to the pipeline.
+    2. If `broadcast.<channel>.text` already exists, keep it untouched (it may
+       have been edited by hand). Never overwrite it.
+    3. Otherwise write it following `SOCIAL_COPY_PROMPT` in
+       `_scripts/broadcast.py`, which is the single source for the author's
+       social voice and per-channel format (in Italian, as that prompt
+       says). Do not use the article-writing style or runtime for the tone.
+       Differences from the prompt: you have read the whole article, and the
+       output goes in YAML, not JSON, so ignore the "single line / `\n`" rule
+       and use a `|-` block with real paragraph breaks.
+    4. The channel limit counts the final post: `text`, the article URL and
+       the hashtags. Over it, the pipeline shortens `text` mid-sentence and
+       ends it with "…" (URL and hashtags are kept), so the copy you reviewed
+       is not the copy that goes out. Keep `text` within
+       `text_budget(<channel>, <url>)` from `_scripts/broadcast.py` (the same
+       figure the pipeline gives the model).
+       The URL is `https://gabrielebaldassarre.com/<category folder>/<slug>/`
+       (category folder like `home-assistant`, as in `get_post_info`). Do not
+       put the URL in `text`, and do not repeat in `hashtags` a hashtag already
+       used inline.
+    5. Write it into the existing `broadcast` mapping, leaving `channels`,
+       `sent` and `*_image` untouched:
+       ```yaml
+       broadcast:
+         channels: [linkedin, mastodon]
+         sent: false
+         linkedin:
+           text: |-
+             <copy>
+           hashtags: ["#tag1", "#tag2"]
+         mastodon:
+           text: |-
+             <copy>
+           hashtags: ["#tag1", "#tag2"]
+       ```
+       When `text` is present the pipeline sends it to Buffer as is, without
+       calling GitHub Models. A channel without `text` keeps the old behaviour.
+    6. In the final summary, list for each channel whether its copy was
+       written, kept or skipped, so the user can read it before pushing.
+
+12. Close the oracle run and confirm it is closed/reaped before the final
    original-file check. Immediately before writing, reread the post and
    compare it to the opened snapshot. If it changed, stop without writing and
    start a fresh run. Otherwise write the fully composed document exactly
@@ -193,6 +308,12 @@ know X, can they still understand the article and replicate the result?"
 
 After annotation, suggest optimal image placement for the post. Write your
 suggestions as HTML comments — **one comment per placement, positioned inline at the exact body position where the image should go**, never as a single summary block at the end. Each comment must specify role and context.
+
+For placements with `role=screenshot` that show a live page, write the comment as
+`<!-- screenshot: <url> | <what to show> -->` and capture it right away as
+described under **Screenshots** in step 8, before the final write. Take `<url>`
+from the command arguments or from the article; if it is unknown, ask the user
+once for the base URL instead of guessing.
 
 ### Article content type
 

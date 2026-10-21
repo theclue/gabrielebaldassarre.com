@@ -63,6 +63,9 @@ en: &DEFAULT_EN
   series_previous             : "Previous"
   series_next                 : "Next"
   series_index_label          : "Articles in this series"
+  image_credit_label          : "Cover photo"
+  image_credit_by             : "by"
+  image_credit_on             : "on"
 en-US:
   <<: *DEFAULT_EN
 en-CA:
@@ -134,5 +137,8 @@ it: &DEFAULT_IT
   series_previous             : "Precedente"
   series_next                 : "Successivo"
   series_index_label          : "Articoli della serie"
+  image_credit_label          : "Foto di copertina"
+  image_credit_by             : "di"
+  image_credit_on             : "su"
 it-IT:
   <<: *DEFAULT_IT

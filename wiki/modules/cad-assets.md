@@ -2,6 +2,7 @@
 title: "CAD Assets"
 description: "Parametric CAD sources, design contracts, release boundaries, and optional blog asset packaging"
 category: "modules"
+language: en
 source_files:
   - ".opencode/commands/create-cad.md"
   - ".opencode/agents/cad-author.md"
@@ -14,7 +15,7 @@ source_files:
   - "_layouts/asset-3d.html"
   - "docs/assisted-cad-modeling-method.md"
 created: "2026-10-15"
-last_updated: "2026-10-15"
+last_updated: "2026-10-20"
 ---
 
 # CAD Assets

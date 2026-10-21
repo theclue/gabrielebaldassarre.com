@@ -1,0 +1,18 @@
+{%- comment -%} Credito dell'immagine hero: compare solo se in front-matter c'è image_credit con almeno author o source. Testi da _data/ui-text.yml. {%- endcomment -%}
+{%- assign _ui = site.data.ui-text[site.locale] -%}
+{%- assign credit = page.image_credit -%}
+{%- if credit.author or credit.source -%}
+<p class="image-credit">
+  {{ _ui.image_credit_label | default: "Cover photo" }}
+  {%- if credit.author %} {{ _ui.image_credit_by | default: "by" }}
+    {%- if credit.author_url %} <a href="{{ credit.author_url | escape }}" rel="external ugc noopener nofollow" target="_blank" class="link-meta link-role-attribution">{{ credit.author | escape }}</a>
+    {%- else %} {{ credit.author | escape }}
+    {%- endif -%}
+  {%- endif -%}
+  {%- if credit.source %} {{ _ui.image_credit_on | default: "on" }}
+    {%- if credit.source_url %} <a href="{{ credit.source_url | escape }}" rel="external ugc noopener nofollow" target="_blank" class="link-meta link-role-attribution">{{ credit.source | escape }}</a>
+    {%- else %} {{ credit.source | escape }}
+    {%- endif -%}
+  {%- endif -%}.
+</p>
+{%- endif -%}

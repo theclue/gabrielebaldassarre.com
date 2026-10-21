@@ -2,6 +2,7 @@
 title: "Getting Started"
 description: "Prerequisites, safe inspection, and separate setup paths for the site, author tools, R, CAD, and SEO."
 category: "root"
+language: en
 source_files:
   - "Makefile"
   - "Makefile.common"
@@ -11,6 +12,10 @@ source_files:
   - "Dockerfile"
   - "_scripts/author-extraction/package.json"
   - "_scripts/author-extraction/bun.lock"
+  - "_scripts/author-extraction/post-authoring-plugin.mjs"
+  - ".opencode/commands/create-post.md"
+  - ".opencode/commands/revise-post.md"
+  - ".opencode/commands/annotate-post.md"
   - "docs/post-authoring.md"
   - ".env.example"
   - "containers/knitr/Dockerfile"
@@ -22,7 +27,7 @@ source_files:
   - "_scripts/cad/build.py"
   - "_scripts/seo/monitor.py"
 created: "2026-10-15"
-last_updated: "2026-10-15"
+last_updated: "2026-10-20"
 ---
 
 # Getting Started
@@ -34,8 +39,9 @@ Choose the workflow you need rather than installing every toolchain. The Jekyll 
 | Workflow | Prerequisites | Source |
 |----------|---------------|--------|
 | Site build and preview | Make, Docker CLI, and a running Docker engine. The image supplies Ruby/Bundler, Jekyll dependencies, Node, and supporting system tools. | `Makefile.common`, `Dockerfile` |
-| Guided Markdown authoring | An OpenCode V2 session opened at the repository root, the local post-authoring plugin, dependencies from `_scripts/author-extraction`, and host Ruby with `rake` available. The plugin does not install these prerequisites. | `docs/post-authoring.md`, `Rakefile` |
-| Node author-tool development | Node.js for ES modules and the declared scripts; npm is used by the documented commands. Direct dependencies are `@opencode/plugin` 2.0.24, `ajv` 8.20.0, and `yaml` 2.8.1. The manifest declares no Node engine range or package-manager version. | `_scripts/author-extraction/package.json` |
+| Guided Markdown authoring | An OpenCode **2.0.29+** host exposing a callable `permission.assert`, a session opened at the repository root, the local post-authoring plugin, and dependencies from `_scripts/author-extraction`. New-article creation additionally requires host Ruby with `rake`; revision does not run Rake. The plugin does not install these prerequisites. | `docs/post-authoring.md`, `_scripts/author-extraction/post-authoring-plugin.mjs`, `Rakefile` |
+| Node author-tool development | Node.js for ES modules and the declared scripts, Bun for the documented locked install, and npm for the documented `run` examples. Direct dependencies are the `@opencode/plugin` *[SDK]* (see [Glossary](./glossary.md)) **2.0.31**, `ajv` 8.20.0, and `yaml` 2.8.1. The manifest declares no Node engine range or package-manager version. | `_scripts/author-extraction/package.json`, `_scripts/author-extraction/bun.lock`, `docs/post-authoring.md` |
+| [Post annotation](./api/wikidata-oracle.md) (separate, opt-in) | The read-only `wikidata_oracle` tool for semantic retrieval and validation; Chrome DevTools MCP for live screenshots; ImageMagick's `magick` for image cropping/resizing; and Unsplash MCP for best-effort hero-image lookup when a hero is missing. Browser/image tools and external services are separate operational dependencies, not supplied by the author package install. | `.opencode/commands/annotate-post.md`, `_scripts/author-extraction/package.json` |
 | [R Markdown and diagrams](./modules/r-publishing.md) | Native `Rscript` with the required R packages, or the separate knitr Docker image. Single-file knitting explicitly loads `svglite`, `knitr`, and `rprojroot`; individual articles and diagrams can require more packages. | `R/build_one.R`, `containers/knitr/Dockerfile`, `Makefile.common` |
 | [CAD exports and previews](./modules/cad-assets.md) | Native OpenSCAD; Python 3 with PyYAML and ImageMagick for the preview orchestration; or the separate CAD image. The image installs `openscad-nightly`, Python, PyYAML, and ImageMagick. | `_scripts/cad/build.py`, `containers/openscad/Dockerfile` |
 | [SEO monitoring](./modules/seo-monitoring.md) | Docker and the dedicated Python image, plus authorized service configuration in `.env`. The image uses Python 3.14 and installs `requirements-seo.txt`, including dbt-sqlite. | `Dockerfile.seo`, `Makefile.common`, `.env.example` |
@@ -97,11 +103,27 @@ Sources: `Makefile.common`, `Rakefile`, `.Rprofile`.
 
 **Known entrypoint mismatch:** `make help` advertises `configure`, but the inspected Makefiles define no `configure` target. Use the documented `./configure` entrypoint, not `make configure`.
 
-### Author-tool dependency caveat
+### Author-tool dependencies and host compatibility
 
-`docs/post-authoring.md` recommends `npm --prefix _scripts/author-extraction ci`. However, read-only filesystem inspection on 2026-10-15 found `bun.lock` and **no** `_scripts/author-extraction/package-lock.json` or `npm-shrinkwrap.json`. The Bun lock's direct dependency versions match `package.json`, but it is not an npm lockfile.
+The current [operator guide](../docs/post-authoring.md#artefatti-e-manutenzione) uses the package-local Bun *[lockfile]* (see [Glossary](./glossary.md)). If author dependencies are missing, its command from the repository root is:
 
-The documented npm clean-install instruction is therefore **not verified for this checkout**. Resolve the package-manager/lockfile policy with the maintainer before installing. Do not silently generate a replacement lockfile or present an unlocked install as equivalent. Any eventual dependency installation is a side-effecting operation that writes dependencies/cache and can access the network. No install command was run for this guide.
+```sh
+bun install --cwd _scripts/author-extraction --frozen-lockfile
+```
+
+**Side effects — dependency/cache writes and possible network access:** this is the documented locked-install path, not an inspection command. The package contains `bun.lock`, but no `package-lock.json` or `npm-shrinkwrap.json`. A Bun lock is not an npm lock for `npm ci`; do not silently generate a replacement or present an unlocked install as equivalent. The manifest and Bun lock pin the author SDK to **2.0.31**, independently of the running OpenCode host version.
+
+The guide separately requires **OpenCode 2.0.29 or newer**, with a callable host `permission.assert`. Installing or updating the SDK does not add that capability to an older running host. If the API is missing or not a function, preparation fails with `AUTHOR_POST_HOST_UNSUPPORTED` before runtime compilation or file writes; the plugin remains loaded and `/cancel-post` remains available. After upgrading OpenCode, **restart the server**, rather than only reloading configuration/plugins. For the background service, the guide instructs stopping active operations first, then using `opencode service restart` (`docs/post-authoring.md:111–140`, `_scripts/author-extraction/post-authoring-plugin.mjs:24–43`). This is documentation, not authorization to restart a shared service.
+
+Using Bun for installation does not invalidate the package's Node-based `npm run` entrypoints. The guide documents these optional test commands; they execute tests, not dependency installation or harmless onboarding inspection:
+
+```sh
+npm --prefix _scripts/author-extraction run test:post-authoring
+npm --prefix _scripts/author-extraction run test:integration
+npm --prefix _scripts/author-extraction run test:post-revision
+```
+
+Sources: `_scripts/author-extraction/package.json`, `_scripts/author-extraction/bun.lock`, `docs/post-authoring.md:199–221`. No installation, tests, service restart, or live host/tool/service checks were performed for this update; declared requirements do not establish installed availability.
 
 ### Optional R, CAD, and SEO containers
 
@@ -152,9 +174,15 @@ Sources: `Makefile`, `Makefile.common`, `R/build_one.R`.
 
 Once dependencies and plugin availability are resolved, use [`/create-post`](./modules/governed-post-authoring.md) in a **new root-directory OpenCode session**, not in a subagent or another checkout. This is a side-effecting writing workflow: it creates task/runtime evidence, invokes host Rake, and fills one new Markdown file. The default destination is `_drafts/<slug>.md`; an explicitly requested post goes to `_posts/<category>/<date>-<slug>.md` (`docs/post-authoring.md`).
 
-The command stays with the active model/provider and does not launch subagents or implicitly switch providers. If the plugin/gate is unavailable, stop rather than bypassing it. It does not overwrite existing drafts, publish an existing draft, create CAD assets implicitly, or perform commit, push, build, deploy, or broadcast. R Markdown creation and existing-article revisions are separate workflows.
+The command stays with the active model/provider and does not launch subagents or implicitly switch providers. If the plugin/gate is unavailable, stop rather than bypassing it. It does not overwrite existing drafts, publish an existing draft, create CAD assets implicitly, or perform commit, push, build, deploy, or broadcast. `/create-post` is *[create-only]* (see [Glossary](./glossary.md)); existing-article revisions use `/revise-post` below. R Markdown creation and annotation remain separate workflows; annotation is not automatic (`docs/post-authoring.md`, `.opencode/commands/create-post.md`).
 
 Use `/cancel-post` to end an interrupted author-runtime activation after stopping any preparation still running. Cancellation ends injection but leaves files and evidence intact; changing the topic is not cancellation. Successful preparation and hook application do not certify factual accuracy or approve the final prose (`docs/post-authoring.md`).
+
+### Revise an existing Markdown article
+
+Use [`/revise-post`](./modules/governed-post-authoring.md#prepare-an-existing-article-for-revision) for one existing `.md` article in `_drafts/` or a category directory under `_posts/`. Before editing, the agent must read the article and 2–4 comparable approved corpus references, then call `author_post_revision_prepare` with the target, request, a `rewrite`/`expand` task, and literal reference excerpts. Preparation requests host edit permission, saves an immutable original snapshot and revision evidence under `.opencode/authoring-revisions/`, and activates the runtime without editing the article or running Rake. If preparation fails or is unavailable, stop rather than bypassing it (`docs/post-authoring.md:142–177`, `.opencode/commands/revise-post.md`).
+
+*[Context injection]* (see [Glossary](./glossary.md)) remains active in the same session through writing, editorial comparison, and corrections. Before `author_post_finish` with `written`, the revision needs changed article content, an observed hook application, and a current quote-grounded report prepared/submitted through `author_post_editorial_prepare` and `author_post_editorial_submit`, with no remaining `needs_revision` aspects. Later edits invalidate that report. It remains a candidate pending human review, not certification of voice or human approval. Creation's `written` does not satisfy this revision gate: a later revision needs a new explicit preparation, even in the same chat; chat history does not keep a closed runtime active. Neither revision nor cancellation publishes the article (`docs/post-authoring.md:179–197`, `_scripts/author-extraction/post-authoring-plugin.mjs`, `.opencode/commands/revise-post.md`).
 
 ### File creation and publication boundaries
 

@@ -1,18 +1,38 @@
 ---
 category: Home Assistant
 title: "Batterie non molto smart: stimare la carica residua e riconoscere i cicli di ricarica"
-subtitle: "Un indicatore di autonomia, non una misura dello stato di carica"
-excerpt: "I dispositivi alimentati con normali batterie tipo AA o AAA non espongono, in genere, ad Home Assistant un sensore con la percentuale di carica residua. Con un po' di algebra e un modo piuttosto creativo di usare gli Helper possiamo costruire un modello approssimato per stimare l'autonomia residua e i cicli di ricarica che funzioni anche quando l'utente si dimentica di segnalare al sistema che ha appena sostituito le batterie."
-master: /assets/images/cicli-carica-simulati.png
+excerpt: "I dispositivi alimentati con normali batterie con connessione bipolare non forniscono, in genere, ad Home Assistant un sensore con la percentuale di carica residua. Con un po' di algebra e un modo piuttosto creativo di usare gli Helper possiamo costruire un modello approssimato per stimare l'autonomia residua e i cicli di ricarica che funzioni anche quando l'utente si dimentica di segnalare al sistema che ha appena sostituito le batterie."
+master: /assets/images/posts/batterie-home-assistant-ricarica-stimata.jpg
 image_meta:
   role: illustration
   context: ambient
-  caption: ""
+  caption: "Pile cilindriche usate viste dall'alto. Photo by Roberto Sorin on Unsplash"
+image_credit:
+  author: "Roberto Sorin"
+  author_url: "https://unsplash.com/@roberto_sorin?utm_source=mcp_server&utm_medium=referral"
+  source: "Unsplash"
+  source_url: "https://unsplash.com/?utm_source=mcp_server&utm_medium=referral"
 header:
   overlay_filter: 0.5
 broadcast:
   channels: [linkedin,mastodon]
   sent: false
+  linkedin:
+    text: |-
+      𝙐𝙣𝙖 𝙗𝙖𝙩𝙩𝙚𝙧𝙞𝙖 𝙘𝙝𝙚 𝙩𝙞 𝙙𝙞𝙘𝙚 𝙨𝙤𝙡𝙤 «𝙉𝙤𝙧𝙢𝙖𝙡» 𝙤 «𝙇𝙤𝙬» 𝙦𝙪𝙖𝙣𝙩𝙤 𝙩𝙞 𝙨𝙩𝙖 𝙙𝙞𝙘𝙚𝙣𝙙𝙤 𝙙𝙖𝙫𝙫𝙚𝙧𝙤?
+
+      I dispositivi smart alimentati con batterie con connettore bipolare non sono in grado, in genere, di dichiarare il proprio stato ad Home Assistant con accuratezza, ma al massimo indicazioni generiche tipo "Low" e "Normal" in base alla tensione in uscita.
+
+      Questo rende i dashboard di monitoraggio delle batterie non molto soddisfacenti e poco utili, per stimare il tempo residuo di carica.
+
+      Per questo motivo, con un po' di algebra e un uso piuttosto creativo degli helper di #homeassistant ho costruito un modello di stima che tiene conto dei cicli di ricarica, delle capacità delle celle e il consumo presunto. Il risultato è un indicatore percentuale molto più simile a quelli ottenibili dai dispositivi dotati di batterie con il pin per la telemetria. 
+
+      La ricarica la dichiaro nel più classico dei modi con un pulsante (che noia), ma se mi dimentico di farlo, l'automazione prova a riconoscerla da sola in base ai dati storici e al comportamento osservato in passato.
+    hashtags: ["#domotica", "#HomeAssistant"]
+  mastodon:
+    text: |-
+      Ho provato a stimare in Home Assistant quanto durano le batterie delle mie termovalvole Tado, che espongono, in modo decisamente poco smart, solo un sensore con indicazioni generiche tipo "Normal" o "Low". Ne è uscito un modello di simulazione dei cicli di ricarica che usa i dati storici e il comportamento per stimare l'autonomia residua della ricarica.
+    hashtags: ["#HomeAssistant", "#domotica", "#Tado"]
 intended_audience: practitioner
 proficiency_level: intermediate
 tags:
@@ -674,6 +694,8 @@ cards:
 ```
 
 La pill mostrerà **`2×AA · 2220 mAh/cella`** e seguirà le modifiche degli helper. Se mancano i metadati, indicherà numero o capacità non disponibili. Se manca la percentuale, apparirà `n/d`: una barra vuota non va interpretata da sola come zero.
+
+{% cloudinary /assets/images/batterie-home-assistant-ricarica-stimata-1.png alt="Card Termovalvole con tre righe batteria per Soggiorno, Cameretta e Bagno: percentuale a destra, barra sotto e pill con 2×AA · 2220 mAh/cella" caption="Le tre righe del template: percentuale, barra e pill con numero, formato e capacità nominale per cella." role="screenshot" context="result" %}
 
 Il formato `AA` è qui una caratteristica dichiarata dei dispositivi, mentre numero e capacità vengono dagli helper. **2220 mAh è il valore nominale di ciascuna cella**. Il modello non somma le due capacità e non ricava energia, tensione o chimica. Questi metadati descrivono le batterie montate; non entrano nella formula dei 55 giorni e non la validano.
 

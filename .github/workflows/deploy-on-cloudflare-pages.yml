@@ -21,6 +21,8 @@ on:
       - "!.github/workflows/seo-pipeline.yml"
       - "!.github/workflows/deploy-on-cloudflare-pages.yml"
       - "!README.md"
+      - "!docs/**"
+      - "!wiki/**"
   pull_request:
     branches: [main, master]
     paths:
@@ -41,6 +43,8 @@ on:
       - "!.github/workflows/seo-pipeline.yml"
       - "!.github/workflows/deploy-on-cloudflare-pages.yml"
       - "!README.md"
+      - "!docs/**"
+      - "!wiki/**"
   workflow_dispatch:
 
 permissions:

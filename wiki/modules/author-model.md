@@ -2,6 +2,7 @@
 title: "Author Model Compiler"
 description: "Step 4 compact author-pattern composition, verified lineage, and immutable native candidates."
 category: "modules"
+language: en
 source_files:
   - "_scripts/author-extraction/model.mjs"
   - "_scripts/author-extraction/model-agent.mjs"
@@ -14,7 +15,7 @@ source_files:
   - "docs/author-identifiers.md"
   - "docs/author-runtime.md"
 created: "2026-10-15"
-last_updated: "2026-10-15"
+last_updated: "2026-10-20"
 ---
 
 # Author Model Compiler
