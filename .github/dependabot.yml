@@ -4,7 +4,7 @@ updates:
   - package-ecosystem: "bundler"
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: "daily"
       timezone: "Europe/Rome"
     cooldown:
       default-days: 8
@@ -21,7 +21,7 @@ updates:
   - package-ecosystem: "bun"
     directory: "/_scripts/author-extraction"
     schedule:
-      interval: "weekly"
+      interval: "daily"
       timezone: "Europe/Rome"
     cooldown:
       default-days: 8
@@ -38,7 +38,7 @@ updates:
   - package-ecosystem: "npm"
     directory: "/_scripts/wikidata-integration"
     schedule:
-      interval: "weekly"
+      interval: "daily"
       timezone: "Europe/Rome"
     cooldown:
       default-days: 8
@@ -55,7 +55,7 @@ updates:
   - package-ecosystem: "pip"
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: "daily"
       timezone: "Europe/Rome"
     cooldown:
       default-days: 8
@@ -72,7 +72,7 @@ updates:
   - package-ecosystem: "docker"
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: "daily"
       timezone: "Europe/Rome"
     cooldown:
       default-days: 8
@@ -89,7 +89,7 @@ updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: "daily"
       timezone: "Europe/Rome"
     cooldown:
       default-days: 8
