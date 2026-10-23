@@ -112,8 +112,8 @@ Il plugin usa le dipendenze già presenti nel package `_scripts/author-extractio
 e il comando `rake` nell'ambiente host. Non installa Ruby, gem o provider.
 Richiede **OpenCode 2.0.29 o successivo**: prima di quella versione il contesto
 dei plugin Promise non espone `permission.assert`. Il SDK è fissato alla
-**2.0.31** nel package e nel lockfile Bun. Aggiornare il solo SDK non aggiunge
-questa capacità a un processo host precedente.
+**2.0.31** nel package e nel lockfile `package-lock.json`. Aggiornare il solo SDK
+non aggiunge questa capacità a un processo host precedente.
 
 Se l'API manca o non è una funzione, la preparazione si ferma con
 `AUTHOR_POST_HOST_UNSUPPORTED`, prima della compilazione del runtime e di
@@ -126,7 +126,7 @@ operazioni attive e usare `opencode service restart`.
 Se le dipendenze Node mancano, l'operatore può eseguire dalla root:
 
 ```sh
-bun install --cwd _scripts/author-extraction --frozen-lockfile
+npm --prefix _scripts/author-extraction ci
 ```
 
 Il caricamento usa le API V2 e il SDK già fissato nel lockfile. Se un processo

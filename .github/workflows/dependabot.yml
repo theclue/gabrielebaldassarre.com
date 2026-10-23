@@ -59,13 +59,11 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: '24'
-      - uses: oven-sh/setup-bun@v2
       - run: |
-          bun install --cwd _scripts/author-extraction --frozen-lockfile
+          npm --prefix _scripts/author-extraction ci
           npm --prefix _scripts/author-extraction test
           npm --prefix _scripts/author-extraction run test:integration
           npm --prefix _scripts/author-extraction run check:author-model
-          npm --prefix _scripts/author-extraction run check:author-runtime
       - run: |
           npm --prefix _scripts/wikidata-integration ci
           node --test _scripts/wikidata-integration/index.test.mjs

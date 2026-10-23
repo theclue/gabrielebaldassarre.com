@@ -21,12 +21,14 @@ class DependabotConfigTest < Minitest::Test
     updates = config.fetch("updates")
     expected_pairs = [
       ["bundler", "/"],
-      ["bun", "/_scripts/author-extraction"],
+      ["npm", "/_scripts/author-extraction"],
       ["npm", "/_scripts/wikidata-integration"],
       ["pip", "/"],
       ["docker", "/"],
       ["github-actions", "/"]
     ]
+    assert File.exist?(File.join(ROOT, "_scripts/author-extraction/package-lock.json"))
+    refute File.exist?(File.join(ROOT, "_scripts/author-extraction/bun.lock"))
     actual_pairs = updates.map do |update|
       [update.fetch("package-ecosystem"), update.fetch("directory")]
     end
@@ -60,10 +62,15 @@ class DependabotConfigTest < Minitest::Test
       assert_equal "github.actor == 'dependabot[bot]'", jobs.fetch(job).fetch("if")
     end
 
-    jobs.fetch("test-scripts").fetch("steps").each do |step|
+    test_script_steps = jobs.fetch("test-scripts").fetch("steps")
+    test_script_steps.each do |step|
       refute_match(/\bsudo\b/, step.to_yaml)
       refute_includes step.to_yaml, "/private/var/folders"
     end
+    refute_includes test_script_steps.to_yaml, "oven-sh/setup-bun"
+    refute_match(/\bbun install\b/, test_script_steps.to_yaml)
+    assert test_script_steps.any? { |step| step["run"]&.include?("npm --prefix _scripts/author-extraction ci") },
+      "test-scripts should install author-extraction dependencies with npm ci"
 
     flag_major = jobs.fetch("flag-major")
     assert_equal ["metadata"], flag_major.fetch("needs")

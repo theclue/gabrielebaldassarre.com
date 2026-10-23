@@ -12,7 +12,6 @@ Thumbs.db
 
 *.lock
 !renv.lock
-!_scripts/author-extraction/bun.lock
 
 .geany/session.ini
 
