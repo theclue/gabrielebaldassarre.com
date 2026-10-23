@@ -2,13 +2,14 @@ import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { access, mkdtemp, mkdir, readFile, rm, writeFile, symlink } from 'node:fs/promises';
 import { join } from 'node:path';
+import { tmpdir } from 'node:os';
 import { before, describe, it } from 'node:test';
 import { fileURLToPath } from 'node:url';
 import Ajv2020 from 'ajv/dist/2020.js';
 import { prepareArticle, acceptCandidate, verifyExtractionRecord } from './core.mjs';
 
 const PACKAGE_DIR = fileURLToPath(new URL('.', import.meta.url));
-const APPROVED_TEMP = '/private/var/folders/qm/5mfn0b0n5ds_d9xpg0l9jqgc0000gp/T/opencode';
+const APPROVED_TEMP = tmpdir();
 const ARTICLE_PATH = '_posts/synthetic.md';
 const REPO_ROOT = fileURLToPath(new URL('../../', import.meta.url));
 const INSTRUCTIONS = '# Synthetic author-extractor fixture\n';

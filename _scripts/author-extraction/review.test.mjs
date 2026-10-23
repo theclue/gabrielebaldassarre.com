@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { cp, mkdir, mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { join, dirname } from 'node:path';
+import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { describe, it } from 'node:test';
 import { parse as parseYaml } from 'yaml';
@@ -9,7 +10,7 @@ import { applyAuthorReview, prepareAuthorReview, validateAuthorPatterns } from '
 
 const PACKAGE_DIR = fileURLToPath(new URL('.', import.meta.url));
 const REPO_ROOT = fileURLToPath(new URL('../../', import.meta.url));
-const APPROVED_TEMP = '/private/var/folders/qm/5mfn0b0n5ds_d9xpg0l9jqgc0000gp/T/opencode';
+const APPROVED_TEMP = tmpdir();
 const SOURCE_DIRECTORY = 'docs/author-pattern-results/v1.3';
 const DIMENSIONS = ['rhetorical', 'epistemic', 'decisional', 'semantic'];
 const HASH = (bytes) => createHash('sha256').update(bytes).digest('hex');

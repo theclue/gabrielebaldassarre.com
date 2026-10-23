@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { cp, mkdir, mkdtemp, readFile, readdir, rm, symlink, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { tmpdir } from "node:os";
 import { fileURLToPath } from "node:url";
 import { describe, it } from "node:test";
 import { authoringSha as sha } from "./post-authoring.mjs";
@@ -8,7 +9,7 @@ import { planAuthorRevision, prepareAuthorRevision, submitAuthorEditorialReview,
 import { setupPostAuthoring } from "./post-authoring-plugin.mjs";
 
 const ROOT = fileURLToPath(new URL("../../", import.meta.url));
-const TEMP = "/private/var/folders/qm/5mfn0b0n5ds_d9xpg0l9jqgc0000gp/T/opencode";
+const TEMP = tmpdir();
 const target = "_drafts/revision-fixture.md";
 const aspects = ["opening", "decision", "technical_transition", "limitation"];
 const original = "---\ntitle: Fixture\n---\nOriginal synthetic fixture body, not a blog article.\n";

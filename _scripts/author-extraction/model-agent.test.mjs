@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { cp, mkdir, mkdtemp, readFile, readdir, rm, stat, symlink, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
+import { tmpdir } from "node:os";
 import { fileURLToPath } from "node:url";
 import { describe, it } from "node:test";
 import { parse as parseYaml } from "yaml";
@@ -10,7 +11,7 @@ import { prepareAuthorModelCandidate, submitAuthorModelCandidate } from "./model
 import { createModelAdapter, modelPrepareInputSchema, modelSubmitInputSchema, modelToolResult } from "./model-native.mjs";
 
 const ROOT = fileURLToPath(new URL("../../", import.meta.url));
-const TEMP = "/private/var/folders/qm/5mfn0b0n5ds_d9xpg0l9jqgc0000gp/T/opencode";
+const TEMP = tmpdir();
 const DIR = "docs/author-pattern-results/v1.3";
 const composition = await readFile(new URL("./author-model.composition.json", import.meta.url), "utf8");
 const schema = JSON.parse(await readFile(new URL("./author-model.schema.json", import.meta.url), "utf8"));

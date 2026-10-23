@@ -3,6 +3,7 @@ import { createHash } from "node:crypto";
 import { chmod, mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { createServer } from "node:http";
+import { tmpdir } from "node:os";
 import { pathToFileURL } from "node:url";
 import path from "node:path";
 import { test } from "node:test";
@@ -11,7 +12,7 @@ const entryPath = path.join(path.dirname(new URL(import.meta.url).pathname), "in
 const repositoryRoot = path.resolve(path.dirname(entryPath), "../..");
 const integration = existsSync(entryPath) ? await import(pathToFileURL(entryPath).href) : undefined;
 const bridgeTest = (name, body) => test(name, { skip: integration ? false : "feature pending: index.mjs not implemented" }, body);
-const scratchParent = "/private/var/folders/qm/5mfn0b0n5ds_d9xpg0l9jqgc0000gp/T/opencode";
+const scratchParent = tmpdir();
 const projectID = "wikidata-integration-fixture-project";
 const sourceDocument = [
   "---", "title: \"Offline bridge fixture\"", "tags:", "  - shell", "knowledge_prerequisites:",

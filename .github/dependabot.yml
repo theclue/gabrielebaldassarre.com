@@ -1,8 +1,105 @@
-# Version updates are handled by Renovate (see /renovate.json).
-# Dependabot security updates and alerts remain enabled via
-# Settings -> Security & quality -> Advanced Security.
-# This file is intentionally kept with an empty updates list (official
-# way to retire version updates while preserving the config for future
-# security-updates grouping rules).
+# Minor and patch updates are grouped into minor-and-patch; major updates are intentionally left ungrouped and unignored so Dependabot opens a separate PR for each major version update.
 version: 2
-updates: []
+updates:
+  - package-ecosystem: "bundler"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      timezone: "Europe/Rome"
+    cooldown:
+      default-days: 8
+    commit-message:
+      prefix: "chore(deps)"
+    labels: ["dependencies"]
+    groups:
+      minor-and-patch:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+  - package-ecosystem: "bun"
+    directory: "/_scripts/author-extraction"
+    schedule:
+      interval: "weekly"
+      timezone: "Europe/Rome"
+    cooldown:
+      default-days: 8
+    commit-message:
+      prefix: "chore(deps)"
+    labels: ["dependencies"]
+    groups:
+      minor-and-patch:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+  - package-ecosystem: "npm"
+    directory: "/_scripts/wikidata-integration"
+    schedule:
+      interval: "weekly"
+      timezone: "Europe/Rome"
+    cooldown:
+      default-days: 8
+    commit-message:
+      prefix: "chore(deps)"
+    labels: ["dependencies"]
+    groups:
+      minor-and-patch:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      timezone: "Europe/Rome"
+    cooldown:
+      default-days: 8
+    commit-message:
+      prefix: "chore(deps)"
+    labels: ["dependencies"]
+    groups:
+      minor-and-patch:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      timezone: "Europe/Rome"
+    cooldown:
+      default-days: 8
+    commit-message:
+      prefix: "chore(deps)"
+    labels: ["dependencies", "docker"]
+    groups:
+      minor-and-patch:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      timezone: "Europe/Rome"
+    cooldown:
+      default-days: 8
+    commit-message:
+      prefix: "chore(deps)"
+    labels: ["dependencies", "github-actions"]
+    groups:
+      minor-and-patch:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"

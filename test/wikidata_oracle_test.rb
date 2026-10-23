@@ -8,12 +8,13 @@ require "open3"
 require "rbconfig"
 require "socket"
 require "time"
+require "tmpdir"
 require "uri"
 
 class WikidataOracleTest < Minitest::Test
   ROOT = File.expand_path("..", __dir__)
   CLI = File.join(ROOT, "_scripts", "wikidata-oracle.rb")
-  SCRATCH_ROOT = "/private/var/folders/qm/5mfn0b0n5ds_d9xpg0l9jqgc0000gp/T/opencode"
+  SCRATCH_ROOT = Dir.tmpdir
   POST_PATH = "_posts/oracle-fixture.md"
   INTERNAL_ERROR_MARKER = "T8_TEST_PRIVATE_DIAGNOSTIC_SENTINEL"
   CONTEXTS = {

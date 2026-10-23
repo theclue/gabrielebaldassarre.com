@@ -1,13 +1,14 @@
 import assert from 'node:assert/strict';
 import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
+import { tmpdir } from 'node:os';
 import { describe, it } from 'node:test';
 import Ajv2020 from 'ajv/dist/2020.js';
 import { createExtractionAdapter } from './native.mjs';
 import { prepareArticle, acceptCandidate, verifyExtractionRecord } from './core.mjs';
 
 const ROOT = '/synthetic/trusted-repository-root';
-const APPROVED_TEMP = '/private/var/folders/qm/5mfn0b0n5ds_d9xpg0l9jqgc0000gp/T/opencode';
+const APPROVED_TEMP = tmpdir();
 const HASH = 'a'.repeat(64);
 const BODY = 'first quote\n\nsecond passage';
 const PREPARED = Object.freeze({

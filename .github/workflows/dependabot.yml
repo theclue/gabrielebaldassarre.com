@@ -1,0 +1,101 @@
+name: Dependabot Build, Test & Automerge
+
+on: { pull_request: { branches: [main, master] } }
+
+permissions: { contents: read, pull-requests: read }
+
+concurrency:
+  group: dependabot-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  metadata:
+    if: github.actor == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    outputs:
+      update-type: ${{ steps.metadata.outputs.update-type }}
+      package-ecosystem: ${{ steps.metadata.outputs.package-ecosystem }}
+    steps:
+      - id: metadata
+        uses: dependabot/fetch-metadata@v3
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+  flag-major:
+    needs: [metadata]
+    if: github.actor == 'dependabot[bot]' && needs.metadata.outputs.update-type == 'version-update:semver-major'
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+    steps:
+      - name: Label major update PR for manual review
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+        run: |
+          gh label create "major" --color "d73a4a" --description "Major dependency update requiring manual review" --force
+          gh pr edit "$PR_URL" --add-label "major"
+
+  build-site:
+    if: github.actor == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: docker/setup-buildx-action@v4
+      - run: make site
+      - run: '[ -d _site ]'
+
+  test-scripts:
+    if: github.actor == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - uses: oven-sh/setup-bun@v2
+      - run: |
+          bun install --cwd _scripts/author-extraction --frozen-lockfile
+          npm --prefix _scripts/author-extraction test
+          npm --prefix _scripts/author-extraction run test:integration
+          npm --prefix _scripts/author-extraction run check:author-model
+          npm --prefix _scripts/author-extraction run check:author-runtime
+      - run: |
+          npm --prefix _scripts/wikidata-integration ci
+          node --test _scripts/wikidata-integration/index.test.mjs
+      - run: |
+          ruby test/wikidata_oracle_test.rb
+          ruby test/vscode_process_rake_tasks_test.rb
+          ruby test/dependabot_config_test.rb
+
+  build-seo:
+    if: github.actor == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: docker/setup-buildx-action@v4
+      - run: make build-seo
+      - run: docker run --rm -v "$PWD":/workspace --entrypoint python3 gabrielebaldassarre/seo:latest -m py_compile _scripts/seo/monitor.py _scripts/seo/post_history.py _scripts/seo/dbt_runner.py
+
+  automerge:
+    needs: [metadata, build-site, test-scripts, build-seo]
+    if: >-
+      github.actor == 'dependabot[bot]' &&
+      needs.metadata.outputs.update-type != 'version-update:semver-major' &&
+      (needs.metadata.outputs.update-type == 'version-update:semver-minor' || needs.metadata.outputs.update-type == 'version-update:semver-patch')
+    runs-on: ubuntu-latest
+    permissions: { contents: write, pull-requests: write }
+    steps:
+      - name: Approve and enable auto-merge
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+        run: |
+          gh pr review --approve "$PR_URL" || true
+          gh pr merge --auto --squash "$PR_URL" || gh pr merge --squash "$PR_URL"

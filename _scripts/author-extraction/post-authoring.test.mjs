@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { cp, mkdir, mkdtemp, readFile, readdir, rm, symlink, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { tmpdir } from "node:os";
 import { fileURLToPath } from "node:url";
 import { describe, it } from "node:test";
 import { parse as yaml } from "yaml";
@@ -8,7 +9,7 @@ import { planAuthorPost, prepareAuthorPost, verifyAuthorPostContext } from "./po
 import { setupPostAuthoring } from "./post-authoring-plugin.mjs";
 
 const ROOT = fileURLToPath(new URL("../../", import.meta.url));
-const TEMP = "/private/var/folders/qm/5mfn0b0n5ds_d9xpg0l9jqgc0000gp/T/opencode";
+const TEMP = tmpdir();
 const PACKAGE = "_scripts/author-extraction";
 const request = {
   request: "Una bozza tutorial sulla modellazione di una matita parametrica in OpenSCAD.",
