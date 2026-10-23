@@ -37,7 +37,7 @@ class DependabotConfigTest < Minitest::Test
     updates.each do |update|
       assert_nil update["ignore"]
       assert_equal 8, update.dig("cooldown", "default-days")
-      assert_equal "weekly", update.dig("schedule", "interval")
+      assert_equal "daily", update.dig("schedule", "interval")
       assert_equal "Europe/Rome", update.dig("schedule", "timezone")
       assert_equal "chore(deps)", update.dig("commit-message", "prefix")
       group = update.dig("groups", "minor-and-patch")
