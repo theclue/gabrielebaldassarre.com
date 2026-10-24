@@ -32,9 +32,10 @@ jobs:
       - name: Label major update PR for manual review
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
           PR_URL: ${{ github.event.pull_request.html_url }}
         run: |
-          gh label create "major" --color "d73a4a" --description "Major dependency update requiring manual review" --force
+          gh label create "major" --repo "$GH_REPO" --color "d73a4a" --description "Major dependency update requiring manual review" --force
           gh pr edit "$PR_URL" --add-label "major"
 
   build-site:

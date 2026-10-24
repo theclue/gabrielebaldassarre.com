@@ -83,11 +83,34 @@ class DependabotConfigTest < Minitest::Test
       run&.include?('gh label create "major"') && run.include?('gh pr edit "$PR_URL" --add-label "major"')
     end
     refute_nil label_step, "flag-major should ensure the major label and apply it to the pull request"
+    assert_equal "${{ github.repository }}", label_step.dig("env", "GH_REPO")
+    assert_includes label_step.fetch("run"), 'gh label create "major" --repo "$GH_REPO"'
 
     automerge = jobs.fetch("automerge")
     assert_equal %w[metadata build-site test-scripts build-seo].sort, automerge.fetch("needs").sort
     assert_match(/!=\s*['"]version-update:semver-major['"]/, automerge.fetch("if"))
     assert_match(/==\s*['"]version-update:semver-minor['"]/, automerge.fetch("if"))
     assert_match(/==\s*['"]version-update:semver-patch['"]/, automerge.fetch("if"))
+  end
+
+  def test_seo_runtime_uses_dbt_compatible_python_3_13
+    dockerfile = File.read(File.join(ROOT, "Dockerfile.seo"))
+    assert_match(/^FROM python:3\.13-slim\b/, dockerfile)
+
+    monitor_workflow = YAML.safe_load_file(File.join(ROOT, ".github", "workflows", "seo-monitor.yml"))
+    monitor_job = monitor_workflow.fetch("jobs").fetch("monitor")
+    monitor_setup_python_step = monitor_job.fetch("steps").find do |step|
+      step["uses"]&.start_with?("actions/setup-python@")
+    end
+    refute_nil monitor_setup_python_step, "monitor should set up Python"
+    assert_equal "3.13", monitor_setup_python_step.dig("with", "python-version")
+
+    pipeline_workflow = YAML.safe_load_file(File.join(ROOT, ".github", "workflows", "seo-pipeline.yml"))
+    post_history_job = pipeline_workflow.fetch("jobs").fetch("post-history")
+    post_history_setup_python_step = post_history_job.fetch("steps").find do |step|
+      step["uses"]&.start_with?("actions/setup-python@")
+    end
+    refute_nil post_history_setup_python_step, "post-history should set up Python"
+    assert_equal "3.13", post_history_setup_python_step.dig("with", "python-version")
   end
 end
