@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+require 'fileutils'
+require 'time'
+
 module Jekyll
   class LLMsFullGenerator < Generator
     safe true
@@ -51,8 +54,14 @@ module Jekyll
 
         # post.content is the Liquid-rendered output — tags resolved, HTML generated
         # Strip HTML tags to leave plain text suitable for AI ingestion
-        plain = post.content
-          .gsub(/<[^>]+>/, '')         # strip HTML tags
+        plain = post.content.to_s
+        previous = nil
+        while plain != previous
+          previous = plain
+          plain = plain.gsub(/<[^<>]*>/, '')
+        end
+        plain = plain
+          .delete('<>')                # remove any unclosed angle brackets
           .gsub(/\n{3,}/, "\n\n")      # collapse excessive newlines
         output << plain
         output << "\n\n"

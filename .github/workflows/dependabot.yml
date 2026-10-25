@@ -71,6 +71,7 @@ jobs:
       - run: |
           ruby test/wikidata_oracle_test.rb
           ruby test/vscode_process_rake_tasks_test.rb
+          ruby test/llms_full_generator_test.rb
           ruby test/dependabot_config_test.rb
 
   build-seo:

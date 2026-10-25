@@ -6,6 +6,7 @@ import { createServer } from "node:http";
 import { tmpdir } from "node:os";
 import { pathToFileURL } from "node:url";
 import path from "node:path";
+import vm from "node:vm";
 import { test } from "node:test";
 
 const entryPath = path.join(path.dirname(new URL(import.meta.url).pathname), "index.mjs");
@@ -65,7 +66,7 @@ async function createFakeWikidata({ stallSearch = false } = {}) {
     requests.push({ path: url.pathname, action: url.searchParams.get("action") });
     if (url.pathname === "/sparql") {
       const query = url.searchParams.get("query") ?? "";
-      const seed = query.match(/VALUES \?item \{ <([^>]+)>/)?.[1];
+      const seed = query.match(/VALUES \?item \{ <([^<>\s]+)>/)?.[1];
       const term = { type: "uri", value: seed ?? "http://www.wikidata.org/entity/Q227308" };
       return sendJson(response, {
         head: { vars: ["item", "property", "value", "subject", "object"] },
@@ -122,6 +123,66 @@ function sendJson(response, payload, status = 200) {
   response.writeHead(status, { "content-type": "application/json; charset=utf-8" });
   response.end(JSON.stringify(payload));
 }
+
+test("fake wikidata sparql seed matcher rejects unclosed angle brackets without backtracking across tokens", async () => {
+  const fake = await createFakeWikidata();
+  try {
+    const validQuery = "SELECT * WHERE { VALUES ?item { <http://www.wikidata.org/entity/Q227308> } }";
+    const validResponse = await fetch(`${fake.sparqlEndpoint}?${new URLSearchParams({ query: validQuery })}`);
+    const validPayload = await validResponse.json();
+    assert.equal(validPayload.results.bindings.length, 1);
+    assert.equal(validPayload.results.bindings[0].item.value, "http://www.wikidata.org/entity/Q227308");
+
+    const malformedQuery = "SELECT * WHERE { VALUES ?item { <http://www.wikidata.org/entity/Q1 <http://www.wikidata.org/entity/Q227308> } }";
+    const malformedResponse = await fetch(`${fake.sparqlEndpoint}?${new URLSearchParams({ query: malformedQuery })}`);
+    const malformedPayload = await malformedResponse.json();
+    assert.deepEqual(malformedPayload.results.bindings, []);
+  } finally {
+    await fake.close();
+  }
+});
+
+test("mermaid-init rerender restores data-mermaid-code via textContent instead of innerHTML", async () => {
+  const script = await readFile(path.join(repositoryRoot, "assets/js/mermaid-init.js"), "utf8");
+  const originalCode = "graph LR\n  A <--> B";
+  const attributes = new Map();
+  let textContent = originalCode;
+  let mutationCallback;
+  const mermaidElement = {
+    get textContent() { return textContent; },
+    set textContent(value) { textContent = String(value); },
+    set innerHTML(value) { textContent = String(value).replace(/<[^>]*>/g, ""); },
+    getAttribute(name) { return attributes.has(name) ? attributes.get(name) : null; },
+    setAttribute(name, value) { attributes.set(name, String(value)); },
+    removeAttribute(name) { attributes.delete(name); }
+  };
+  const documentElement = { getAttribute() { return null; } };
+  const context = {
+    document: {
+      documentElement,
+      querySelectorAll(selector) {
+        if (selector === ".language-mermaid code, code.language-mermaid") return [];
+        if (selector === "pre.mermaid") return [mermaidElement];
+        if (selector === "pre.mermaid[data-mermaid-code]") {
+          return attributes.has("data-mermaid-code") ? [mermaidElement] : [];
+        }
+        return [];
+      }
+    },
+    window: { matchMedia: () => ({ matches: false, addEventListener() {} }) },
+    mermaid: { initialize() {}, run() {} },
+    MutationObserver: class {
+      constructor(callback) { mutationCallback = callback; }
+      observe() {}
+    }
+  };
+
+  vm.runInNewContext(script, context, { filename: "mermaid-init.js" });
+  mutationCallback([{ attributeName: "data-theme" }]);
+
+  assert.equal(mermaidElement.textContent, originalCode);
+  assert.equal(mermaidElement.getAttribute("data-processed"), null);
+});
 
 function bridgeOptions(root, fake, overrides = {}) {
   return {

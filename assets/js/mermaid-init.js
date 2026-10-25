@@ -56,7 +56,7 @@
 
   function rerender() {
     document.querySelectorAll('pre.mermaid[data-mermaid-code]').forEach(function (el) {
-      el.innerHTML = el.getAttribute('data-mermaid-code') || '';
+      el.textContent = el.getAttribute('data-mermaid-code') || '';
       el.removeAttribute('data-processed');
     });
     render();
