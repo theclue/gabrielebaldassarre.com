@@ -4,5 +4,5 @@ google-api-python-client>=2.150
 google-auth>=2.30
 pyyaml>=6.0
 httpx>=0.28
-python-dateutil>=2.9
+python-dateutil>=2.9.0.post0
 dbt-sqlite>=1.9
