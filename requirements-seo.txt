@@ -5,4 +5,4 @@ google-auth>=2.62.0
 pyyaml>=6.0.3
 httpx>=0.28
 python-dateutil>=2.9.0.post0
-dbt-sqlite>=1.9
+dbt-sqlite>=1.10.0
