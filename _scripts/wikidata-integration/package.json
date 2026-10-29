@@ -3,6 +3,6 @@
   "private": true,
   "type": "module",
   "dependencies": {
-    "@opencode/plugin": "2.1.0"
+    "@opencode/plugin": "2.1.2"
   }
 }
