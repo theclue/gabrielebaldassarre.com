@@ -18,7 +18,7 @@
     "check:author-runtime": "node compile-author-runtime.mjs --check"
   },
   "dependencies": {
-    "@opencode/plugin": "2.1.0",
+    "@opencode/plugin": "2.1.2",
     "ajv": "8.20.0",
     "yaml": "2.9.1"
   }
