@@ -1,6 +1,15 @@
 name: Dependabot Build, Test & Automerge
 
-on: { pull_request: { branches: [main, master] } }
+on:
+  pull_request:
+    branches: [main, master]
+  push:
+    branches: [main, master]
+    paths:
+      - "requirements*.txt"
+      - "requirements*.in"
+      - "Gemfile.lock"
+      - "_scripts/**/package-lock.json"
 
 permissions: { contents: read, pull-requests: read }
 
@@ -10,7 +19,7 @@ concurrency:
 
 jobs:
   metadata:
-    if: github.actor == 'dependabot[bot]'
+    if: github.event_name == 'pull_request' && github.actor == 'dependabot[bot]'
     runs-on: ubuntu-latest
     outputs:
       update-type: ${{ steps.metadata.outputs.update-type }}
@@ -77,8 +86,21 @@ jobs:
   build-seo:
     if: github.actor == 'dependabot[bot]'
     runs-on: ubuntu-latest
+    outputs:
+      pip_resolution_failed: ${{ steps.pip-check.outputs.pip_resolution_failed }}
     steps:
       - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+      - name: Check pip dependency resolution
+        id: pip-check
+        run: |
+          echo "pip_resolution_failed=false" >> "$GITHUB_OUTPUT"
+          if ! python3 -m pip install --dry-run --ignore-installed --break-system-packages -r requirements-seo.txt; then
+            echo "pip_resolution_failed=true" >> "$GITHUB_OUTPUT"
+            exit 1
+          fi
       - uses: docker/setup-buildx-action@v4
       - run: make build-seo
       - run: docker run --rm -v "$PWD":/workspace --entrypoint python3 gabrielebaldassarre/seo:latest -m py_compile _scripts/seo/monitor.py _scripts/seo/post_history.py _scripts/seo/dbt_runner.py
@@ -86,6 +108,7 @@ jobs:
   automerge:
     needs: [metadata, build-site, test-scripts, build-seo]
     if: >-
+      github.event_name == 'pull_request' &&
       github.actor == 'dependabot[bot]' &&
       needs.metadata.outputs.update-type != 'version-update:semver-major' &&
       (needs.metadata.outputs.update-type == 'version-update:semver-minor' || needs.metadata.outputs.update-type == 'version-update:semver-patch')
@@ -99,3 +122,204 @@ jobs:
         run: |
           gh pr review --approve "$PR_URL" || true
           gh pr merge --auto --squash "$PR_URL" || gh pr merge --squash "$PR_URL"
+
+  autoclose-unresolvable:
+    needs: [build-seo]
+    if: >-
+      failure() &&
+      github.event_name == 'pull_request' &&
+      needs.build-seo.outputs.pip_resolution_failed == 'true' &&
+      github.actor == 'dependabot[bot]' &&
+      github.event.pull_request.user.login == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+    steps:
+      - name: Label and close unresolvable Dependabot PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+        run: |
+          gh label create "blocked-by-constraint" --repo "$GH_REPO" --color "d93f0b" --description "Blocked by dependency constraints in requirements-seo.txt" --force
+          gh pr edit "$PR_URL" --add-label "blocked-by-constraint"
+          gh pr close "$PR_URL" --comment "Closing automatically because \`pip install --dry-run\` failed against \`requirements-seo.txt\` constraints. Labeled \`blocked-by-constraint\` (branch retained and dependency not ignored); this PR will be re-evaluated and reopened when constraints change on \`main\`."
+
+  evaluate-blocked-prs:
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      reopen_prs: ${{ steps.evaluate.outputs.reopen_prs }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+      - name: Evaluate closed PRs labeled blocked-by-constraint
+        id: evaluate
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          BASE_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import base64, json, os, pathlib, re, subprocess
+
+          repo = os.environ["GH_REPO"]
+          base_sha = os.environ["BASE_SHA"]
+          gh_token = os.environ["GH_TOKEN"]
+          raw = subprocess.check_output(
+              [
+                  "gh", "pr", "list",
+                  "--repo", repo,
+                  "--state", "closed",
+                  "--label", "blocked-by-constraint",
+                  "--limit", "100",
+                  "--json", "number,title,author",
+              ],
+              text=True,
+          )
+          prs = json.loads(raw)
+          pip_env = {k: v for k, v in os.environ.items() if not k.startswith(("GH_", "GITHUB_"))}
+          reopen_nums = []
+
+          def norm(name: str) -> str:
+              return re.sub(r"[-_.]+", "-", name).lower()
+
+          title_re = re.compile(
+              r"(?:bump|update)\s+(?P<pkg>[A-Za-z0-9._-]+)(?:\s+requirement)?\s+from\s+\S+\s+to\s+(?P<new>\S+)",
+              re.IGNORECASE,
+          )
+          req_path = pathlib.Path("requirements-seo.txt")
+          baseline_text = req_path.read_text(encoding="utf-8")
+          auth_b64 = base64.b64encode(f"x-access-token:{gh_token}".encode("utf-8")).decode("ascii")
+          auth_header = f"Authorization: Basic {auth_b64}"
+
+          def check_pip() -> bool:
+              res = subprocess.run(
+                  [
+                      "python3", "-m", "pip", "install", "--dry-run",
+                      "--ignore-installed", "--break-system-packages",
+                      "-r", "requirements-seo.txt",
+                  ],
+                  check=False,
+                  env=pip_env,
+              )
+              return res.returncode == 0
+
+          for pr in prs:
+              if pr.get("author", {}).get("login") not in ("app/dependabot", "dependabot[bot]"):
+                  continue
+              num = int(pr["number"])
+              subprocess.run(["git", "checkout", "--detach", base_sha], check=True)
+              subprocess.run(["git", "reset", "--hard", base_sha], check=True)
+              subprocess.run(["git", "clean", "-fd"], check=True)
+
+              merged = False
+              fetch_res = subprocess.run(
+                  ["git", "-c", f"http.https://github.com/.extraheader={auth_header}", "fetch", "origin", f"refs/pull/{num}/head"],
+                  check=False,
+              )
+              if fetch_res.returncode == 0:
+                  merge_res = subprocess.run(
+                      [
+                          "git",
+                          "-c", "user.name=github-actions[bot]",
+                          "-c", "user.email=41898282+github-actions[bot]@users.noreply.github.com",
+                          "merge", "--no-commit", "--no-ff", "FETCH_HEAD",
+                      ],
+                      check=False,
+                  )
+                  if merge_res.returncode == 0:
+                      merged = True
+                  else:
+                      subprocess.run(["git", "merge", "--abort"], check=False)
+                      subprocess.run(["git", "reset", "--hard", base_sha], check=True)
+
+              if not merged:
+                  m = title_re.search(pr.get("title", ""))
+                  if not m:
+                      continue
+                  pkg = norm(m.group("pkg"))
+                  new_spec = m.group("new")
+                  updated_lines = []
+                  matched = False
+                  for line in baseline_text.splitlines(keepends=True):
+                      stripped = line.strip()
+                      if stripped and not stripped.startswith("#"):
+                          pkg_match = re.match(r"^([A-Za-z0-9._-]+(?:\[[A-Za-z0-9._,-]+\])?)", stripped)
+                          if pkg_match and norm(pkg_match.group(1).split("[", 1)[0]) == pkg:
+                              matched = True
+                              lhs = pkg_match.group(1)
+                              if new_spec.startswith((">=", "==", "~=", "<", ">")):
+                                  line = f"{lhs}{new_spec}\n"
+                              else:
+                                  line = f"{lhs}>={new_spec}\n"
+                      updated_lines.append(line)
+                  if not matched:
+                      continue
+                  req_path.write_text("".join(updated_lines), encoding="utf-8")
+
+              try:
+                  if check_pip():
+                      reopen_nums.append(num)
+              finally:
+                  req_path.write_text(baseline_text, encoding="utf-8")
+                  subprocess.run(["git", "merge", "--abort"], check=False)
+                  subprocess.run(["git", "reset", "--hard", base_sha], check=True)
+
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as out:
+              out.write(f"reopen_prs={json.dumps(reopen_nums)}\n")
+          PY
+
+  reopen-blocked-prs:
+    needs: [evaluate-blocked-prs]
+    if: >-
+      github.event_name == 'push' &&
+      needs.evaluate-blocked-prs.outputs.reopen_prs != '' &&
+      needs.evaluate-blocked-prs.outputs.reopen_prs != '[]'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+    steps:
+      - name: Reopen resolved Dependabot PRs
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          REOPEN_PRS: ${{ needs.evaluate-blocked-prs.outputs.reopen_prs }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, os, subprocess
+
+          reopen_prs = json.loads(os.environ["REOPEN_PRS"])
+          if not isinstance(reopen_prs, list) or any(type(number) is not int for number in reopen_prs):
+              raise ValueError("REOPEN_PRS must be a JSON list of integer PR numbers")
+
+          repo = os.environ["GH_REPO"]
+          for number in reopen_prs:
+              pr_number = str(number)
+              subprocess.run(
+                  ["gh", "pr", "edit", pr_number, "--repo", repo, "--remove-label", "blocked-by-constraint"],
+                  check=False,
+              )
+              subprocess.run(
+                  ["gh", "pr", "reopen", pr_number, "--repo", repo],
+                  check=True,
+              )
+              subprocess.run(
+                  ["gh", "pr", "comment", pr_number, "--repo", repo, "--body", "@dependabot recreate"],
+                  check=True,
+              )
+          PY

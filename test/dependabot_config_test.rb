@@ -46,6 +46,10 @@ class DependabotConfigTest < Minitest::Test
       assert_equal %w[minor patch], group.fetch("update-types")
       refute_includes group.fetch("update-types"), "major"
     end
+
+    pip_update = updates.find { |update| update["package-ecosystem"] == "pip" }
+    refute_nil pip_update
+    assert_equal [{ "dependency-type" => "all" }], pip_update.fetch("allow")
   end
 
   def test_dependabot_workflow_checks_and_automerges_pull_requests
@@ -54,9 +58,22 @@ class DependabotConfigTest < Minitest::Test
 
     triggers = workflow.fetch("on") { workflow.fetch(true) }
     assert_equal %w[main master], triggers.dig("pull_request", "branches").sort
+    assert_equal %w[main master], triggers.dig("push", "branches").sort
+    assert_equal %w[requirements*.txt requirements*.in Gemfile.lock _scripts/**/package-lock.json].sort,
+      triggers.dig("push", "paths").sort
 
     jobs = workflow.fetch("jobs")
-    assert_equal %w[metadata flag-major build-site test-scripts build-seo automerge], jobs.keys
+    assert_equal %w[
+      metadata
+      flag-major
+      build-site
+      test-scripts
+      build-seo
+      automerge
+      autoclose-unresolvable
+      evaluate-blocked-prs
+      reopen-blocked-prs
+    ], jobs.keys
 
     %w[build-site test-scripts build-seo].each do |job|
       assert_equal "github.actor == 'dependabot[bot]'", jobs.fetch(job).fetch("if")
@@ -91,6 +108,36 @@ class DependabotConfigTest < Minitest::Test
     assert_match(/!=\s*['"]version-update:semver-major['"]/, automerge.fetch("if"))
     assert_match(/==\s*['"]version-update:semver-minor['"]/, automerge.fetch("if"))
     assert_match(/==\s*['"]version-update:semver-patch['"]/, automerge.fetch("if"))
+
+    build_seo = jobs.fetch("build-seo")
+    assert_equal "${{ steps.pip-check.outputs.pip_resolution_failed }}",
+      build_seo.dig("outputs", "pip_resolution_failed")
+    pip_check_step = build_seo.fetch("steps").find { |step| step["id"] == "pip-check" }
+    refute_nil pip_check_step
+    assert_includes pip_check_step.fetch("run"),
+      "python3 -m pip install --dry-run --ignore-installed --break-system-packages -r requirements-seo.txt"
+
+    autoclose = jobs.fetch("autoclose-unresolvable")
+    assert_equal ["build-seo"], autoclose.fetch("needs")
+    assert_equal({ "contents" => "read", "pull-requests" => "write", "issues" => "write" }, autoclose.fetch("permissions"))
+    assert_includes autoclose.fetch("if"), "needs.build-seo.outputs.pip_resolution_failed == 'true'"
+    autoclose_run = autoclose.fetch("steps").first.fetch("run")
+    assert_includes autoclose_run, "blocked-by-constraint"
+    assert_includes autoclose_run, "gh pr close"
+    refute_includes autoclose_run, "--delete-branch"
+    refute_includes autoclose_run, "@dependabot ignore"
+
+    evaluate_blocked = jobs.fetch("evaluate-blocked-prs")
+    assert_equal({ "contents" => "read", "pull-requests" => "read" }, evaluate_blocked.fetch("permissions"))
+    assert_equal "${{ steps.evaluate.outputs.reopen_prs }}", evaluate_blocked.dig("outputs", "reopen_prs")
+
+    reopen_blocked = jobs.fetch("reopen-blocked-prs")
+    assert_equal ["evaluate-blocked-prs"], reopen_blocked.fetch("needs")
+    assert_equal({ "contents" => "read", "pull-requests" => "write", "issues" => "write" }, reopen_blocked.fetch("permissions"))
+    reopen_steps_yaml = reopen_blocked.fetch("steps").to_yaml
+    refute_includes reopen_steps_yaml, "actions/checkout"
+    refute_match(/\bpip\b/, reopen_steps_yaml)
+    assert_includes reopen_steps_yaml, "@dependabot recreate"
   end
 
   def test_seo_runtime_uses_dbt_compatible_python_3_13
