@@ -29,11 +29,14 @@ class DependabotConfigTest < Minitest::Test
     ]
     assert File.exist?(File.join(ROOT, "_scripts/author-extraction/package-lock.json"))
     refute File.exist?(File.join(ROOT, "_scripts/author-extraction/bun.lock"))
-    actual_pairs = updates.map do |update|
-      [update.fetch("package-ecosystem"), update.fetch("directory")]
+    actual_pairs = updates.flat_map do |update|
+      dirs = update["directories"] || [update.fetch("directory")]
+      dirs.map { |dir| [update.fetch("package-ecosystem"), dir] }
     end
     assert_equal expected_pairs.sort, actual_pairs.sort
-    refute updates.any? { |update| Array(update.fetch("directory")).any? { |directory| directory.include?("containers/**") } },
+    assert_equal 1, updates.count { |update| update["package-ecosystem"] == "npm" },
+      "npm directories should be consolidated into a single Dependabot entry"
+    refute updates.any? { |update| Array(update["directories"] || update["directory"]).any? { |directory| directory.include?("containers/**") } },
       "containers/** directories should not be configured"
 
     updates.each do |update|

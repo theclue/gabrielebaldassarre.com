@@ -19,24 +19,9 @@ updates:
           - "minor"
           - "patch"
   - package-ecosystem: "npm"
-    directory: "/_scripts/author-extraction"
-    schedule:
-      interval: "daily"
-      timezone: "Europe/Rome"
-    cooldown:
-      default-days: 8
-    commit-message:
-      prefix: "chore(deps)"
-    labels: ["dependencies"]
-    groups:
-      minor-and-patch:
-        patterns:
-          - "*"
-        update-types:
-          - "minor"
-          - "patch"
-  - package-ecosystem: "npm"
-    directory: "/_scripts/wikidata-integration"
+    directories:
+      - "/_scripts/author-extraction"
+      - "/_scripts/wikidata-integration"
     schedule:
       interval: "daily"
       timezone: "Europe/Rome"
