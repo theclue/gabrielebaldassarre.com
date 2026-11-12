@@ -2,7 +2,7 @@
 category: DevOps
 title: "Prova a prendermi: come ho insegnato al mio blog a farsi trovare"
 excerpt: Una pipeline completa di SEO auditing automatica per il mio blog Jekyll con Lighthouse, PageSpeed Insights, IndexNow, microformati e posizionamento per LLM — tutto integrato in GitHub Actions.
-master: /assets/images/seo-pipeline-farsi-trovare.png
+master: /assets/images/posts/seo-pipeline-farsi-trovare.png
 image_meta:
   role: illustration
   context: ambient
@@ -143,7 +143,7 @@ Ne ho approfittato quindi per sistemare, lato template Jekyll, questi elementi s
 
 **Core Web Vitals sotto controllo.** Lighthouse CI e PageSpeed Insights verificano a ogni deploy che LCP (Largest Contentful Paint), CLS (Cumulative Layout Shift) e TBT (Total Blocking Time) restino entro soglie accettabili. Le mie pagine sono statiche, quindi i valori sono naturalmente buoni, ma il controllo automatico mi avvisa se qualcosa degenera — un'immagine troppo pesante, un font che blocca il rendering, un layout che slitta, un javascript che crea problemi.
 
-{% cloudinary /assets/images/pagespeed-insights-esempio-report.png alt="Esempio di report Pagespeed Insights" caption="PSI è un po' più old school e da molto peso agli aspetti tecnici" role="screenshot" context="result" %}
+{% cloudinary /assets/images/posts/seo-automatico-jekyll/pagespeed-insights-esempio-report.png alt="Esempio di report Pagespeed Insights" caption="PSI è un po' più old school e da molto peso agli aspetti tecnici" role="screenshot" context="result" %}
 
 ---
 
@@ -161,7 +161,7 @@ Sul mio blog, ogni post ha già un blocco JSON-LD `BlogPosting` con titolo, desc
   "@type": "Person",
   "name": "Gabriele Baldassarre",
   "url": "https://gabrielebaldassarre.com",
-  "image": "https://gabrielebaldassarre.com/assets/images/gabriele-baldassarre.png",
+  "image": "https://gabrielebaldassarre.com/assets/images/site/gabriele-baldassarre.png",
   "sameAs": [
     "https://github.com/theclue",
     "https://www.linkedin.com/in/gabrielebaldassarre",
@@ -194,7 +194,7 @@ L'obiettivo è costruire un mini knowledge graph semantico, così che un motore 
 
 Dopo aver definito il proprio modello di metadati di schema, non fa male fare un passaggio su {% xlink "https://validator.schema.org" "Schema Validator" role="tool" context="enables-step" target="external-authoritative" %}.
 
-{% cloudinary /assets/images/schema-validator-esempio-report.png alt="Una vista molto dev-friendly dello schema validator. A quanto pare questo strumento non è così severo rispetto agli altri che abbiamo visto" role="screenshot" context="result" %}
+{% cloudinary /assets/images/posts/seo-automatico-jekyll/schema-validator-esempio-report.png alt="Una vista molto dev-friendly dello schema validator. A quanto pare questo strumento non è così severo rispetto agli altri che abbiamo visto" role="screenshot" context="result" %}
 
 ---
 
@@ -297,7 +297,7 @@ Output a console:
 
 Il report JSON completo — ben più ricco della sintesi a console — viene salvato come artifact del workflow, accessibile per 30 giorni.
 
-{% cloudinary /assets/images/pagespeed-insights-abilita-api.png alt="Pagina per abilitare le API di PageSpeed Insights" caption="Per utilizzare le API di PageSpeed Insights è necessario un progetto su Google Cloud Platform. Questa cosa non mi fa impazzire, ma se non altro sono gratuite" role="screenshot" context="reference" %}
+{% cloudinary /assets/images/posts/seo-automatico-jekyll/pagespeed-insights-abilita-api.png alt="Pagina per abilitare le API di PageSpeed Insights" caption="Per utilizzare le API di PageSpeed Insights è necessario un progetto su Google Cloud Platform. Questa cosa non mi fa impazzire, ma se non altro sono gratuite" role="screenshot" context="reference" %}
 
 #### Lighthouse CI
 
@@ -336,7 +336,7 @@ Essendo un tool locale, ipoteticamente potrebbe anche essere eseguito a _build t
 
 Nel mio caso, ad esempio, che uso una CDN per le immagini, durante il build gli asset non sono ancora pubblici e i loro URL non sono ancora risolti. L'audit pre-deploy soffrirebbe di falsi positivi. Eseguo quindi Lighthouse **post-deploy**, quando il sito è live e Cloudinary ha già cachato tutte le immagini.
 
-{% cloudinary /assets/images/lighhouse-ci-esempio-report.png alt="Esempio di report Lighthouse" caption="Lighthouse CI fornisce un report molto dettagliato. Come vedete, già non sono messo così male come scoring" role="screenshot" context="result" %}
+{% cloudinary /assets/images/posts/seo-automatico-jekyll/lighhouse-ci-esempio-report.png alt="Esempio di report Lighthouse" caption="Lighthouse CI fornisce un report molto dettagliato. Come vedete, già non sono messo così male come scoring" role="screenshot" context="result" %}
 
 I report HTML e JSON sono salvati come workflow artifact con timestamp e commit hash nel nome (`assertions-20260516-164500-a1b2c3d.json`), da dove li recupero per un'ispezione ad oggi manuale. Sono incredibilmente ricchi di informazioni. Forse anche troppe, per un umano... se capite dove voglio arrivare.
 

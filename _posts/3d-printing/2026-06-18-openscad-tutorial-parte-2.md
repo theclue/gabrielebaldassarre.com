@@ -313,7 +313,7 @@ intersection() {
 }
 ```
 
-{% cloudinary /assets/images/openscad-tutorial-parte-2-1.png alt="Screenshot di OpenSCAD di una intersezione tra una collezione di sfere" caption="L'intersezione di una unione non funziona come ci si aspetterebbe" width=50 %}
+{% cloudinary /assets/images/posts/openscad-tutorial-parte-2/openscad-tutorial-parte-2-1.png alt="Screenshot di OpenSCAD di una intersezione tra una collezione di sfere" caption="L'intersezione di una unione non funziona come ci si aspetterebbe" width=50 %}
 
 Il problema è che il `for` interno raggruppa tutte le sfere in una `union()` prima ancora che `intersection()` le veda. L'intersezione viene calcolata tra... l'unione di tutte le sfere e nient'altro. Risultato: l'unionee.
 
@@ -328,7 +328,7 @@ intersection_for(n = [1 : 6]) {
 }
 ```
 
-{% cloudinary /assets/images/openscad-tutorial-parte-2-2.png alt="Screenshot di OpenSCAD dell'operazione di intersezione tra una collezione di sfere" caption="L'intersezione senza unione richiede l'uso di un costrutto for apposito" width=50 %}
+{% cloudinary /assets/images/posts/openscad-tutorial-parte-2/openscad-tutorial-parte-2-2.png alt="Screenshot di OpenSCAD dell'operazione di intersezione tra una collezione di sfere" caption="L'intersezione senza unione richiede l'uso di un costrutto for apposito" width=50 %}
 
 ---
 
@@ -358,7 +358,7 @@ module bayonet_slot_L(r_inner_wall, axial_in, h_pin, w_pin_deg, twist_deg, drop_
     }
 }
 ```
-{% cloudinary /assets/images/openscad-tutorial-parte-2-3.png alt="Screenshot OpenSCAD con dettaglio dello slot a baionetta" caption="Dettaglio di come si presenta uno slot per l'innesto a baionetta. È, di fstto, un set di tre scassi vagamente a forma di L, distanziati di 120° sulla superficie interna del cilindro" width=50 %}
+{% cloudinary /assets/images/posts/openscad-tutorial-parte-2/openscad-tutorial-parte-2-3.png alt="Screenshot OpenSCAD con dettaglio dello slot a baionetta" caption="Dettaglio di come si presenta uno slot per l'innesto a baionetta. È, di fstto, un set di tre scassi vagamente a forma di L, distanziati di 120° sulla superficie interna del cilindro" width=50 %}
 
 Analizziamo i tre settori:
 

@@ -3,8 +3,7 @@ category: Approfondimenti
 title: Lo spazio degli stati
 excerpt: "Senza un minimo di concetti base di Meccanica Razionale non si va molto oltre, nello studio della fisica. La materia è certamente ostica, ma come di consueto cercheremo di limitarci al minimo (teorico) necessario. Cominciando dal principio."
 header:
-  overlay_image: /assets/images/focault-pendulum-overlay.jpg
-  teaser: /assets/images/focault-pendulum-teaser.jpg
+  overlay_image: /assets/images/posts/focault-pendulum-overlay.jpg
   overlay_filter: 0.5
 editor_options:
   chunk_output_type: inline

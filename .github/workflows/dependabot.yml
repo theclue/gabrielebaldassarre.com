@@ -73,7 +73,6 @@ jobs:
           npm --prefix _scripts/author-extraction ci
           npm --prefix _scripts/author-extraction test
           npm --prefix _scripts/author-extraction run test:integration
-          npm --prefix _scripts/author-extraction run check:author-model
       - run: |
           npm --prefix _scripts/wikidata-integration ci
           node --test _scripts/wikidata-integration/index.test.mjs

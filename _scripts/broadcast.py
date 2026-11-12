@@ -474,7 +474,7 @@ def cloudinary_social_url(master_path, social_config, post_title, channel_type):
     logo_ref = config.get('logo')
     has_south_overlay = bool(caption_text) or bool(logo_ref)
     if has_south_overlay:
-        bar_url = f"{SITE_URL}/assets/images/1x1-black.png"
+        bar_url = f"{SITE_URL}/assets/images/site/1x1-black.png"
         bar_b64 = base64.b64encode(bar_url.encode()).decode()
         parts.append(f"l_fetch:{bar_b64},c_scale,w_{width},h_150,o_80")
         parts.append('fl_layer_apply,g_south')

@@ -2,7 +2,7 @@
 category: Home Assistant
 title: "Il cielo in salotto, parte 2: Il Sole"
 excerpt: "Seconda parte della dashboard di astrometria: aggiungiamo il monitoraggio solare con immagini live da SOHO e GOES-16, la previsione delle aurore boreali OVATION, e i grafici del vento solare BT/BZ in tempo reale."
-master: /assets/images/astrometria-dashboard-distorci-2.png
+master: /assets/images/posts/astrometria-dashboard-distorci-2.png
 image_meta:
   role: screenshot
   context: reference
@@ -25,7 +25,7 @@ Il Sole non è un oggetto statico. È una stella attiva, percorsa da correnti di
 
 Questa sezione della dashboard raccoglie tutto questo in un unico colpo d'occhio.
 
-{% cloudinary /assets/images/astrometria-dashboard.png alt="La dashboard di astrometria" caption="Intanto, vi ricordo, questo è quello che ci prefiggiamo di ottenere e oggi ci concentreremo sulla colonna centrale" role="screenshot" context="architecture" %}
+{% cloudinary /assets/images/posts/dashboard-astrometria/astrometria-dashboard.png alt="La dashboard di astrometria" caption="Intanto, vi ricordo, questo è quello che ci prefiggiamo di ottenere e oggi ci concentreremo sulla colonna centrale" role="screenshot" context="architecture" %}
 
 ---
 
@@ -169,7 +169,7 @@ cards:
   - # Aurora OVATION
 ```
 
-{% cloudinary /assets/images/astrometria-dashboard-immagini-sole-noaa.png alt="Live Sun, NOAA" caption="Immagini della superficie del Sole e indicatori NOAA Space Weather" role="screenshot" context="result" %}
+{% cloudinary /assets/images/posts/dashboard-astrometria/astrometria-dashboard-immagini-sole-noaa.png alt="Live Sun, NOAA" caption="Immagini della superficie del Sole e indicatori NOAA Space Weather" role="screenshot" context="result" %}
 
 ---
 
@@ -300,7 +300,7 @@ apex_config:
         strokeDashArray: 4
 ```
 
-{% cloudinary /assets/images/astrometria-dashboard-vento-solare.png alt="Grafici del vento solare" caption="ApexChart è estremamente flessibile e consente di ottenere layout e combinazioni molto complesse, anche se, ammetto, raramente mi trovo a rappresentare grafici diversi da istogrammi, scatterplot o spezzate...che ci volete fare, sono un tradizionalista!" role="chart" context="result" long_description="Grafico a doppia linea con BT (arancione) e BZ (blu) del vento solare su 6 ore, con linea orizzontale tratteggiata a zero. BT oscilla tra 2 e 8 nT, BZ tra -6 e +2 nT." %}
+{% cloudinary /assets/images/posts/dashboard-astrometria/astrometria-dashboard-vento-solare.png alt="Grafici del vento solare" caption="ApexChart è estremamente flessibile e consente di ottenere layout e combinazioni molto complesse, anche se, ammetto, raramente mi trovo a rappresentare grafici diversi da istogrammi, scatterplot o spezzate...che ci volete fare, sono un tradizionalista!" role="chart" context="result" long_description="Grafico a doppia linea con BT (arancione) e BZ (blu) del vento solare su 6 ore, con linea orizzontale tratteggiata a zero. BT oscilla tra 2 e 8 nT, BZ tra -6 e +2 nT." %}
 
 ---
 

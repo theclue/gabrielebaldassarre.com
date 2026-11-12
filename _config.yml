@@ -35,8 +35,8 @@ site_logo                : "/assets/logos/the-16bit-robot.png"
 url                      : "https://gabrielebaldassarre.com"
 baseurl                  : "/"
 repository               : "theclue/gabrielebaldassarre.com"
-teaser                   : "/assets/images/default-post-teaser.png"
-og_image                 : "/assets/images/default-post-teaser.png"
+teaser                   : "/assets/images/site/default-post-teaser.png"
+og_image                 : "/assets/images/site/default-post-teaser.png"
 words_per_minute         : 150
 atom_feed:
   hide                   : false
@@ -64,7 +64,7 @@ naver_site_verification  :
 # Site Author
 author:
   name             : "Gabriele Baldassarre"
-  avatar           : "/assets/images/gabriele-baldassarre.png"
+  avatar           : "/assets/images/site/gabriele-baldassarre.png"
   bio              : "Ingegnere per professione, maker per passione, mi occupo di divulgazione scientifica, di domotica e di tenere il cervello sempre acceso."
   location         : "Milano, Italia"
   email            :
@@ -115,7 +115,6 @@ exclude:
   - Makefile
   - bin
   - "*.Rmd"
-  - plugins/author-pattern-consolidator
   # SEO monitoring pipeline — fuori dalla sfera Jekyll, evita autoreload
   # del dev server quando si modificano script Python / modelli dbt /
   # config monitoring / artefatti CI.

@@ -2,7 +2,6 @@
 category: 3d Printing
 title: "Un generatore di IKEA Billy con OpenSCAD"
 excerpt: "Come trasformare l'archetipo di una libreria in un modello parametrico: carcassa, pannelli, modello parametrico, BOM e cutplanner."
-master: /assets/images/posts/generatore-ikea-billy-openscad.png
 image_meta:
   role: illustration
   context: ambient

@@ -21,7 +21,6 @@
 out_dir <- "assets/images/diagrams"
 dir.create(out_dir, showWarnings = FALSE, recursive = TRUE)
 svg_file <- file.path(out_dir, "thread-vs-bayonet-comparison.svg")
-png_file <- file.path(out_dir, "thread-vs-bayonet-comparison.png")
 
 svg(svg_file, width = 10, height = 4.8, bg = .color_bg,
     family = "sans", pointsize = 11)
@@ -237,7 +236,4 @@ mtext("Filettatura vs Innesto a baionetta", side = 3, line = -1.2,
       outer = TRUE, col = .color_text, cex = 1.1, font = 2)
 
 dev.off()
-
-# Convert to PNG
-system2("rsvg-convert", c("-w", "1600", svg_file, "-o", png_file))
-message("── Done: ", svg_file, " + ", png_file)
+message("── Done: ", svg_file)

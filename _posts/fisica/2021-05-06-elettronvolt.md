@@ -3,8 +3,8 @@ category: Fisica
 title: Che cos'è l'elettronvolt
 excerpt: In questo breve articolo ci concentreremo sull'elettronvolt, una delle unità di misura più utilizzate in fisica delle particelle e a cui i fisici sono così affezionati da usarlo per misurare praticamente tutto.
 header:
-  overlay_image: /assets/images/elettronvolt-overlay.jpg
-  teaser: /assets/images/elettronvolt-teaser.jpg
+  overlay_image: /assets/images/posts/elettronvolt-overlay.jpg
+  teaser: /assets/images/posts/elettronvolt-teaser.jpg
   overlay_filter: 0.5
 ---
 

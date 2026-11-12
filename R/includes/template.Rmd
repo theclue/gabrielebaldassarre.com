@@ -5,8 +5,11 @@ category: ""
 tags: []
 header:
   overlay_filter: 0.5
-  overlay_image: /assets/images/
-  teaser: /assets/images/
+broadcast:
+  channels: [linkedin,mastodon]
+  sent: false
+intended_audience: practitioner
+proficiency_level: intermediate
 editor_options:
   chunk_output_type: inline
 ---

@@ -149,7 +149,7 @@ module Jekyll
         caption_color = config_h['color'] || 'white'
 
         # Letterbox: semi-transparent black bar behind text+logo (only when caption present)
-        bar_url = "#{site.config['url']}/assets/images/1x1-black.png"
+        bar_url = "#{site.config['url']}/assets/images/site/1x1-black.png"
         parts << "l_fetch:#{b64_encode(bar_url)},c_scale,w_#{width},h_120,o_80"
         parts << 'fl_layer_apply,g_south'
       end

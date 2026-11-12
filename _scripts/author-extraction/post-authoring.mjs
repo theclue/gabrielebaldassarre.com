@@ -1,13 +1,11 @@
 import { execFile } from "node:child_process";
 import { createHash } from "node:crypto";
-import { constants } from "node:fs";
-import { lstat, mkdir, open, realpath } from "node:fs/promises";
+import { lstat, mkdir, realpath } from "node:fs/promises";
 import path from "node:path";
 import { promisify } from "node:util";
 import Ajv2020 from "ajv/dist/2020.js";
 import runtimeSchema from "./author-runtime-profile.schema.json" with { type: "json" };
 import { compileAuthorRuntimeProfile, readAuthorRuntimeInput } from "./runtime.mjs";
-import { materializeAuthorRuntime } from "./compile-author-runtime.mjs";
 
 const run = promisify(execFile);
 const categories = ["3D Printing", "DevOps", "Fisica", "Home Assistant", "Meccanica", "Reti Sociali"];
@@ -44,7 +42,6 @@ async function safeDirectory(root, relative, create = false) {
 
 async function assertNewTarget(root, target) {
   const parent = path.dirname(target);
-  // Check existing ancestors without creating output directories during planning.
   let current = await realpath(root);
   for (const part of parent.split("/")) {
     current = path.join(current, part);
@@ -58,15 +55,6 @@ async function assertNewTarget(root, target) {
   fail("AUTHOR_POST_EXISTS", "The target already exists; no existing post or draft will be overwritten.");
 }
 
-async function immutable(root, relative, text, limit = 64 * 1024) {
-  await safeDirectory(root, path.dirname(relative), true);
-  try {
-    const handle = await open(path.join(root, relative), constants.O_WRONLY | constants.O_CREAT | constants.O_EXCL, 0o644);
-    try { await handle.writeFile(text); await handle.sync(); } finally { await handle.close(); }
-  } catch (error) { if (error.code !== "EEXIST") throw error; }
-  if ((await readAuthorRuntimeInput(root, relative, limit)).text !== text) fail("AUTHOR_POST_COLLISION", "Existing authoring evidence differs; nothing was overwritten.");
-}
-
 export async function planAuthorPost(root, input) {
   if (!validate(input) || input.task.mode !== "generate") fail("AUTHOR_POST_INPUT_INVALID", "A closed new-post request with a generate task is required.");
   const date = input.date ?? today();
@@ -74,11 +62,10 @@ export async function planAuthorPost(root, input) {
   const compiled = await compileAuthorRuntimeProfile(root, JSON.stringify(input.task));
   const request = { ...input, date, task: JSON.parse(compiled.runtime_profile_json).task_context };
   const requestHash = sha(json(request));
-  const directory = `docs/authoring-runs/${requestHash}`;
   const target = input.destination === "draft" ? `_drafts/${input.slug}.md`
     : `_posts/${input.category.toLowerCase().replaceAll(" ", "-")}/${date}-${input.slug}.md`;
   await assertNewTarget(root, target);
-  return { request, compiled, directory, target, requestHash };
+  return { request, compiled, target, requestHash };
 }
 
 // Never interpolate user values into a shell. Rake's task argument parser also
@@ -90,16 +77,6 @@ export async function prepareAuthorPost(root, input, { signal } = {}) {
   check(signal);
   const plan = await planAuthorPost(root, input);
   check(signal);
-  const requestPath = `${plan.directory}/request.json`, taskPath = `${plan.directory}/task.json`;
-  await immutable(root, requestPath, json(plan.request));
-  await immutable(root, taskPath, json(plan.request.task));
-  check(signal);
-  await materializeAuthorRuntime(root, taskPath);
-  const runtime = await materializeAuthorRuntime(root, taskPath, { checkOnly: true });
-  if (runtime.profile_sha256 !== plan.compiled.runtime_profile_sha256 || runtime.instructions_sha256 !== plan.compiled.runtime_instructions_sha256) {
-    fail("AUTHOR_POST_INPUT_CHANGED", "Runtime inputs changed during preparation; no article template was created.");
-  }
-  const instructions = (await readAuthorRuntimeInput(root, runtime.instructions_path, 48 * 1024)).text;
   const rake = await readAuthorRuntimeInput(root, "Rakefile", 64 * 1024);
   await safeDirectory(root, path.dirname(plan.target), true);
   await assertNewTarget(root, plan.target);
@@ -115,45 +92,47 @@ export async function prepareAuthorPost(root, input, { signal } = {}) {
   }
   check(signal);
   const scaffold = await readAuthorRuntimeInput(root, plan.target, 64 * 1024);
-  const receipt = {
-    schema_version: "author-post-preparation/1", request_sha256: plan.requestHash,
-    request_path: requestPath, task_path: taskPath, target_path: plan.target, rake_task: input.destination,
-    rakefile_sha256: sha(rake.bytes), scaffold_sha256: sha(scaffold.bytes),
-    runtime_id: runtime.runtime_id, manifest_path: `${path.dirname(runtime.profile_path)}/manifest.json`,
-    profile_path: runtime.profile_path, profile_sha256: runtime.profile_sha256,
-    instructions_path: runtime.instructions_path, instructions_sha256: runtime.instructions_sha256,
-    source_author_model_sha256: runtime.source_author_model_sha256,
+  const profile = JSON.parse(plan.compiled.runtime_profile_json);
+  return {
+    schema_version: "author-post-preparation/2",
+    request_sha256: plan.requestHash,
+    request: plan.request,
+    target_path: plan.target,
+    rake_task: input.destination,
+    rakefile_sha256: sha(rake.bytes),
+    scaffold_sha256: sha(scaffold.bytes),
+    runtime_id: plan.compiled.runtime_id,
+    profile_sha256: plan.compiled.runtime_profile_sha256,
+    instructions_sha256: plan.compiled.runtime_instructions_sha256,
+    source_author_model_sha256: profile.source.author_model_sha256,
+    instructions_markdown: plan.compiled.runtime_instructions_markdown,
   };
-  const receiptPath = `${plan.directory}/preparation.json`;
-  await immutable(root, receiptPath, json(receipt));
-  return { ...receipt, receipt_path: receiptPath, instructions_markdown: instructions };
 }
 
 export async function verifyAuthorPostContext(root, prepared) {
-  const saved = JSON.parse((await readAuthorRuntimeInput(root, prepared.receipt_path, 64 * 1024)).text);
-  const { receipt_path, instructions_markdown, ...expected } = prepared;
-  if (json(saved) !== json(expected)) fail("AUTHOR_POST_RECEIPT_CHANGED", "Authoring receipt changed.");
-  const requestFile = await readAuthorRuntimeInput(root, saved.request_path, 32 * 1024);
-  const request = JSON.parse(requestFile.text);
-  if (!validate(request) || sha(json(request)) !== saved.request_sha256 || request.task.mode !== "generate") fail("AUTHOR_POST_INPUT_CHANGED", "Authoring request changed.");
-  const taskFile = await readAuthorRuntimeInput(root, saved.task_path);
-  if (json(JSON.parse(taskFile.text)) !== json(request.task)) fail("AUTHOR_POST_INPUT_CHANGED", "Authoring task changed.");
-  const runtime = await materializeAuthorRuntime(root, saved.task_path, { checkOnly: true });
-  if (runtime.runtime_id !== saved.runtime_id || runtime.instructions_sha256 !== saved.instructions_sha256 || runtime.profile_sha256 !== saved.profile_sha256 ||
-      `${path.dirname(runtime.profile_path)}/manifest.json` !== saved.manifest_path || runtime.profile_path !== saved.profile_path || runtime.instructions_path !== saved.instructions_path ||
-      runtime.source_author_model_sha256 !== saved.source_author_model_sha256) fail("AUTHOR_POST_INPUT_CHANGED", "The bound runtime changed.");
-  const instructions = (await readAuthorRuntimeInput(root, saved.instructions_path, 48 * 1024)).text;
-  if (sha(instructions) !== saved.instructions_sha256 || instructions !== instructions_markdown) fail("AUTHOR_POST_INPUT_CHANGED", "Authoring instructions changed.");
-  // The article is editable, but must still be a regular file inside this repo.
-  await readAuthorRuntimeInput(root, saved.target_path, 512 * 1024);
-  return instructions;
+  if (!prepared || prepared.schema_version !== "author-post-preparation/2" || !validate(prepared.request) ||
+      sha(json(prepared.request)) !== prepared.request_sha256 || prepared.request.task.mode !== "generate") {
+    fail("AUTHOR_POST_INPUT_CHANGED", "Authoring request changed.");
+  }
+  const compiled = await compileAuthorRuntimeProfile(root, JSON.stringify(prepared.request.task));
+  const profile = JSON.parse(compiled.runtime_profile_json);
+  if (compiled.runtime_id !== prepared.runtime_id ||
+      compiled.runtime_profile_sha256 !== prepared.profile_sha256 ||
+      compiled.runtime_instructions_sha256 !== prepared.instructions_sha256 ||
+      profile.source.author_model_sha256 !== prepared.source_author_model_sha256 ||
+      compiled.runtime_instructions_markdown !== prepared.instructions_markdown) {
+    fail("AUTHOR_POST_INPUT_CHANGED", "The bound runtime changed.");
+  }
+  await readAuthorRuntimeInput(root, prepared.target_path, 512 * 1024);
+  return compiled.runtime_instructions_markdown;
 }
 
 export async function verifyAuthorPostWritten(root, prepared) {
   const target = await readAuthorRuntimeInput(root, prepared.target_path, 512 * 1024);
   const body = /^---\r?\n[\s\S]*?\r?\n---\s*\r?\n([\s\S]*)$/.exec(target.text)?.[1];
-  if (sha(target.bytes) === prepared.scaffold_sha256 || !body?.trim()) fail("AUTHOR_POST_BODY_MISSING", "The new file still has no article body; use cancelled to end without writing.");
+  if (sha(target.bytes) === prepared.scaffold_sha256 || !body?.trim()) {
+    fail("AUTHOR_POST_BODY_MISSING", "The new file still has no article body; use cancelled to end without writing.");
+  }
 }
 
-// Shared create-only evidence primitives; revision never invokes the Rake path.
-export { json as authoringJson, sha as authoringSha, immutable as immutableAuthoringEvidence };
+export { json as authoringJson, sha as authoringSha };

@@ -55,14 +55,14 @@ class VscodeProcessRakeTasksTest < Minitest::Test
       assert File.file?(post), "post path should not contain quote characters"
       assert_includes File.read(post), "category: Home Assistant\n"
       assert_includes File.read(post), "title: \"A Post Title\"\n"
-      assert_includes File.read(post), "master: /assets/images/posts/a-post-slug.png\n"
+      refute_includes File.read(post), "master:"
 
       run_task(workspace, "✏️ Nuova bozza", "draftTitle", "postCategory", "draftSlug")
       draft = File.join(workspace, "_drafts", "a-draft-slug.md")
       assert File.file?(draft), "draft path should not contain quote characters"
       assert_includes File.read(draft), "category: Home Assistant\n"
       assert_includes File.read(draft), "title: \"A Draft Title\"\n"
-      assert_includes File.read(draft), "master: /assets/images/posts/a-draft-slug.png\n"
+      refute_includes File.read(draft), "master:"
 
       run_task(workspace, "✨ Nuovo workbook Rmd", "rmdTitle", "rmdCategory", "rmdSlug")
       rmd = File.join(workspace, "_posts", "reti-sociali", "#{DATE}-an-rmd-slug.Rmd")

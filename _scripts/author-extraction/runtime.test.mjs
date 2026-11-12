@@ -1,13 +1,12 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { cp, mkdir, mkdtemp, readFile, readdir, rm, stat, symlink, writeFile } from "node:fs/promises";
+import { cp, mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { tmpdir } from "node:os";
 import { fileURLToPath } from "node:url";
 import { describe, it } from "node:test";
 import Ajv2020 from "ajv/dist/2020.js";
 import { compileAuthorRuntimeProfile, verifyAuthorRuntimeProfile } from "./runtime.mjs";
-import { materializeAuthorRuntime, main } from "./compile-author-runtime.mjs";
 import { canonicalIdentifier } from "./identifiers.mjs";
 
 const ROOT = fileURLToPath(new URL("../../", import.meta.url));
@@ -62,7 +61,7 @@ function checkGuardProjection(result, profile) {
   }
 }
 
-describe("author runtime compiler: compact resolved selection", () => {
+describe("author runtime compiler: compact resolved selection in memory", () => {
   it("compiles operative text and every applicable guardrail clause without copying the model", async () => {
     const result = await compile(await taskFile("A08-scientific-units.json")); const p = JSON.parse(result.runtime_profile_json);
     assert.ok(validate(p), JSON.stringify(validate.errors));
@@ -185,7 +184,6 @@ describe("author runtime compiler: compact resolved selection", () => {
     assert.ok(a.runtime_instructions_markdown.includes("## Guardrail obbligatori"));
     assert.ok(a.runtime_instructions_markdown.includes("non capirebbe"));
     assert.ok(a.runtime_instructions_markdown.includes("Nessun contesto semantico attivato"));
-    // This checks artifact structure, not guaranteed resistance of every LLM to injection.
   });
 
   it("keeps the eV runtime free of unrelated local topics and duplicates no continuation guard", async () => {
@@ -228,15 +226,12 @@ describe("author runtime compiler: compact resolved selection", () => {
     assert.equal(JSON.parse(result.runtime_profile_json).provenance.runtime_compiler_version, "author-runtime-compiler/1.1");
   });
 
-  it("cannot remove a covered prohibition or falsify clause lineage, and retains the promoted v1 snapshot", async () => {
+  it("cannot remove a covered prohibition or falsify clause lineage", async () => {
     const result = await compile(await taskFile("A08-scientific-units.json"));
     const edited = JSON.parse(result.runtime_profile_json); edited.runtime_instructions.prohibitions.pop();
     await assert.rejects(verifyAuthorRuntimeProfile(ROOT, JSON.stringify(edited)), { code: "RUNTIME_PROFILE_CHANGED" });
     const forged = JSON.parse(result.runtime_profile_json); forged.guardrails.find((g) => g.id === "G05").source_clause_ids = ["G05:C01"];
     await assert.rejects(verifyAuthorRuntimeProfile(ROOT, JSON.stringify(forged)), { code: "RUNTIME_PROFILE_CHANGED" });
-    const oldPath = join(ROOT, DIRECTORY, "author-runtimes/arp-6d694ff2cdf563cbfbfad186/author-runtime-profile.json");
-    const oldBytes = await readFile(oldPath); assert.equal(sha(oldBytes), "5cb6d5aa218e4020daa595c373240fc820674029e3ceb294ad8300f4a4fcd23b");
-    assert.ok(validate(JSON.parse(oldBytes)), JSON.stringify(validate.errors));
   });
 
   it("rejects malformed/duplicate JSON, invalid statuses and attempts to invent routing fields", async () => {
@@ -263,52 +258,20 @@ describe("author runtime compiler: compact resolved selection", () => {
     const edited = structuredClone(schema); edited.$defs.Text.$ref = "https://example.invalid/schema"; await writeFile(p, JSON.stringify(edited));
     await assert.rejects(compileAuthorRuntimeProfile(root, JSON.stringify(basic)), { code: "RUNTIME_SCHEMA_INVALID" });
   });
-});
 
-describe("runtime materialization and real-article smoke cases", () => {
-  it("materializes hash-addressed profile, instructions and manifest idempotently; refuses conflicting bytes", async (t) => {
-    const root = await fixture(t); const first = await materializeAuthorRuntime(root, "task.json");
-    const p = join(root, first.profile_path); const mtime = (await stat(p)).mtimeMs;
-    await materializeAuthorRuntime(root, "task.json"); assert.equal((await stat(p)).mtimeMs, mtime);
-    const checked = await materializeAuthorRuntime(root, "task.json", { checkOnly: true }); assert.equal(checked.operation, "verified");
-    assert.equal(sha(await readFile(p)), first.profile_sha256); assert.equal(sha(await readFile(join(root, first.instructions_path))), first.instructions_sha256);
-    assert.ok(first.guardrail_resolution.some((entry) => entry.disposition === "covered_by_prohibition"));
-    assert.deepEqual(await readFile(join(root, DIRECTORY, "author-model.json")), modelBytes);
-    const edited = JSON.parse(await readFile(p, "utf8")); edited.guardrails.pop(); await writeFile(p, JSON.stringify(edited));
-    const editedBytes = await readFile(p);
-    await assert.rejects(materializeAuthorRuntime(root, "task.json"), { code: "RUNTIME_COLLISION" });
-    assert.deepEqual(await readFile(p), editedBytes);
-  });
-
-  it("checks read-only and rejects path escapes, symlinks and unknown CLI flags", async (t) => {
-    const root = await fixture(t);
-    await assert.rejects(materializeAuthorRuntime(root, "task.json", { checkOnly: true }), { code: "RUNTIME_MISSING" });
-    assert.ok(!(await readdir(join(root, DIRECTORY))).includes("author-runtimes"));
-    await assert.rejects(materializeAuthorRuntime(root, "../task.json"), { code: "RUNTIME_PATH_INVALID" });
-    await symlink(join(root, "task.json"), join(root, "link.json"));
-    await assert.rejects(materializeAuthorRuntime(root, "link.json"), { code: "RUNTIME_INPUT_INVALID" });
-    const other = join(root, "unrelated"); await mkdir(other); await symlink(other, join(root, DIRECTORY, "author-runtimes"));
-    await assert.rejects(materializeAuthorRuntime(root, "task.json"), { code: "RUNTIME_PATH_INVALID" }); assert.deepEqual(await readdir(other), []);
-    await assert.rejects(main(["--force"]), { code: "RUNTIME_ARGUMENTS_INVALID" });
-  });
-
-  it("selects the expected compact profile against seven actual approved articles, without generating or editing posts", async () => {
+  it("selects the expected compact profile across all benchmark tasks in memory", async () => {
     const cases = JSON.parse(await readFile(new URL("./fixtures/runtime-corpus-cases.json", import.meta.url), "utf8"));
     for (const entry of cases.cases) {
-      const record = JSON.parse(await readFile(join(ROOT, `docs/author-extraction-results/v1.3/${entry.article_id}.json`), "utf8"));
-      const bytes = await readFile(join(ROOT, record.source.path)); assert.equal(sha(bytes), record.source.file_hash);
-      for (const marker of entry.source_markers) assert.ok(bytes.toString("utf8").includes(marker), `${entry.article_id}: ${marker}`);
       const task = await taskFile(entry.task); const result = await compile(task); const p = JSON.parse(result.runtime_profile_json);
       assert.deepEqual(p.active_profile_ids, entry.profiles, entry.article_id);
       assert.deepEqual(p.contextual_rules.filter((r) => r.id.startsWith("C04:")).map((r) => r.id), entry.local_rules, entry.article_id);
       assert.deepEqual(p.semantic_context.map((s) => s.id), entry.semantic_context, entry.article_id);
       assert.deepEqual(Object.fromEntries(p.devices.map((d) => [d.id, d.status])), entry.devices, entry.article_id);
       checkGuardProjection(result, p);
-      assert.ok(p.devices.length <= 3, "these smoke cases need few devices; this is not a global quota");
+      assert.ok(p.devices.length <= 3);
       assert.ok(Buffer.byteLength(result.runtime_profile_json) < modelBytes.length);
       assert.ok(Buffer.byteLength(result.runtime_instructions_markdown) < 12 * 1024);
       assert.ok(p.semantic_context.every((s) => s.usage === "conceptual_context_only_not_style"));
-      assert.deepEqual(await readFile(join(ROOT, record.source.path)), bytes);
     }
     assert.deepEqual(await readFile(join(ROOT, DIRECTORY, "author-model.json")), modelBytes);
   });

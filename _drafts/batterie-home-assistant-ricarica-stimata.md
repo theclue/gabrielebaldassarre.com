@@ -695,7 +695,7 @@ cards:
 
 La pill mostrerà **`2×AA · 2220 mAh/cella`** e seguirà le modifiche degli helper. Se mancano i metadati, indicherà numero o capacità non disponibili. Se manca la percentuale, apparirà `n/d`: una barra vuota non va interpretata da sola come zero.
 
-{% cloudinary /assets/images/batterie-home-assistant-ricarica-stimata-1.png alt="Card Termovalvole con tre righe batteria per Soggiorno, Cameretta e Bagno: percentuale a destra, barra sotto e pill con 2×AA · 2220 mAh/cella" caption="Le tre righe del template: percentuale, barra e pill con numero, formato e capacità nominale per cella." role="screenshot" context="result" %}
+{% cloudinary /assets/images/posts/batterie-home-assistant-ricarica-stimata/batterie-home-assistant-ricarica-stimata-1.png alt="Card Termovalvole con tre righe batteria per Soggiorno, Cameretta e Bagno: percentuale a destra, barra sotto e pill con 2×AA · 2220 mAh/cella" caption="Le tre righe del template: percentuale, barra e pill con numero, formato e capacità nominale per cella." role="screenshot" context="result" %}
 
 Il formato `AA` è qui una caratteristica dichiarata dei dispositivi, mentre numero e capacità vengono dagli helper. **2220 mAh è il valore nominale di ciascuna cella**. Il modello non somma le due capacità e non ricava energia, tensione o chimica. Questi metadati descrivono le batterie montate; non entrano nella formula dei 55 giorni e non la validano.
 

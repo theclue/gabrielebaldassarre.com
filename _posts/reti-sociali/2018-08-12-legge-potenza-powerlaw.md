@@ -6,8 +6,7 @@ excerpt: La legge di potenza, o _power law_ è uno dei costrutti matematici che 
 category: "Reti Sociali"
 header:
   overlay_filter: 0.5
-  overlay_image: /assets/images/powerlaw-overlay.jpg
-  teaser: /assets/images/powerlaw-teaser.jpg
+  overlay_image: /assets/images/posts/powerlaw-overlay.jpg
 editor_options:
   chunk_output_type: inline
 ---

@@ -5,7 +5,7 @@ import vm from "node:vm";
 import { it } from "node:test";
 import { Effect } from "effect";
 import { fromPromise } from "@opencode/plugin/promise/adapter";
-import { loadPluginSDK } from "./native.mjs";
+import { loadPluginSDK } from "./post-authoring-plugin.mjs";
 
 it("loads the actual auto-discovered post-authoring entrypoint with the V2 SDK and a host-bound root", async () => {
   const url = new URL("../../.opencode/plugins/post-authoring.js", import.meta.url);
@@ -13,12 +13,11 @@ it("loads the actual auto-discovered post-authoring entrypoint with the V2 SDK a
   const moduleOf = (exports) => new vm.SyntheticModule(Object.keys(exports), function () {
     for (const [name, value] of Object.entries(exports)) this.setExport(name, value);
   }, { context });
-  const sdk = moduleOf({ loadPluginSDK }), nodeUrl = moduleOf({ fileURLToPath });
-  const implementation = moduleOf({ setupPostAuthoring(ctx, root) { calls.push({ ctx, root }); return "cleanup-fixture"; } });
+  const nodeUrl = moduleOf({ fileURLToPath });
+  const implementation = moduleOf({ loadPluginSDK, setupPostAuthoring(ctx, root) { calls.push({ ctx, root }); return "cleanup-fixture"; } });
   const entrypoint = new vm.SourceTextModule(await readFile(url, "utf8"), { context, initializeImportMeta(meta) { meta.url = url.href; } });
   await entrypoint.link((specifier) => {
     if (specifier === "node:url") return nodeUrl;
-    if (specifier === "../../_scripts/author-extraction/native.mjs") return sdk;
     if (specifier === "../../_scripts/author-extraction/post-authoring-plugin.mjs") return implementation;
     throw new Error(`Unexpected dependency: ${specifier}`);
   });
@@ -34,7 +33,6 @@ it("the installed SDK exposes permission.assert through its real Promise adapter
     source: { type: "tool", messageID: "message-1", id: "tool-1" } };
   const denied = new Error("Host permission denied");
   let reject = false;
-  // Other host domains are inspected by the adapter, but must never be invoked.
   const unused = new Proxy(() => { throw new Error("Unexpected SDK host operation"); }, { get: () => unused });
   const host = new Proxy({ permission: {
     assert(value) { calls.push(value); return reject ? Effect.fail(denied) : Effect.void; },

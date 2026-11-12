@@ -3,8 +3,7 @@ category: Fisica
 title: Esperimenti quantistici
 excerpt: Un grande classico della meccanica quantistica è l'affermazione secondo cui una misurazione altera il sistema. In questo articolo cerchiamo di dare una spiegazione più rigorosa di questa concezione comune.
 header:
-  overlay_image: /assets/images/spazi-vettoriali-overlay.jpg
-  teaser: /assets/images/spazi-vettoriali-teaser.jpg
+  overlay_image: /assets/images/posts/spazi-vettoriali-overlay.jpg
   overlay_filter: 0.5
 ---
 
@@ -25,13 +24,13 @@ Riprendiamo l'esempio del sistema della moneta, che può assumere i due soli val
 
 In pratica, abbiamo la situazione seguente:
 
-![Apparato di misurazione](/assets/images/apparato_spin_up.svg?style=centerme)
+![Apparato di misurazione](/assets/images/posts/esperimenti-quantistici/apparato_spin_up.svg?style=centerme)
 
 Notiamo che prima di aver eseguito la misurazione, la finestrella dell'apparato non mostra alcun valore misurato.
 
 Supponiamo, ora, che lo spin sia stato preparato da qualcuno (o qualcosa) nello stato _up_. Non ci interessa sapere chi o cosa ha imposto questo stato al sistema, nella nostra concettualizzazione matematica. Ciò che importa è che lo spin sia nello stato _up_ senza alcuna possibilità di errore. Effettuiamo la misurazione: l'apparato restituirà il valore +1.
 
-![Apparato di misurazione: up](/assets/images/apparato_spin_up_misura.svg?style=centerme)
+![Apparato di misurazione: up](/assets/images/posts/esperimenti-quantistici/apparato_spin_up_misura.svg?style=centerme)
 
 Per essere sicuri, resettiamo l'apparato di misura e rieseguiamo le misure più volte, assicurandoci che tra una misura e l'altra non accada qualcosa nel sistema tale da alterare il valore di $$\sigma_z$$ (in fisica si dice che non accade _niente di interessante_ al sistema). Otterremo __sempre__ +1: il risultato dell'esperimento non varia.
 
@@ -39,7 +38,7 @@ E questa è già una prima, grande, scoperta: nei sistemi quantistici, i risulta
 
 Adesso, facciamo qualcosa di veramente inaspettato: ruotiamo di 180° l'apparato ed eseguiamo la misurazione. Il risultato che otteniamo è -1 e, come prima, tale misura è confermata rieseguendo gli esperimenti.
 
-![Apparato di misurazione: up](/assets/images/apparato_spin_down.svg?style=centerme)
+![Apparato di misurazione: up](/assets/images/posts/esperimenti-quantistici/apparato_spin_down.svg?style=centerme)
 
 E questa è la seconda grande scoperta: c'è, nello stato delle grandezze quantistiche, un qualche tipo di concetto di __direzionalità__. E, quale strumento migliore abbiamo a disposizione per descrivere, in un modello, la direzionalità se non tramite i __vettori__?
 
@@ -47,7 +46,7 @@ Se, infatti, lo stato dello spin fosse rappresentato da un vettore con modulo un
 
 Ma cosa succede se ruotiamo l'apparato di lato ed effettuiamo la misurazione? In base alla meccanica classica, dovremmo avere come risultato 0 (la componente sull'asse x del vettore _up_ è zero). E invece...
 
-![Apparato di misurazione: x](/assets/images/apparato_spin_lato.svg?style=centerme)
+![Apparato di misurazione: x](/assets/images/posts/esperimenti-quantistici/apparato_spin_lato.svg?style=centerme)
 
 Per quanto ci ostiniamo a misurare, il risultato sarà ancora una volta +1 oppure -1!
 
@@ -55,7 +54,7 @@ Non solo: è impossibile _prevedere_ se il risultato sarà +1 o -1. Entrambi i v
 
 E se ruotiamo l'apparato di un angolo arbitrario? La meccanica classica ci dice che il risultato dovrebbe essere $$ \cos(\theta) $$, dove $$ \theta $$ è l'angolo formato dall'apparato con il vettore di spin, perché tale è la componente del vettore di spin lungo la direzione in cui è orientato l'apparato. Ma niente da fare...
 
-![Apparato di misurazione: angolo arbitrario](/assets/images/apparato_spin_theta.svg?style=centerme)
+![Apparato di misurazione: angolo arbitrario](/assets/images/posts/esperimenti-quantistici/apparato_spin_theta.svg?style=centerme)
 
 Il risultato è ancora una volta +1 o -1, con la stessa irritante aleatorietà iniziale.
 

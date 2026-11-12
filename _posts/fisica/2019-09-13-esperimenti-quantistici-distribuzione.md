@@ -3,8 +3,7 @@ category: Fisica
 title: Esperimenti ripetuti e preparazione di un sistema
 excerpt: La meccanica quantistica tutto sommato non distrugge totalmente la nostra idea del mondo. A patto di rinunciare a un po' di confortante determinismo.
 header:
-  overlay_image: /assets/images/esperimento-laser-overlay.jpg
-  teaser: /assets/images/esperimento-laser-teaser.jpg
+  overlay_image: /assets/images/posts/esperimento-laser-overlay.jpg
   overlay_filter: 0.5
 ---
 

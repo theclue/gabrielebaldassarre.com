@@ -5,7 +5,7 @@ category: 3D Printing
 excerpt: 'Prima parte sulle basi di OpenSCAD attraverso un progetto reale: un passacavo
   parametrico da scrivania con attacco a baionetta. Impariamo la sintassi, le primitive
   CSG, le trasformazioni e l''organizzazione del codice.'
-master: /assets/images/openscad-overlay.png
+master: /assets/images/posts/openscad-overlay.png
 image_meta:
   role: screenshot
   context: reference
@@ -232,7 +232,7 @@ cube([20, 30, 5]);              // 20×30×5, appoggiato su Z=0
 cube([10, 10, 10], center=true); // 10×10×10, centrato nell'origine
 ```
 
-{% cloudinary /assets/images/openscad-tutorial-parte-1-1.png alt="Screenshot di un parallelepipedo in OpenSCAD" caption="Un parallelepipedo 10x5x5 centrato nell'origine, creato a partire dalla primitiva" width=50%}
+{% cloudinary /assets/images/posts/openscad-tutorial-parte-1/openscad-tutorial-parte-1-1.png alt="Screenshot di un parallelepipedo in OpenSCAD" caption="Un parallelepipedo 10x5x5 centrato nell'origine, creato a partire dalla primitiva" width=50%}
 
 **`sphere(r)` o `sphere(d)`** — una sfera di raggio `r` (o diametro `d`). Con `$fn` controllate il numero minimo di segmenti del solido: valori bassi danno un poliedro, valori alti una sfera liscia. `$fn = 6` produce un cubo! Il parametro `$fa` (minimum angle) è un'alternativa più elegante quando non volete hardcodare la risoluzione.
 
@@ -241,7 +241,7 @@ sphere(r = 10);         // sfera di raggio 10 mm
 sphere(d = 20, $fn=64); // sfera liscia di diametro 20 mm
 ```
 
-{% cloudinary /assets/images/openscad-tutorial-parte-1-2.png alt="Screenshot di una sfera in OpenSCAD" caption="Una sfera di diametro 10, appoggiata al piano di base e con $fn=128" width=50%}
+{% cloudinary /assets/images/posts/openscad-tutorial-parte-1/openscad-tutorial-parte-1-2.png alt="Screenshot di una sfera in OpenSCAD" caption="Una sfera di diametro 10, appoggiata al piano di base e con $fn=128" width=50%}
 
 **`cylinder(h, r)` o `cylinder(h, d)`** — un cilindro di altezza `h`. `r1` e `r2` (o `d1` e `d2`) diversi tra loro producono un tronco di cono. Anche qui `$fn` controlla la risoluzione del cerchio di base.
 
@@ -251,7 +251,7 @@ cylinder(h = 5, d1 = 10, d2 = 6);         // tronco di cono
 cylinder(h = 25, d = 60, $fn = 128);      // cilindro liscio
 ```
 
-{% cloudinary /assets/images/openscad-tutorial-parte-1-3.png alt="Screenshot di un cilindo in OpenSCAD" caption="Un cilindro appoggiato al piano di base, di diametro 35 ed altezza 55, con $fn = 128$" width=50%}
+{% cloudinary /assets/images/posts/openscad-tutorial-parte-1/openscad-tutorial-parte-1-3.png alt="Screenshot di un cilindo in OpenSCAD" caption="Un cilindro appoggiato al piano di base, di diametro 35 ed altezza 55, con $fn = 128$" width=50%}
 
 **Riepilogo primitive 3D:**
 - `cube([w, d, h])` o `cube(size, center)`
@@ -335,7 +335,7 @@ linear_extrude(height = 5)
     polygon([[0,0], [10,0], [5,10]]);
 ```
 
-{% cloudinary /assets/images/openscad-tutorial-parte-1-4.png alt="Screenshot di un prisma in OpenSCAD" caption="Prisma a base triangolare ottenuto estrudendo un triangolo di 5 nella direzione positiva dell'asse Z (comportamento di default)" width=50%}
+{% cloudinary /assets/images/posts/openscad-tutorial-parte-1/openscad-tutorial-parte-1-4.png alt="Screenshot di un prisma in OpenSCAD" caption="Prisma a base triangolare ottenuto estrudendo un triangolo di 5 nella direzione positiva dell'asse Z (comportamento di default)" width=50%}
 
 Con il parametro `twist` potete ruotare la sezione durante l'estrusione, utile ad esempio per creare strutture elicoidali. Notate come anche queste trasformazioni supportano il parametro `$fn`.
 
@@ -347,7 +347,7 @@ linear_extrude(height = 15, convexity = 10, twist = 1440, $fn = 32)
   circle(r = 1);
 ```
 
-{% cloudinary /assets/images/openscad-tutorial-parte-1-6.png alt="Screenshot di una struttura elicoidale in OpenSCAD" caption="Boing boing..." width=50%}
+{% cloudinary /assets/images/posts/openscad-tutorial-parte-1/openscad-tutorial-parte-1-6.png alt="Screenshot di una struttura elicoidale in OpenSCAD" caption="Boing boing..." width=50%}
 
 
 **`rotate_extrude(angle)`** — prende una forma 2D e la ruota attorno all'asse Z, creando un solido di rivoluzione. Se `angle` è 360°, ottenete un toroide completo; angoli minori producono settori. È uno dei modi per ottenere l'equivalente dell'operazione _revolve_, ovvero solidi di rotazione.
@@ -360,7 +360,7 @@ rotate_extrude(angle = 180, $fn = 128)
 
 La `translate([15, 0, 0])` sposta il quadrato lontano dall'asse Z prima della rivoluzione: senza questa traslazione, il solido collasserebbe su sé stesso (ruotando una forma che contiene l'origine si ottiene un cilindro pieno, non un guscio).
 
-{% cloudinary /assets/images/openscad-tutorial-parte-1-5.png alt="Screenshot di un semiguscio toroidale in OpenSCAD" caption="Un semiguscio toroidale ottenuto facendo ruotare un rettangolo traslato di 15 sul semiasse positivo dell'asse X e poi effettuando una rivoluzione di 180° in modo da creare un solido con almeno 128 segmenti." width=50%}
+{% cloudinary /assets/images/posts/openscad-tutorial-parte-1/openscad-tutorial-parte-1-5.png alt="Screenshot di un semiguscio toroidale in OpenSCAD" caption="Un semiguscio toroidale ottenuto facendo ruotare un rettangolo traslato di 15 sul semiasse positivo dell'asse X e poi effettuando una rivoluzione di 180° in modo da creare un solido con almeno 128 segmenti." width=50%}
 
 Nel progetto del passacavo, `rotate_extrude` è usato, ad esempio, per creare i settori di anello che compongono lo slot a L dell'attacco a baionetta attraverso un modulo riutilizzabile (visto che di scassi ne sono previsti 3, sfalsati di 120°):
 
@@ -396,7 +396,7 @@ union() {
 }
 ```
 
-{% cloudinary /assets/images/openscad-tutorial-parte-1-7.png alt="Screenshot di un manicotto flangiato in OpenSCAD" caption="Flangia e manicotto" width=50%}
+{% cloudinary /assets/images/posts/openscad-tutorial-parte-1/openscad-tutorial-parte-1-7.png alt="Screenshot di un manicotto flangiato in OpenSCAD" caption="Flangia e manicotto" width=50%}
 
 Notate come `translate` sposti solo il secondo `cylinder`, non il primo: le trasformazioni dentro `union()` (o qualsiasi altro blocco) si applicano solo agli oggetti che seguono immediatamente, seguendo la _prefix notation_ (per questo motivo delimitare i comandi con `;` è fondamentale!).
 
@@ -417,7 +417,7 @@ difference() {
 }
 ```
 
-{% cloudinary /assets/images/openscad-tutorial-parte-1-8.png alt="Screenshot del manicotto finito in OpenSCAD" caption="Il manicotto finito" width=50%}
+{% cloudinary /assets/images/posts/openscad-tutorial-parte-1/openscad-tutorial-parte-1-8.png alt="Screenshot del manicotto finito in OpenSCAD" caption="Il manicotto finito" width=50%}
 
 Come potete vedere, il secondo `cylinder` (diametro `sleeve_id`, altezza maggiorata `+ 4`) viene sottratto dal primo, creando un tubo cavo. L'altezza maggiorata garantisce che il foro attraversi completamente entrambi i pezzi senza lasciare superfici complanari — che in OpenSCAD causano artefatti di rendering, specie durante l'esportazione.
 

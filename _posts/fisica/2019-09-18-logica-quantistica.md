@@ -3,8 +3,7 @@ category: Fisica
 title: Logica classica e logica quantistica
 excerpt: Lo spazio degli stati di un sistema classico è governato dalla logica booleana. Vedremo oggi che, in un sistema quantistico le cose sono un po' più complicate e molto meno intuitive.
 header:
-  overlay_image: /assets/images/logica-quantistica-overlay.jpg
-  teaser: /assets/images/logica-quantistica-teaser.jpg
+  overlay_image: /assets/images/posts/logica-quantistica-overlay.jpg
   overlay_filter: 0.5
 ---
 
@@ -16,19 +15,19 @@ Supponiamo di avere il sistema _Lancio di un dado_. Questo sistema può trovarsi
 
 $$ D = {1, 2, 3, 4, 5, 6} $$
 
-![Stati possibili nel lancio del dado](/assets/images/dado_insieme.svg)
+![Stati possibili nel lancio del dado](/assets/images/posts/logica-quantistica/dado_insieme.svg)
 
 Una possibile proposizione potrebbe essere: _"Tutti i risultati pari"_, che rappresenta un sottoinsieme dell'insieme D.
 
 $$ P = {2, 4, 6} $$
 
-![Stati possibili nel lancio del dado: risultati pari](/assets/images/dado_insieme_pari.svg)
+![Stati possibili nel lancio del dado: risultati pari](/assets/images/posts/logica-quantistica/dado_insieme_pari.svg)
 
 Un'altra proposizione potrebbe essere _"Tutti i risultati maggiori di tre"_:
 
 $$ T = {4, 5, 6} $$
 
-![Stati possibili nel lancio del dado: risultati maggiori di tre](/assets/images/dado_insieme_tre.svg)
+![Stati possibili nel lancio del dado: risultati maggiori di tre](/assets/images/posts/logica-quantistica/dado_insieme_tre.svg)
 
 Logica classica
 ---------------
@@ -37,7 +36,7 @@ La logica formale booleana consente la combinazione di più proposizioni attrave
 
 $$ A = P \cap T $$
 
-![Stati possibili nel lancio del dado: intersezione](/assets/images/dado_insieme_and.svg)
+![Stati possibili nel lancio del dado: intersezione](/assets/images/posts/logica-quantistica/dado_insieme_and.svg)
 
 Allo stesso modo valgono le operazioni di __OR__, di __NOT__ e tutte le possibili declinazioni (__NAND__, __XOR__...). Ebbene, in un sistema classico vale la commutatività delle proposizioni. Siano A e B due proposizioni (insiemi), allora:
 

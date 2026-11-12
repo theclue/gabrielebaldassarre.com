@@ -2,7 +2,7 @@
 category: Home Assistant
 title: "Illuminanza intelligente per lo smartworking: fisica, modelli e controllo in Home Assistant"
 excerpt: Come stimare l'illuminamento di un ambiente senza sensori fisici, usando la posizione del sole e la fotometria delle finestre, e come usare questa stima per automatizzare la luce ottimale quando si lavora da casa.
-master: /assets/images/homeassistant-illuminanza.png
+master: /assets/images/posts/homeassistant-illuminanza.png
 image_meta:
   role: illustration
   context: ambient

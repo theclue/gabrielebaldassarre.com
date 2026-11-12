@@ -3,8 +3,7 @@ category: Fisica
 title: Lo spazio degli stati di un sistema quantistico
 excerpt: "In questo articolo introdurremo lo spazio vettoriale complesso che rappresenta l'ossatura del modello matematico utilizzato per studiare gli stati di un sistema quantistico"
 header:
-  overlay_image: /assets/images/spazi-vettoriali-overlay.jpg
-  teaser: /assets/images/spazi-vettoriali-teaser.jpg
+  overlay_image: /assets/images/posts/spazi-vettoriali-overlay.jpg
   overlay_filter: 0.5
 ---
 

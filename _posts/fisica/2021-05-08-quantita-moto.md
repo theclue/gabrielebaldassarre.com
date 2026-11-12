@@ -2,7 +2,7 @@
 category: Fisica
 title: La quantità di moto e l'impulso (fisica classica)
 excerpt: Studiando la fisica nei libri in lingua inglese, può capitare di fare un po' di confusione con i concetti di momento, quantità di moto e impulso, per via di come questi concetti sono, invece, espressi con la lingua di Newton. Questo breve articolo cercherà di fugare ogni possibile dubbio.
-master: /assets/images/quantitamoto.png
+master: /assets/images/posts/quantitamoto.png
 broadcast:
   channels: [linkedin, mastodon]
   sent: true

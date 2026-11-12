@@ -3,8 +3,7 @@ category: Fisica
 title: Sistemi classici e sistemi quantistici
 excerpt: Prima di iniziare lo studio della meccanica quantistica, è importante chiarire cosa si intende per sistema e cosa differenzia un sistema quantistico da un sistema classico.
 header:
-  overlay_image: /assets/images/sistemi-classici-quantistici-overlay.jpg
-  teaser: /assets/images/sistemi-classici-quantistici-teaser.jpg
+  overlay_image: /assets/images/posts/sistemi-classici-quantistici-overlay.jpg
   overlay_filter: 0.5
 ---
 
@@ -17,7 +16,7 @@ Sistemi classici
 
 Supponiamo di voler modellare come sistema il lancio di una moneta (un classico, no?). Nota che stiamo modellando come sistema il _lancio_ della moneta, non la _moneta_ in sé (come oggetto con delle caratteristiche fisiche ben precise e che esiste in un punto ben preciso dello spazio). Come tale, questo sistema può trovarsi solo in uno dei due possibili stati:
 
-![Stati possibili nel lancio di una moneta](/assets/images/testacroce.jpg)
+![Stati possibili nel lancio di una moneta](/assets/images/posts/sistemi-classici-quantistici/testacroce.jpg)
 
 Ad ogni lancio, otterremo solo uno dei due possibili stati, senza alcuna ambiguità. Non importa quanti lanci effettuiamo: otterremo sempre testa _oppure_ croce. E mai _un po' testa e un po' croce_.
 

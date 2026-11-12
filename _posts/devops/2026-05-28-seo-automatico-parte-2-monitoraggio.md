@@ -6,7 +6,7 @@ excerpt: 'Seconda parte della pipeline SEO con strumenti gratuiti e automatici: 
   data lake su Cloudflare R2 e D1, Google Trends e Search Console, dbt per l''ETL
   e un report mensile automatizzato, il tutto eseguito tramite GitHub Actions. Gratis.'
 mermaid: true
-master: /assets/images/seo-automatico-monitoraggio-overlay.png
+master: /assets/images/posts/seo-automatico-monitoraggio-overlay.png
 image_meta:
   role: illustration
   context: ambient
@@ -475,7 +475,7 @@ Il seed set è di circa 25-30 keyword per run. Per ognuna, salvo l'interesse nel
 
 I dati finiscono su R2 (raw) e su D1 (`keyword_trends`) per le query analitiche.
 
-{% cloudinary /assets/images/seo-automatico-parte-2-monitoraggio-1.png alt="Serie storica sugli argomenti ai seo e generative engine optimization" caption="Un esempio di serie storica di Google Trends: sono questi i dati che saranno recuperati e salvati nel database D1" %}
+{% cloudinary /assets/images/posts/seo-automatico-parte-2-monitoraggio/seo-automatico-parte-2-monitoraggio-1.png alt="Serie storica sugli argomenti ai seo e generative engine optimization" caption="Un esempio di serie storica di Google Trends: sono questi i dati che saranno recuperati e salvati nel database D1" %}
 
 ---
 
@@ -489,7 +489,7 @@ Se Google Trends ti dice cosa cercano, **Search Console** ti dice come ti trovan
 
 Anche questi dati vanno su R2 (raw) e D1 (`search_console_data`). La tabella ha colonne per `query`, `page`, `clicks`, `impressions`, `ctr`, `position`, `device`, `country` — abbastanza per fare analisi di coverage e identificare i contenuti che performano meglio (o peggio) del previsto.
 
-{% cloudinary /assets/images/seo-automatico-parte-2-monitoraggio-2.png alt="Screenshot di Google Search Console" caption="" %}
+{% cloudinary /assets/images/posts/seo-automatico-parte-2-monitoraggio/seo-automatico-parte-2-monitoraggio-2.png alt="Screenshot di Google Search Console" caption="" %}
 
 ---
 

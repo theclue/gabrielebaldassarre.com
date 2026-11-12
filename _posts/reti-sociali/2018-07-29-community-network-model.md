@@ -3,8 +3,7 @@ title: "Una rete sociale fatta di comunità"
 excerpt: "L'esperimento dei sei gradi di separazione ci conferma che il mondo è sorprendentemente _piccolo_ e _ben connesso_. Recentemente, però, si è scoperto che le reti sociali umane presentano una caratteristica ancora più affascinate, fondamentale per la loro stessa sopravvivenza: l'innata propensione ad organizzarsi in community."
 category: "Reti Sociali"
 header:
-  overlay_image: /assets/images/community-network-overlay.jpg
-  teaser: /assets/images/community-network-teaser.jpg
+  overlay_image: /assets/images/posts/community-network-overlay.jpg
   overlay_filter: 0.5
 ---
 
@@ -17,7 +16,7 @@ Sfortunatamente per gli hippie e per i fisici, però, il XXI Secolo si è aperto
 Ma prima di parlare di questo modello più evoluto, vediamo innanzitutto brevemente come si è chiuso il XX Secolo in casa dei sociologi.
 
 {% figure caption:"Stanley Milgram, lo psicologo statunitense che, nell'ambito dell'arcinoto esperimento, nel 1967 spedì lettere in giro per tutti gli Stati Uniti e dimostrò che viviamo in un mondo piccolo. Non tutti sanno, però, che prima di lui l'esistenza dello _Small-World effect_ era stata speculata dallo scrittore ungherese [Frigyers Karinthy](http://www.eastjournal.net/archives/74471) mentre [Ithiel de Sola Pool](https://en.wikipedia.org/wiki/Ithiel_de_Sola_Pool) e Manfred Kochen colmarono, nel 1978 e con un rigoroso  modello matematico, le lacune dell'illustre, e discusso, predecessore (foto: [Psychology Unlocked](http://www.psychologyunlocked.com/stanley-milgram/))." %}
-![Stanley Milgram](/assets/images/stanley-milgram.jpg)
+![Stanley Milgram](/assets/images/posts/community-network-model/stanley-milgram.jpg)
 {% endfigure %}
 
 ## Cosa si sapeva già: le tre caratteristiche di una rete sociale
@@ -39,7 +38,7 @@ Così come il DNA è costruito da una sequenza di quattro basi elementari (adeni
 Il motivo per cui l'elemento più atomico di organizzazione delle comunità sociali sia il triangolo è ancora oggetto di studi e non vi ci addentreremo in questa sede. Fatto sta, che, come una catena di DNA è descritta da una lunga sequenza di basi, una rete sociale può essere descritta da una lunga _sequenza di triangoli_. Questi triangoli prendono il nome di _triadi_ o, più spesso, di __clique__ (in italiano orribilmente traducibile con 'cricca'). E queste _clique_ non sono, tipicamente, oggetti statici; le relazioni evolvono nel tempo e la struttura della rete con esso. Con essa, quindi, cambiano le clique.
 
 {% figure caption:"Una serie di clique, o triadi. In effetti, diverse possono essere le configurazioni con cui si presenta una triade aperta o chiusa. Tra questi esempi, l'unica caratterizzata da una certa instabilità è quella di sinistra che non a caso prende il nome di _triade proibita (forbidden triad)_: la probabilità che evolva, presto o tardi, in una delle due configurazioni più a destra è molto alta." %}
-![Triadi in equilibrio e proibite](/assets/images/triadi.svg)
+![Triadi in equilibrio e proibite](/assets/images/posts/community-network-model/triadi.svg)
 {% endfigure %}
 
 Il motivo per cui avviene questa "risoluzione" della clique ha cause fisiche: minimizzazione dell'energia. Troppo dispendiosa di energie, infatti, è la situazione del nodo _A_, costretto a mantenere due canali segregati con _C_ e _B_ in una situazione di perenne stress sociale. Molto più facile risolverla facendo sì che i due nodi non connessi tra di loro entrino in contatto oppure interrompendo la relazione con uno dei due vicini (_C_, in questo caso).
@@ -57,7 +56,7 @@ Capire se ci troviamo di fronte a una rete di questo tipo, che per inciso prende
 Una rete _scale-free_ munita, come detto, di _hubs_ presenterà, invece, una distribuzione con una coda molto lunga sulla destra, dove ci sono nodi con una degree centrality di molto superiore alla media. Più precisamente, la degree centrality segue la [legge di potenza]({% post_url reti-sociali/2018-08-12-legge-potenza-powerlaw %}), o __power law__.
 
 {% figure caption:"La distribuzione del numero dei collegamenti dei nodi per una rete non _scale-free_ (a sinistra) con una _scale-free_ (a destra). Sull'asse delle ascisse il numero di connessioni \\( k \\) di un nodo, sulle ordinate la percentuale di nodi tra tutti quelli della rete ad avere esattamente \\( k \\) connessioni. In una rete non _scale-free_ si ha il tipico andamento a campana di una binomiale (o di una Poisson o anche di una normale, a seconda delle approssimazioni applicate al modello) con la maggior parte dei nodi avente un numero di nodi vicino alla media e scarsa probabilità di avere degli _hub_ o dei nodi fortemente disconessi. Una rete _scale-free_, invece, ha l'andamento tipico di una power law, con la maggior parte dei nodi ad avere poche connessioni e pochi nodi ad avere un numero di connessioni \\( k \\) molto maggiori della media \\( k_{avg} \\)." %}
-![Bell-shape & Power Law](/assets/images/powerlaw.gif)
+![Bell-shape & Power Law](/assets/images/posts/community-network-model/powerlaw.gif)
 {% endfigure %}
 
 Solo una puntualizzazione sul nome: queste reti si chiamano __scale-free__ perché la pendenza della retta caratteristica del modello di regressione costruito sulla distribuzione della centralità è _invariante alla scala_,  cioè non varia al variare del numero dei nodi. Solo, tuttavia, questa grandezza presenta questa caratteristica, mentre tipicamente le altre grandezze caratteristiche (strutturali, come la centralità, o attributi legati ai nodi) sono genericamente _non invarianti_.
@@ -74,13 +73,13 @@ Il buon senso ci suggerisce che le community locali si creano attorno agli indiv
 In gergo, questo comportamento è chiamato __mixing__ e una rete che favorisce la coesione tra nodi affini è una rete soggetta ad _assortative mixing_ (o anche __omofilia__). Al contrario, una rete che favorisce le relazioni tra individui _non affini_ viene detta una rete soggetta a _disassortative mixing_.
 
 {% figure caption:"Una stessa rete può essere sia assortativa che disassortativa, in base all'attributo scelto per esprimere la relazione. Una rete di adolescenti, ad esempio, è probabile che sia assortativa attorno a un attributo come l'età, ma sarà quasi certamente disassortativa su un attributo come il sesso se i legami esprimono relazioni sentimentali (la probabilità di un legame tra due nodi è più alta se essi non sono dello stesso sesso)." %}
-![Il tempo delle mele](/assets/images/la-boum.jpg)
+![Il tempo delle mele](/assets/images/posts/community-network-model/la-boum.jpg)
 {% endfigure %}
 
 Esiste, però, una particolare relazione di (dis)assortatività e cioè quella legata al numero di connessioni dei nodi (la _degree centrality_ o _grado_) che possiamo riassumere in una semplice domanda: i nodi con un elevato numero connessioni tenderanno a collegarsi ad altri nodi con molte connessioni o preferiranno nodi con un basso numero di connessioni?
 
 {% figure caption:"Reti assortative e disassortative in riferimento al numero di connessioni (grado). In una rete assortativa (a sinistra) abbiamo una elevata densità di nodi con tante connessioni al centro, in un grande componente molto connesso, e una periferia di nodi con poche connessioni. In una rete disassortativa (a destra) invece avremo una distribuzione più uniforme tra centro e periferia e nodi con basso numero di connessioni adiacenti a nodi più popolari." %}
-![Assortative & Disassortative Network](/assets/images/assortative-disassortative.png)
+![Assortative & Disassortative Network](/assets/images/posts/community-network-model/assortative-disassortative.png)
 {% endfigure %}
 
 Ebbene, molte reti sociali e per la verità _tutte_ quelle che sembrano organizzarsi in community, a prescindere dalle loro dimensioni, sono assortative sul grado. Tipici esempi sono la rete individuata dalle collaborazioni scientifiche (tenendo conto che nella maggior parte dei casi i _paper_ scientifici sono scritti a più mani da diversi studiosi e ricercatori) e la rete dei membri dei consigli di amministrazione delle aziende.

@@ -3,8 +3,7 @@ category: Fisica
 title: Basi ortonormali in un sistema quantistico
 excerpt: "In questo articolo introdurremo il concetto di base di un sistema quantistico e di come questo rappresenti tutti i suoi stati possibili"
 header:
-  overlay_image: /assets/images/basi-ortonormali-overlay.jpg
-  teaser: /assets/images/basi-ortonormali-teaser.jpg
+  overlay_image: /assets/images/posts/basi-ortonormali-overlay.jpg
   overlay_filter: 0.5
 ---
 

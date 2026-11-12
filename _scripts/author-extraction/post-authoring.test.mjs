@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { cp, mkdir, mkdtemp, readFile, readdir, rm, symlink, writeFile } from "node:fs/promises";
+import { cp, mkdir, mkdtemp, readFile, readdir, realpath, rm, symlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { tmpdir } from "node:os";
 import { fileURLToPath } from "node:url";
@@ -53,22 +53,17 @@ function host(root, storage = new Map()) {
     move: (value) => { directory = value; }, disposals: () => disposals };
 }
 
-describe("new post authoring: runtime gate and actual Rake, isolated files only", () => {
-  it("plans without writes and creates a tutorial draft with a new verified C02 runtime", async (t) => {
+describe("new post authoring: in-memory runtime gate and actual Rake", () => {
+  it("plans without writes and creates a tutorial draft with an in-memory C02 runtime and zero intermediate files", async (t) => {
     const root = await fixture(t), before = await readdir(root);
     const plan = await planAuthorPost(root, request);
     assert.deepEqual(await readdir(root), before); assert.equal(plan.target, "_drafts/matita-openscad.md");
     const prepared = await prepareAuthorPost(root, request);
-    const profile = JSON.parse(await readFile(path.join(root, prepared.profile_path), "utf8"));
-    assert.deepEqual(profile.active_profile_ids, ["C02"]); assert.equal(profile.semantic_context.length, 0);
-    assert.ok(!profile.devices.some((d) => d.status === "required"));
-    assert.equal(profile.task_context.content_type, "tutorial");
     assert.ok((await readFile(path.join(root, prepared.target_path), "utf8")).includes("title:"));
     assert.equal(await verifyAuthorPostContext(root, prepared), prepared.instructions_markdown);
     assert.notEqual(prepared.runtime_id, "ARP:4B5275EA8296FB42E66217BE");
-    const receipt = JSON.parse(await readFile(path.join(root, prepared.receipt_path), "utf8"));
-    assert.equal(receipt.instructions_sha256, prepared.instructions_sha256);
-    assert.ok(!Object.hasOwn(receipt, "instructions_markdown"));
+    assert.ok(!(await readdir(path.join(root, "docs"))).includes("authoring-runs"));
+    assert.ok(!(await readdir(path.join(root, "docs/author-pattern-results/v1.3"))).includes("author-runtimes"));
   });
 
   it("uses the post Rake task and the requested date/category", async (t) => {
@@ -87,7 +82,7 @@ describe("new post authoring: runtime gate and actual Rake, isolated files only"
     assert.ok(!(await readdir(root)).includes("SHOULD_NOT_EXIST"));
   });
 
-  it("rejects unsupported/invalid requests before creating runtime or article files", async (t) => {
+  it("rejects unsupported/invalid requests before creating article files", async (t) => {
     const root = await fixture(t), before = await readdir(root);
     for (const changed of [{ slug: "../bad" }, { title: "first\nsecond" }, { category: "Unknown" }, { destination: "publish" }, { date: "2026-02-30" },
       { task: { ...request.task, mode: "rewrite" } }, { task: { ...request.task, content_type: "other" } },
@@ -108,28 +103,24 @@ describe("new post authoring: runtime gate and actual Rake, isolated files only"
     await assert.rejects(prepareAuthorPost(root, { ...request, destination: "post" }), { code: "AUTHOR_POST_PATH_INVALID" });
   });
 
-  it("stops if governed model verification fails, before Rake or output materialization", async (t) => {
+  it("stops if governed model verification fails, before Rake", async (t) => {
     const root = await fixture(t); await writeFile(path.join(root, "docs/author-pattern-results/v1.3/author-model.json"), "{}");
     await assert.rejects(prepareAuthorPost(root, request));
     assert.ok(!(await readdir(root)).includes("_drafts"));
-    assert.ok(!(await readdir(path.join(root, "docs"))).includes("authoring-runs"));
   });
 
-  it("reports a Rake failure without generating fallback prose or removing files", async (t) => {
+  it("reports a Rake failure without generating fallback prose", async (t) => {
     const root = await fixture(t); await writeFile(path.join(root, "Rakefile"), "abort 'fixture failure'\n");
     await assert.rejects(prepareAuthorPost(root, request), { code: "AUTHOR_POST_RAKE_FAILED" });
     assert.deepEqual(await readdir(path.join(root, "_drafts")), []);
-    assert.ok((await readdir(path.join(root, "docs/authoring-runs"))).length === 1);
   });
 
-  it("keeps written article bytes editable but rejects changed runtime, task or receipt bytes", async (t) => {
-    for (const target of ["instructions_path", "profile_path", "task_path", "receipt_path"]) {
-      const root = await fixture(t), p = await prepareAuthorPost(root, request);
-      await writeFile(path.join(root, p.target_path), "---\ntitle: Matita\n---\nFixture body, not an article.\n");
-      assert.equal(await verifyAuthorPostContext(root, p), p.instructions_markdown);
-      await writeFile(path.join(root, p[target]), "{}\n");
-      await assert.rejects(verifyAuthorPostContext(root, p));
-    }
+  it("keeps written article bytes editable but rejects changed runtime or task state", async (t) => {
+    const root = await fixture(t), p = await prepareAuthorPost(root, request);
+    await writeFile(path.join(root, p.target_path), "---\ntitle: Matita\n---\nFixture body, not an article.\n");
+    assert.equal(await verifyAuthorPostContext(root, p), p.instructions_markdown);
+    await assert.rejects(verifyAuthorPostContext(root, { ...p, instructions_markdown: "tampered" }));
+    await assert.rejects(verifyAuthorPostContext(root, { ...p, request_sha256: "0".repeat(64) }));
   });
 
   it("cancels before writes when the signal is already aborted", async (t) => {
@@ -161,16 +152,16 @@ describe("OpenCode V2 authoring hook, session scope and permissions (no LLM call
       });
       assert.deepEqual(await readdir(root, { recursive: true }), before);
       assert.equal(h.storage.size, 0); assert.equal(h.permissions.length, 0);
-      // Unsupported hosts must still allow model-free cancellation, not fail setup.
       await h.commands.get("cancel-post").execute({ sessionID: "session-1" });
       assert.equal(h.synthetic.length, 1);
     }
   });
 
-  it("asserts host edit permission before any runtime/scaffold writes", async (t) => {
+  it("asserts host edit permission only on the target path before Rake writes", async (t) => {
     const root = await fixture(t), h = host(root), cleanup = await setupPostAuthoring(h.ctx, root); t.after(cleanup); h.deny();
     await assert.rejects(h.tools.get("author_post_prepare").execute(request, h.toolContext), { code: "DENIED" });
     assert.equal(h.permissions[0].action, "edit"); assert.equal(h.permissions[0].agent, "build");
+    assert.deepEqual(h.permissions[0].resources, [path.join(await realpath(root), "_drafts/matita-openscad.md")]);
     assert.ok(!(await readdir(root)).includes("_drafts")); assert.equal(h.storage.size, 0);
     h.deny("shell");
     await assert.rejects(h.tools.get("author_post_prepare").execute(request, h.toolContext), { code: "DENIED" });
@@ -215,10 +206,10 @@ describe("OpenCode V2 authoring hook, session scope and permissions (no LLM call
     const event = again.event(); await again.hooks.get("context")(event); assert.equal(event.system.at(-1).text, p.instructions_markdown);
   });
 
-  it("fails closed after runtime tampering, with model-free /cancel-post recovery", async (t) => {
+  it("fails closed after model tampering, with model-free /cancel-post recovery", async (t) => {
     const root = await fixture(t), h = host(root), cleanup = await setupPostAuthoring(h.ctx, root); t.after(cleanup);
-    const p = decode(await h.tools.get("author_post_prepare").execute(request, h.toolContext));
-    await writeFile(path.join(root, p.instructions_path), "tampered");
+    await h.tools.get("author_post_prepare").execute(request, h.toolContext);
+    await writeFile(path.join(root, "docs/author-pattern-results/v1.3/author-model.json"), "{}");
     const event = h.event(); await assert.rejects(h.hooks.get("context")(event)); assert.deepEqual(event.system, []);
     await h.commands.get("cancel-post").execute({ sessionID: "session-1" });
     assert.equal(h.storage.size, 0); assert.equal(h.synthetic.length, 1);

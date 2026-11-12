@@ -3,8 +3,7 @@ category: Fisica
 title: L'effetto fotoelettrico
 excerpt: Un breve articolo che spiega cos'è l'effetto fotoelettrico e di come la spiegazione del fenomeno fornita da Einstein gli valse il premio Nobel nel 1921.
 header:
-  overlay_image: /assets/images/effetto-fotoelettrico-overlay.png
-  teaser: /assets/images/effetto-fotoelettrico-teaser.jpg
+  overlay_image: /assets/images/posts/effetto-fotoelettrico-overlay.png
   overlay_filter: 0.5
 ---
 
@@ -66,5 +65,5 @@ Questo fenomeno, confermato sperimentalmente, contraddice apertamente quanto pre
 Questa diretta conseguenza della quantizzazione dell'energia, per cui fotoni ed elettroni interagiscono uno per uno, portò  Einstein a vincere il suo unico premio Nobel nel 1921.
 
 {% figure caption:"Ironicamente, il grande fisico tedesco non vinse mai l'ambito premio per il lavoro che lo avrebbe consegnato alla storia, quello sulla Relatività Generale, ma solo per questo suo contributo che, di fatto, diede il via alla meccanica quantistica. Una teoria per alcuni aspetti della quale egli nutrì molte riserve, per non dire profonda avversione, durante tutta la sua vita." %}
-![Albert Einstein nel 1915](/assets/images/einstein.jpg)
+![Albert Einstein nel 1915](/assets/images/posts/effetto-fotoelettrico/einstein.jpg)
 {% endfigure %}

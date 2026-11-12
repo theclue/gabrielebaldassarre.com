@@ -5,7 +5,7 @@ excerpt: 'La terza e ultima sezione della dashboard di astrometria: l''immagine 
   del giorno NASA (APOD) con API key e secrets.yaml, la posizione in tempo reale della
   ISS con multiscrape, e i prossimi lanci spaziali. Come integrare tutto in Home Assistant
   con REST sensor, Generic Camera e multiscrape.'
-master: /assets/images/astrometria-dashboard-3.png
+master: /assets/images/posts/astrometria-dashboard-3.png
 image_meta:
   role: screenshot
   context: reference
@@ -188,7 +188,7 @@ In *Impostazioni → Dispositivi e servizi → Generic Camera*, nel campo **Stil
 
 Questo crea `camera.apod_nasa_gov` (il nome, ovviamente, è libero). La camera si aggiorna automaticamente ogni volta che il sensore REST scarica un nuovo URL.
 
-{% cloudinary /assets/images/home-assistant-generic-camera.png alt="Pannello di configurazione di Generic Camera" caption="Configuriamo la fotocamera generica come tipo a immagine fissa, passando il template del sensore con l'URL diretto della foto" loading="lazy" role="screenshot" context="result" %}
+{% cloudinary /assets/images/posts/dashboard-astrometria/home-assistant-generic-camera.png alt="Pannello di configurazione di Generic Camera" caption="Configuriamo la fotocamera generica come tipo a immagine fissa, passando il template del sensore con l'URL diretto della foto" loading="lazy" role="screenshot" context="result" %}
 
 ### La card nella dashboard
 
@@ -208,7 +208,7 @@ tap_action:
 ```
 {% endraw %}
 
-{% cloudinary /assets/images/home-assistant-apod.png alt="Astronomical picture of the day" caption="La scheda finita, con l'immagine e la descrizione subito sotto" loading="lazy" role="screenshot" context="result" %}
+{% cloudinary /assets/images/posts/dashboard-astrometria/home-assistant-apod.png alt="Astronomical picture of the day" caption="La scheda finita, con l'immagine e la descrizione subito sotto" loading="lazy" role="screenshot" context="result" %}
 
 Il `tap_action` punta all'entità della **camera**, non al sensore. Questo è il dettaglio chiave: se si lascia il comportamento predefinito (more-info del sensore), il tap apre il pannello del sensore con i valori degli attributi — utile, ma non spettacolare. Puntando la `tap_action` alla camera, il tap apre il modale della camera con l'immagine a tutta larghezza, che è quello che vogliamo.
 
@@ -299,7 +299,7 @@ multiscrape:
 ```
 {% endraw %}
 
-{% cloudinary /assets/images/home-assistant-iis.png alt="Badge IIS, con velocità e altitudine" caption="Ho deciso di creare due piccole pills, o badge, nella parte superiore del dashboard con le informazioni di velocità istantanea e altitudine della Stazione Spaziale Internazionale. Non credevo dovessero occupare più spazio di così" loading="lazy" role="screenshot" context="result" %}
+{% cloudinary /assets/images/posts/dashboard-astrometria/home-assistant-iis.png alt="Badge IIS, con velocità e altitudine" caption="Ho deciso di creare due piccole pills, o badge, nella parte superiore del dashboard con le informazioni di velocità istantanea e altitudine della Stazione Spaziale Internazionale. Non credevo dovessero occupare più spazio di così" loading="lazy" role="screenshot" context="result" %}
 
 Alcune note:
 
@@ -404,7 +404,7 @@ multiscrape:
 ```
 {% endraw %}
 
-{% cloudinary /assets/images/home-assistant-lanci.png alt="I prossimi due lanci spaziali" caption="Il box con il bollettino dei lanci è semplice, ma efficace" loading="lazy" role="screenshot" context="result" %}
+{% cloudinary /assets/images/posts/dashboard-astrometria/home-assistant-lanci.png alt="I prossimi due lanci spaziali" caption="Il box con il bollettino dei lanci è semplice, ma efficace" loading="lazy" role="screenshot" context="result" %}
 
 Alcuni dettagli che meritano spiegazione:
 
@@ -414,7 +414,7 @@ Alcuni dettagli che meritano spiegazione:
 
 **Il `regex_replace` per il link** — Il campo `quicktext` di RocketLaunch.Live non contiene solo l'URL ma del testo in prosa del tipo: *"Follow SpaceX on Twitter for info: https://t.co/..."*. La prima `regex_replace` usa un lookahead (`.*(?=http)`) per eliminare tutto quello che precede il protocollo `http`. La seconda elimina la parte finale ` for info...` che talvolta segue l'URL. Il risultato è l'URL pulito, usabile come link nella card.
 
-{% cloudinary /assets/images/astrometria-dashboard.png alt="La dashboard di astrometria" caption="Ed eccoci al termine del nostro viaggio, con il dashboard che dovrebbe risultare più o meno così." %}
+{% cloudinary /assets/images/posts/dashboard-astrometria/astrometria-dashboard.png alt="La dashboard di astrometria" caption="Ed eccoci al termine del nostro viaggio, con il dashboard che dovrebbe risultare più o meno così." %}
 
 ---
 

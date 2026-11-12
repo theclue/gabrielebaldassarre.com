@@ -3,8 +3,8 @@ title: "Radiografia di una rete: il grado (degree distribution)"
 excerpt: "La trama dei legami in una rete può descrivere la rete in una moltitudine di modi. Tra tutti, però, è l'analisi del _grado_ che fornisce le informazioni più preziose: classificare una rete in base alle sue proprietà e fornire indicazioni sulla sua formazione e la sua evoluzione."
 header:
   overlay_filter: 0.5
-  overlay_image: /assets/images/degree-distribution-overlay.jpg
-  teaser: /assets/images/degree-distribution-teaser.jpg
+  overlay_image: /assets/images/posts/degree-distribution-overlay.jpg
+  teaser: /assets/images/posts/degree-distribution-teaser.jpg
 editor_options:
   chunk_output_type: inline
 ---

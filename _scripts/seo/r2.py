@@ -10,13 +10,13 @@ import boto3
 def _client():
     return boto3.client(
         "s3",
-        endpoint_url=os.environ["CLOUDFLARE_R2_ENDPOINT"],
-        aws_access_key_id=os.environ["CLOUDFLARE_R2_ACCESS_KEY_ID"],
-        aws_secret_access_key=os.environ["CLOUDFLARE_R2_SECRET_ACCESS_KEY"],
+        endpoint_url=os.environ.get("CLOUDFLARE_R2_ENDPOINT") or os.environ["R2_ENDPOINT"],
+        aws_access_key_id=os.environ.get("CLOUDFLARE_R2_ACCESS_KEY_ID") or os.environ["R2_KEY"],
+        aws_secret_access_key=os.environ.get("CLOUDFLARE_R2_SECRET_ACCESS_KEY") or os.environ["R2_SECRET"],
     )
 
 
-BUCKET = "gabrielebaldassarre-seo"
+BUCKET = os.environ.get("CLOUDFLARE_R2_SEO_BUCKET") or os.environ.get("R2_BUCKET") or "gabrielebaldassarre-seo"
 
 
 def upload_json(prefix: str, name: str, data: dict | list) -> str:
@@ -60,3 +60,35 @@ def download_json(key: str) -> dict | list:
     s3 = _client()
     resp = s3.get_object(Bucket=BUCKET, Key=key)
     return json.loads(resp["Body"].read().decode("utf-8"))
+
+
+def upload_files(prefix: str, file_paths: list[str]) -> list[str]:
+    """Upload one or more local JSON files to R2 under a shared timestamped prefix."""
+    s3 = _client()
+    ts = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H%M%SZ")
+    uploaded = []
+    for path in file_paths:
+        if not os.path.isfile(path):
+            continue
+        key = f"{prefix}/{ts}/{os.path.basename(path)}"
+        with open(path, "rb") as fd:
+            s3.upload_fileobj(fd, BUCKET, key)
+        print(f"  -> r2://{key}")
+        uploaded.append(key)
+    return uploaded
+
+
+if __name__ == "__main__":
+    import glob
+    import sys
+
+    if len(sys.argv) < 3:
+        print("Usage: python3 -m _scripts.seo.r2 <prefix> <glob_or_file...>", file=sys.stderr)
+        sys.exit(1)
+    target_prefix = sys.argv[1].strip("/")
+    files = []
+    for pattern in sys.argv[2:]:
+        matched = sorted(glob.glob(pattern))
+        files.extend(matched if matched else ([pattern] if os.path.isfile(pattern) else []))
+    upload_files(target_prefix, files)
+    print(f"{len(files)} file caricati su R2 ({target_prefix})")

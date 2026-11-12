@@ -1,179 +1,66 @@
-# /create_rmd
+---
+description: Crea un nuovo post o bozza R Markdown (.Rmd) a partire da una descrizione in linguaggio naturale.
+subagent: false
+---
 
-Crea un post tutorial/divulgativo tecnico-scientifico in formato `.Rmd`
-(R Markdown) a partire da una descrizione in linguaggio naturale.
+# /create-rmd
+
+Crea un post tecnico-scientifico in formato `.Rmd` (R Markdown) a partire da una descrizione in linguaggio naturale:
+
+$ARGUMENTS
 
 ## Scopo
 
-Generare contenuti completi in formato `.Rmd` per il blog
-gabrielebaldassarre.com. L'articolo viene creato come `.Rmd` in
-`_posts/<category>/` (o `_drafts/` se la descrizione indica "in bozza").
+Generare contenuti completi in formato `.Rmd` per il blog gabrielebaldassarre.com. L'articolo viene creato come `.Rmd` in `_posts/<category>/` oppure in `_drafts/` (default bozza se non specificato diversamente). Il file `.md` e i grafici SVG in `assets/figures/<slug>/` vengono poi prodotti tramite `rake knit["<percorso>.Rmd"]` o `make knitr`.
 
-A differenza di `/create_post`, questo comando genera solo il file `.Rmd`.
-Il `.md` knittato viene prodotto successivamente, previa revisione e
-aggiustamenti del `.Rmd`.
+## Flusso operativo
 
-## Architettura
+### Fase 1: estrazione dei parametri
 
-1. **Interpretazione** della descrizione utente (estrazione metadati)
-2. **Chiamata** al Rake task `new_rmd` o `new_rmd_draft` per creare
-   il template `.Rmd`
-3. **Riempimento** del template con contenuto R Markdown completo
-4. **Restituzione** di recap, indice, stima accessibilità, prompt Midjourney
+Dalla descrizione fornita, ricava:
+- **`title`** (obbligatorio): titolo del post in italiano.
+- **`category`** (obbligatorio): una tra `3D Printing`, `DevOps`, `Fisica`, `Home Assistant`, `Meccanica`, `Reti Sociali`.
+- **`slug`** (obbligatorio): derivato dal titolo secondo le stesse regole di `/create-post`.
+- **Pacchetti R necessari**: identifica quali pacchetti R servono (`tidyverse`, `igraph`, `ggplot2`, `ggraph`, ecc.) per includerli nel chunk `setup` tramite `p_load(...)`.
 
-## Workflow
-
-### Fase 1 — Estrazione parametri
-
-Identica a `/create_post` (Fase 1). In aggiunta:
-
-- **Contenuto matematico/statistico** — Se la descrizione menziona
-  analisi dati, grafici, simulazioni, modelli statistici, reti, il post
-  è candidato ideale per `.Rmd`.
-- **Pacchetti R necessari** — Identifica dalla descrizione quali
-  pacchetti R servono (tidyverse, igraph, ggplot2, etc.) e includili
-  nel chunk `setup`.
-
-### Fase 2 — Determinazione destinazione
-
-Identica a `/create_post`.
-
-### Fase 3 — Chiamata Rake
+### Fase 2: creazione del file `.Rmd` con Rake
 
 Esegui il comando Rake corrispondente:
+- Bozza (default): `rake new_rmd_draft["<title>","<category>","<slug>"]`
+- Post pubblicato: `rake new_rmd["<title>","<category>","<slug>"]`
 
-- Post Rmd: `rake new_rmd["<title>","<category>","<slug>"]`
-- Draft Rmd: `rake new_rmd_draft["<title>","<category>","<slug>"]`
+Il task copia `R/includes/template.Rmd` e imposta `title` e `category`.
 
-Il Rake task:
-- Copia il template da `R/includes/template.Rmd`
-- Sostituisce `title` e `category` nel frontmatter YAML
-- Include il chunk `setup` standard con pacman, tidyverse, rprojroot
+### Fase 3: stesura del contenuto `.Rmd`
 
-### Fase 4 — Riempimento contenuto
+Compila il corpo del file `.Rmd` dopo il frontmatter:
+- Ogni chunk di grafico deve avere nome univoco in inglese, `fig.alt`, `fig.cap`, `fig.role` (`chart`, `diagram`, `screenshot`, `photo`, `illustration`) e `fig.context` (`result`, `step`, `architecture`, `comparison`, `evidence`, `reference`).
+- Durante il knit (`R/build_one.R`), i grafici vengono salvati automaticamente in `assets/figures/<nome-file-senza-ext>/` in formato SVG (`svglite`) con tag `{% cloudinary %}`.
+- Usa formule LaTeX inline `$...$` o display `$$...$$`, tabelle `knitr::kable()` e valori calcolati inline `` `r <espressione>` ``.
 
-Il corpo del `.Rmd` (dopo il frontmatter `---`) viene generato come
-contenuto completo.
+### Fase 4: aggiornamento del frontmatter
 
-**Struttura del contenuto Rmd:**
-
-```markdown
-```{r setup, include=FALSE, cache=FALSE}
-# ... standard setup dal template ...
-# Aggiungere qui i p_load per i pacchetti specifici del post
-p_load("igraph", "scales", "ggraph")  # esempio
-```
-
-## Introduzione
-...
-
-## Sezione 1: <titolo>
-...
-
-```{r <nome-chunk-1>, fig.asp=0.7,
-      fig.alt="<alt text>",
-      fig.cap="<caption>",
-      fig.role="chart",
-      fig.context="result"}
-# codice R qui
-```
-
-...
-```
-
-**Regole per i chunk R:**
-- Ogni chunk ha un nome univoco descrittivo in inglese
-- `fig.alt` obbligatorio per accessibilità
-- `fig.cap` descrive brevemente il grafico
-- `fig.role`: `chart`, `diagram`, `screenshot`, `photo`, `illustration`
-- `fig.context`: `result`, `step`, `architecture`, `comparison`, `evidence`, `reference`
-- `fig.asp` controlla l'aspect ratio (default 0.7 = 7:10,黄金比 approssimato)
-- Grafici salvati in `assets/images/<slug>-<nome>.svg` (svglite, default dal template)
-
-**Regole generali:**
-- Italiano tecnico ma accessibile
-- Le formule LaTeX inline: `$...$` o display: `$$...$$`
-- I link esterni: `[testo](url)` (verranno annotati dopo il knit)
-- I commenti HTML `<!-- TODO: ... -->` per segnalare punti da verificare
-- Le tabelle usano `knitr::kable()` con caption
-- I valori numerici nel testo usano `` `r <espressione>` `` inline R
-
-### Fase 5 — Aggiornamento frontmatter
-
-Dopo aver generato il corpo, aggiorna i campi YAML:
+Aggiorna i campi YAML nel frontmatter:
 
 ```yaml
-excerpt: "<160 caratteri, descrittivo>"
+excerpt: "<massimo 160 caratteri, descrittivo>"
 tags:
   - tag1
-  - ...
   - R
-header:
-  overlay_filter: 0.5
-  overlay_image: /assets/images/<slug>-overlay.jpg
-  teaser: /assets/images/<slug>-teaser.jpg
+difficulty_declared:
+  conceptual: <1-5>
+  technical: <1-5>
+  mathematical: <0-5>
 ```
 
-Il blocco `editor_options: {chunk_output_type: inline}` è già presente
-dal template. Non rimuoverlo.
+Non inserire percorsi `master:` o `overlay_image` verso file non ancora esistenti su disco. Mantieni invariato `editor_options: {chunk_output_type: inline}`.
 
-### Fase 6 — Output per l'utente
+### Fase 5: riepilogo per l'utente
 
-Al termine, restituisci un messaggio strutturato:
-
-```
-## /create_rmd completato
-
-**File creato:** `_posts/<category>/<date>-<slug>.Rmd`
-**Titolo:** <title>
-**Categoria:** <category>
-**Destinazione:** _posts | _drafts
-**Pacchetti R richiesti:** <p_load list>
-
-### Indice dei contenuti
-1. <Sezione 1>
-2. <Sezione 2>
-...
-
-### Chunk R generati
-- `<nome-chunk-1>`: <tipo grafico> — <descrizione>
-- `<nome-chunk-2>`: <tipo grafico> — <descrizione>
-...
-
-### Stima accessibilità
-- **Audience:** <intended_audience>
-- **Livello:** <proficiency_level>
-- **Difficoltà dichiarata:** concettuale <N>/5, tecnica <N>/5, matematica <N>/5
-- **Prerequisiti chiave:** <elenco>
-
-### Prompt Midjourney (master image)
-/imagine prompt: <prompt in inglese, --ar 16:9 --style raw>
-
-### Prossimi passi
-1. Rivedere e correggere il contenuto `.Rmd`
-2. Eseguire `rake knit["<path>.Rmd"]` per generare il `.md`
-3. Verificare che i grafici SVG siano stati generati correttamente
-4. Generare la master image con Midjourney
-5. Eseguire `/annotate-post _posts/<category>/<date>-<slug>.md`
-   sul file `.md` risultante
-6. Se è una serie: eseguire `/create_rmd` per le parti successive
-   specificando "in bozza", o `/create_post` per eventuali companion
-   in solo markdown
-```
-
-## Slug derivation (SEO/GEO)
-
-Stesse regole di `/create_post`.
-
-## Note
-
-- Il file `.Rmd` **non** viene knittato automaticamente. Il knit richiede
-  Docker (`gabrielebaldassarre/knitr`) e va fatto dopo revisione.
-- Il template include già il setup chunk standard. Aggiungere solo
-  `p_load()` per pacchetti aggiuntivi.
-- I grafici sono generati in SVG (svglite) con sfondo trasparente,
-  ottimizzati per tema scuro e chiaro.
-- Il font del blog (Roboto/Inter system font stack) è gestito via CSS;
-  non serve specificarlo nei grafici R.
-- Per post con molti grafici (>5), considera di usare `cache=TRUE`
-  (già default nel template) per velocizzare i re-knit.
+Restituisci:
+1. Percorso del file `.Rmd` creato, titolo, categoria e pacchetti R richiesti.
+2. Elenco dei chunk R generati e indice delle sezioni.
+3. Prossimi passi:
+   - Revisionare il file `.Rmd`.
+   - Eseguire `rake knit["<percorso>.Rmd"]` (oppure `make knitr`) per generare il `.md` e i grafici SVG in `assets/figures/`.
+   - Eseguire `/annotate-post` sul file `.md` generato.

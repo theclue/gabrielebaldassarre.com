@@ -22,7 +22,9 @@ concurrency:
 jobs:
   indexnow:
     name: IndexNow — Notifica motori di ricerca
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event != 'pull_request')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout 🛎️
@@ -36,44 +38,11 @@ jobs:
         env:
           INPUT_URLS: ${{ inputs.urls }}
         run: |
-          normalize_url() {
-            local raw="$1"
-            local cleaned=$(echo "$raw" | sed 's/\.\(md\|Rmd\|MD\)$//')
-            if echo "$cleaned" | grep -q '_posts/'; then
-              local d=$(dirname "$cleaned" | xargs basename)
-              local s=$(basename "$cleaned" .md | sed 's/^[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}-//')
-              echo "https://gabrielebaldassarre.com/${d}/${s}/"
-            elif echo "$cleaned" | grep -q '^/'; then
-              echo "https://gabrielebaldassarre.com${cleaned}"
-            else
-              echo "https://gabrielebaldassarre.com/${cleaned}"
-            fi
-          }
-
-          : > /tmp/indexnow_urls.txt
-
-          if [ -n "$INPUT_URLS" ]; then
-            for u in $INPUT_URLS; do
-              normalize_url "$u" >> /tmp/indexnow_urls.txt
-            done
-          else
-            if git cat-file -e "HEAD~1" 2>/dev/null; then
-              git diff --name-only HEAD~1 HEAD 2>/dev/null | grep -E '^_posts/.*\.(md|Rmd)$' | while read post; do
-                [ -z "$post" ] && continue
-                normalize_url "$post" >> /tmp/indexnow_urls.txt
-              done
-            fi
-          fi
-
-          count=$(wc -l < /tmp/indexnow_urls.txt 2>/dev/null || echo 0)
-          echo "URL da notificare: ${count}"
-          cat /tmp/indexnow_urls.txt
-
-          if [ "$count" -eq 0 ]; then
-            echo "no_urls=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "no_urls=false" >> "$GITHUB_OUTPUT"
-          fi
+          python3 _scripts/ci/changed_posts.py \
+            --format url \
+            --inputs "$INPUT_URLS" \
+            --output-file /tmp/indexnow_urls.txt \
+            --github-output-empty-key no_urls
 
       - name: Invia notifiche IndexNow 📡
         if: steps.find.outputs.no_urls != 'true'
@@ -101,7 +70,9 @@ jobs:
 
   pagespeed:
     name: PageSpeed Insights
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event != 'pull_request')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout 🛎️
@@ -115,42 +86,11 @@ jobs:
         env:
           INPUT_URLS: ${{ inputs.urls }}
         run: |
-          url_from_post() {
-            local raw="$1"
-            local cleaned=$(echo "$raw" | sed 's/\.\(md\|Rmd\|MD\)$//')
-            if echo "$cleaned" | grep -q '_posts/'; then
-              local d=$(dirname "$cleaned" | xargs basename)
-              local s=$(basename "$cleaned" .md | sed 's/^[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}-//')
-              echo "/${d}/${s}/"
-            elif echo "$cleaned" | grep -q '^/'; then
-              echo "$cleaned"
-            else
-              echo "/${cleaned}"
-            fi
-          }
-
-          : > /tmp/psi_urls.txt
-
-          if [ -n "$INPUT_URLS" ]; then
-            for u in $INPUT_URLS; do
-              url_from_post "$u" >> /tmp/psi_urls.txt
-            done
-          else
-            if git cat-file -e "HEAD~1" 2>/dev/null; then
-              git diff --name-only HEAD~1 HEAD 2>/dev/null | grep -E '^_posts/.*\.(md|Rmd)$' | while read post; do
-                [ -z "$post" ] && continue
-                url_from_post "$post" >> /tmp/psi_urls.txt
-              done
-            fi
-          fi
-
-          cat /tmp/psi_urls.txt | sort -u > /tmp/psi_urls_unique.txt
-          count=$(wc -l < /tmp/psi_urls_unique.txt 2>/dev/null || echo 0)
-          echo "URL da verificare: ${count}"
-
-          if [ "$count" -eq 0 ]; then
-            echo "no_urls=true" >> "$GITHUB_OUTPUT"
-          fi
+          python3 _scripts/ci/changed_posts.py \
+            --format path \
+            --inputs "$INPUT_URLS" \
+            --output-file /tmp/psi_urls_unique.txt \
+            --github-output-empty-key no_urls
 
       - name: Analizza PageSpeed Insights 📊
         if: steps.find.outputs.no_urls != 'true'
@@ -158,7 +98,6 @@ jobs:
           API_KEY="${{ secrets.PAGESPEED_API_KEY }}"
           if [ -z "$API_KEY" ]; then
             echo "⚠️  PAGESPEED_API_KEY non impostata nei GitHub Secrets — salto PageSpeed Insights"
-            echo "     Crea il secret: https://github.com/theclue/gabrielebaldassarre.com/settings/secrets/actions"
             exit 0
           fi
           HAS_ERRORS=0
@@ -169,12 +108,10 @@ jobs:
             echo ""
             echo "🔍 Analisi: ${URL}"
 
-            # Mobile
             MOBILE=$(curl -s "https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${URL}&strategy=mobile&category=performance&category=accessibility&category=seo&category=best-practices&key=${API_KEY}")
             PSI_ERROR=$(echo "$MOBILE" | jq -r '.error.message // ""')
             if [ -n "$PSI_ERROR" ]; then
               echo "  ❌ Errore API PageSpeed: ${PSI_ERROR}"
-              echo "     Verifica: (1) quota giornaliera su Google Cloud Console, (2) API key valida in GitHub Secrets"
               continue
             fi
             PERF=$(echo "$MOBILE" | jq -r '(.lighthouseResult.categories.performance.score // 0) * 100')
@@ -186,7 +123,6 @@ jobs:
 
             echo "  📱 Mobile  | Perf: ${PERF}% | A11y: ${A11Y}% | SEO: ${SEO}% | LCP: ${LCP} | TBT: ${TBT} | CLS: ${CLS}"
 
-            # Desktop
             DESKTOP=$(curl -s "https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${URL}&strategy=desktop&category=performance&category=accessibility&category=seo&category=best-practices&key=${API_KEY}")
             D_PSI_ERR=$(echo "$DESKTOP" | jq -r '.error.message // ""')
             if [ -n "$D_PSI_ERR" ]; then
@@ -197,13 +133,11 @@ jobs:
               echo "  🖥️  Desktop | Perf: ${D_PERF}% | A11y: ${D_A11Y}%"
             fi
 
-            # Salva report completo per artifact
             SAFE_NAME=$(echo "${path}" | tr '/' '_' | cut -c1-50)
             mkdir -p psi-reports
             echo "$MOBILE" > "psi-reports/${SAFE_NAME}-mobile.json"
             echo "$DESKTOP" > "psi-reports/${SAFE_NAME}-desktop.json"
 
-            # Alert solo su problemi seri
             if [ -n "$PERF" ] && [ "$(echo "$PERF < 50" | bc -l 2>/dev/null)" = "1" ]; then
               echo "  ⚠️  PERFORMANCE MOBILE SOTTO SOGLIA CRITICA: ${PERF}%"
               HAS_ERRORS=1
@@ -212,10 +146,8 @@ jobs:
               echo "  ⚠️  ACCESSIBILITÀ MOBILE SOTTO SOGLIA: ${A11Y}%"
               HAS_ERRORS=1
             fi
-
           done < /tmp/psi_urls_unique.txt
 
-          echo ""
           if [ "$HAS_ERRORS" -eq 1 ]; then
             echo "⚠️  PageSpeed Insights: problemi rilevati su alcuni URL. Vedi log sopra."
           else
@@ -233,149 +165,19 @@ jobs:
       - name: Upload to R2 (pagespeed) ☁️
         if: steps.find.outputs.no_urls != 'true'
         env:
-          R2_ENDPOINT: ${{ secrets.CLOUDFLARE_R2_ENDPOINT }}
-          R2_KEY: ${{ secrets.CLOUDFLARE_R2_ACCESS_KEY_ID }}
-          R2_SECRET: ${{ secrets.CLOUDFLARE_R2_SECRET_ACCESS_KEY }}
-          R2_BUCKET: ${{ secrets.CLOUDFLARE_R2_SEO_BUCKET }}
+          CLOUDFLARE_R2_ENDPOINT: ${{ secrets.CLOUDFLARE_R2_ENDPOINT }}
+          CLOUDFLARE_R2_ACCESS_KEY_ID: ${{ secrets.CLOUDFLARE_R2_ACCESS_KEY_ID }}
+          CLOUDFLARE_R2_SECRET_ACCESS_KEY: ${{ secrets.CLOUDFLARE_R2_SECRET_ACCESS_KEY }}
+          CLOUDFLARE_R2_SEO_BUCKET: ${{ secrets.CLOUDFLARE_R2_SEO_BUCKET }}
         run: |
           pip install -q boto3
-          python3 -c "
-          import boto3, os, glob
-          from datetime import datetime, timezone
-          s3 = boto3.client('s3',
-            endpoint_url=os.environ['R2_ENDPOINT'],
-            aws_access_key_id=os.environ['R2_KEY'],
-            aws_secret_access_key=os.environ['R2_SECRET'])
-          bucket = os.environ.get('R2_BUCKET') or 'gabrielebaldassarre-seo'
-          now = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H%M%SZ')
-          for f in glob.glob('psi-reports/*.json'):
-              key = f'seo/pagespeed/{now}/{os.path.basename(f)}'
-              with open(f, 'rb') as fd:
-                  s3.upload_fileobj(fd, bucket, key)
-              print(f'  -> r2://{key}')
-          print('pagespeed reports uploaded to R2')
-          "
-
-  hermes-seo:
-    name: Hermes SEO Audit
-    if: false  # DISABLED: rate-limit causing pipeline stalls; debug TBD
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout 🛎️
-        uses: actions/checkout@v7
-        with:
-          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
-          fetch-depth: 2
-
-      - name: Trova URL da verificare 🔍
-        id: find
-        env:
-          INPUT_URLS: ${{ inputs.urls }}
-        run: |
-          url_from_post() {
-            local raw="$1"
-            local cleaned=$(echo "$raw" | sed 's/\.\(md\|Rmd\|MD\)$//')
-            if echo "$cleaned" | grep -q '_posts/'; then
-              local d=$(dirname "$cleaned" | xargs basename)
-              local s=$(basename "$cleaned" .md | sed 's/^[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}-//')
-              echo "/${d}/${s}/"
-            elif echo "$cleaned" | grep -q '^/'; then
-              echo "$cleaned"
-            else
-              echo "/${cleaned}"
-            fi
-          }
-
-          : > /tmp/hermes_urls.txt
-
-          if [ -n "$INPUT_URLS" ]; then
-            for u in $INPUT_URLS; do
-              url_from_post "$u" >> /tmp/hermes_urls.txt
-            done
-          else
-            if git cat-file -e "HEAD~1" 2>/dev/null; then
-              git diff --name-only HEAD~1 HEAD 2>/dev/null | grep -E '^_posts/.*\.(md|Rmd)$' | while read post; do
-                [ -z "$post" ] && continue
-                url_from_post "$post" >> /tmp/hermes_urls.txt
-              done
-            fi
-          fi
-
-          wc -l < /tmp/hermes_urls.txt
-
-      - name: Audit SEO via Hermes 🔬
-        env:
-          HERMES_API_KEY: ${{ secrets.HERMES_API_KEY }}
-        run: |
-          echo "🔬 Hermes SEO Audit in corso..."
-          echo "   Rate limit: 1 richiesta ogni 300s (anche con API key)"
-          HERMES_AUTH=""
-          HERMES_SLEEP=302
-          if [ -n "$HERMES_API_KEY" ]; then
-            HERMES_AUTH="&key=${HERMES_API_KEY}"
-          fi
-
-          TOTAL=$(wc -l < /tmp/hermes_urls.txt 2>/dev/null || echo 0)
-          CURRENT=0
-
-          while read -r path; do
-            [ -z "$path" ] && continue
-            CURRENT=$((CURRENT + 1))
-            URL="https://gabrielebaldassarre.com${path}"
-            echo "📋 [${CURRENT}/${TOTAL}] ${URL}"
-
-            RESULT=$(curl -s -w "\n%{http_code}" "https://hermesforge.dev/api/seo?url=${URL}${HERMES_AUTH}")
-            HTTP_CODE=$(echo "$RESULT" | tail -1)
-            JSON_BODY=$(echo "$RESULT" | sed '$d')
-
-            if [ "$HTTP_CODE" != "200" ]; then
-              echo "  ❌ Hermes API ha risposto HTTP ${HTTP_CODE}"
-              echo "     Raw (primi 200 char): $(echo "$JSON_BODY" | head -c 200)"
-              continue
-            fi
-
-            if ! echo "$JSON_BODY" | jq . >/dev/null 2>&1; then
-              echo "  ❌ Hermes API non ha restituito JSON valido"
-              echo "     Raw (primi 200 char): $(echo "$JSON_BODY" | head -c 200)"
-              continue
-            fi
-
-            SCORE=$(echo "$JSON_BODY" | jq -r '.score // "N/A"')
-            GRADE=$(echo "$JSON_BODY" | jq -r '.grade // "N/A"')
-            ISSUES=$(echo "$JSON_BODY" | jq -r '.issues // []')
-            ISSUE_COUNT=$(echo "$ISSUES" | jq 'length')
-            WARNINGS=$(echo "$JSON_BODY" | jq -r '.warnings // []')
-            WARN_COUNT=$(echo "$WARNINGS" | jq 'length')
-            PASSED=$(echo "$JSON_BODY" | jq -r '.passed // []')
-            PASS_COUNT=$(echo "$PASSED" | jq 'length')
-
-            echo "  Punteggio: ${SCORE}/100 (${GRADE})"
-            echo "  Problemi: ${ISSUE_COUNT} | Warning: ${WARN_COUNT} | OK: ${PASS_COUNT}"
-
-            if [ "$ISSUE_COUNT" -gt 0 ] 2>/dev/null; then
-              echo "  🔴 Problemi:"
-              echo "$ISSUES" | jq -r '.[] | "    - [\(.category)] \(.issue) (\(.severity))"'
-            fi
-            if [ "$WARN_COUNT" -gt 0 ] 2>/dev/null; then
-              echo "  🟡 Warning:"
-              echo "$WARNINGS" | jq -r '.[] | "    - [\(.category)] \(.issue)"'
-            fi
-
-            echo ""
-            echo "  📊 Riepilogo: ${SCORE}/100 (${GRADE}) | 🔴 ${ISSUE_COUNT} | 🟡 ${WARN_COUNT} | ✅ ${PASS_COUNT}"
-            echo ""
-
-            # Rispetta rate limit: attendi tra una richiesta e l'altra (non dopo l'ultima)
-            if [ "$CURRENT" -lt "$TOTAL" ]; then
-              sleep "$HERMES_SLEEP"
-            fi
-          done < /tmp/hermes_urls.txt
-
-          echo "✅ Hermes SEO Audit completato"
+          python3 -m _scripts.seo.r2 seo/pagespeed "psi-reports/*.json"
 
   lighthouse:
     name: Lighthouse CI (post-deploy)
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event != 'pull_request')
     runs-on: ubuntu-latest
     continue-on-error: true
     steps:
@@ -390,44 +192,11 @@ jobs:
         env:
           INPUT_URLS: ${{ inputs.urls }}
         run: |
-          full_url() {
-            local raw="$1"
-            local cleaned=$(echo "$raw" | sed 's/\.\(md\|Rmd\|MD\)$//')
-            if echo "$cleaned" | grep -q '_posts/'; then
-              local d=$(dirname "$cleaned" | xargs basename)
-              local s=$(basename "$cleaned" .md | sed 's/^[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}-//')
-              echo "https://gabrielebaldassarre.com/${d}/${s}/"
-            elif echo "$cleaned" | grep -q '^http'; then
-              echo "$cleaned"
-            elif echo "$cleaned" | grep -q '^/'; then
-              echo "https://gabrielebaldassarre.com${cleaned}"
-            else
-              echo "https://gabrielebaldassarre.com/${cleaned}"
-            fi
-          }
-
-          : > /tmp/lh_urls.txt
-
-          if [ -n "$INPUT_URLS" ]; then
-            for u in $INPUT_URLS; do
-              full_url "$u" >> /tmp/lh_urls.txt
-            done
-          else
-            if git cat-file -e "HEAD~1" 2>/dev/null; then
-              git diff --name-only HEAD~1 HEAD 2>/dev/null | grep -E '^_posts/.*\.(md|Rmd)$' | while read post; do
-                [ -z "$post" ] && continue
-                full_url "$post" >> /tmp/lh_urls.txt
-              done
-            fi
-          fi
-
-          count=$(wc -l < /tmp/lh_urls.txt 2>/dev/null || echo 0)
-          echo "URL da verificare: ${count}"
-          cat /tmp/lh_urls.txt
-
-          if [ "$count" -eq 0 ]; then
-            echo "no_urls=true" >> "$GITHUB_OUTPUT"
-          fi
+          python3 _scripts/ci/changed_posts.py \
+            --format url \
+            --inputs "$INPUT_URLS" \
+            --output-file /tmp/lh_urls.txt \
+            --github-output-empty-key no_urls
 
       - name: Nessun URL da analizzare con Lighthouse ℹ️
         if: steps.find.outputs.no_urls == 'true'
@@ -453,18 +222,11 @@ jobs:
       - name: Lighthouse CI 🟢
         if: steps.find.outputs.no_urls != 'true'
         run: |
-          echo "🏠 Avvio Lighthouse CI..."
-          echo ""
-
           npm install -g @lhci/cli --quiet
-
           rm -rf .lighthouseci
-          HAS_RESULTS=0
 
-          cat /tmp/lh_urls.txt | while read url; do
+          while read -r url; do
             [ -z "$url" ] && continue
-            SAFE=$(echo "$url" | sed 's|https://||' | sed 's|/|_|g' | cut -c1-60)
-
             echo "🔍 Analisi: ${url}"
             if npx lhci collect --url="$url" --settings.chromeFlags="--no-sandbox --headless --disable-gpu" --numberOfRuns=1; then
               echo "✅ Raccolta completata per ${url}"
@@ -472,55 +234,33 @@ jobs:
             else
               echo "  ⚠️  Collezione fallita per ${url}"
             fi
-          done
+          done < /tmp/lh_urls.txt
 
-          echo ""
-          echo "📊 Verifica assertion..."
           if [ -f /tmp/lh_has_results ]; then
             npx lhci assert --config=.github/lighthouse/lighthouserc.json || {
-              echo ""
-              echo "⚠️  Lighthouse CI: alcuni KPI sotto soglia — vedi report sopra"
-              echo "   (Post-deploy, puramente informativo — non bloccante)"
+              echo "⚠️  Lighthouse CI: alcuni KPI sotto soglia (informativo)"
             }
-          else
-            echo "⚠️  Nessun URL raccolto con successo — assertion saltate"
           fi
 
-          # Salva report HTML e JSON con timestamp
           TS=$(date +'%Y%m%d-%H%M%S')
           COMMIT=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
           mkdir -p lighthouse-results
-          echo "📄 Report generati in .lighthouseci/:"
-          if [ -d .lighthouseci ]; then
-            ls -laR .lighthouseci/
-          else
-            echo "  (nessun report generato)"
-          fi
 
-          # Assertions
           if [ -f .lighthouseci/assertion-results.json ]; then
             cp .lighthouseci/assertion-results.json "lighthouse-results/assertions-${TS}-${COMMIT}.json"
           else
             echo "[{\"note\":\"no_assertions\",\"ts\":\"${TS}\",\"commit\":\"${COMMIT}\"}]" > "lighthouse-results/assertions-${TS}-${COMMIT}.json"
           fi
 
-          # Tutti i file HTML e JSON (inclusi quelli in sottodirectory)
           find .lighthouseci -name '*.html' -exec cp {} "lighthouse-results/" \; 2>/dev/null || true
           find .lighthouseci -name '*.json' ! -name 'assertion-results.json' -exec cp {} "lighthouse-results/" \; 2>/dev/null || true
 
-          # Rinomina con timestamp per distinguerli
           for f in lighthouse-results/*.html; do
             [ -f "$f" ] && mv "$f" "lighthouse-results/$(basename "$f" .html)-${TS}.html"
           done
           for f in lighthouse-results/*.json; do
             [ -f "$f" ] && [ "$(basename "$f")" != "assertions-${TS}-${COMMIT}.json" ] && mv "$f" "lighthouse-results/$(basename "$f" .json)-${TS}.json"
           done
-
-          echo "📦 File salvati:"
-          ls -la lighthouse-results/
-
-          echo ""
-          echo "✅ Lighthouse CI completato"
 
       - name: Salva report Lighthouse 📥
         if: always() && steps.find.outputs.no_urls != 'true'
@@ -536,32 +276,19 @@ jobs:
       - name: Upload to R2 (lighthouse) ☁️
         if: steps.find.outputs.no_urls != 'true'
         env:
-          R2_ENDPOINT: ${{ secrets.CLOUDFLARE_R2_ENDPOINT }}
-          R2_KEY: ${{ secrets.CLOUDFLARE_R2_ACCESS_KEY_ID }}
-          R2_SECRET: ${{ secrets.CLOUDFLARE_R2_SECRET_ACCESS_KEY }}
-          R2_BUCKET: ${{ secrets.CLOUDFLARE_R2_SEO_BUCKET }}
+          CLOUDFLARE_R2_ENDPOINT: ${{ secrets.CLOUDFLARE_R2_ENDPOINT }}
+          CLOUDFLARE_R2_ACCESS_KEY_ID: ${{ secrets.CLOUDFLARE_R2_ACCESS_KEY_ID }}
+          CLOUDFLARE_R2_SECRET_ACCESS_KEY: ${{ secrets.CLOUDFLARE_R2_SECRET_ACCESS_KEY }}
+          CLOUDFLARE_R2_SEO_BUCKET: ${{ secrets.CLOUDFLARE_R2_SEO_BUCKET }}
         run: |
           pip install -q boto3
-          python3 -c "
-          import boto3, os, glob
-          from datetime import datetime, timezone
-          s3 = boto3.client('s3',
-            endpoint_url=os.environ['R2_ENDPOINT'],
-            aws_access_key_id=os.environ['R2_KEY'],
-            aws_secret_access_key=os.environ['R2_SECRET'])
-          bucket = os.environ.get('R2_BUCKET') or 'gabrielebaldassarre-seo'
-          now = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H%M%SZ')
-          for f in glob.glob('lighthouse-results/*.json') + glob.glob('.lighthouseci/*.json'):
-              key = f'seo/lighthouse/{now}/{os.path.basename(f)}'
-              with open(f, 'rb') as fd:
-                  s3.upload_fileobj(fd, bucket, key)
-              print(f'  -> r2://{key}')
-          print('lighthouse reports uploaded to R2')
-          "
+          python3 -m _scripts.seo.r2 seo/lighthouse "lighthouse-results/*.json" ".lighthouseci/*.json"
 
   post-history:
     name: Post change tracking (git diff)
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event != 'pull_request')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout 🛎️

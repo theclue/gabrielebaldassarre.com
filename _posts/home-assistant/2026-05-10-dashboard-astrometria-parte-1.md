@@ -2,7 +2,7 @@
 category: Home Assistant
 title: "Il cielo in salotto, parte 1: Sistema Terra-Luna"
 excerpt: "Come costruire una dashboard di astrometria in Home Assistant per tenere d'occhio la Luna, il Sole e lo spazio profondo. Prima parte: l'architettura generale e il modulo Terra-Luna, con disco lunare in tempo reale via API NASA, template sensor per il formato data NASA e il sensore di fase lunare con icone e immagine dinamica."
-master: /assets/images/astrometria-dashboard-distorci.png
+master: /assets/images/posts/astrometria-dashboard-distorci.png
 image_meta:
   role: screenshot
   context: reference
@@ -43,7 +43,7 @@ La dashboard è divisa in tre sezioni:
 2. **Sol** — immagini live del Sole, aurora boreale, vento solare (parte 2)
 3. **Spazio profondo e bollettini** — l'immagine del giorno NASA (APOD), posizione della ISS, prossimi lanci (parte 3)
 
-{% cloudinary /assets/images/astrometria-dashboard.png alt="La dashboard di astrometria" caption="Al termine di questa serie di articoli, l'aspetto del dashboard sarà - speriamo - più o meno questo" role="screenshot" context="architecture" %}
+{% cloudinary /assets/images/posts/dashboard-astrometria/astrometria-dashboard.png alt="La dashboard di astrometria" caption="Al termine di questa serie di articoli, l'aspetto del dashboard sarà - speriamo - più o meno questo" role="screenshot" context="architecture" %}
 ---
 
 ## La Luna
@@ -173,7 +173,7 @@ badges:
     entity: sensor.sun_next_dusk
 ```
 
-{% cloudinary /assets/images/fasi-lunari.png alt="Il disco lunare" caption="La foto della Luna può finalmente essere visualizzata in dashboard utilizzando una qualsiasi card che possa visualizzare un flusso di fotocamera." role="screenshot" context="result" %}
+{% cloudinary /assets/images/posts/dashboard-astrometria/fasi-lunari.png alt="Il disco lunare" caption="La foto della Luna può finalmente essere visualizzata in dashboard utilizzando una qualsiasi card che possa visualizzare un flusso di fotocamera." role="screenshot" context="result" %}
 
 ### La custom:lunar-phase-card
 
@@ -208,7 +208,7 @@ graph_config:
   time_step_size: 30
 ```
 
-{% cloudinary /assets/images/moon-card.png alt="La Moon card" caption="Card di sintesi della Luna" role="screenshot" context="result" %}
+{% cloudinary /assets/images/posts/dashboard-astrometria/moon-card.png alt="La Moon card" caption="Card di sintesi della Luna" role="screenshot" context="result" %}
 
 `use_default: true` dice alla card di calcolare autonomamente la fase senza affidarsi a un sensore esterno — il che la rende indipendente dal REST sensor NASA e dal sensore `moon`. Questo è utile per avere ridondanza: anche se l'API NASA fosse irraggiungibile, la card continua a mostrare la fase calcolata internamente.
 
@@ -256,7 +256,7 @@ template:
 ```
 {% endraw %}
 
-{% cloudinary /assets/images/fasi-lunari-header.png alt="Badge fasi lunari" caption="Badge costruito a partire dal sensore. Notare l'immagine e le descrizioni in italiano" role="screenshot" context="result" %}
+{% cloudinary /assets/images/posts/dashboard-astrometria/fasi-lunari-header.png alt="Badge fasi lunari" caption="Badge costruito a partire dal sensore. Notare l'immagine e le descrizioni in italiano" role="screenshot" context="result" %}
 
 Alcune note:
 

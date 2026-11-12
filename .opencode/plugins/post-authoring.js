@@ -1,6 +1,5 @@
 import { fileURLToPath } from "node:url";
-import { loadPluginSDK } from "../../_scripts/author-extraction/native.mjs";
-import { setupPostAuthoring } from "../../_scripts/author-extraction/post-authoring-plugin.mjs";
+import { loadPluginSDK, setupPostAuthoring } from "../../_scripts/author-extraction/post-authoring-plugin.mjs";
 
 const { Plugin } = await loadPluginSDK();
 

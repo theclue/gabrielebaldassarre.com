@@ -3,7 +3,7 @@ category: DevOps
 title: Una shell history per ogni progetto
 excerpt: Come separare la history di ZSH per progetto usando la root git, senza plugin
   esterni e con un semplice hook. Un biscottino da terminale veloce e pratico.
-master: /assets/images/wargames-terminal-screen.png
+master: /assets/images/posts/wargames-terminal-screen.png
 image_meta:
   role: illustration
   context: ambient

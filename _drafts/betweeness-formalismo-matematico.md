@@ -2,7 +2,7 @@
 title: "La matematica dietro le misure della centralità"
 excerpt: "Lorem ipsum dolor sic amet"
 header:
-  overlay_image: /assets/images/centrality-overlay.png
+  overlay_image: /assets/images/posts/centrality-overlay.png
   overlay_filter: 0.5
 graph_bare: "graphs/smallworld-example-bare.html"
 graph_degree: "graphs/smallworld-example-degree.html"

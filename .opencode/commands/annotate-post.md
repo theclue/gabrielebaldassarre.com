@@ -63,13 +63,13 @@ If the post has no series indicators, skip this step entirely.
    `{concept_id, label, language, context}`, and `context` must be an exact
    source-text substring. Omit `run_id` until the returned run supplies it.
    Read the official tool response JSON from
-    `Tool.Result.content`. If the host saves oversized content to a managed
-    tool-output file, read that exact delivered file. A read-only local JSON
-    projection may help inspect its candidates, evidence, and graph records;
-    it is not permission to launch the oracle CLI or retrieve data with shell.
-    Preserve IDs and provenance; if the saved response cannot be read, close
-    the run and stop without selecting unseen evidence or writing.
-    Do not pass a model-selected root, request ID,
+   `Tool.Result.content`. If the host saves oversized content to a managed
+   tool-output file, read that exact delivered file. A read-only local JSON
+   projection may help inspect its candidates, evidence, and graph records;
+   it is not permission to launch the oracle CLI or retrieve data with shell.
+   Preserve IDs and provenance; if the saved response cannot be read, close
+   the run and stop without selecting unseen evidence or writing.
+   Do not pass a model-selected root, request ID,
    endpoint, user agent, CLI option, or limit.
 
 5. Open the run against the unchanged post snapshot. Use `discover` with
@@ -91,12 +91,12 @@ If the post has no series indicators, skip this step entirely.
    `knowledge_prerequisites`; keep the original body bytes and every other
    frontmatter field semantically unchanged. Validate this complete draft
    with `proposed_document`, the exact `acknowledged_snapshot_id` from `open`,
-    and one per-concept `decisions` entry. Every decision must include the
-    explicit `type` discriminator: `select` uses
-    `{type: "select", concept_id, candidate_id, evidence_ids, rationale, proposed_sameAs}`;
-    `abstain` uses `{type: "abstain", concept_id, reason}` with reason `ambiguous`, `no_match`,
+   and one per-concept `decisions` entry. Every decision must include the
+   explicit `type` discriminator: `select` uses
+   `{type: "select", concept_id, candidate_id, evidence_ids, rationale, proposed_sameAs}`;
+   `abstain` uses `{type: "abstain", concept_id, reason}` with reason `ambiguous`, `no_match`,
    `unavailable`, `unprocessed`, or `insufficient_evidence`;
-    `preserve_existing` uses `{type: "preserve_existing", concept_id}` and keeps the original value
+   `preserve_existing` uses `{type: "preserve_existing", concept_id}` and keeps the original value
    unchanged.
    Proceed only if the tool status is `ok`, `result.accepted` is true, and
    `result.proposed_sha256` matches the submitted bytes. A rejected,
@@ -123,7 +123,7 @@ If the post has no series indicators, skip this step entirely.
      `offers-alternative`, `extends-topic`
    - Classify target: `internal`, `external-authoritative`,
      `external-community`, `external-commercial`, `external-ugc`
-   - Get a suitable description: crawl the linked page and try to get a proper description of the resource. 
+   - Get a suitable description: crawl the linked page and try to get a proper description of the resource.
 
    **Links to internal posts**: Replace with
    `{% post_link "/url/" "text" role="..." context="..." %}`.
@@ -146,16 +146,16 @@ If the post has no series indicators, skip this step entirely.
       login, **stop**, tell the user the browser is ready, and wait for their
       reply so they can sign in. Ask at most once per run. Then navigate to
       `<url>`.
-   2. `take_snapshot` and find the element matching `<what to show>`. If it
+   2. `take_snapshot` and find the element matching `<what to show>`. Ensure the directory `assets/images/posts/<slug>/` exists. If it
       is a single element with a `uid`, `take_screenshot` with that `uid` and
-      `filePath` `assets/images/<slug>-<n>.png` (`<slug>` = post filename
+      `filePath` `assets/images/posts/<slug>/<slug>-<n>.png` (`<slug>` = post filename
       without date and `.md`; `<n>` = next free progressive number for that
       slug). If the content is only loose text with no container to pick,
       take the bounding box with `evaluate_script` (pass the uids of its
       text nodes as `args`; use `getBoundingClientRect()`, `scrollIntoView`
       first, note `devicePixelRatio`), screenshot the viewport to a temp
       path outside the repo (the full viewport may show private data) and
-      crop it into `assets/images/<slug>-<n>.png` with
+      crop it into `assets/images/posts/<slug>/<slug>-<n>.png` with
       `magick <raw> -crop <W>x<H>+<X>+<Y> +repage -strip <file>`, scaling
       the box by `devicePixelRatio`; delete the raw file afterwards. If no
       element matches, ask instead of capturing the whole page.
@@ -164,7 +164,7 @@ If the post has no series indicators, skip this step entirely.
       `magick <file> -crop <W>x<H>+<X>+<Y> +repage <file>`. Optionally also
       `magick <file> -strip -resize '1600x>' <file>`.
    4. Replace the placeholder with
-      `{% cloudinary /assets/images/<slug>-<n>.png alt="..." caption="..." role="screenshot" context="step|result|reference|evidence" %}`,
+      `{% cloudinary /assets/images/posts/<slug>/<slug>-<n>.png alt="..." caption="..." role="screenshot" context="step|result|reference|evidence" %}`,
       writing alt and caption from `<what to show>` and the adjacent text.
 
    List the saved image paths in the final summary so the user can check
@@ -366,7 +366,6 @@ First classify the post by its dominant structure:
 - `decorative` images require empty `alt=""`.
 
 These rules are derived from `frontmatter-schema.yml` and `metadata-schema.jsonld`.
-
 
 ## Important
 
