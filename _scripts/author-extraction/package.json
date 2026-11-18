@@ -12,7 +12,7 @@
     "test:post-revision": "node --test post-revision.test.mjs"
   },
   "dependencies": {
-    "@opencode/plugin": "2.2.6",
+    "@opencode/plugin": "2.2.7",
     "ajv": "8.20.0",
     "yaml": "2.9.1"
   }
